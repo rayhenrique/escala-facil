@@ -1,9 +1,21 @@
 <?php
 
 return [
-    'current' => env('APP_VERSION', '1.3.0'),
+    'current' => env('APP_VERSION', '1.3.1'),
 
     'releases' => [
+        [
+            'version' => '1.3.1',
+            'date' => '2026-09-26',
+            'title' => 'Correção do acesso em produção',
+            'summary' => 'O login e os demais recursos interativos agora carregam o Livewire pelo bundle do sistema, com compatibilidade direta com o Nginx do CloudPanel.',
+            'highlights' => [
+                'Login corrigido no ambiente de produção com CloudPanel.',
+                'Livewire incorporado ao bundle do Vite para evitar erro 404 no JavaScript.',
+                'Formulário de acesso protegido contra envio de senha pela URL caso o JavaScript falhe.',
+                'Teste automatizado adicionado para impedir a regressão do carregamento do Livewire.',
+            ],
+        ],
         [
             'version' => '1.3.0',
             'date' => '2026-09-26',

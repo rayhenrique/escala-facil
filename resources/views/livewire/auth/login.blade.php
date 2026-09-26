@@ -7,7 +7,8 @@
         <div class="status-success mt-6" role="status">{{ session('status') }}</div>
     @endif
 
-    <form wire:submit="login" class="mt-8 space-y-5" novalidate>
+    <form method="post" action="{{ route('login') }}" wire:submit="login" class="mt-8 space-y-5" novalidate>
+        @csrf
         <div>
             <label for="email" class="field-label">E-mail</label>
             <input

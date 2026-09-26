@@ -4,7 +4,7 @@
 
 Sistema interno para gestão de escalas médicas, plantões, trocas e ausências em unidades de saúde. A aplicação centraliza a operação da gerência, permite que profissionais acompanhem a própria agenda e aplica as regras de compatibilidade e limite mensal em todas as decisões de troca.
 
-**Versão atual:** `1.3.0` — consulte o histórico completo em [`versoes.md`](versoes.md).
+**Versão atual:** `1.3.1` — consulte o histórico completo em [`versoes.md`](versoes.md).
 
 Desenvolvido por [KL Tecnologia](https://kltecnologia.com).
 
@@ -104,6 +104,8 @@ As decisões visuais estão em [`DESIGN.md`](DESIGN.md) e os comportamentos comp
 | Vite | 7.3.6 |
 | MySQL | 8.0 ou superior, com InnoDB |
 
+O Livewire é incorporado ao bundle do Vite para funcionar de forma consistente atrás do Nginx do CloudPanel. Depois de atualizar dependências PHP, execute novamente `npm run build` antes de publicar a aplicação.
+
 Em 26/09/2026, o Composer confirmou `13.33.0` como a versão estável mais recente disponível do Laravel. A restrição `laravel/framework: ^13.0` permite receber atualizações compatíveis da série 13.
 
 ## Requisitos locais
@@ -133,7 +135,7 @@ Crie um banco MySQL chamado `escala_facil` e ajuste o `.env`:
 APP_NAME="Escala Fácil"
 APP_URL=http://127.0.0.1:8000
 APP_TIMEZONE=America/Fortaleza
-APP_VERSION=1.3.0
+APP_VERSION=1.3.1
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR
 APP_FAKER_LOCALE=pt_BR

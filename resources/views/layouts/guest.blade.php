@@ -49,6 +49,6 @@
                 <x-system-footer class="w-full max-w-md" />
             </section>
         </main>
-        @livewireScripts
+        @livewireScriptConfig
     </body>
 </html>

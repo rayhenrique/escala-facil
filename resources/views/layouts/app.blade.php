@@ -137,6 +137,6 @@
             </div>
         </div>
         <livewire:release-announcement />
-        @livewireScripts
+        @livewireScriptConfig
     </body>
 </html>

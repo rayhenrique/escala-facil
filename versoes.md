@@ -6,6 +6,15 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.3.1 — 26/09/2026
+
+### Correção do acesso em produção
+
+- Corrigido o login quando o Nginx do CloudPanel bloqueia a rota dinâmica do JavaScript do Livewire.
+- Livewire passou a ser compilado dentro do bundle do Vite, eliminando a dependência da rota dinâmica `livewire.min.js`.
+- O formulário de login agora usa `POST` como fallback, impedindo que e-mail e senha sejam enviados pela URL caso o JavaScript não carregue.
+- Adicionado teste de regressão para validar o carregamento manual do Livewire e a proteção do formulário de acesso.
+
 ## 1.3.0 — 26/09/2026
 
 ### Notificações e comprovantes de troca

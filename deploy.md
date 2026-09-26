@@ -135,7 +135,7 @@ APP_KEY=
 APP_DEBUG=false
 APP_URL=https://escalafacil.kltecnologia.com
 APP_TIMEZONE=America/Fortaleza
-APP_VERSION=1.3.0
+APP_VERSION=1.3.1
 
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR
@@ -193,6 +193,8 @@ O build deve criar `public/build/manifest.json`. Confirme:
 ```bash
 test -f public/build/manifest.json && echo "Build do frontend concluído"
 ```
+
+O JavaScript do Livewire é incorporado ao bundle do Vite. Essa estratégia evita que regras de arquivos estáticos do Nginx no CloudPanel bloqueiem a rota dinâmica do Livewire. Por isso, execute `npm run build` sempre depois de `composer install` ou de qualquer atualização do Livewire.
 
 Se `node` não existir, instale o NVM e o Node.js 24 no usuário do site:
 
@@ -379,6 +381,8 @@ git pull --ff-only origin main
 php8.5 /usr/local/bin/composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
 npm ci
 npm run build
+release_version=$(grep '^APP_VERSION=' .env.example | cut -d= -f2-)
+sed -i "s/^APP_VERSION=.*/APP_VERSION=$release_version/" .env
 php8.5 artisan migrate --force
 php8.5 artisan optimize:clear
 php8.5 artisan optimize

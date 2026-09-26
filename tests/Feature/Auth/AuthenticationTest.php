@@ -15,7 +15,13 @@ class AuthenticationTest extends TestCase
 
     public function test_login_screen_is_rendered_and_public_registration_is_disabled(): void
     {
-        $this->get('/login')->assertOk()->assertSee('Entre na sua conta');
+        $this->get('/login')
+            ->assertOk()
+            ->assertSee('Entre na sua conta')
+            ->assertSee('method="post"', false)
+            ->assertSee('window.livewireScriptConfig', false)
+            ->assertDontSee('livewire.min.js', false);
+
         $this->get('/register')->assertNotFound();
     }
 
