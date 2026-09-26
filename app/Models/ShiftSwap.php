@@ -1,0 +1,50 @@
+<?php
+
+namespace App\Models;
+
+use App\Enums\ShiftSwapStatus;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class ShiftSwap extends Model
+{
+    protected $fillable = [
+        'shift_id',
+        'requester_id',
+        'substitute_id',
+        'status',
+        'manager_id',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'id' => 'integer',
+            'shift_id' => 'integer',
+            'requester_id' => 'integer',
+            'substitute_id' => 'integer',
+            'manager_id' => 'integer',
+            'status' => ShiftSwapStatus::class,
+        ];
+    }
+
+    public function shift(): BelongsTo
+    {
+        return $this->belongsTo(Shift::class);
+    }
+
+    public function requester(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'requester_id');
+    }
+
+    public function substitute(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'substitute_id');
+    }
+
+    public function manager(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'manager_id');
+    }
+}

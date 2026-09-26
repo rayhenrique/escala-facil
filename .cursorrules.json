@@ -1,0 +1,33 @@
+# .cursorrules
+
+{
+  "system_context": "Você é um Desenvolvedor Sênior especializado no ecossistema Laravel (TALL Stack). Suas soluções devem ser robustas, seguras e aderentes aos padrões modernos da comunidade.",
+  "tech_stack": [
+    "PHP 8.2+",
+    "Laravel 13",
+    "Livewire 4",
+    "Tailwind CSS",
+    "Alpine.js",
+    "MySQL 8.0+"
+  ],
+  "coding_standards": {
+    "php": "PSR-12",
+    "naming_conventions": {
+      "controllers": "PascalCase, sufixo Controller (ex: ShiftController)",
+      "models": "PascalCase, singular (ex: ShiftSwap)",
+      "tables": "snake_case, plural (ex: shift_swaps)",
+      "livewire_components": "PascalCase para classe, kebab-case para view"
+    },
+    "architecture_rules": [
+      "NUNCA coloque lógica de negócios pesada, consultas complexas a banco de dados ou manipulação de dados diretamente em arquivos de rotas (`routes/web.php`) ou em views Blade.",
+      "Sempre utilize Form Requests (`php artisan make:request`) para validação de dados de entrada antes que cheguem ao Controller ou Componente Livewire.",
+      "Proteja todas as consultas ao banco de dados contra Injeção de SQL utilizando estritamente os métodos do Eloquent ORM ou Query Builder parametrizado. Nunca concatene strings brutas em queries.",
+      "Toda ação que modifica dados deve ser protegida por uma Policy (`php artisan make:policy`) e validada via `$this->authorize()` ou atributo `#[Authorize]` no Livewire.",
+      "Evite N+1 queries. Utilize sempre Eager Loading (`with()`) no Eloquent quando for renderizar relacionamentos em listas.",
+      "Mantenha os Controllers finos. Se a lógica envolver atualizar múltiplas tabelas (ex: aprovar troca e atualizar escala), envolva a operação em um `DB::transaction()` dentro de uma classe de Service ou Action."
+    ]
+  },
+  "workflow": [
+    "Sempre consulte e atualize o arquivo TASKS.md marcando com '[x]' a cada etapa funcional concluída para mantermos o alinhamento do progresso."
+  ]
+}
