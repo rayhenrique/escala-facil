@@ -28,6 +28,9 @@
     ]
   },
   "workflow": [
-    "Sempre consulte e atualize o arquivo TASKS.md marcando com '[x]' a cada etapa funcional concluída para mantermos o alinhamento do progresso."
+    "Sempre consulte e atualize o arquivo TASKS.md marcando com '[x]' a cada etapa funcional concluída para mantermos o alinhamento do progresso.",
+    "Antes de iniciar alterações, execute `git pull --rebase origin main` para sincronizar a branch principal.",
+    "Toda mudança funcional significativa deve atualizar a versão semântica em config/version.php e .env.example, registrar as novidades em versoes.md e manter o README.md coerente.",
+    "Depois de validar testes, Pint e build, faça commit com mensagem objetiva e envie a branch principal com `git push origin main`."
   ]
 }
