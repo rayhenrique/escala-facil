@@ -8,7 +8,9 @@ use App\Models\Sector;
 use App\Models\Shift;
 use App\Models\ShiftSwap;
 use App\Models\User;
+use App\Notifications\ShiftSwapEventNotification;
 use App\Services\DemoDataService;
+use DomainException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -38,6 +40,12 @@ class DemoDataCommandTest extends TestCase
         $this->assertSame(12, ShiftSwap::query()->count());
         $this->assertGreaterThan(0, DB::table('absences')->count());
 
+        $demoUser = User::query()->where('email', 'like', 'demo.%')->firstOrFail();
+        $demoUser->notify(new ShiftSwapEventNotification(['event' => 'demo']));
+        $manager->notify(new ShiftSwapEventNotification(['event' => 'real']));
+        $demoNotificationId = $demoUser->notifications()->sole()->id;
+        $realNotificationId = $manager->notifications()->sole()->id;
+
         $this->artisan('demo:data', ['action' => 'clear'])
             ->expectsOutput('Dados de demonstração removidos com sucesso.')
             ->assertSuccessful();
@@ -52,6 +60,8 @@ class DemoDataCommandTest extends TestCase
         $this->assertDatabaseHas('users', ['id' => $manager->id]);
         $this->assertDatabaseHas('categories', ['id' => $existingCategory->id]);
         $this->assertDatabaseHas('sectors', ['id' => $existingSector->id]);
+        $this->assertDatabaseMissing('notifications', ['id' => $demoNotificationId]);
+        $this->assertDatabaseHas('notifications', ['id' => $realNotificationId]);
     }
 
     public function test_demo_seed_refuses_a_duplicate_batch_and_refresh_recreates_it(): void
@@ -65,5 +75,22 @@ class DemoDataCommandTest extends TestCase
         $this->assertDatabaseHas('demo_data_batches', ['key' => DemoDataService::BATCH_KEY]);
         $this->assertSame(20, User::query()->where('email', 'like', 'demo.%')->count());
         $this->assertSame(102, Shift::query()->count());
+    }
+
+    public function test_demo_service_requires_explicit_authorization_in_production(): void
+    {
+        $originalEnvironment = app()->environment();
+        app()->detectEnvironment(fn (): string => 'production');
+
+        try {
+            $this->assertThrows(
+                fn () => app(DemoDataService::class)->seed(),
+                DomainException::class,
+            );
+        } finally {
+            app()->detectEnvironment(fn (): string => $originalEnvironment);
+        }
+
+        $this->assertDatabaseCount('demo_data_batches', 0);
     }
 }

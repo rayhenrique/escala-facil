@@ -33,7 +33,8 @@
     @if ($showFormModal)
         <div class="modal-overlay" x-data x-init="$nextTick(() => $refs.firstField?.focus())" @keydown.escape.window="$wire.closeFormModal()">
             <button type="button" wire:click="closeFormModal" class="modal-backdrop" aria-label="Fechar formulário de usuário"></button>
-            <form wire:submit="save" class="modal-dialog max-w-4xl" role="dialog" aria-modal="true" aria-labelledby="user-form-title" novalidate>
+            <form method="post" wire:submit="save" class="modal-dialog max-w-4xl" role="dialog" aria-modal="true" aria-labelledby="user-form-title" novalidate>
+                @csrf
                 <header class="modal-header">
                     <div>
                         <p class="eyebrow">{{ $editingUserId ? 'Edição' : 'Novo cadastro' }}</p>

@@ -8,6 +8,7 @@ use App\Models\Shift;
 use App\Models\ShiftSwap;
 use App\Models\User;
 use App\Services\ShiftSwapNotificationService;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
@@ -17,7 +18,7 @@ class DecideShiftSwapAction
 
     public function approve(User $manager, int $shiftSwapId): ShiftSwap
     {
-        $shiftSwap = DB::transaction(function () use ($manager, $shiftSwapId): ShiftSwap {
+        return DB::transaction(function () use ($manager, $shiftSwapId): ShiftSwap {
             $shiftId = ShiftSwap::query()->whereKey($shiftSwapId)->firstOrFail(['shift_id'])->shift_id;
             $shift = Shift::query()->lockForUpdate()->findOrFail($shiftId);
             $shiftSwap = ShiftSwap::query()
@@ -38,6 +39,14 @@ class DecideShiftSwapAction
 
             Gate::forUser($manager)->authorize('approve', $shiftSwap);
 
+            $referenceDate = $shiftSwap->created_at ?? now();
+
+            foreach ($participants as $participant) {
+                if ($participant->hasReachedSwapLimit($referenceDate->month, $referenceDate->year, lockForUpdate: true)) {
+                    throw new AuthorizationException('Um dos profissionais atingiu o limite mensal de quatro trocas aprovadas.');
+                }
+            }
+
             $shiftSwap->update([
                 'status' => ShiftSwapStatus::Approved,
                 'manager_id' => $manager->id,
@@ -48,17 +57,16 @@ class DecideShiftSwapAction
                 'status' => ShiftStatus::Scheduled,
             ]);
 
-            return $shiftSwap->refresh();
+            $shiftSwap = $shiftSwap->refresh();
+            $this->notifications->approved($shiftSwap);
+
+            return $shiftSwap;
         });
-
-        $this->notifications->approved($shiftSwap);
-
-        return $shiftSwap;
     }
 
     public function reject(User $manager, int $shiftSwapId): ShiftSwap
     {
-        $shiftSwap = DB::transaction(function () use ($manager, $shiftSwapId): ShiftSwap {
+        return DB::transaction(function () use ($manager, $shiftSwapId): ShiftSwap {
             $shiftSwap = ShiftSwap::query()->lockForUpdate()->findOrFail($shiftSwapId);
 
             Gate::forUser($manager)->authorize('reject', $shiftSwap);
@@ -68,11 +76,10 @@ class DecideShiftSwapAction
                 'manager_id' => $manager->id,
             ]);
 
-            return $shiftSwap->refresh();
+            $shiftSwap = $shiftSwap->refresh();
+            $this->notifications->rejected($shiftSwap);
+
+            return $shiftSwap;
         });
-
-        $this->notifications->rejected($shiftSwap);
-
-        return $shiftSwap;
     }
 }

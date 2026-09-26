@@ -22,8 +22,10 @@ class DemoDataService
     public const BATCH_KEY = 'escala-facil-demo-v1';
 
     /** @return array<string, int> */
-    public function seed(): array
+    public function seed(bool $allowInProduction = false): array
     {
+        $this->assertEnvironmentAllowsChanges($allowInProduction);
+
         if (DB::table('demo_data_batches')->where('key', self::BATCH_KEY)->exists()) {
             throw new DomainException('Os dados de demonstração já estão instalados. Use "refresh" para recriá-los.');
         }
@@ -177,8 +179,10 @@ class DemoDataService
     }
 
     /** @return array<string, int> */
-    public function clear(): array
+    public function clear(bool $allowInProduction = false): array
     {
+        $this->assertEnvironmentAllowsChanges($allowInProduction);
+
         return DB::transaction(function (): array {
             $batch = DB::table('demo_data_batches')
                 ->where('key', self::BATCH_KEY)
@@ -216,6 +220,10 @@ class DemoDataService
                 ->delete();
 
             $deletedShifts = Shift::query()->whereIn('id', $shiftIds)->delete();
+            DB::table('notifications')
+                ->where('notifiable_type', User::class)
+                ->whereIn('notifiable_id', $userIds)
+                ->delete();
             $deletedUsers = User::query()->whereIn('id', $userIds)->delete();
             $deletedCategories = Category::query()->whereIn('id', $categoryIds)->delete();
             $deletedSectors = Sector::query()->whereIn('id', $sectorIds)->delete();
@@ -241,5 +249,12 @@ class DemoDataService
         return collect($manifest)
             ->map(fn (array $ids): int => count($ids))
             ->all();
+    }
+
+    private function assertEnvironmentAllowsChanges(bool $allowInProduction): void
+    {
+        if (app()->isProduction() && ! $allowInProduction) {
+            throw new DomainException('Dados de demonstração exigem autorização explícita no ambiente de produção.');
+        }
     }
 }

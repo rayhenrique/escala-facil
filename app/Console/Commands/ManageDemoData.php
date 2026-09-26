@@ -31,19 +31,21 @@ class ManageDemoData extends Command
         }
 
         try {
+            $allowInProduction = (bool) $this->option('force');
+
             if ($action === 'refresh') {
                 try {
-                    $demoData->clear();
+                    $demoData->clear($allowInProduction);
                 } catch (DomainException) {
                     // Um refresh sem lote anterior equivale à primeira instalação.
                 }
-                $summary = $demoData->seed();
+                $summary = $demoData->seed($allowInProduction);
                 $message = 'Dados de demonstração recriados com sucesso.';
             } elseif ($action === 'clear') {
-                $summary = $demoData->clear();
+                $summary = $demoData->clear($allowInProduction);
                 $message = 'Dados de demonstração removidos com sucesso.';
             } else {
-                $summary = $demoData->seed();
+                $summary = $demoData->seed($allowInProduction);
                 $message = 'Dados de demonstração instalados com sucesso.';
             }
         } catch (DomainException $exception) {

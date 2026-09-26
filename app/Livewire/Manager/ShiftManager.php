@@ -9,6 +9,7 @@ use App\Models\Category;
 use App\Models\Sector;
 use App\Models\Shift;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
@@ -48,7 +49,7 @@ class ShiftManager extends Component
     public function mount(): void
     {
         $this->authorize('viewAny', Shift::class);
-        $this->month = $this->month ?: now()->format('Y-m');
+        $this->month = $this->normalizeMonth($this->month);
         $this->date = today()->addDay()->format('Y-m-d');
     }
 
@@ -77,6 +78,7 @@ class ShiftManager extends Component
 
     public function updatedMonth(): void
     {
+        $this->month = $this->normalizeMonth($this->month);
         $this->resetPage();
     }
 
@@ -179,6 +181,19 @@ class ShiftManager extends Component
             'user_id' => $this->userId !== '' ? $this->userId : null,
             'status' => $this->status,
         ];
+    }
+
+    private function normalizeMonth(string $month): string
+    {
+        if (! preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $month)) {
+            return now()->format('Y-m');
+        }
+
+        $date = CarbonImmutable::createFromFormat('!Y-m-d', $month.'-01');
+
+        return $date !== false && $date->format('Y-m') === $month
+            ? $month
+            : now()->format('Y-m');
     }
 
     public function render(): View

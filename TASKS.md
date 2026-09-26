@@ -79,3 +79,11 @@
   - [x] Atualizar README, manual, schema, contrato de experiência e versão do sistema.
   - [x] Criar guia de deploy para a VPS Hostinger com CloudPanel, PHP 8.5 e Laravel 13.
   - [x] Validar privacidade, destinatários, comprovantes, responsividade, testes e build.
+
+- [x] **Fase 12: Robustez operacional e produção**
+  - [x] Criar comando seguro e interativo para o primeiro gerente.
+  - [x] Impedir deploy parcial quando o Git local estiver alterado ou divergente do GitHub.
+  - [x] Tornar mudanças de troca e notificações atômicas e reforçar bloqueios concorrentes.
+  - [x] Normalizar filtros mensais e proteger a massa fictícia e os seeders em produção.
+  - [x] Aplicar fallback `POST` e CSRF em todos os formulários Livewire.
+  - [x] Validar a suíte completa, build de produção, dependências e script de deploy.

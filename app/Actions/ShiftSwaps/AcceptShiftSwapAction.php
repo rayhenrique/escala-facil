@@ -3,6 +3,7 @@
 namespace App\Actions\ShiftSwaps;
 
 use App\Enums\ShiftSwapStatus;
+use App\Models\Shift;
 use App\Models\ShiftSwap;
 use App\Models\User;
 use App\Services\ShiftSwapNotificationService;
@@ -15,7 +16,13 @@ class AcceptShiftSwapAction
 
     public function execute(User $substitute, int $shiftSwapId): ShiftSwap
     {
-        $shiftSwap = DB::transaction(function () use ($substitute, $shiftSwapId): ShiftSwap {
+        return DB::transaction(function () use ($substitute, $shiftSwapId): ShiftSwap {
+            $shiftId = ShiftSwap::query()->whereKey($shiftSwapId)->firstOrFail(['shift_id'])->shift_id;
+
+            Shift::query()
+                ->lockForUpdate()
+                ->findOrFail($shiftId);
+
             $shiftSwap = ShiftSwap::query()
                 ->with(['requester', 'substitute', 'shift'])
                 ->lockForUpdate()
@@ -25,11 +32,10 @@ class AcceptShiftSwapAction
 
             $shiftSwap->update(['status' => ShiftSwapStatus::PendingManager]);
 
-            return $shiftSwap->refresh();
+            $shiftSwap = $shiftSwap->refresh();
+            $this->notifications->accepted($shiftSwap);
+
+            return $shiftSwap;
         });
-
-        $this->notifications->accepted($shiftSwap);
-
-        return $shiftSwap;
     }
 }

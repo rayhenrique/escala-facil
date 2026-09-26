@@ -6,6 +6,7 @@ use App\Actions\ShiftSwaps\AcceptShiftSwapAction;
 use App\Actions\ShiftSwaps\CreateShiftSwapAction;
 use App\Actions\ShiftSwaps\DecideShiftSwapAction;
 use App\Enums\ShiftStatus;
+use App\Enums\ShiftSwapStatus;
 use App\Enums\UserRole;
 use App\Livewire\Manager\SwapApprovals;
 use App\Livewire\NotificationsCenter;
@@ -15,8 +16,10 @@ use App\Models\Sector;
 use App\Models\Shift;
 use App\Models\ShiftSwap;
 use App\Models\User;
+use App\Services\ShiftSwapNotificationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use RuntimeException;
 use Tests\TestCase;
 
 class ShiftSwapNotificationTest extends TestCase
@@ -181,6 +184,32 @@ class ShiftSwapNotificationTest extends TestCase
         $substitute->delete();
 
         $this->assertDatabaseMissing('notifications', ['id' => $notificationId]);
+    }
+
+    public function test_approval_is_rolled_back_when_its_notification_cannot_be_persisted(): void
+    {
+        [$manager, $requester, $substitute, $shift] = $this->team();
+        $shiftSwap = ShiftSwap::query()->create([
+            'shift_id' => $shift->id,
+            'requester_id' => $requester->id,
+            'substitute_id' => $substitute->id,
+            'status' => ShiftSwapStatus::PendingManager,
+        ]);
+
+        $this->mock(ShiftSwapNotificationService::class)
+            ->shouldReceive('approved')
+            ->once()
+            ->andThrow(new RuntimeException('Falha simulada ao persistir a notificação.'));
+
+        $this->assertThrows(
+            fn () => app(DecideShiftSwapAction::class)->approve($manager, $shiftSwap->id),
+            RuntimeException::class,
+        );
+
+        $this->assertSame(ShiftSwapStatus::PendingManager, $shiftSwap->refresh()->status);
+        $this->assertNull($shiftSwap->manager_id);
+        $this->assertSame($requester->id, $shift->refresh()->user_id);
+        $this->assertDatabaseCount('notifications', 0);
     }
 
     /** @return array{User, User, User, Shift} */

@@ -1,9 +1,21 @@
 <?php
 
 return [
-    'current' => env('APP_VERSION', '1.3.1'),
+    'current' => env('APP_VERSION', '1.3.2'),
 
     'releases' => [
+        [
+            'version' => '1.3.2',
+            'date' => '2026-09-26',
+            'title' => 'Robustez operacional e gerente inicial',
+            'summary' => 'O deploy e os fluxos críticos receberam verificações adicionais, e a primeira conta gerencial pode ser criada sem expor a senha.',
+            'highlights' => [
+                'Novo comando seguro para criar o gerente inicial com senha oculta.',
+                'Deploy interrompido automaticamente diante de alterações locais ou divergência do Git.',
+                'Trocas e notificações persistidas na mesma transação para evitar estados parciais.',
+                'Filtros de mês, carga de demonstração e formulários reforçados contra entradas inválidas.',
+            ],
+        ],
         [
             'version' => '1.3.1',
             'date' => '2026-09-26',

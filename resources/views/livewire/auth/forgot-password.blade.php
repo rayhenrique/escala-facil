@@ -8,7 +8,8 @@
         <div class="status-success mt-6" role="status">{{ session('status') }}</div>
     @endif
 
-    <form wire:submit="sendResetLink" class="mt-8 space-y-6" novalidate>
+    <form method="post" wire:submit="sendResetLink" class="mt-8 space-y-6" novalidate>
+        @csrf
         <div>
             <label for="email" class="field-label">E-mail</label>
             <input wire:model="email" id="email" type="email" autocomplete="email" autofocus class="field-input" placeholder="nome@instituicao.com.br" @error('email') aria-invalid="true" aria-describedby="email-error" @enderror>

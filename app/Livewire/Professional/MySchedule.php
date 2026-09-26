@@ -14,6 +14,7 @@ use App\Models\Shift;
 use App\Models\ShiftSwap;
 use App\Models\User;
 use App\Support\ShiftSwapReceipt;
+use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
@@ -45,7 +46,12 @@ class MySchedule extends Component
 
     public function mount(): void
     {
-        $this->month = $this->month ?: now()->format('Y-m');
+        $this->month = $this->normalizeMonth($this->month);
+    }
+
+    public function updatedMonth(): void
+    {
+        $this->month = $this->normalizeMonth($this->month);
     }
 
     #[Computed]
@@ -160,6 +166,19 @@ class MySchedule extends Component
     {
         $this->reset(['swapShiftId', 'substituteId', 'absenceShiftId', 'absenceReason', 'attachment']);
         $this->resetValidation();
+    }
+
+    private function normalizeMonth(string $month): string
+    {
+        if (! preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $month)) {
+            return now()->format('Y-m');
+        }
+
+        $date = CarbonImmutable::createFromFormat('!Y-m-d', $month.'-01');
+
+        return $date !== false && $date->format('Y-m') === $month
+            ? $month
+            : now()->format('Y-m');
     }
 
     public function render(): View

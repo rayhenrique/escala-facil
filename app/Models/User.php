@@ -86,16 +86,21 @@ class User extends Authenticatable
         return $this->hasMany(Absence::class);
     }
 
-    public function hasReachedSwapLimit(int $month, int $year): bool
+    public function hasReachedSwapLimit(int $month, int $year, bool $lockForUpdate = false): bool
     {
-        return ShiftSwap::query()
+        $query = ShiftSwap::query()
             ->where('status', ShiftSwapStatus::Approved)
             ->where(function ($query) {
                 $query->where('requester_id', $this->getKey())
                     ->orWhere('substitute_id', $this->getKey());
             })
             ->whereMonth('created_at', $month)
-            ->whereYear('created_at', $year)
-            ->count() >= self::MONTHLY_SWAP_LIMIT;
+            ->whereYear('created_at', $year);
+
+        $participations = $lockForUpdate
+            ? $query->lockForUpdate()->pluck('id')->count()
+            : $query->count();
+
+        return $participations >= self::MONTHLY_SWAP_LIMIT;
     }
 }

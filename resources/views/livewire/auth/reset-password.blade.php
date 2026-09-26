@@ -3,7 +3,8 @@
     <h2 class="auth-title">Crie uma nova senha</h2>
     <p class="auth-description">Escolha uma senha segura para voltar ao Escala Fácil.</p>
 
-    <form wire:submit="resetPassword" class="mt-8 space-y-5" novalidate>
+    <form method="post" wire:submit="resetPassword" class="mt-8 space-y-5" novalidate>
+        @csrf
         <div>
             <label for="email" class="field-label">E-mail</label>
             <input wire:model="email" id="email" type="email" autocomplete="email" class="field-input" @error('email') aria-invalid="true" aria-describedby="email-error" @enderror>

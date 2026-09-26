@@ -173,6 +173,24 @@ class PhaseFourWorkflowTest extends TestCase
         $this->actingAs($manager)->get('/professional/dashboard')->assertForbidden();
     }
 
+    public function test_invalid_month_filters_are_normalized_before_queries_run(): void
+    {
+        [$manager, $professional] = $this->team();
+        $currentMonth = now()->format('Y-m');
+
+        Livewire::actingAs($manager)
+            ->test(ShiftManager::class)
+            ->set('month', '2026-99')
+            ->assertSet('month', $currentMonth)
+            ->assertHasNoErrors();
+
+        Livewire::actingAs($professional)
+            ->test(MySchedule::class)
+            ->set('month', '../../etc/passwd')
+            ->assertSet('month', $currentMonth)
+            ->assertHasNoErrors();
+    }
+
     /** @return array{User, User, User, Category, Sector} */
     private function team(): array
     {

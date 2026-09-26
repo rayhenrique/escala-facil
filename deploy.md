@@ -135,7 +135,7 @@ APP_KEY=
 APP_DEBUG=false
 APP_URL=https://escalafacil.kltecnologia.com
 APP_TIMEZONE=America/Fortaleza
-APP_VERSION=1.3.1
+APP_VERSION=1.3.2
 
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR
@@ -233,22 +233,13 @@ Não execute `php artisan migrate:fresh`, pois ele apaga todas as tabelas. Não 
 
 ## 11. Criar o primeiro gerente
 
-Abra o Tinker:
+Use o comando interativo e informe a senha nos prompts ocultos:
 
 ```bash
-php8.5 artisan tinker
+php8.5 artisan user:create-manager --name="Nome do responsável" --email="responsavel@exemplo.com"
 ```
 
-No prompt do Tinker, execute cada linha. A função `password` oculta a senha digitada:
-
-```php
-$senha = Laravel\Prompts\password('Senha do primeiro gerente');
-$gerente = App\Models\User::create(['name' => 'Gerente de Plantões', 'email' => 'gerente@seudominio.com.br', 'password' => $senha, 'role' => 'manager']);
-$gerente->id;
-exit
-```
-
-Troque o nome e o e-mail pelo responsável real. Depois do primeiro login, os demais usuários podem ser cadastrados no módulo **Usuários**.
+A senha deve ter pelo menos 12 caracteres, letras maiúsculas e minúsculas, número e símbolo. Ela não é passada na linha de comando nem gravada no histórico do terminal. Depois do primeiro login, os demais usuários podem ser cadastrados no módulo **Usuários**.
 
 ## 12. Otimizar a aplicação
 
@@ -372,12 +363,26 @@ Os logs do Nginx e PHP também ficam disponíveis na aba **Logs** do site no Clo
 
 ## 17. Atualizar o sistema depois de novas versões
 
-Antes de cada atualização, faça backup do banco pelo CloudPanel. Depois, como usuário do site:
+Antes de cada atualização, faça backup do banco pelo CloudPanel. O fluxo recomendado usa o script versionado, que interrompe o deploy antes da manutenção se houver alterações locais ou divergência entre a VPS e o GitHub:
 
 ```bash
 cd ~/htdocs/escalafacil.kltecnologia.com
+bash scripts/deploy-production.sh
+```
+
+O script atualiza a branch somente por fast-forward, instala dependências, compila o frontend, executa migrations e caches, reabre o sistema e confirma que o Livewire não voltou a depender da rota bloqueada pelo Nginx.
+
+Para executar as mesmas etapas manualmente, como usuário do site:
+
+```bash
+set -Eeuo pipefail
+cd ~/htdocs/escalafacil.kltecnologia.com
+test -z "$(git status --porcelain)"
+git fetch origin main
+git merge-base --is-ancestor HEAD origin/main
+git merge --ff-only origin/main
 php8.5 artisan down --retry=60
-git pull --ff-only origin main
+trap 'php8.5 artisan up >/dev/null 2>&1 || true' EXIT
 php8.5 /usr/local/bin/composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
 npm ci
 npm run build
@@ -388,6 +393,7 @@ php8.5 artisan optimize:clear
 php8.5 artisan optimize
 php8.5 artisan reload
 php8.5 artisan up
+trap - EXIT
 ```
 
 Verifique a versão e a saúde:

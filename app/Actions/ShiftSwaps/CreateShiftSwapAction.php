@@ -17,20 +17,20 @@ class CreateShiftSwapAction
     /** @param array{shift_id: int|string, substitute_id: int|string} $payload */
     public function execute(User $requester, array $payload): ShiftSwap
     {
-        $shiftSwap = DB::transaction(function () use ($requester, $payload): ShiftSwap {
+        return DB::transaction(function () use ($requester, $payload): ShiftSwap {
             Shift::query()->lockForUpdate()->findOrFail($payload['shift_id']);
 
             $validated = (new StoreShiftSwapRequest)->validatePayload($payload, $requester);
 
-            return ShiftSwap::query()->create([
+            $shiftSwap = ShiftSwap::query()->create([
                 ...$validated,
                 'requester_id' => $requester->id,
                 'status' => ShiftSwapStatus::PendingProfessional,
             ]);
+
+            $this->notifications->requested($shiftSwap);
+
+            return $shiftSwap;
         });
-
-        $this->notifications->requested($shiftSwap);
-
-        return $shiftSwap;
     }
 }

@@ -42,7 +42,8 @@
     @if ($swapShiftId)
         <section class="panel mt-8 border-primary" aria-labelledby="swap-form-title">
             <div class="section-heading"><div><p class="eyebrow">Solicitação de troca</p><h2 id="swap-form-title">Escolha um substituto elegível</h2></div><button type="button" wire:click="cancelAction" class="button-secondary w-full sm:w-auto">Cancelar</button></div>
-            <form wire:submit="requestSwap" class="mt-6 max-w-xl" novalidate>
+            <form method="post" wire:submit="requestSwap" class="mt-6 max-w-xl" novalidate>
+                @csrf
                 <label for="substitute" class="field-label">Profissional substituto</label>
                 <select wire:model="substituteId" id="substitute" class="field-input" @error('substitute_id') aria-invalid="true" aria-describedby="substitute-error" @enderror>
                     <option value="">Selecione</option>
@@ -59,7 +60,8 @@
     @if ($absenceShiftId)
         <section class="panel mt-8 border-amber-300" aria-labelledby="absence-form-title">
             <div class="section-heading"><div><p class="eyebrow">Ausência justificada</p><h2 id="absence-form-title">Informe o motivo da ausência</h2></div><button type="button" wire:click="cancelAction" class="button-secondary w-full sm:w-auto">Cancelar</button></div>
-            <form wire:submit="reportAbsence" class="mt-6 max-w-2xl space-y-5" novalidate>
+            <form method="post" wire:submit="reportAbsence" class="mt-6 max-w-2xl space-y-5" novalidate>
+                @csrf
                 <div><label for="absence-reason" class="field-label">Justificativa</label><textarea wire:model="absenceReason" id="absence-reason" rows="5" class="field-input min-h-32 resize-none" @error('reason') aria-invalid="true" aria-describedby="reason-error" @enderror></textarea>@error('reason') <p id="reason-error" class="field-error">{{ $message }}</p> @enderror</div>
                 <div><label for="attachment" class="field-label">Documento comprobatório <span class="font-normal text-muted">(opcional)</span></label><input wire:model="attachment" id="attachment" type="file" accept=".pdf,.jpg,.jpeg,.png" class="file-input" @error('attachment') aria-invalid="true" aria-describedby="attachment-error" @enderror><p class="mt-2 text-xs text-muted">PDF, JPG ou PNG de até 5 MB.</p>@error('attachment') <p id="attachment-error" class="field-error">{{ $message }}</p> @enderror</div>
                 @error('shift_id') <p class="field-error">{{ $message }}</p> @enderror

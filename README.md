@@ -4,7 +4,7 @@
 
 Sistema interno para gestão de escalas médicas, plantões, trocas e ausências em unidades de saúde. A aplicação centraliza a operação da gerência, permite que profissionais acompanhem a própria agenda e aplica as regras de compatibilidade e limite mensal em todas as decisões de troca.
 
-**Versão atual:** `1.3.1` — consulte o histórico completo em [`versoes.md`](versoes.md).
+**Versão atual:** `1.3.2` — consulte o histórico completo em [`versoes.md`](versoes.md).
 
 Desenvolvido por [KL Tecnologia](https://kltecnologia.com).
 
@@ -135,7 +135,7 @@ Crie um banco MySQL chamado `escala_facil` e ajuste o `.env`:
 APP_NAME="Escala Fácil"
 APP_URL=http://127.0.0.1:8000
 APP_TIMEZONE=America/Fortaleza
-APP_VERSION=1.3.1
+APP_VERSION=1.3.2
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR
 APP_FAKER_LOCALE=pt_BR
@@ -167,6 +167,16 @@ Para iniciar somente o servidor HTTP:
 ```powershell
 php artisan serve
 ```
+
+## Criar o primeiro gerente
+
+Depois das migrations, crie a conta administrativa com um comando interativo. A senha é solicitada de forma oculta, confirmada e não fica gravada no código nem no histórico do terminal:
+
+```powershell
+php artisan user:create-manager --name="Nome do responsável" --email="responsavel@exemplo.com"
+```
+
+A senha deve ter pelo menos 12 caracteres, letras maiúsculas e minúsculas, número e símbolo. Contas adicionais podem ser cadastradas pelo módulo **Usuários**.
 
 ## Usuários de desenvolvimento
 
@@ -239,6 +249,14 @@ git push origin main
 
 O repositório público oficial está em [github.com/rayhenrique/escala-facil](https://github.com/rayhenrique/escala-facil).
 
+Na VPS, use o deploy validado documentado em [`deploy.md`](deploy.md):
+
+```bash
+bash scripts/deploy-production.sh
+```
+
+O script valida a situação do Git antes de colocar o sistema em manutenção, aceita somente atualização por fast-forward e testa a página de login após a publicação.
+
 ## Licença e propriedade intelectual
 
 O Escala Fácil e seu código-fonte são propriedade exclusiva da **KL Tecnologia**. A publicação do repositório não concede licença de uso ou exploração. Qualquer reprodução, modificação, distribuição, sublicenciamento ou uso comercial depende de autorização prévia e expressa da KL Tecnologia. Consulte os termos completos em [`LICENSE`](LICENSE).
@@ -309,7 +327,7 @@ Valide o contrato visual:
 npx -p @google/design.md designmd lint DESIGN.md
 ```
 
-Na validação mais recente, a suíte possui **53 testes e 333 asserções**, todos aprovados.
+Na validação mais recente, a suíte possui **58 testes e 365 asserções**, todos aprovados.
 
 ## Documentação
 

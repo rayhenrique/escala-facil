@@ -6,6 +6,19 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.3.2 — 26/09/2026
+
+### Robustez operacional e gerente inicial
+
+- Adicionado comando interativo para criar a primeira conta de gerente sem gravar a senha no código ou no histórico do terminal.
+- Criado script de deploy que valida o Git antes de entrar em manutenção e interrompe o processo em caso de divergência ou arquivos alterados.
+- Notificações de troca agora são persistidas na mesma transação das mudanças operacionais, evitando confirmações parciais.
+- Reforçado o bloqueio concorrente do limite mensal de trocas durante a aprovação gerencial.
+- Filtros mensais inválidos são normalizados antes das consultas.
+- Remoção da massa fictícia também elimina notificações ligadas aos usuários de demonstração e preserva os dados reais.
+- Seeders com credenciais conhecidas são bloqueados em produção sem autorização explícita.
+- Formulários Livewire usam `POST` e CSRF como fallback seguro caso o JavaScript deixe de carregar.
+
 ## 1.3.1 — 26/09/2026
 
 ### Correção do acesso em produção
