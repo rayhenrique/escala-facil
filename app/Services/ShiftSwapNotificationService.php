@@ -105,7 +105,7 @@ class ShiftSwapNotificationService
     }
 
     /**
-     * @param array<string, mixed> $receipt
+     * @param  array<string, mixed>  $receipt
      * @return array<string, mixed>
      */
     private function payloadFromReceipt(

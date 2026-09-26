@@ -307,7 +307,7 @@ Valide o contrato visual:
 npx -p @google/design.md designmd lint DESIGN.md
 ```
 
-Na validação mais recente, a suíte possui **48 testes e 291 asserções**, todos aprovados.
+Na validação mais recente, a suíte possui **53 testes e 333 asserções**, todos aprovados.
 
 ## Documentação
 
@@ -318,6 +318,7 @@ Na validação mais recente, a suíte possui **48 testes e 291 asserções**, to
 - [`DESIGN.md`](DESIGN.md): identidade visual e regras da interface;
 - [`UX-CONTRACT.md`](UX-CONTRACT.md): navegação, estados, feedback e responsividade;
 - [`versoes.md`](versoes.md): histórico completo e processo de lançamento;
+- [`deploy.md`](deploy.md): instalação e atualização na VPS Hostinger com CloudPanel;
 - [`.cursorrules.json`](.cursorrules.json): convenções técnicas do projeto.
 
 ## Fora do MVP

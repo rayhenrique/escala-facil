@@ -44,6 +44,13 @@ class User extends Authenticatable
         ];
     }
 
+    protected static function booted(): void
+    {
+        static::deleting(function (User $user): void {
+            $user->notifications()->delete();
+        });
+    }
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);

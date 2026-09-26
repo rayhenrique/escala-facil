@@ -77,4 +77,5 @@
   - [x] Exibir o comprovante imediatamente para quem executou a ação e mantê-lo no histórico dos destinatários.
   - [x] Adicionar contador de não lidas e controles de leitura na sidebar e na central.
   - [x] Atualizar README, manual, schema, contrato de experiência e versão do sistema.
+  - [x] Criar guia de deploy para a VPS Hostinger com CloudPanel, PHP 8.5 e Laravel 13.
   - [x] Validar privacidade, destinatários, comprovantes, responsividade, testes e build.

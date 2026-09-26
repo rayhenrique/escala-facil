@@ -18,6 +18,7 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - Comprovante imutável em cada evento com referência, plantão, setor, categoria, participantes, situação e responsável pela decisão.
 - Comprovante imediato para o usuário que solicita, aceita, aprova ou rejeita a troca.
 - Controles para marcar uma notificação ou todo o histórico como lido.
+- Guia de produção `deploy.md` para Hostinger e CloudPanel, incluindo banco, SSL, cron, worker, atualização e backup.
 
 ## 1.2.0 — 26/09/2026
 

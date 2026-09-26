@@ -168,6 +168,21 @@ class ShiftSwapNotificationTest extends TestCase
         $this->assertSame(0, $substitute->unreadNotifications()->count());
     }
 
+    public function test_notifications_are_removed_with_a_deletable_user(): void
+    {
+        [, $requester, $substitute, $shift] = $this->team();
+        app(CreateShiftSwapAction::class)->execute($requester, [
+            'shift_id' => $shift->id,
+            'substitute_id' => $substitute->id,
+        ]);
+
+        $notificationId = $substitute->notifications()->sole()->id;
+        $shift->delete();
+        $substitute->delete();
+
+        $this->assertDatabaseMissing('notifications', ['id' => $notificationId]);
+    }
+
     /** @return array{User, User, User, Shift} */
     private function team(): array
     {

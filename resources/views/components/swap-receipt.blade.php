@@ -35,7 +35,7 @@
             <span class="meta-label">Situação</span>
             <div class="mt-2"><x-status-badge :status="$receipt['status']" :label="$receipt['status_label']" /></div>
         </div>
-        <div>
+        <div @class(['lg:col-span-2' => ! $receipt['manager']])>
             <span class="meta-label">Registrado em</span>
             <p>{{ $recordedAt->format('d/m/Y H:i') }}</p>
         </div>

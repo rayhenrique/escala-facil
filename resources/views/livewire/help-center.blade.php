@@ -42,6 +42,10 @@
                 <h3>Novidades</h3>
                 <p>Ao entrar pela primeira vez depois de uma atualização, leia o modal de novidades e escolha “Entendi, continuar”. O histórico completo permanece disponível nesta página.</p>
             </article>
+            <article>
+                <h3>Notificações e comprovantes</h3>
+                <p>O item <strong>Notificações</strong> mostra solicitações, aceites e decisões de troca. O contador indica itens não lidos, e cada aviso mantém um comprovante com a referência e os dados da movimentação.</p>
+            </article>
         </div>
     </section>
 
@@ -65,7 +69,7 @@
             </details>
             <details>
                 <summary>Analisar trocas</summary>
-                <div><p>Em <strong>Trocas</strong>, revise as solicitações que já foram aceitas pelo substituto. Confira plantão, solicitante e substituto antes de aprovar. A aprovação transfere o plantão; a rejeição encerra o pedido sem alterar a escala.</p></div>
+                <div><p>Em <strong>Trocas</strong>, revise as solicitações que já foram aceitas pelo substituto. Todos os gerentes recebem um aviso quando uma troca chega à fila. Confira plantão, solicitante e substituto antes de aprovar. A aprovação transfere o plantão; a rejeição encerra o pedido sem alterar a escala. Ao decidir, o sistema mostra um comprovante e avisa os dois profissionais.</p></div>
             </details>
             <details>
                 <summary>Gerenciar setores e categorias</summary>
@@ -90,11 +94,11 @@
             </details>
             <details>
                 <summary>Solicitar uma troca</summary>
-                <div><ol><li>Localize um plantão futuro atribuído a você.</li><li>Escolha <strong>Solicitar troca</strong>.</li><li>Selecione um colega elegível e confirme.</li></ol><p>Somente profissionais do mesmo setor e categoria aparecem como opção. O pedido fica aguardando o colega.</p></div>
+                <div><ol><li>Localize um plantão futuro atribuído a você.</li><li>Escolha <strong>Solicitar troca</strong>.</li><li>Selecione um colega elegível e confirme.</li></ol><p>Somente profissionais do mesmo setor e categoria aparecem como opção. O colega recebe uma notificação, e você recebe um comprovante da solicitação.</p></div>
             </details>
             <details>
                 <summary>Aceitar uma solicitação</summary>
-                <div><p>Nos pedidos recebidos, confira os dados do plantão antes de aceitar. Depois do aceite, a troca segue para decisão da gerência e a escala ainda não muda até a aprovação.</p></div>
+                <div><p>Nos pedidos recebidos, confira os dados do plantão antes de aceitar. Depois do aceite, a troca segue para decisão da gerência e a escala ainda não muda até a aprovação. Solicitante, substituto e gerentes são avisados; a decisão final gera outro aviso e comprovante.</p></div>
             </details>
             <details>
                 <summary>Informar ausência</summary>
@@ -112,6 +116,7 @@
             <article><h3>Limite de trocas</h3><p>Cada profissional pode participar de até quatro trocas aprovadas por mês, somando pedidos próprios e substituições.</p></article>
             <article><h3>Compatibilidade</h3><p>Uma troca ou alocação exige que o profissional pertença ao mesmo setor e à mesma categoria do plantão.</p></article>
             <article><h3>Fluxo da troca</h3><p>Aguardando profissional → Aguardando gerência → Aprovada ou Rejeitada.</p></article>
+            <article><h3>Rastreabilidade</h3><p>Cada solicitação, aceite e decisão gera um comprovante identificado. Alterações futuras em cadastros não modificam o resumo já registrado.</p></article>
             <article><h3>Cobertura</h3><p>Agendado possui cobertura; Ausência informada registra a falta; Descoberto exige nova alocação.</p></article>
         </div>
     </section>

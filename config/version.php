@@ -15,6 +15,7 @@ return [
                 'Solicitante e substituto avisados após aceite, aprovação ou rejeição.',
                 'Nova Central de Notificações com contador e controle de leitura.',
                 'Comprovante com referência, plantão, participantes e responsável pela decisão.',
+                'Guia completo de deploy na Hostinger com CloudPanel, SSL, fila e atualizações.',
             ],
         ],
         [
