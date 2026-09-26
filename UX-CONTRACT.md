@@ -24,6 +24,8 @@ Este documento registra o comportamento compartilhado das telas autenticadas. As
 | Calendário mensal | `MonthlyCalendar` + classes `calendar-*` | mês gerencial e detalhe diário | navegação entre meses, seleção de dia e lista completa de plantões |
 | Central de ajuda | `HelpCenter` | manual de gerente, profissional, regras e versões | acesso pelos dois perfis, âncoras, acordeões e histórico completo |
 | Novidades da versão | `ReleaseAnnouncement` + `last_seen_version` | primeiro acesso após lançamento | modal único por versão, confirmação persistida e acesso ao manual |
+| Notificações | `NotificationsCenter` + notificações em banco | solicitação, aceite, aprovação e rejeição | isolamento por usuário, contador de não lidas e controles de leitura |
+| Comprovante de troca | `resources/views/components/swap-receipt.blade.php` | imediato e histórico | retrato do evento com referência, plantão e participantes |
 | Feedback | bloco de sessão com `role="status"` | sucesso | mensagem após mutação sem alterar geometria |
 | Exclusão | confirmação contextual em Gestão de Escalas | excluir plantão | cancelamento disponível e teste do fluxo |
 | Scrollbar | regra global de `resources/css/app.css` | rolagem de página e painéis | inspeção no navegador |
@@ -37,7 +39,8 @@ Este documento registra o comportamento compartilhado das telas autenticadas. As
 - No desktop, o toggle alterna a sidebar entre 18rem e 6rem e persiste a preferência no navegador; Usuários é o último item dos módulos gerenciais.
 - No celular, o botão “Abrir menu principal” exibe a sidebar como gaveta. A gaveta fecha pelo botão, pelo fundo de proteção, pela tecla `Esc` ou após a escolha de uma rota.
 - Uma resposta 403 deve preservar a possibilidade de retorno a uma área autorizada.
-- Ajuda e versões pertence ao grupo Suporte e está disponível para gerente e profissional; o número da versão atual aparece na sidebar.
+- Notificações e Ajuda e versões pertencem ao grupo Suporte e estão disponíveis para gerente e profissional; o número da versão atual aparece na sidebar.
+- O item Notificações mostra um contador de não lidas, inclusive quando a sidebar está recolhida, e atualiza o total periodicamente.
 
 ## Fluxos e retorno
 
@@ -47,6 +50,7 @@ Este documento registra o comportamento compartilhado das telas autenticadas. As
 | Excluir plantão | confirmação contextual antes da ação | item removido e mensagem de sucesso | item permanece disponível |
 | Solicitar ou aceitar troca | ação desabilitada durante envio | mensagem e atualização das listas | validação explica incompatibilidade ou cota |
 | Aprovar troca | ação desabilitada durante decisão | plantão transferido e pedido removido da fila | pedido permanece para nova análise |
+| Consultar notificações | contador e histórico carregados sem alterar a navegação | item pode ser marcado como lido e o comprovante permanece disponível | somente notificações do usuário autenticado podem ser consultadas |
 | Informar ausência | “Enviando…” durante upload | plantão descoberto e alerta gerencial | motivo e arquivo permanecem corrigíveis |
 | Criar ou editar cadastro | modal aberto pelo botão “Adicionar” ou pela ação “Editar” | mensagem de sucesso, modal fechado e lista atualizada | modal permanece aberto com erros junto aos campos |
 | Conhecer uma nova versão | modal bloqueia a área até uma decisão consciente | versão registrada como visualizada e modal fechado, ou redirecionamento ao manual | sem confirmação, o modal volta a aparecer no próximo acesso |
@@ -57,6 +61,8 @@ Este documento registra o comportamento compartilhado das telas autenticadas. As
 - O calendário mostra a quantidade de plantões em cada dia e diferencia cobertura completa de plantões sem profissional; ao selecionar uma data, lista todos os registros daquele dia.
 - Números do painel representam consultas reais. Zero significa ausência confirmada de registros no filtro descrito.
 - O painel gerencial mostra plantões descobertos de hoje em diante e trocas com status `pending_manager`.
+- A criação da solicitação notifica o substituto; o aceite notifica os profissionais e todos os gerentes; aprovação ou rejeição notifica solicitante e substituto.
+- O comprovante guarda um retrato dos dados no momento do evento e não depende de consultas atuais para exibir nomes, setor, categoria ou horários.
 - Alertas exibem no máximo quatro itens por grupo e oferecem acesso à lista completa quando houver mais registros.
 - Status nunca depende somente de cor; o badge sempre apresenta um rótulo.
 

@@ -67,3 +67,14 @@
   - [x] Exibir modal de novidades uma vez no primeiro acesso após cada nova versão.
   - [x] Atualizar README, schema, contrato de experiência e sistema visual.
   - [x] Validar autorização, persistência da confirmação, responsividade, testes e build.
+
+- [x] **Fase 11: Notificações e comprovantes de troca**
+  - [x] Criar notificações persistentes em banco e uma Central de Notificações para os dois perfis.
+  - [x] Notificar o substituto quando receber uma solicitação de troca.
+  - [x] Notificar todos os gerentes quando uma troca aceita aguardar aprovação.
+  - [x] Notificar solicitante e substituto após aceite, aprovação ou rejeição.
+  - [x] Gerar um comprovante imutável a cada movimentação da troca.
+  - [x] Exibir o comprovante imediatamente para quem executou a ação e mantê-lo no histórico dos destinatários.
+  - [x] Adicionar contador de não lidas e controles de leitura na sidebar e na central.
+  - [x] Atualizar README, manual, schema, contrato de experiência e versão do sistema.
+  - [x] Validar privacidade, destinatários, comprovantes, responsividade, testes e build.

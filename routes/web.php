@@ -9,6 +9,7 @@ use App\Livewire\Manager\SectorManager;
 use App\Livewire\Manager\ShiftManager;
 use App\Livewire\Manager\SwapApprovals;
 use App\Livewire\Manager\UserManager;
+use App\Livewire\NotificationsCenter;
 use App\Livewire\Professional\MySchedule;
 use Illuminate\Support\Facades\Route;
 
@@ -21,6 +22,10 @@ Route::get('dashboard', DashboardRedirectController::class)
 Route::get('help', HelpCenter::class)
     ->middleware('auth')
     ->name('help');
+
+Route::get('notifications', NotificationsCenter::class)
+    ->middleware('auth')
+    ->name('notifications');
 
 Route::middleware(['auth', 'professional'])
     ->prefix('professional')

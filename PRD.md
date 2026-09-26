@@ -18,6 +18,7 @@ Sistema interno para gerenciamento de escalas médicas e trocas de plantões em 
   * Após o aceite, a solicitação vai para a gerência aprovar.
   * A aprovação transfere automaticamente o plantão para o substituto.
 * **Módulo de Ausências:** Profissionais podem sinalizar ausência em um plantão, anexando um documento (ex: atestado). O plantão é marcado como "Descoberto" e um alerta é gerado para a gerência.
+* **Módulo de Notificações:** O substituto é avisado ao receber uma solicitação; todos os gerentes são avisados após o aceite; solicitante e substituto são avisados sobre aceite, aprovação ou rejeição. Cada evento preserva um comprovante com o resumo da troca.
 
 ## 4. Regras de Negócio Críticas
 * **Match de Perfil:** Uma troca só pode ser solicitada/aceita por profissionais que possuam a exata mesma `categoria` e atuem no mesmo `setor`.

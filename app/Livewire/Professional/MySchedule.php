@@ -6,12 +6,14 @@ use App\Actions\Absences\ReportAbsenceAction;
 use App\Actions\ShiftSwaps\AcceptShiftSwapAction;
 use App\Actions\ShiftSwaps\CreateShiftSwapAction;
 use App\Enums\ShiftSwapStatus;
+use App\Enums\ShiftSwapEvent;
 use App\Enums\UserRole;
 use App\Http\Requests\ReportAbsenceRequest;
 use App\Models\Absence;
 use App\Models\Shift;
 use App\Models\ShiftSwap;
 use App\Models\User;
+use App\Support\ShiftSwapReceipt;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
@@ -37,6 +39,9 @@ class MySchedule extends Component
     public string $absenceReason = '';
 
     public $attachment = null;
+
+    /** @var array<string, mixed>|null */
+    public ?array $swapReceipt = null;
 
     public function mount(): void
     {
@@ -94,13 +99,14 @@ class MySchedule extends Component
         unset($this->eligibleSubstitutes);
     }
 
-    public function requestSwap(CreateShiftSwapAction $action): void
+    public function requestSwap(CreateShiftSwapAction $action, ShiftSwapReceipt $receipts): void
     {
         $this->authorize('create', ShiftSwap::class);
-        $action->execute(auth()->user(), [
+        $shiftSwap = $action->execute(auth()->user(), [
             'shift_id' => $this->swapShiftId,
             'substitute_id' => $this->substituteId,
         ]);
+        $this->swapReceipt = $receipts->make($shiftSwap, ShiftSwapEvent::Requested);
 
         $this->swapShiftId = null;
         $this->substituteId = '';
@@ -108,11 +114,12 @@ class MySchedule extends Component
         session()->flash('status', 'Solicitação enviada ao profissional selecionado.');
     }
 
-    public function acceptSwap(int $shiftSwapId, AcceptShiftSwapAction $action): void
+    public function acceptSwap(int $shiftSwapId, AcceptShiftSwapAction $action, ShiftSwapReceipt $receipts): void
     {
         $shiftSwap = ShiftSwap::query()->findOrFail($shiftSwapId);
         $this->authorize('accept', $shiftSwap);
-        $action->execute(auth()->user(), $shiftSwapId);
+        $shiftSwap = $action->execute(auth()->user(), $shiftSwapId);
+        $this->swapReceipt = $receipts->make($shiftSwap, ShiftSwapEvent::Accepted);
 
         session()->flash('status', 'Troca aceita e encaminhada para aprovação da gerência.');
     }

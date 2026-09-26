@@ -1,9 +1,22 @@
 <?php
 
 return [
-    'current' => env('APP_VERSION', '1.2.0'),
+    'current' => env('APP_VERSION', '1.3.0'),
 
     'releases' => [
+        [
+            'version' => '1.3.0',
+            'date' => '2026-09-26',
+            'title' => 'Notificações e comprovantes de troca',
+            'summary' => 'Cada etapa da troca agora avisa as pessoas envolvidas e mantém um comprovante detalhado da movimentação.',
+            'highlights' => [
+                'Substituto avisado ao receber uma nova solicitação de troca.',
+                'Gerentes avisados quando uma troca aceita aguarda decisão.',
+                'Solicitante e substituto avisados após aceite, aprovação ou rejeição.',
+                'Nova Central de Notificações com contador e controle de leitura.',
+                'Comprovante com referência, plantão, participantes e responsável pela decisão.',
+            ],
+        ],
         [
             'version' => '1.2.0',
             'date' => '2026-09-26',

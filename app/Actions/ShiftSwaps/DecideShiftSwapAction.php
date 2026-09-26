@@ -7,14 +7,17 @@ use App\Enums\ShiftSwapStatus;
 use App\Models\Shift;
 use App\Models\ShiftSwap;
 use App\Models\User;
+use App\Services\ShiftSwapNotificationService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class DecideShiftSwapAction
 {
+    public function __construct(private readonly ShiftSwapNotificationService $notifications) {}
+
     public function approve(User $manager, int $shiftSwapId): ShiftSwap
     {
-        return DB::transaction(function () use ($manager, $shiftSwapId): ShiftSwap {
+        $shiftSwap = DB::transaction(function () use ($manager, $shiftSwapId): ShiftSwap {
             $shiftId = ShiftSwap::query()->whereKey($shiftSwapId)->firstOrFail(['shift_id'])->shift_id;
             $shift = Shift::query()->lockForUpdate()->findOrFail($shiftId);
             $shiftSwap = ShiftSwap::query()
@@ -47,11 +50,15 @@ class DecideShiftSwapAction
 
             return $shiftSwap->refresh();
         });
+
+        $this->notifications->approved($shiftSwap);
+
+        return $shiftSwap;
     }
 
     public function reject(User $manager, int $shiftSwapId): ShiftSwap
     {
-        return DB::transaction(function () use ($manager, $shiftSwapId): ShiftSwap {
+        $shiftSwap = DB::transaction(function () use ($manager, $shiftSwapId): ShiftSwap {
             $shiftSwap = ShiftSwap::query()->lockForUpdate()->findOrFail($shiftSwapId);
 
             Gate::forUser($manager)->authorize('reject', $shiftSwap);
@@ -63,5 +70,9 @@ class DecideShiftSwapAction
 
             return $shiftSwap->refresh();
         });
+
+        $this->notifications->rejected($shiftSwap);
+
+        return $shiftSwap;
     }
 }

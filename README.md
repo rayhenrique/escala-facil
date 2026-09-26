@@ -4,7 +4,7 @@
 
 Sistema interno para gestão de escalas médicas, plantões, trocas e ausências em unidades de saúde. A aplicação centraliza a operação da gerência, permite que profissionais acompanhem a própria agenda e aplica as regras de compatibilidade e limite mensal em todas as decisões de troca.
 
-**Versão atual:** `1.2.0` — consulte o histórico completo em [`versoes.md`](versoes.md).
+**Versão atual:** `1.3.0` — consulte o histórico completo em [`versoes.md`](versoes.md).
 
 Desenvolvido por [KL Tecnologia](https://kltecnologia.com).
 
@@ -19,6 +19,8 @@ O MVP está funcional e inclui:
 - calendário mensal da gerência com todos os plantões e profissionais de cada dia;
 - agenda mensal do profissional;
 - solicitação, aceite e aprovação gerencial de trocas;
+- notificações persistentes para substitutos, solicitantes e gerentes em cada etapa da troca;
+- comprovantes de solicitação, aceite e decisão com um retrato dos dados da movimentação;
 - controle de quatro trocas aprovadas por profissional a cada mês;
 - registro de ausência justificada com anexo privado;
 - central de ajuda com manual completo e histórico de versões;
@@ -40,6 +42,7 @@ O gerente pode:
 - cadastrar e manter usuários, setores e categorias;
 - criar, editar, alocar e excluir plantões;
 - aprovar ou rejeitar trocas aceitas pelo substituto;
+- receber uma notificação quando uma troca aceita aguardar decisão;
 - consultar alertas gerados por ausências.
 
 ### Profissional
@@ -49,9 +52,10 @@ O profissional pode:
 - consultar os próprios plantões por mês;
 - solicitar troca com um colega elegível;
 - aceitar pedidos em que foi indicado como substituto;
+- receber notificações ao ser indicado e após aceite ou decisão da gerência;
 - informar ausência e anexar um comprovante.
 
-Os dois perfis podem abrir **Ajuda e versões** para consultar o manual, as regras operacionais e o histórico de lançamentos.
+Os dois perfis podem abrir **Notificações** para acompanhar movimentações e comprovantes e **Ajuda e versões** para consultar o manual, as regras operacionais e o histórico de lançamentos.
 
 O cadastro público permanece desativado. Novas contas são criadas pela gerência no módulo **Usuários**.
 
@@ -62,6 +66,8 @@ O cadastro público permanece desativado. Novas contas são criadas pela gerênc
 - O fluxo segue `Aguardando profissional` → `Aguardando gerência` → `Aprovada` ou `Rejeitada`.
 - Cada profissional pode participar de no máximo **quatro trocas aprovadas por mês**, somando solicitações e substituições.
 - A aprovação gerencial transfere o plantão ao substituto.
+- Uma solicitação avisa o substituto; o aceite avisa o solicitante, o substituto e todos os gerentes; a decisão avisa os dois profissionais.
+- Cada etapa armazena um comprovante com referência, data, horário, setor, categoria e participantes conforme estavam no momento da movimentação.
 - Uma ausência justificada deixa o plantão descoberto e gera um alerta gerencial.
 - Usuários, setores e categorias com histórico ou vínculos operacionais não podem ser excluídos.
 - O gerente não pode excluir a própria conta nem retirar dela o perfil gerencial.
@@ -79,6 +85,7 @@ A interface parte do celular como composição principal:
 - métricas e grupos de ações se empilham em telas estreitas;
 - a navegação usa uma sidebar recolhível e persistente no desktop e uma gaveta com ícones no celular;
 - modais de nova versão comunicam mudanças uma vez por usuário, com acesso direto ao manual;
+- a sidebar mostra o número de notificações não lidas e a central organiza os comprovantes em cartões responsivos;
 - campos de formulário têm 48 px de altura e estados de foco perceptíveis.
 
 As decisões visuais estão em [`DESIGN.md`](DESIGN.md) e os comportamentos compartilhados em [`UX-CONTRACT.md`](UX-CONTRACT.md).
@@ -126,7 +133,7 @@ Crie um banco MySQL chamado `escala_facil` e ajuste o `.env`:
 APP_NAME="Escala Fácil"
 APP_URL=http://127.0.0.1:8000
 APP_TIMEZONE=America/Fortaleza
-APP_VERSION=1.2.0
+APP_VERSION=1.3.0
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR
 APP_FAKER_LOCALE=pt_BR
@@ -247,6 +254,7 @@ O Escala Fácil e seu código-fonte são propriedade exclusiva da **KL Tecnologi
 | Categorias | `/manager/categories` | gerente |
 | Usuários | `/manager/users` | gerente |
 | Minha escala | `/professional/dashboard` | profissional |
+| Notificações e comprovantes | `/notifications` | gerente e profissional |
 | Ajuda e versões | `/help` | gerente e profissional |
 
 Todas as rotas gerenciais exigem autenticação e passam pelo middleware `EnsureUserIsManager`. As mutações também são protegidas por Policies.
@@ -261,6 +269,7 @@ O domínio principal usa estas tabelas:
 - `shifts`: plantões, horários, alocação e cobertura;
 - `shift_swaps`: solicitações, participantes e decisão da troca;
 - `absences`: ausências justificadas e anexos;
+- `notifications`: avisos persistentes, leitura e comprovantes imutáveis das trocas;
 - `demo_data_batches`: manifesto técnico usado para remover a carga fictícia sem apagar os dados reais.
 
 Consulte [`DATABASE-SCHEMA.md`](DATABASE-SCHEMA.md) para os tipos e relacionamentos.

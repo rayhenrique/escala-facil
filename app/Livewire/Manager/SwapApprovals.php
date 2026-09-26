@@ -3,8 +3,10 @@
 namespace App\Livewire\Manager;
 
 use App\Actions\ShiftSwaps\DecideShiftSwapAction;
+use App\Enums\ShiftSwapEvent;
 use App\Enums\ShiftSwapStatus;
 use App\Models\ShiftSwap;
+use App\Support\ShiftSwapReceipt;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -15,25 +17,30 @@ class SwapApprovals extends Component
 {
     use WithPagination;
 
+    /** @var array<string, mixed>|null */
+    public ?array $swapReceipt = null;
+
     public function mount(): void
     {
         $this->authorize('viewAny', ShiftSwap::class);
     }
 
-    public function approve(int $shiftSwapId, DecideShiftSwapAction $action): void
+    public function approve(int $shiftSwapId, DecideShiftSwapAction $action, ShiftSwapReceipt $receipts): void
     {
         $shiftSwap = ShiftSwap::query()->findOrFail($shiftSwapId);
         $this->authorize('approve', $shiftSwap);
-        $action->approve(auth()->user(), $shiftSwapId);
+        $shiftSwap = $action->approve(auth()->user(), $shiftSwapId);
+        $this->swapReceipt = $receipts->make($shiftSwap, ShiftSwapEvent::Approved);
 
         session()->flash('status', 'Troca aprovada e plantão transferido ao substituto.');
     }
 
-    public function reject(int $shiftSwapId, DecideShiftSwapAction $action): void
+    public function reject(int $shiftSwapId, DecideShiftSwapAction $action, ShiftSwapReceipt $receipts): void
     {
         $shiftSwap = ShiftSwap::query()->findOrFail($shiftSwapId);
         $this->authorize('reject', $shiftSwap);
-        $action->reject(auth()->user(), $shiftSwapId);
+        $shiftSwap = $action->reject(auth()->user(), $shiftSwapId);
+        $this->swapReceipt = $receipts->make($shiftSwap, ShiftSwapEvent::Rejected);
 
         session()->flash('status', 'Solicitação de troca rejeitada.');
     }

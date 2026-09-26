@@ -63,6 +63,8 @@
     .sidebar-nav-link { @apply flex min-h-12 items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold text-white/70 transition-colors hover:bg-white/10 hover:text-white; }
     .sidebar-nav-link-active { @apply bg-white/12 text-white shadow-sm; }
     .sidebar-nav-icon { @apply size-5 shrink-0; }
+    .notification-indicator { @apply absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-amber-300 ring-2 ring-primary-strong; }
+    .notification-count { @apply inline-flex min-w-6 items-center justify-center rounded-full bg-amber-300 px-1.5 py-0.5 text-[0.6875rem] font-bold text-primary-strong; }
     .sidebar-icon-button { @apply inline-flex size-11 items-center justify-center rounded-lg text-white/70 transition-colors hover:bg-white/10 hover:text-white; }
     .sidebar-collapse-button { @apply size-8 shrink-0 items-center justify-center rounded-md text-white/60 transition-colors hover:bg-white/10 hover:text-white; }
     .mobile-topbar { @apply sticky top-0 z-30 flex min-h-16 items-center justify-between border-b border-line bg-white/95 px-4 backdrop-blur lg:hidden; }
@@ -174,6 +176,16 @@
     .release-highlights { @apply space-y-3; }
     .release-highlights li { @apply flex items-start gap-3 rounded-lg bg-canvas px-4 py-3 text-sm leading-6 text-ink; }
     .release-highlights li > span:first-child { @apply font-bold text-coverage; }
+    .notification-card { @apply rounded-xl border border-line bg-white p-5 shadow-soft sm:p-6; }
+    .notification-card-unread { @apply border-primary bg-primary-soft/30; }
+    .swap-receipt { @apply overflow-hidden rounded-xl border border-line bg-canvas; }
+    .swap-receipt-heading { @apply flex flex-col gap-4 border-b border-line bg-white px-5 py-4 sm:flex-row sm:items-center sm:justify-between; }
+    .swap-receipt-heading h2 { @apply mt-2 text-lg font-semibold; }
+    .swap-receipt-grid { @apply grid gap-px bg-line sm:grid-cols-2 lg:grid-cols-3; }
+    .swap-receipt-grid > div { @apply min-w-0 bg-canvas px-5 py-4; }
+    .swap-receipt-grid p { @apply mt-2 break-words text-sm font-semibold text-ink; }
+    .swap-receipt-grid small { @apply mt-1 block text-xs leading-5 text-muted; }
+    .swap-receipt-primary { @apply sm:col-span-2 lg:col-span-1; }
     .system-footer { @apply flex flex-col items-center justify-between gap-2 border-t border-line py-5 text-center text-xs text-muted sm:flex-row sm:text-left; }
     .system-footer a { @apply font-semibold text-primary transition-colors hover:text-primary-strong; }
 }

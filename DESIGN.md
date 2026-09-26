@@ -160,6 +160,8 @@ Rótulos ficam sempre visíveis. Erros aparecem junto ao campo com `aria-invalid
 
 O modal de nova versão é deliberado e não fecha por clique externo: o usuário escolhe continuar ou abrir o manual. O cabeçalho escuro o distingue de formulários, e os destaques usam uma lista curta com texto. A Central de Ajuda usa atalhos, acordeões e uma linha do tempo de versões para permitir leitura rápida no celular e consulta detalhada no desktop.
 
+A Central de Notificações usa cartões com uma faixa suave para itens não lidos. Cada cartão contém mensagem, ações de leitura e o comprovante em uma grade compacta; no celular, os campos do comprovante formam uma coluna legível. A referência monoespaçada e o badge de situação reforçam a rastreabilidade sem criar uma estética separada do restante do sistema.
+
 ### Iconography
 
 Ícones futuros devem usar traço simples de 1,5 a 2px, entre 16 e 20px, acompanhados por texto quando representam uma ação. O símbolo da marca é o único ícone preenchido recorrente.

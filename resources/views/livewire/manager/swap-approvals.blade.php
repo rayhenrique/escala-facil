@@ -7,6 +7,10 @@
         <div class="status-success mt-6" role="status">{{ session('status') }}</div>
     @endif
 
+    @if ($swapReceipt)
+        <x-swap-receipt :receipt="$swapReceipt" class="mt-6" />
+    @endif
+
     <section class="mt-8 space-y-4" aria-label="Trocas aguardando decisão">
         @forelse ($swaps as $swap)
             <article class="panel" wire:key="swap-approval-{{ $swap->id }}">

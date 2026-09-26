@@ -6,6 +6,19 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.3.0 — 26/09/2026
+
+### Notificações e comprovantes de troca
+
+- Nova Central de Notificações disponível para gerentes e profissionais.
+- Contador de notificações não lidas na sidebar, com atualização periódica.
+- Aviso ao substituto quando uma solicitação de troca é criada.
+- Aviso a todos os gerentes quando o substituto aceita e a troca aguarda aprovação.
+- Avisos ao solicitante e ao substituto após aceite, aprovação ou rejeição.
+- Comprovante imutável em cada evento com referência, plantão, setor, categoria, participantes, situação e responsável pela decisão.
+- Comprovante imediato para o usuário que solicita, aceita, aprova ou rejeita a troca.
+- Controles para marcar uma notificação ou todo o histórico como lido.
+
 ## 1.2.0 — 26/09/2026
 
 ### Central de ajuda e novidades

@@ -53,6 +53,17 @@
 * `status` (enum: 'pending', 'acknowledged') - Gerente marca como ciente
 * `timestamps`
 
+### `notifications` (Notificações e Comprovantes)
+* `id` (uuid, primary)
+* `type` (string) - Classe da notificação
+* `notifiable_type` (string) - Tipo do destinatário
+* `notifiable_id` (unsignedBigInteger) - Usuário destinatário
+* `data` (text/json serializado) - Evento, mensagem, destino e retrato imutável do comprovante
+* `read_at` (timestamp, nullable) - Data e hora da leitura
+* `timestamps`
+
+O campo `data` preserva a referência da troca, plantão, horários, setor, categoria, solicitante, substituto, situação e gerente responsável no momento do evento. Isso mantém o comprovante fiel mesmo se cadastros forem alterados depois.
+
 ## Tabela técnica de dados de demonstração
 
 ### `demo_data_batches`

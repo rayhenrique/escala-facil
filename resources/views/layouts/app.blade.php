@@ -93,7 +93,8 @@
 
                     <div class="mt-6 border-t border-white/10 pt-5">
                         <p class="sidebar-label px-3 font-mono text-[0.6875rem] font-medium uppercase tracking-[0.16em] text-white/45">Suporte</p>
-                        <div class="mt-3">
+                        <div class="mt-3 space-y-1">
+                            <livewire:notification-nav-item />
                             <a href="{{ route('help') }}" wire:navigate title="Ajuda e versões" class="sidebar-nav-link {{ request()->routeIs('help') ? 'sidebar-nav-link-active' : '' }}" @if(request()->routeIs('help')) aria-current="page" @endif>
                                 <x-nav-icon name="help" class="sidebar-nav-icon" /><span class="sidebar-label">Ajuda e versões</span>
                             </a>

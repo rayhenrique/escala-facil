@@ -12,6 +12,10 @@
         <div class="status-success mt-6" role="status">{{ session('status') }}</div>
     @endif
 
+    @if ($swapReceipt)
+        <x-swap-receipt :receipt="$swapReceipt" class="mt-6" />
+    @endif
+
     @if ($swapLimitReached)
         <div class="mt-6 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900" role="status">
             Você atingiu a cota de quatro trocas aprovadas neste mês. Novas solicitações e aceites serão liberados no próximo mês.
