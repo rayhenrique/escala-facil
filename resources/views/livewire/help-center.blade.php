@@ -3,7 +3,7 @@
         <div>
             <p class="eyebrow">Central de orientação</p>
             <h1 class="page-title">Ajuda e versões</h1>
-            <p class="page-description">Consulte o manual de uso do Escala Fácil, as regras principais e tudo o que mudou em cada versão.</p>
+            <p class="page-description">Siga a ordem inicial de configuração, consulte as rotinas de cada perfil e encontre orientações para as situações mais comuns do Escala Fácil.</p>
         </div>
         <div class="current-version-card">
             <span class="meta-label">Versão atual</span>
@@ -13,38 +13,69 @@
     </div>
 
     <nav class="help-shortcuts mt-8" aria-label="Atalhos do manual">
-        <a href="#primeiros-passos"><x-nav-icon name="home" class="size-5" /><span>Primeiros passos</span></a>
-        <a href="#manual-gerencia"><x-nav-icon name="schedule" class="size-5" /><span>Manual da gerência</span></a>
-        <a href="#manual-profissional"><x-nav-icon name="calendar" class="size-5" /><span>Manual do profissional</span></a>
-        <a href="#regras-status"><x-nav-icon name="help" class="size-5" /><span>Regras e status</span></a>
+        <a href="#ordem-inicial"><x-nav-icon name="home" class="size-5" /><span>Comece por aqui</span></a>
+        <a href="#manual-gerencia"><x-nav-icon name="schedule" class="size-5" /><span>Rotina da gerência</span></a>
+        <a href="#manual-profissional"><x-nav-icon name="calendar" class="size-5" /><span>Rotina profissional</span></a>
+        <a href="#trocas-ausencias"><x-nav-icon name="swap" class="size-5" /><span>Trocas e ausências</span></a>
+        <a href="#problemas-comuns"><x-nav-icon name="help" class="size-5" /><span>Solução de problemas</span></a>
+        <a href="#instalar-aplicativo"><x-nav-icon name="install" class="size-5" /><span>Instalar aplicativo</span></a>
         <a href="#historico-versoes"><x-nav-icon name="sparkles" class="size-5" /><span>Histórico de versões</span></a>
     </nav>
 
-    <section id="primeiros-passos" class="help-section mt-8 scroll-mt-6" aria-labelledby="first-steps-title">
+    <section id="ordem-inicial" class="help-section mt-8 scroll-mt-6" aria-labelledby="initial-order-title">
         <div class="help-section-heading">
             <span>01</span>
-            <div><p class="eyebrow">Base do sistema</p><h2 id="first-steps-title">Primeiros passos</h2></div>
+            <div><p class="eyebrow">Implantação inicial</p><h2 id="initial-order-title">Ordem correta para começar</h2></div>
         </div>
+
+        <div class="manual-callout mt-6" role="note">
+            <strong>Faça esta sequência uma vez, usando uma conta de gerente.</strong>
+            <p>Os cadastros dependem uns dos outros. Categorias e setores precisam existir antes dos profissionais, e os profissionais precisam estar cadastrados antes da alocação dos plantões.</p>
+        </div>
+
+        <ol class="manual-roadmap" aria-label="Sequência inicial de configuração">
+            <li>
+                <span class="manual-step-number">1</span>
+                <div><h3>Cadastre as categorias</h3><p>Registre as especialidades ou funções profissionais exigidas nos plantões, como Médico, Enfermeiro ou Técnico de Enfermagem.</p><a href="#gerenciar-categorias">Ver instruções de categorias</a></div>
+            </li>
+            <li>
+                <span class="manual-step-number">2</span>
+                <div><h3>Cadastre os setores</h3><p>Registre os locais ou áreas de atendimento, como Pronto Atendimento, UTI ou Clínica Médica.</p><a href="#gerenciar-setores">Ver instruções de setores</a></div>
+            </li>
+            <li>
+                <span class="manual-step-number">3</span>
+                <div><h3>Cadastre os usuários</h3><p>Crie as contas gerenciais e profissionais. Todo profissional deve receber uma categoria e um setor compatíveis com sua atuação.</p><a href="#gerenciar-usuarios">Ver instruções de usuários</a></div>
+            </li>
+            <li>
+                <span class="manual-step-number">4</span>
+                <div><h3>Crie os plantões</h3><p>Informe data, horário, setor e categoria. Aloque um profissional compatível ou deixe o plantão descoberto até definir a cobertura.</p><a href="#gerenciar-plantoes">Ver instruções de plantões</a></div>
+            </li>
+            <li>
+                <span class="manual-step-number">5</span>
+                <div><h3>Confira o calendário</h3><p>Selecione os próximos dias e confirme horários, plantonistas e eventuais plantões sem profissional.</p><a href="#consultar-calendario">Ver instruções do calendário</a></div>
+            </li>
+            <li>
+                <span class="manual-step-number">6</span>
+                <div><h3>Inicie a operação diária</h3><p>Use a Visão geral para acompanhar cobertura, trocas aguardando decisão e alertas de ausência.</p><a href="#rotina-gerencial">Ver a rotina gerencial</a></div>
+            </li>
+        </ol>
+
         <div class="help-content-grid">
             <article>
-                <h3>Acesso e perfil</h3>
-                <p>Entre com o e-mail e a senha fornecidos pela gerência. O sistema identifica seu perfil e abre automaticamente a área correta. Use “Esqueci minha senha” na tela de login quando precisar redefinir a credencial.</p>
+                <h3>Acesso à conta</h3>
+                <p>Entre com o e-mail e a senha fornecidos pela gerência. O perfil da conta define automaticamente a área exibida. Use <strong>Esqueci minha senha</strong> na tela de acesso quando precisar redefinir a credencial.</p>
             </article>
             <article>
-                <h3>Navegação</h3>
-                <p>No desktop, use o controle no topo da sidebar para recolher ou expandir o menu. No celular, toque no botão de menu para abrir a gaveta. A preferência da sidebar fica salva neste navegador.</p>
+                <h3>Navegação no desktop</h3>
+                <p>A sidebar permanece visível. Use o controle no topo para recolher ou expandir o menu; a preferência fica salva neste navegador. O item destacado indica a página atual.</p>
             </article>
             <article>
-                <h3>Leitura de estados</h3>
-                <p>Badges e mensagens informam se um plantão está agendado, descoberto ou com ausência. As cores ajudam na leitura, mas o texto do estado é sempre a referência principal.</p>
+                <h3>Navegação no celular</h3>
+                <p>Toque em <strong>Abrir menu principal</strong> para mostrar a gaveta lateral. Ela fecha ao escolher uma página, tocar fora do menu ou usar o botão de fechar.</p>
             </article>
             <article>
-                <h3>Novidades</h3>
-                <p>Ao entrar pela primeira vez depois de uma atualização, leia o modal de novidades e escolha “Entendi, continuar”. O histórico completo permanece disponível nesta página.</p>
-            </article>
-            <article>
-                <h3>Notificações e comprovantes</h3>
-                <p>O item <strong>Notificações</strong> mostra solicitações, aceites e decisões de troca. O contador indica itens não lidos, e cada aviso mantém um comprovante com a referência e os dados da movimentação.</p>
+                <h3>Novidades da versão</h3>
+                <p>Depois de uma atualização, o primeiro acesso apresenta as novidades. Escolha <strong>Entendi, continuar</strong> para entrar ou abra este manual. O aviso aparece uma vez para cada versão.</p>
             </article>
         </div>
     </section>
@@ -52,32 +83,131 @@
     <section id="manual-gerencia" class="help-section mt-8 scroll-mt-6" aria-labelledby="manager-manual-title">
         <div class="help-section-heading">
             <span>02</span>
-            <div><p class="eyebrow">Perfil gerente</p><h2 id="manager-manual-title">Manual da gerência</h2></div>
+            <div><p class="eyebrow">Perfil gerente</p><h2 id="manager-manual-title">Configuração e rotina da gerência</h2></div>
         </div>
+        <p class="manual-section-intro">Os tópicos abaixo seguem a mesma ordem recomendada para preparar o sistema e conduzir a operação.</p>
+
         <div class="help-accordion">
-            <details open>
-                <summary>Visão geral e alertas</summary>
-                <div><p>O painel apresenta plantões agendados no mês, futuros descobertos e trocas aguardando decisão. Use os alertas e atalhos para abrir diretamente o módulo relacionado. Um valor zero significa que a consulta não encontrou pendências.</p></div>
+            <details id="gerenciar-categorias" open>
+                <summary>1. Cadastrar e manter categorias</summary>
+                <div>
+                    <ol>
+                        <li>Abra <strong>Categorias</strong> na sidebar.</li>
+                        <li>Selecione <strong>Adicionar categoria</strong>.</li>
+                        <li>Informe um nome claro para a função ou especialidade e salve.</li>
+                        <li>Use <strong>Editar</strong> para corrigir o nome sem perder os vínculos existentes.</li>
+                        <li>Use <strong>Excluir</strong> somente quando a categoria não estiver vinculada a usuários ou plantões.</li>
+                    </ol>
+                    <p><strong>Resultado esperado:</strong> a categoria passa a aparecer nos formulários de profissionais e plantões. Se a exclusão for bloqueada, mantenha o cadastro para preservar o histórico operacional.</p>
+                </div>
+            </details>
+            <details id="gerenciar-setores">
+                <summary>2. Cadastrar e manter setores</summary>
+                <div>
+                    <ol>
+                        <li>Abra <strong>Setores</strong> na sidebar.</li>
+                        <li>Selecione <strong>Adicionar setor</strong>.</li>
+                        <li>Informe o nome do local ou área de atendimento e salve.</li>
+                        <li>Use <strong>Editar</strong> quando precisar atualizar a identificação.</li>
+                        <li>Exclua apenas setores sem usuários ou plantões vinculados.</li>
+                    </ol>
+                    <p><strong>Boa prática:</strong> use nomes reconhecidos pela equipe e evite cadastros duplicados com abreviações diferentes.</p>
+                </div>
+            </details>
+            <details id="gerenciar-usuarios">
+                <summary>3. Cadastrar e manter usuários</summary>
+                <div>
+                    <h4>Criar uma conta</h4>
+                    <ol>
+                        <li>Abra <strong>Usuários</strong> e selecione <strong>Adicionar usuário</strong>.</li>
+                        <li>Informe nome completo e um e-mail exclusivo.</li>
+                        <li>Escolha o perfil <strong>Gerente</strong> ou <strong>Profissional</strong>.</li>
+                        <li>Para um profissional, selecione obrigatoriamente a categoria e o setor.</li>
+                        <li>Defina e confirme a senha inicial, depois salve.</li>
+                    </ol>
+                    <h4>Pesquisar, editar e excluir</h4>
+                    <ul>
+                        <li>Use a busca por nome ou e-mail e o filtro de perfil para localizar uma conta.</li>
+                        <li>Na edição, deixe a senha vazia para mantê-la; preencha somente quando quiser substituí-la.</li>
+                        <li>O sistema bloqueia alterações de perfil, categoria ou setor que tornariam plantões futuros incompatíveis.</li>
+                        <li>A própria conta gerencial não pode ser rebaixada, e o último gerente precisa permanecer no sistema.</li>
+                        <li>Usuários com histórico de plantões, trocas ou ausências não podem ser excluídos.</li>
+                    </ul>
+                </div>
+            </details>
+            <details id="gerenciar-plantoes">
+                <summary>4. Criar, editar, alocar e excluir plantões</summary>
+                <div>
+                    <h4>Criar um plantão</h4>
+                    <ol>
+                        <li>Abra <strong>Escalas</strong>, escolha o mês e selecione <strong>Adicionar plantão</strong>.</li>
+                        <li>Informe uma data atual ou futura.</li>
+                        <li>Defina o horário inicial e o final; o encerramento deve ser posterior ao início.</li>
+                        <li>Selecione setor e categoria.</li>
+                        <li>Escolha um profissional elegível ou deixe sem profissional para registrar um plantão descoberto.</li>
+                        <li>Salve e confira a mensagem de sucesso.</li>
+                    </ol>
+                    <h4>Manutenção</h4>
+                    <ul>
+                        <li>Use <strong>Editar</strong> para ajustar os dados; somente profissionais do mesmo setor e categoria ficam disponíveis.</li>
+                        <li>Antes de excluir, confira a confirmação apresentada pelo sistema. A exclusão remove o plantão da escala.</li>
+                        <li>Quando uma ausência é informada, o plantão perde a alocação e passa a exigir nova cobertura.</li>
+                    </ul>
+                </div>
+            </details>
+            <details id="consultar-calendario">
+                <summary>5. Conferir o calendário mensal</summary>
+                <div>
+                    <ol>
+                        <li>Abra <strong>Calendário</strong>.</li>
+                        <li>Navegue pelas setas ou selecione diretamente o mês desejado.</li>
+                        <li>Observe a quantidade de plantões em cada dia e o indicador de itens descobertos.</li>
+                        <li>Selecione um dia para listar todos os plantões com horário, setor, categoria, profissional e status.</li>
+                        <li>Use os atalhos de gestão para corrigir a escala quando necessário.</li>
+                    </ol>
+                    <p>O calendário também está disponível aos profissionais para consulta, mas somente a gerência visualiza ações administrativas.</p>
+                </div>
+            </details>
+            <details id="rotina-gerencial">
+                <summary>6. Executar a rotina gerencial diária</summary>
+                <div>
+                    <h4>Ao iniciar o dia</h4>
+                    <ol>
+                        <li>Abra <strong>Visão geral</strong> e confira os plantões programados, descobertos e as trocas pendentes.</li>
+                        <li>Abra os alertas de cobertura e realoque profissionais quando necessário.</li>
+                        <li>Acesse <strong>Trocas</strong> para analisar pedidos já aceitos pelo substituto.</li>
+                        <li>Confira <strong>Notificações</strong> e abra os comprovantes ainda não lidos.</li>
+                    </ol>
+                    <h4>Antes de encerrar</h4>
+                    <ul>
+                        <li>Confirme a cobertura dos próximos dias no calendário.</li>
+                        <li>Verifique se não há decisões gerenciais pendentes.</li>
+                        <li>Revise alertas gerados por ausências e providencie a nova alocação.</li>
+                    </ul>
+                </div>
             </details>
             <details>
-                <summary>Calendário mensal</summary>
-                <div><p>Abra <strong>Calendário</strong>, altere o mês pelas setas ou pelo seletor e escolha um dia. Abaixo do calendário aparecem todos os plantões daquele dia com profissional, horário, setor, categoria e status. O marcador vermelho indica plantão sem profissional.</p></div>
+                <summary>7. Aprovar ou rejeitar trocas</summary>
+                <div>
+                    <ol>
+                        <li>Abra <strong>Trocas</strong>. A fila gerencial mostra apenas pedidos já aceitos pelo substituto.</li>
+                        <li>Confira data, horário, setor, categoria, solicitante e substituto.</li>
+                        <li>Selecione <strong>Aprovar</strong> para transferir o plantão ao substituto, ou <strong>Rejeitar</strong> para encerrar o pedido sem mudar a escala.</li>
+                        <li>Leia o comprovante da decisão e guarde a referência quando precisar localizar o evento depois.</li>
+                    </ol>
+                    <p>A decisão avisa os dois profissionais. A aprovação ainda revalida compatibilidade e limite mensal antes de alterar o plantão.</p>
+                </div>
             </details>
             <details>
-                <summary>Criar, editar e excluir plantões</summary>
-                <div><ol><li>Abra <strong>Escalas</strong> e selecione o mês.</li><li>Use <strong>Adicionar plantão</strong> para abrir o formulário.</li><li>Informe data, horários, setor e categoria; escolha um profissional compatível ou deixe sem alocação.</li><li>Salve para atualizar a lista. Use <strong>Editar</strong> para corrigir e <strong>Excluir</strong> para remover após a confirmação.</li></ol><p>O sistema bloqueia profissionais de categoria ou setor incompatíveis.</p></div>
-            </details>
-            <details>
-                <summary>Analisar trocas</summary>
-                <div><p>Em <strong>Trocas</strong>, revise as solicitações que já foram aceitas pelo substituto. Todos os gerentes recebem um aviso quando uma troca chega à fila. Confira plantão, solicitante e substituto antes de aprovar. A aprovação transfere o plantão; a rejeição encerra o pedido sem alterar a escala. Ao decidir, o sistema mostra um comprovante e avisa os dois profissionais.</p></div>
-            </details>
-            <details>
-                <summary>Gerenciar setores e categorias</summary>
-                <div><p>Use <strong>Adicionar setor</strong> ou <strong>Adicionar categoria</strong> para cadastrar. A edição ocorre no mesmo modal. A exclusão é bloqueada quando o cadastro está vinculado a usuários ou plantões, preservando o histórico.</p></div>
-            </details>
-            <details>
-                <summary>Gerenciar usuários</summary>
-                <div><p>Em <strong>Usuários</strong>, pesquise por nome ou e-mail e filtre pelo perfil. Ao criar um profissional, informe categoria e setor. Gerentes não usam esses vínculos. O sistema protege a própria conta do gerente, o último gerente ativo e usuários com histórico operacional.</p></div>
+                <summary>8. Acompanhar notificações e comprovantes</summary>
+                <div>
+                    <ul>
+                        <li>O contador na sidebar mostra quantas notificações ainda não foram lidas.</li>
+                        <li>Abra <strong>Notificações</strong> para consultar o histórico, marcar um item como lido ou marcar todos.</li>
+                        <li>Cada comprovante registra uma referência, o plantão, os participantes, a situação e o responsável pela ação.</li>
+                        <li>Os dados do comprovante permanecem como estavam no momento do evento, mesmo que um cadastro seja alterado depois.</li>
+                    </ul>
+                </div>
             </details>
         </div>
     </section>
@@ -85,51 +215,238 @@
     <section id="manual-profissional" class="help-section mt-8 scroll-mt-6" aria-labelledby="professional-manual-title">
         <div class="help-section-heading">
             <span>03</span>
-            <div><p class="eyebrow">Perfil profissional</p><h2 id="professional-manual-title">Manual do profissional</h2></div>
+            <div><p class="eyebrow">Perfil profissional</p><h2 id="professional-manual-title">Rotina do profissional</h2></div>
         </div>
         <div class="help-accordion">
             <details open>
                 <summary>Consultar minha escala</summary>
-                <div><p>Abra <strong>Minha escala</strong> e selecione o mês. Cada cartão mostra data, horário, setor, categoria e situação do plantão. Pedidos de troca recebidos e enviados aparecem na mesma área.</p></div>
+                <div>
+                    <ol>
+                        <li>Abra <strong>Minha escala</strong>.</li>
+                        <li>Escolha o mês que deseja consultar.</li>
+                        <li>Confira data, horário, setor, categoria e situação em cada cartão.</li>
+                        <li>Use as ações do próprio plantão quando precisar solicitar troca ou informar ausência.</li>
+                    </ol>
+                    <p>Pedidos enviados e recebidos aparecem na mesma área para facilitar o acompanhamento.</p>
+                </div>
             </details>
             <details>
-                <summary>Consultar o calendário completo</summary>
-                <div><p>Abra <strong>Calendário</strong>, escolha o mês e selecione um dia para consultar todos os plantões e profissionais escalados. A visualização também identifica plantões ainda sem profissional, mas as ações de gestão permanecem exclusivas da gerência.</p></div>
+                <summary>Consultar a escala completa no calendário</summary>
+                <div>
+                    <ol>
+                        <li>Abra <strong>Calendário</strong> na sidebar.</li>
+                        <li>Navegue até o mês desejado e escolha um dia.</li>
+                        <li>Consulte todos os plantões e plantonistas daquela data, incluindo horário, setor, categoria e cobertura.</li>
+                    </ol>
+                    <p>Plantões ainda sem profissional também aparecem. A consulta não permite criar, editar ou excluir registros.</p>
+                </div>
             </details>
             <details>
                 <summary>Solicitar uma troca</summary>
-                <div><ol><li>Localize um plantão futuro atribuído a você.</li><li>Escolha <strong>Solicitar troca</strong>.</li><li>Selecione um colega elegível e confirme.</li></ol><p>Somente profissionais do mesmo setor e categoria aparecem como opção. O colega recebe uma notificação, e você recebe um comprovante da solicitação.</p></div>
+                <div>
+                    <ol>
+                        <li>Localize um plantão futuro atribuído a você.</li>
+                        <li>Selecione <strong>Solicitar troca</strong>.</li>
+                        <li>Escolha um colega elegível da lista e confirme.</li>
+                        <li>Guarde a referência do comprovante apresentado.</li>
+                    </ol>
+                    <p>A lista inclui somente colegas do mesmo setor e categoria. O pedido fica como <strong>Aguardando profissional</strong> até o substituto responder.</p>
+                </div>
             </details>
             <details>
-                <summary>Aceitar uma solicitação</summary>
-                <div><p>Nos pedidos recebidos, confira os dados do plantão antes de aceitar. Depois do aceite, a troca segue para decisão da gerência e a escala ainda não muda até a aprovação. Solicitante, substituto e gerentes são avisados; a decisão final gera outro aviso e comprovante.</p></div>
+                <summary>Responder a um pedido recebido</summary>
+                <div>
+                    <ol>
+                        <li>Abra o pedido recebido e confira todos os dados do plantão.</li>
+                        <li>Selecione <strong>Aceitar</strong> somente se puder assumir o horário.</li>
+                        <li>Após o aceite, acompanhe o status <strong>Aguardando gerência</strong>.</li>
+                        <li>Consulte a notificação final para saber se a troca foi aprovada ou rejeitada.</li>
+                    </ol>
+                    <p>O aceite ainda não muda a escala. A transferência ocorre somente depois da aprovação gerencial.</p>
+                </div>
             </details>
             <details>
-                <summary>Informar ausência</summary>
-                <div><p>No plantão correspondente, use <strong>Informar ausência</strong>, descreva o motivo e anexe o comprovante quando disponível. O arquivo fica em armazenamento privado. Ao confirmar, o plantão passa a descoberto e a gerência recebe o alerta.</p></div>
+                <summary>Informar uma ausência</summary>
+                <div>
+                    <ol>
+                        <li>Localize o plantão de hoje ou uma data futura atribuído a você.</li>
+                        <li>Selecione <strong>Informar ausência</strong>.</li>
+                        <li>Descreva o motivo de forma clara.</li>
+                        <li>Se houver comprovante, anexe um arquivo PDF, JPG ou PNG de até 5 MB.</li>
+                        <li>Confirme o envio e confira a mensagem apresentada.</li>
+                    </ol>
+                    <p>O arquivo fica protegido. Depois da confirmação, o plantão passa a descoberto, solicitações de troca abertas são encerradas e a gerência recebe o alerta.</p>
+                </div>
             </details>
+            <details>
+                <summary>Acompanhar notificações e comprovantes</summary>
+                <div>
+                    <ul>
+                        <li>Você recebe aviso ao ser indicado como substituto.</li>
+                        <li>Solicitante e substituto recebem aviso depois do aceite e da decisão gerencial.</li>
+                        <li>Abra <strong>Notificações</strong> para consultar a referência e o resumo completo de cada movimentação.</li>
+                        <li>Marcar uma notificação como lida não apaga o comprovante.</li>
+                    </ul>
+                </div>
+            </details>
+        </div>
+    </section>
+
+    <section id="trocas-ausencias" class="help-section mt-8 scroll-mt-6" aria-labelledby="critical-flows-title">
+        <div class="help-section-heading">
+            <span>04</span>
+            <div><p class="eyebrow">Fluxos críticos</p><h2 id="critical-flows-title">Trocas, ausências e notificações</h2></div>
+        </div>
+        <div class="help-content-grid">
+            <article>
+                <h3>Fluxo completo da troca</h3>
+                <ol class="manual-list"><li>Solicitante escolhe o substituto.</li><li>Substituto recebe a notificação.</li><li>Substituto aceita o pedido.</li><li>Gerentes recebem a pendência.</li><li>Gerente aprova ou rejeita.</li><li>Os profissionais recebem a decisão e o comprovante.</li></ol>
+            </article>
+            <article>
+                <h3>Quem recebe cada aviso</h3>
+                <ul class="manual-list"><li><strong>Solicitação:</strong> substituto.</li><li><strong>Aceite:</strong> solicitante, substituto e todos os gerentes.</li><li><strong>Aprovação ou rejeição:</strong> solicitante e substituto.</li></ul>
+            </article>
+            <article>
+                <h3>Limite mensal</h3>
+                <p>Cada profissional pode participar de até <strong>quatro trocas aprovadas por mês</strong>, somando os pedidos que criou e as substituições que assumiu. A quinta participação é bloqueada.</p>
+            </article>
+            <article>
+                <h3>Compatibilidade obrigatória</h3>
+                <p>Alocações e trocas exigem que o profissional pertença ao mesmo setor e à mesma categoria do plantão. A regra é revalidada no aceite e na aprovação.</p>
+            </article>
+            <article>
+                <h3>Efeito da ausência</h3>
+                <p>A ausência retira o profissional do plantão, registra a justificativa, encerra trocas ainda abertas e cria uma necessidade de cobertura para a gerência.</p>
+            </article>
+            <article>
+                <h3>Valor do comprovante</h3>
+                <p>A referência identifica o evento. O resumo mantém data, horário, setor, categoria, participantes, situação e responsável pela ação para consulta posterior.</p>
+            </article>
         </div>
     </section>
 
     <section id="regras-status" class="help-section mt-8 scroll-mt-6" aria-labelledby="rules-title">
         <div class="help-section-heading">
-            <span>04</span>
-            <div><p class="eyebrow">Referência rápida</p><h2 id="rules-title">Regras e status</h2></div>
+            <span>05</span>
+            <div><p class="eyebrow">Referência rápida</p><h2 id="rules-title">Status, permissões e segurança</h2></div>
         </div>
         <div class="help-content-grid">
-            <article><h3>Limite de trocas</h3><p>Cada profissional pode participar de até quatro trocas aprovadas por mês, somando pedidos próprios e substituições.</p></article>
-            <article><h3>Compatibilidade</h3><p>Uma troca ou alocação exige que o profissional pertença ao mesmo setor e à mesma categoria do plantão.</p></article>
-            <article><h3>Fluxo da troca</h3><p>Aguardando profissional → Aguardando gerência → Aprovada ou Rejeitada.</p></article>
-            <article><h3>Rastreabilidade</h3><p>Cada solicitação, aceite e decisão gera um comprovante identificado. Alterações futuras em cadastros não modificam o resumo já registrado.</p></article>
-            <article><h3>Cobertura</h3><p>Agendado possui cobertura; Ausência informada registra a falta; Descoberto exige nova alocação.</p></article>
+            <article><h3>Status do plantão</h3><ul class="manual-list"><li><strong>Agendado:</strong> possui profissional responsável.</li><li><strong>Descoberto:</strong> aguarda alocação.</li><li><strong>Ausência informada:</strong> a falta foi registrada e exige cobertura.</li></ul></article>
+            <article><h3>Status da troca</h3><p><strong>Aguardando profissional</strong> → <strong>Aguardando gerência</strong> → <strong>Aprovada</strong> ou <strong>Rejeitada</strong>.</p></article>
+            <article><h3>Permissões</h3><p>Gerentes mantêm cadastros, plantões e decisões. Profissionais consultam escalas e calendário, solicitam ou aceitam trocas e informam as próprias ausências.</p></article>
+            <article><h3>Preservação do histórico</h3><p>Cadastros com vínculos operacionais não podem ser excluídos. Essa proteção mantém plantões, trocas, ausências, notificações e comprovantes consistentes.</p></article>
+            <article><h3>Proteção de acesso</h3><p>Não compartilhe a senha. Use <strong>Sair</strong> ao terminar em um dispositivo compartilhado e solicite redefinição quando suspeitar de acesso indevido.</p></article>
+            <article><h3>Leitura dos indicadores</h3><p>Cores facilitam a leitura, mas o texto é a referência. Um contador zero indica que não existem registros para o filtro informado naquele momento.</p></article>
+        </div>
+    </section>
+
+    <section id="problemas-comuns" class="help-section mt-8 scroll-mt-6" aria-labelledby="troubleshooting-title">
+        <div class="help-section-heading">
+            <span>06</span>
+            <div><p class="eyebrow">Solução de problemas</p><h2 id="troubleshooting-title">O que fazer quando algo não funciona</h2></div>
+        </div>
+        <div class="help-accordion">
+            <details open>
+                <summary>Não consigo entrar</summary>
+                <div><p>Confira se o e-mail foi digitado corretamente e se não há espaços antes ou depois. Use <strong>Esqueci minha senha</strong> para solicitar uma nova credencial. Se a mensagem não chegar ou a conta continuar indisponível, peça à gerência para conferir o cadastro e o e-mail informado.</p></div>
+            </details>
+            <details>
+                <summary>Um profissional não aparece para alocação ou troca</summary>
+                <div><p>Confirme se a conta está com perfil Profissional e se possui o mesmo setor e a mesma categoria do plantão. Em trocas, o colega também precisa estar dentro do limite mensal e elegível para aquele pedido.</p></div>
+            </details>
+            <details>
+                <summary>Não consigo editar ou excluir um cadastro</summary>
+                <div><p>Leia a mensagem exibida. Vínculos com usuários, plantões, trocas ou ausências impedem exclusões que apagariam o contexto do histórico. Alterações de usuário também são bloqueadas quando criariam incompatibilidade com plantões futuros.</p></div>
+            </details>
+            <details>
+                <summary>A ação de troca ou ausência não está disponível</summary>
+                <div><p>A ação exige um plantão permitido pela regra: trocas precisam de plantão futuro atribuído ao solicitante e sem outro pedido ativo; ausências aceitam plantões de hoje ou futuros atribuídos ao próprio profissional. O limite mensal também pode impedir uma nova troca.</p></div>
+            </details>
+            <details>
+                <summary>O calendário ou uma lista está vazio</summary>
+                <div><p>Confirme o mês selecionado e os filtros ativos. Uma mensagem de estado vazio significa que não há registros correspondentes; navegue para outro mês ou peça à gerência para conferir o cadastro dos plantões.</p></div>
+            </details>
+            <details>
+                <summary>Uma notificação continua com contador</summary>
+                <div><p>Abra <strong>Notificações</strong> e use <strong>Marcar como lida</strong> no item, ou marque todas quando já tiver conferido o histórico. A atualização não remove o comprovante.</p></div>
+            </details>
+        </div>
+    </section>
+
+    <section id="instalar-aplicativo" class="help-section mt-8 scroll-mt-6" aria-labelledby="install-app-title">
+        <div class="help-section-heading">
+            <span>07</span>
+            <div><p class="eyebrow">Aplicativo instalável</p><h2 id="install-app-title">Como instalar o Escala Fácil</h2></div>
+        </div>
+
+        <div class="manual-callout mt-6" role="note">
+            <strong>Use sempre o endereço oficial da sua instituição.</strong>
+            <p>A instalação não exige loja de aplicativos. Quando o navegador oferecer suporte, o item <strong>Instalar aplicativo</strong> aparece na área Suporte da sidebar e na tela de acesso.</p>
+        </div>
+
+        <div class="help-accordion">
+            <details open>
+                <summary>Instalar no Android com Google Chrome</summary>
+                <div>
+                    <ol>
+                        <li>Abra o endereço do Escala Fácil no <strong>Google Chrome</strong>.</li>
+                        <li>Entre no sistema normalmente e aguarde a página terminar de carregar.</li>
+                        <li>Se aparecer <strong>Instalar aplicativo</strong> na sidebar, toque nessa opção e confirme em <strong>Instalar</strong>.</li>
+                        <li>Se o botão não aparecer, abra o menu de três pontos do Chrome.</li>
+                        <li>Escolha <strong>Instalar aplicativo</strong> ou <strong>Instalar e criar atalho</strong>, conforme o texto exibido no aparelho.</li>
+                        <li>Siga a confirmação do Android. O ícone ficará na tela inicial e na lista de aplicativos.</li>
+                    </ol>
+                    <p>Para remover, abra <strong>Configurações → Apps</strong>, localize Escala Fácil e escolha <strong>Desinstalar</strong>. Consulte também a <a href="https://support.google.com/chrome/answer/9658361?co=GENIE.Platform%3DAndroid&amp;hl=pt-BR" target="_blank" rel="noopener noreferrer">orientação oficial do Google Chrome</a>.</p>
+                </div>
+            </details>
+            <details>
+                <summary>Instalar no iPhone ou iPad com Safari</summary>
+                <div>
+                    <ol>
+                        <li>Abra o endereço do Escala Fácil no <strong>Safari</strong>.</li>
+                        <li>Toque no botão de menu da página e depois em <strong>Compartilhar</strong>. Em algumas versões, o botão Compartilhar já aparece diretamente na barra.</li>
+                        <li>Role as ações e selecione <strong>Adicionar à Tela de Início</strong>.</li>
+                        <li>Quando a opção estiver disponível, mantenha <strong>Abrir como App</strong> ativada.</li>
+                        <li>Toque em <strong>Adicionar</strong>. O ícone será incluído na Tela de Início.</li>
+                    </ol>
+                    <p>Se a ação não estiver na lista, use <strong>Editar Ações</strong> para adicioná-la. Para remover, mantenha o ícone pressionado e escolha a opção de remover aplicativo. Consulte também o <a href="https://support.apple.com/guide/iphone/open-as-web-app-iphea86e5236/ios" target="_blank" rel="noopener noreferrer">manual oficial da Apple</a>.</p>
+                </div>
+            </details>
+            <details>
+                <summary>Instalar no Windows com Microsoft Edge</summary>
+                <div>
+                    <ol>
+                        <li>Abra o endereço do Escala Fácil no <strong>Microsoft Edge</strong>.</li>
+                        <li>Use o ícone de instalação que aparece no lado direito da barra de endereços e confirme.</li>
+                        <li>Se o ícone não aparecer, abra <strong>Configurações e mais (…)</strong>.</li>
+                        <li>Acesse <strong>Mais ferramentas → Aplicativos → Instalar este site como um aplicativo</strong>.</li>
+                        <li>Confirme o nome Escala Fácil e conclua a instalação.</li>
+                        <li>Se desejar, fixe o aplicativo na barra de tarefas ou no menu Iniciar.</li>
+                    </ol>
+                    <p>Os aplicativos instalados podem ser gerenciados em <strong>edge://apps</strong>. Consulte também a <a href="https://support.microsoft.com/pt-br/edge/install-manage-or-uninstall-apps-in-microsoft-edge" target="_blank" rel="noopener noreferrer">orientação oficial do Microsoft Edge</a>.</p>
+                </div>
+            </details>
+            <details>
+                <summary>Atualizações, conexão e segurança</summary>
+                <div>
+                    <ul>
+                        <li>O aplicativo recebe as atualizações do sistema automaticamente ao ser aberto com conexão.</li>
+                        <li>Sem internet, uma tela informa que não foi possível acessar o serviço e oferece <strong>Tentar novamente</strong>.</li>
+                        <li>Escalas, usuários e movimentações não são armazenados para leitura offline, evitando a exibição de informações antigas ou sensíveis.</li>
+                        <li>É necessário estar conectado para entrar, consultar dados atualizados, solicitar trocas, informar ausências ou tomar decisões.</li>
+                        <li>A instalação não altera seu perfil nem suas permissões; use o mesmo e-mail e senha do acesso pelo navegador.</li>
+                    </ul>
+                </div>
+            </details>
         </div>
     </section>
 
     <section id="historico-versoes" class="help-section mt-8 scroll-mt-6" aria-labelledby="versions-title">
         <div class="help-section-heading">
-            <span>05</span>
+            <span>08</span>
             <div><p class="eyebrow">Controle de versão</p><h2 id="versions-title">Histórico de versões</h2></div>
         </div>
+        <p class="manual-section-intro">A versão mais recente aparece primeiro. Cada lançamento resume as mudanças visíveis para os usuários.</p>
         <div class="release-timeline">
             @foreach ($releases as $release)
                 <article class="release-entry {{ $release['version'] === $currentRelease['version'] ? 'release-entry-current' : '' }}">

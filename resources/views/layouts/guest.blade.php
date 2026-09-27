@@ -5,6 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <title>{{ $title ?? 'Acesso' }} · {{ config('app.name') }}</title>
+        <x-pwa-head />
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700|ibm-plex-mono:500&display=swap" rel="stylesheet" />
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -42,6 +43,7 @@
                         <span class="text-lg font-semibold tracking-tight">Escala Fácil</span>
                     </div>
                     {{ $slot }}
+                    <button type="button" class="button-secondary mt-6 w-full" data-pwa-install hidden>Instalar aplicativo</button>
                     <p class="mt-10 text-sm leading-6 text-muted">
                         Acesso exclusivo para usuários cadastrados pela gestão.
                     </p>

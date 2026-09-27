@@ -65,4 +65,17 @@ if ! grep -q 'window.livewireScriptConfig' <<<"$login_html"; then
     exit 1
 fi
 
+manifest_json="$(curl --fail --silent --show-error "$app_url/manifest.webmanifest")"
+service_worker="$(curl --fail --silent --show-error "$app_url/sw.js")"
+
+if ! grep -q '"name": "Escala Fácil"' <<<"$manifest_json" || ! grep -q '"display": "standalone"' <<<"$manifest_json"; then
+    echo "Falha: o manifesto da PWA não está disponível ou está inválido." >&2
+    exit 1
+fi
+
+if ! grep -q 'CACHE_VERSION' <<<"$service_worker" || ! grep -q '/offline.html' <<<"$service_worker"; then
+    echo "Falha: o service worker da PWA não está disponível ou está incompleto." >&2
+    exit 1
+fi
+
 echo "Deploy concluído com sucesso na versão $release_version."

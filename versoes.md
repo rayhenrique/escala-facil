@@ -6,6 +6,21 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.5.0 — 27/09/2026
+
+### Aplicativo instalável e manual completo
+
+- O Escala Fácil agora possui manifesto, ícones e service worker para instalação como PWA no Android, iPhone, iPad e Windows.
+- Adicionado botão de instalação contextual na tela de acesso e na sidebar quando o navegador disponibiliza a ação.
+- A tela offline informa a indisponibilidade da conexão sem armazenar páginas autenticadas, escalas ou dados de usuários.
+- O manual apresenta instruções detalhadas de instalação no Google Chrome para Android, Safari para iOS/iPadOS e Microsoft Edge para Windows.
+- A Central de Ajuda ganhou uma sequência inicial explícita: categorias, setores, usuários, plantões, calendário e operação diária.
+- O manual da gerência agora detalha criação, edição, exclusão, bloqueios de histórico, rotina diária, decisões de troca e comprovantes.
+- O manual do profissional detalha consulta da própria escala e do calendário completo, solicitação e aceite de trocas, ausência e notificações.
+- Os fluxos de troca e ausência informam participantes, destinatários das notificações, limite mensal e efeito de cada ação.
+- Adicionadas referências de status, permissões, segurança e solução dos problemas mais comuns.
+- A apresentação permanece mobile-first, com roteiro visual, atalhos e acordeões acessíveis.
+
 ## 1.4.0 — 27/09/2026
 
 ### Calendário compartilhado

@@ -94,3 +94,18 @@
   - [x] Manter atalhos e ações de gestão exclusivos do gerente.
   - [x] Atualizar manual, contratos, escopo e controle de versão.
   - [x] Validar permissões, responsividade, testes e build de produção.
+
+- [x] **Fase 14: Manual operacional detalhado**
+  - [x] Organizar a implantação inicial na ordem de categorias, setores, usuários, plantões, calendário e operação diária.
+  - [x] Detalhar os procedimentos e bloqueios dos módulos gerenciais.
+  - [x] Detalhar as rotinas do profissional, trocas, ausências, notificações e comprovantes.
+  - [x] Adicionar referências de status, permissões, segurança e solução de problemas.
+  - [x] Atualizar controle de versão, documentação e testes do manual.
+
+- [x] **Fase 15: Aplicativo PWA**
+  - [x] Criar manifesto instalável com identidade, ícones e atalhos do sistema.
+  - [x] Registrar service worker com atualização de recursos estáticos e tela offline própria.
+  - [x] Evitar o cache de páginas autenticadas e dados operacionais.
+  - [x] Disponibilizar a ação de instalação quando suportada pelo navegador.
+  - [x] Documentar a instalação no Android, iOS, iPadOS e Windows.
+  - [x] Validar manifesto, service worker, responsividade, testes e build de produção.

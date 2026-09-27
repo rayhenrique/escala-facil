@@ -135,7 +135,7 @@ APP_KEY=
 APP_DEBUG=false
 APP_URL=https://escalafacil.kltecnologia.com
 APP_TIMEZONE=America/Fortaleza
-APP_VERSION=1.4.0
+APP_VERSION=1.5.0
 
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR
@@ -370,7 +370,7 @@ cd ~/htdocs/escalafacil.kltecnologia.com
 bash scripts/deploy-production.sh
 ```
 
-O script atualiza a branch somente por fast-forward, instala dependências, compila o frontend, executa migrations e caches, reabre o sistema e confirma que o Livewire não voltou a depender da rota bloqueada pelo Nginx.
+O script atualiza a branch somente por fast-forward, instala dependências, compila o frontend, executa migrations e caches, reabre o sistema e confirma o bundle do Livewire, o manifesto e o service worker da PWA.
 
 Para executar as mesmas etapas manualmente, como usuário do site:
 
@@ -402,6 +402,8 @@ Verifique a versão e a saúde:
 git log -1 --oneline
 php8.5 artisan about --only=environment
 curl -I https://escalafacil.kltecnologia.com/up
+curl -I https://escalafacil.kltecnologia.com/manifest.webmanifest
+curl -I https://escalafacil.kltecnologia.com/sw.js
 ```
 
 O comando `artisan reload` encerra de forma controlada workers que usam código antigo; o Supervisor os inicia novamente.

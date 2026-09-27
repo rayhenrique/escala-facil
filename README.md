@@ -4,7 +4,7 @@
 
 Sistema interno para gestão de escalas médicas, plantões, trocas e ausências em unidades de saúde. A aplicação centraliza a operação da gerência, permite que profissionais acompanhem a própria agenda e aplica as regras de compatibilidade e limite mensal em todas as decisões de troca.
 
-**Versão atual:** `1.4.0` — consulte o histórico completo em [`versoes.md`](versoes.md).
+**Versão atual:** `1.5.0` — consulte o histórico completo em [`versoes.md`](versoes.md).
 
 Desenvolvido por [KL Tecnologia](https://kltecnologia.com).
 
@@ -23,8 +23,9 @@ O MVP está funcional e inclui:
 - comprovantes de solicitação, aceite e decisão com um retrato dos dados da movimentação;
 - controle de quatro trocas aprovadas por profissional a cada mês;
 - registro de ausência justificada com anexo privado;
-- central de ajuda com manual completo e histórico de versões;
+- central de ajuda com ordem inicial de implantação, rotinas detalhadas por perfil, solução de problemas e histórico de versões;
 - aviso individual das novidades no primeiro acesso após cada atualização;
+- instalação como PWA no Android, iOS, iPadOS e Windows, com ícones próprios e tela offline segura;
 - interface totalmente em português do Brasil;
 - experiência mobile-first com cartões no celular e tabelas em telas maiores;
 - testes automatizados para permissões, fluxos e regras críticas.
@@ -91,6 +92,18 @@ A interface parte do celular como composição principal:
 
 As decisões visuais estão em [`DESIGN.md`](DESIGN.md) e os comportamentos compartilhados em [`UX-CONTRACT.md`](UX-CONTRACT.md).
 
+## Aplicativo PWA
+
+O Escala Fácil pode ser instalado diretamente pelo navegador, sem uma loja de aplicativos. O manifesto define nome, cores, ícones de 192 e 512 px, modo independente e atalhos; o service worker mantém somente recursos estáticos e oferece uma página própria quando a conexão falha.
+
+Por segurança, respostas HTML autenticadas, escalas e dados de usuários não são armazenados para uso offline. A conexão continua obrigatória para entrar, consultar informações atuais e realizar operações. Em produção, a instalação exige HTTPS válido.
+
+- **Android:** no Chrome, use **Instalar aplicativo** no sistema ou abra o menu de três pontos e escolha **Instalar aplicativo** ou **Instalar e criar atalho**.
+- **iPhone/iPad:** no Safari, abra **Compartilhar**, escolha **Adicionar à Tela de Início**, mantenha **Abrir como App** ativado quando essa opção estiver disponível e confirme.
+- **Windows:** no Edge, use o ícone de instalação na barra de endereços ou abra **Mais ferramentas → Aplicativos → Instalar este site como um aplicativo**.
+
+O manual completo de instalação e remoção fica no módulo **Ajuda e versões**. Os arquivos principais são [`manifest.webmanifest`](public/manifest.webmanifest), [`sw.js`](public/sw.js) e [`offline.html`](public/offline.html).
+
 ## Tecnologias
 
 | Tecnologia | Versão validada |
@@ -107,7 +120,7 @@ As decisões visuais estão em [`DESIGN.md`](DESIGN.md) e os comportamentos comp
 
 O Livewire é incorporado ao bundle do Vite para funcionar de forma consistente atrás do Nginx do CloudPanel. Depois de atualizar dependências PHP, execute novamente `npm run build` antes de publicar a aplicação.
 
-Em 26/09/2026, o Composer confirmou `13.33.0` como a versão estável mais recente disponível do Laravel. A restrição `laravel/framework: ^13.0` permite receber atualizações compatíveis da série 13.
+Em 27/09/2026, o Composer confirmou `13.33.0` como a versão estável mais recente disponível do Laravel. A restrição `laravel/framework: ^13.0` permite receber atualizações compatíveis da série 13.
 
 ## Requisitos locais
 
@@ -136,7 +149,7 @@ Crie um banco MySQL chamado `escala_facil` e ajuste o `.env`:
 APP_NAME="Escala Fácil"
 APP_URL=http://127.0.0.1:8000
 APP_TIMEZONE=America/Fortaleza
-APP_VERSION=1.4.0
+APP_VERSION=1.5.0
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR
 APP_FAKER_LOCALE=pt_BR

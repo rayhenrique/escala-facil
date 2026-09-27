@@ -1,9 +1,22 @@
 <?php
 
 return [
-    'current' => env('APP_VERSION', '1.4.0'),
+    'current' => env('APP_VERSION', '1.5.0'),
 
     'releases' => [
+        [
+            'version' => '1.5.0',
+            'date' => '2026-09-27',
+            'title' => 'Aplicativo instalável e manual completo',
+            'summary' => 'O Escala Fácil agora pode ser instalado como aplicativo, e a Central de Ajuda orienta toda a implantação e operação.',
+            'highlights' => [
+                'PWA instalável no Android, iPhone, iPad e Windows.',
+                'Tela offline segura, sem armazenar dados operacionais ou páginas autenticadas.',
+                'Ordem inicial de categorias, setores, usuários, plantões, calendário e operação diária.',
+                'Procedimentos detalhados para gerentes e profissionais.',
+                'Instruções de instalação e solução de problemas dentro do manual.',
+            ],
+        ],
         [
             'version' => '1.4.0',
             'date' => '2026-09-27',

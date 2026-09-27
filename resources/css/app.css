@@ -139,16 +139,28 @@
     .current-version-card { @apply flex w-full items-center justify-between gap-4 rounded-xl border border-line bg-white px-5 py-4 shadow-soft lg:w-auto lg:min-w-64; }
     .current-version-card strong { @apply text-2xl text-primary; }
     .current-version-card > span:last-child { @apply text-xs text-muted; }
-    .help-shortcuts { @apply grid gap-3 sm:grid-cols-2 xl:grid-cols-5; }
+    .help-shortcuts { @apply grid gap-3 sm:grid-cols-2 xl:grid-cols-4; }
     .help-shortcuts a { @apply flex min-h-14 items-center gap-3 rounded-xl border border-line bg-white px-4 py-3 text-sm font-semibold text-ink shadow-sm transition-colors hover:border-primary hover:bg-primary-soft hover:text-primary; }
     .help-section { @apply rounded-xl border border-line bg-white p-5 shadow-soft sm:p-7; }
     .help-section-heading { @apply flex items-center gap-4 border-b border-line pb-5; }
     .help-section-heading > span { @apply font-mono text-sm font-semibold text-primary; }
     .help-section-heading h2 { @apply mt-2 text-2xl font-semibold; }
+    .manual-section-intro { @apply mt-5 max-w-3xl text-sm leading-6 text-muted; }
+    .manual-callout { @apply rounded-xl border border-primary/25 bg-primary-soft/60 p-5 text-sm leading-6 text-muted; }
+    .manual-callout strong { @apply block text-base text-ink; }
+    .manual-callout p { @apply mt-1; }
+    .manual-roadmap { @apply mt-6 grid gap-4 lg:grid-cols-2; }
+    .manual-roadmap > li { @apply flex list-none gap-4 rounded-xl border border-line bg-canvas p-5; }
+    .manual-step-number { @apply flex size-9 shrink-0 items-center justify-center rounded-full bg-primary font-mono text-sm font-semibold text-white; }
+    .manual-roadmap h3 { @apply font-semibold text-ink; }
+    .manual-roadmap p { @apply mt-2 text-sm leading-6 text-muted; }
+    .manual-roadmap a { @apply mt-3 inline-flex min-h-10 items-center text-sm font-semibold text-primary underline decoration-primary/30 underline-offset-4 hover:text-primary-strong; }
     .help-content-grid { @apply mt-6 grid gap-4 md:grid-cols-2; }
     .help-content-grid article { @apply rounded-xl border border-line bg-canvas p-5; }
     .help-content-grid h3 { @apply font-semibold text-ink; }
     .help-content-grid p { @apply mt-2 text-sm leading-6 text-muted; }
+    .manual-list { @apply mt-3 ml-5 list-disc space-y-2 text-sm leading-6 text-muted; }
+    ol.manual-list { @apply list-decimal; }
     .help-accordion { @apply mt-6 divide-y divide-line rounded-xl border border-line; }
     .help-accordion details { @apply bg-white first:rounded-t-xl last:rounded-b-xl; }
     .help-accordion summary { @apply flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 font-semibold text-ink transition-colors hover:bg-canvas; }
@@ -156,8 +168,14 @@
     .help-accordion details[open] summary::after { content: "−"; }
     .help-accordion details > div { @apply border-t border-line bg-canvas px-5 py-5 text-sm leading-6 text-muted; }
     .help-accordion details p + p { @apply mt-3; }
+    .help-accordion h4 { @apply mb-3 font-semibold text-ink; }
+    .help-accordion h4:not(:first-child) { @apply mt-6; }
     .help-accordion ol { @apply ml-5 list-decimal space-y-2; }
     .help-accordion ol + p { @apply mt-4; }
+    .help-accordion ul { @apply ml-5 list-disc space-y-2; }
+    .help-accordion strong { @apply text-ink; }
+    .help-accordion a { @apply font-semibold text-primary underline decoration-primary/30 underline-offset-4 hover:text-primary-strong; }
+    [data-pwa-install][hidden] { display: none; }
     .release-timeline { @apply mt-6 space-y-4; }
     .release-entry { @apply grid gap-4 rounded-xl border border-line bg-canvas p-5 md:grid-cols-[8rem_minmax(0,1fr)]; }
     .release-entry-current { @apply border-primary bg-primary-soft/60; }

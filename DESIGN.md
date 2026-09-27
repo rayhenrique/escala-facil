@@ -158,7 +158,9 @@ O painel gerencial usa o quadro `coverage-board` como ponto focal único: a faix
 
 Rótulos ficam sempre visíveis. Erros aparecem junto ao campo com `aria-invalid` e `aria-describedby`. Formulários usam `novalidate` para uma experiência consistente. Senhas têm controle de exibição e autocomplete adequado. Alertas usam `role="status"` ou tratamento semântico equivalente. Nos módulos com CRUD, o botão “Adicionar” abre o formulário em um modal; edição reutiliza o mesmo componente, com título e ação contextualizados. No celular, o modal ocupa a altura disponível e mantém o corpo rolável entre cabeçalho e rodapé fixos.
 
-O modal de nova versão é deliberado e não fecha por clique externo: o usuário escolhe continuar ou abrir o manual. O cabeçalho escuro o distingue de formulários, e os destaques usam uma lista curta com texto. A Central de Ajuda usa atalhos, acordeões e uma linha do tempo de versões para permitir leitura rápida no celular e consulta detalhada no desktop.
+O modal de nova versão é deliberado e não fecha por clique externo: o usuário escolhe continuar ou abrir o manual. O cabeçalho escuro o distingue de formulários, e os destaques usam uma lista curta com texto. A Central de Ajuda começa por um roteiro numerado de implantação, seguido por manuais de cada perfil, fluxos críticos, referência de status, solução de problemas e linha do tempo de versões. Atalhos, cartões e acordeões permitem leitura progressiva no celular e consulta detalhada no desktop.
+
+A ação **Instalar aplicativo** aparece somente quando o navegador disponibiliza o fluxo nativo de instalação e usa o mesmo padrão dos demais itens de suporte. A tela offline preserva a marca e informa claramente que dados operacionais exigem conexão, sem simular conteúdo desatualizado.
 
 A Central de Notificações usa cartões com uma faixa suave para itens não lidos. Cada cartão contém mensagem, ações de leitura e o comprovante em uma grade compacta; no celular, os campos do comprovante formam uma coluna legível. A referência monoespaçada e o badge de situação reforçam a rastreabilidade sem criar uma estética separada do restante do sistema.
 

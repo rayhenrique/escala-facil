@@ -31,11 +31,16 @@ class HelpAndVersioningTest extends TestCase
                 ->get(route('help'))
                 ->assertOk()
                 ->assertSee('Ajuda e versões')
-                ->assertSee('Primeiros passos')
-                ->assertSee('Manual da gerência')
-                ->assertSee('Manual do profissional')
-                ->assertSee('Regras e status')
+                ->assertSee('Ordem correta para começar')
+                ->assertSee('Configuração e rotina da gerência')
+                ->assertSee('Rotina do profissional')
+                ->assertSee('Trocas, ausências e notificações')
+                ->assertSee('Status, permissões e segurança')
+                ->assertSee('O que fazer quando algo não funciona')
+                ->assertSee('Como instalar o Escala Fácil')
                 ->assertSee('Histórico de versões')
+                ->assertSee('PDF, JPG ou PNG de até 5 MB')
+                ->assertSee('quatro trocas aprovadas por mês')
                 ->assertSee('v'.$currentVersion)
                 ->assertSee('Desenvolvido por')
                 ->assertSee('KL Tecnologia');
@@ -43,6 +48,32 @@ class HelpAndVersioningTest extends TestCase
 
         auth()->logout();
         $this->get(route('help'))->assertRedirect(route('login'));
+    }
+
+    public function test_manual_presents_the_initial_configuration_in_dependency_order(): void
+    {
+        $manager = User::factory()->create([
+            'role' => UserRole::Manager,
+            'last_seen_version' => app(ApplicationVersion::class)->current(),
+        ]);
+
+        $this->actingAs($manager)
+            ->get(route('help'))
+            ->assertOk()
+            ->assertSeeInOrder([
+                'Cadastre as categorias',
+                'Cadastre os setores',
+                'Cadastre os usuários',
+                'Crie os plantões',
+                'Confira o calendário',
+                'Inicie a operação diária',
+            ])
+            ->assertSeeInOrder([
+                'Aguardando profissional',
+                'Aguardando gerência',
+                'Aprovada',
+                'Rejeitada',
+            ]);
     }
 
     public function test_release_announcement_is_shown_and_acknowledged_once_per_version(): void

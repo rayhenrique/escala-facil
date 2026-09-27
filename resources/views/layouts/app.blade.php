@@ -5,6 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <title>{{ $title ?? 'Painel' }} · {{ config('app.name') }}</title>
+        <x-pwa-head />
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700|ibm-plex-mono:500&display=swap" rel="stylesheet" />
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -101,6 +102,9 @@
                             <a href="{{ route('help') }}" wire:navigate title="Ajuda e versões" class="sidebar-nav-link {{ request()->routeIs('help') ? 'sidebar-nav-link-active' : '' }}" @if(request()->routeIs('help')) aria-current="page" @endif>
                                 <x-nav-icon name="help" class="sidebar-nav-icon" /><span class="sidebar-label">Ajuda e versões</span>
                             </a>
+                            <button type="button" class="sidebar-nav-link w-full" title="Instalar aplicativo" data-pwa-install hidden>
+                                <x-nav-icon name="install" class="sidebar-nav-icon" /><span class="sidebar-label">Instalar aplicativo</span>
+                            </button>
                         </div>
                         <p class="sidebar-label mt-4 px-3 text-xs text-white/40">Versão {{ config('version.current') }}</p>
                     </div>

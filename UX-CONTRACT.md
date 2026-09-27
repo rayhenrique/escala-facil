@@ -22,7 +22,8 @@ Este documento registra o comportamento compartilhado das telas autenticadas. As
 | Cartão de cadastro | classe `record-card` em `resources/css/app.css` | usuários, setores e categorias | conteúdo e ações equivalentes à tabela |
 | Modal de cadastro | classes `modal-*` em `resources/css/app.css` | criar e editar plantões, usuários, setores e categorias | abertura por botão, foco inicial, validação, cancelamento e rolagem móvel |
 | Calendário mensal | `MonthlyCalendar` + classes `calendar-*` | consulta compartilhada e ações gerenciais condicionais | navegação entre meses, seleção de dia, lista completa de plantões e ausência de ações sem permissão |
-| Central de ajuda | `HelpCenter` | manual de gerente, profissional, regras e versões | acesso pelos dois perfis, âncoras, acordeões e histórico completo |
+| Central de ajuda | `HelpCenter` | implantação inicial, rotinas por perfil, fluxos críticos, diagnóstico e versões | acesso pelos dois perfis, ordem inicial preservada, âncoras, acordeões e histórico completo |
+| Aplicativo PWA | `manifest.webmanifest` + `sw.js` + ação `data-pwa-install` | Android, iOS/iPadOS e Windows | instalação nativa quando suportada, modo independente, ícones válidos e fallback offline sem cache autenticado |
 | Novidades da versão | `ReleaseAnnouncement` + `last_seen_version` | primeiro acesso após lançamento | modal único por versão, confirmação persistida e acesso ao manual |
 | Notificações | `NotificationsCenter` + notificações em banco | solicitação, aceite, aprovação e rejeição | isolamento por usuário, contador de não lidas e controles de leitura |
 | Comprovante de troca | `resources/views/components/swap-receipt.blade.php` | imediato e histórico | retrato do evento com referência, plantão e participantes |
@@ -41,6 +42,7 @@ Este documento registra o comportamento compartilhado das telas autenticadas. As
 - Uma resposta 403 deve preservar a possibilidade de retorno a uma área autorizada.
 - Notificações e Ajuda e versões pertencem ao grupo Suporte e estão disponíveis para gerente e profissional; o número da versão atual aparece na sidebar.
 - O item Notificações mostra um contador de não lidas, inclusive quando a sidebar está recolhida, e atualiza o total periodicamente.
+- A ação Instalar aplicativo fica oculta até o navegador emitir a oferta nativa e desaparece quando o sistema já está em modo instalado.
 
 ## Fluxos e retorno
 
@@ -65,6 +67,7 @@ Este documento registra o comportamento compartilhado das telas autenticadas. As
 - O comprovante guarda um retrato dos dados no momento do evento e não depende de consultas atuais para exibir nomes, setor, categoria ou horários.
 - Alertas exibem no máximo quatro itens por grupo e oferecem acesso à lista completa quando houver mais registros.
 - Status nunca depende somente de cor; o badge sempre apresenta um rótulo.
+- Em falha de conexão durante uma navegação, o service worker entrega somente a tela offline. Respostas HTML autenticadas e dados operacionais nunca entram no cache.
 
 ## Layout responsivo
 
