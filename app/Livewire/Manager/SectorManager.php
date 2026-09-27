@@ -22,6 +22,8 @@ class SectorManager extends Component
 
     public ?int $pendingDeleteId = null;
 
+    public string $pendingDeleteName = '';
+
     public bool $showFormModal = false;
 
     public string $name = '';
@@ -88,6 +90,12 @@ class SectorManager extends Component
         $sector = Sector::query()->findOrFail($sectorId);
         $this->authorize('delete', $sector);
         $this->pendingDeleteId = $sector->id;
+        $this->pendingDeleteName = $sector->name;
+    }
+
+    public function cancelDelete(): void
+    {
+        $this->reset(['pendingDeleteId', 'pendingDeleteName']);
     }
 
     public function delete(): void
@@ -96,20 +104,20 @@ class SectorManager extends Component
         $this->authorize('delete', $sector);
 
         if ($sector->users()->exists() || $sector->shifts()->exists()) {
-            $this->pendingDeleteId = null;
+            $this->cancelDelete();
             session()->flash('error', 'O setor não pode ser excluído porque está vinculado a usuários ou plantões.');
 
             return;
         }
 
         $sector->delete();
-        $this->pendingDeleteId = null;
+        $this->cancelDelete();
         session()->flash('status', 'Setor excluído.');
     }
 
     public function resetForm(): void
     {
-        $this->reset(['editingSectorId', 'pendingDeleteId', 'showFormModal', 'name']);
+        $this->reset(['editingSectorId', 'pendingDeleteId', 'pendingDeleteName', 'showFormModal', 'name']);
         $this->resetValidation();
     }
 

@@ -14,12 +14,7 @@
         </div>
     </div>
 
-    @if (session('status'))
-        <div class="status-success mt-6" role="status">{{ session('status') }}</div>
-    @endif
-    @if (session('error'))
-        <div class="status-error mt-6" role="alert">{{ session('error') }}</div>
-    @endif
+    <x-flash-notifications />
 
     @if ($showFormModal)
         <div class="modal-overlay" x-data x-init="$nextTick(() => $refs.firstField?.focus())" @keydown.escape.window="$wire.closeFormModal()">
@@ -58,16 +53,6 @@
             <span class="text-sm text-muted">{{ $categories->total() }} registro(s)</span>
         </div>
 
-        @if ($pendingDeleteId)
-            <div class="confirmation-panel mt-5" role="alert">
-                <p class="text-sm text-danger">Deseja excluir esta categoria? A ação só será concluída se não houver vínculos.</p>
-                <div class="grid grid-cols-2 gap-2 sm:flex">
-                    <button type="button" wire:click="$set('pendingDeleteId', null)" class="button-secondary">Cancelar</button>
-                    <button type="button" wire:click="delete" class="button-danger">Excluir</button>
-                </div>
-            </div>
-        @endif
-
         <div class="mt-6 space-y-3 md:hidden">
             @forelse ($categories as $category)
                 <article class="record-card" wire:key="category-card-{{ $category->id }}">
@@ -105,4 +90,15 @@
 
         <div class="mt-6">{{ $categories->links() }}</div>
     </section>
+
+    <x-confirmation-modal :show="$pendingDeleteId !== null" id="delete-category" title="Excluir categoria?" close-action="cancelDelete">
+        <p>Você está prestes a excluir <strong>{{ $pendingDeleteName }}</strong>.</p>
+        <p>A exclusão será bloqueada se a categoria estiver vinculada a usuários ou plantões.</p>
+        <x-slot:actions>
+            <button type="button" wire:click="cancelDelete" class="button-secondary w-full sm:w-auto" data-confirm-cancel>Manter categoria</button>
+            <button type="button" wire:click="delete" wire:loading.attr="disabled" wire:target="delete" class="button-danger w-full sm:w-auto">
+                <span wire:loading.remove wire:target="delete">Excluir categoria</span><span wire:loading wire:target="delete">Excluindo…</span>
+            </button>
+        </x-slot:actions>
+    </x-confirmation-modal>
 </div>

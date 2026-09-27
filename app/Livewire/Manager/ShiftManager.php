@@ -30,6 +30,8 @@ class ShiftManager extends Component
 
     public ?int $pendingDeleteId = null;
 
+    public string $pendingDeleteLabel = '';
+
     public bool $showFormModal = false;
 
     public string $date = '';
@@ -143,9 +145,22 @@ class ShiftManager extends Component
 
     public function requestDelete(int $shiftId): void
     {
-        $shift = Shift::query()->findOrFail($shiftId);
+        $shift = Shift::query()->with(['sector', 'category'])->findOrFail($shiftId);
         $this->authorize('delete', $shift);
         $this->pendingDeleteId = $shift->id;
+        $this->pendingDeleteLabel = sprintf(
+            '%s, das %s às %s · %s · %s',
+            $shift->date->format('d/m/Y'),
+            substr((string) $shift->start_time, 0, 5),
+            substr((string) $shift->end_time, 0, 5),
+            $shift->sector->name,
+            $shift->category->name,
+        );
+    }
+
+    public function cancelDelete(): void
+    {
+        $this->reset(['pendingDeleteId', 'pendingDeleteLabel']);
     }
 
     public function delete(): void
@@ -154,13 +169,13 @@ class ShiftManager extends Component
         $this->authorize('delete', $shift);
         $shift->delete();
 
-        $this->pendingDeleteId = null;
+        $this->cancelDelete();
         session()->flash('status', 'Plantão excluído.');
     }
 
     public function resetForm(): void
     {
-        $this->reset(['editingShiftId', 'pendingDeleteId', 'showFormModal', 'sectorId', 'categoryId', 'userId']);
+        $this->reset(['editingShiftId', 'pendingDeleteId', 'pendingDeleteLabel', 'showFormModal', 'sectorId', 'categoryId', 'userId']);
         $this->date = today()->addDay()->format('Y-m-d');
         $this->startTime = '07:00';
         $this->endTime = '19:00';

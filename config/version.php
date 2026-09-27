@@ -1,9 +1,22 @@
 <?php
 
 return [
-    'current' => env('APP_VERSION', '1.5.0'),
+    'current' => env('APP_VERSION', '1.6.0'),
 
     'releases' => [
+        [
+            'version' => '1.6.0',
+            'date' => '2026-09-27',
+            'title' => 'Confirmações claras e feedback imediato',
+            'summary' => 'Ações importantes agora mostram suas consequências antes da confirmação e informam o resultado em avisos visuais consistentes.',
+            'highlights' => [
+                'Modal de confirmação para exclusões em todos os módulos de cadastro.',
+                'Revisão antes de solicitar, aceitar, aprovar ou rejeitar trocas e registrar ausências.',
+                'Confirmação antes de marcar todas as notificações como lidas.',
+                'Mensagens flutuantes e acessíveis para resultados de sucesso e erro.',
+                'Experiência mobile-first com foco de teclado e descrição das consequências.',
+            ],
+        ],
         [
             'version' => '1.5.0',
             'date' => '2026-09-27',

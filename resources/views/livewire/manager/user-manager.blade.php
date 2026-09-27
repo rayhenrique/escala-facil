@@ -23,12 +23,7 @@
         </div>
     </div>
 
-    @if (session('status'))
-        <div class="status-success mt-6" role="status">{{ session('status') }}</div>
-    @endif
-    @if (session('error'))
-        <div class="status-error mt-6" role="alert">{{ session('error') }}</div>
-    @endif
+    <x-flash-notifications />
 
     @if ($showFormModal)
         <div class="modal-overlay" x-data x-init="$nextTick(() => $refs.firstField?.focus())" @keydown.escape.window="$wire.closeFormModal()">
@@ -116,16 +111,6 @@
             <span class="text-sm text-muted">{{ $users->total() }} registro(s)</span>
         </div>
 
-        @if ($pendingDeleteId)
-            <div class="confirmation-panel mt-5" role="alert">
-                <p class="text-sm text-danger">Deseja excluir este usuário? Contas com histórico operacional serão preservadas.</p>
-                <div class="grid grid-cols-2 gap-2 sm:flex">
-                    <button type="button" wire:click="$set('pendingDeleteId', null)" class="button-secondary">Cancelar</button>
-                    <button type="button" wire:click="delete" class="button-danger">Excluir</button>
-                </div>
-            </div>
-        @endif
-
         <div class="mt-6 space-y-3 md:hidden" aria-label="Usuários cadastrados">
             @forelse ($users as $user)
                 <article class="record-card" wire:key="user-card-{{ $user->id }}">
@@ -171,4 +156,15 @@
 
         <div class="mt-6">{{ $users->links() }}</div>
     </section>
+
+    <x-confirmation-modal :show="$pendingDeleteId !== null" id="delete-user" title="Excluir usuário?" close-action="cancelDelete">
+        <p>Você está prestes a excluir <strong>{{ $pendingDeleteName }}</strong>.</p>
+        <p>Contas com histórico de plantões, trocas ou ausências serão preservadas para manter a rastreabilidade.</p>
+        <x-slot:actions>
+            <button type="button" wire:click="cancelDelete" class="button-secondary w-full sm:w-auto" data-confirm-cancel>Manter usuário</button>
+            <button type="button" wire:click="delete" wire:loading.attr="disabled" wire:target="delete" class="button-danger w-full sm:w-auto">
+                <span wire:loading.remove wire:target="delete">Excluir usuário</span><span wire:loading wire:target="delete">Excluindo…</span>
+            </button>
+        </x-slot:actions>
+    </x-confirmation-modal>
 </div>

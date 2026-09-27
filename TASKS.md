@@ -109,3 +109,10 @@
   - [x] Disponibilizar a ação de instalação quando suportada pelo navegador.
   - [x] Documentar a instalação no Android, iOS, iPadOS e Windows.
   - [x] Validar manifesto, service worker, responsividade, testes e build de produção.
+
+- [x] **Fase 16: Confirmações e feedback visual**
+  - [x] Criar um modal acessível e reutilizável para confirmar ações importantes.
+  - [x] Aplicar confirmação às exclusões dos CRUDs e às decisões de troca e ausência.
+  - [x] Confirmar a leitura em massa sem apagar o histórico de notificações.
+  - [x] Padronizar mensagens de sucesso e erro em avisos flutuantes responsivos.
+  - [x] Atualizar manual, contrato de experiência, versão e testes automatizados.

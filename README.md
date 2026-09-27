@@ -4,7 +4,7 @@
 
 Sistema interno para gestão de escalas médicas, plantões, trocas e ausências em unidades de saúde. A aplicação centraliza a operação da gerência, permite que profissionais acompanhem a própria agenda e aplica as regras de compatibilidade e limite mensal em todas as decisões de troca.
 
-**Versão atual:** `1.5.0` — consulte o histórico completo em [`versoes.md`](versoes.md).
+**Versão atual:** `1.6.0` — consulte o histórico completo em [`versoes.md`](versoes.md).
 
 Desenvolvido por [KL Tecnologia](https://kltecnologia.com).
 
@@ -21,6 +21,8 @@ O MVP está funcional e inclui:
 - solicitação, aceite e aprovação gerencial de trocas;
 - notificações persistentes para substitutos, solicitantes e gerentes em cada etapa da troca;
 - comprovantes de solicitação, aceite e decisão com um retrato dos dados da movimentação;
+- modais de revisão para exclusões, trocas, ausências e demais ações importantes;
+- avisos flutuantes e acessíveis para mensagens de sucesso e erro;
 - controle de quatro trocas aprovadas por profissional a cada mês;
 - registro de ausência justificada com anexo privado;
 - central de ajuda com ordem inicial de implantação, rotinas detalhadas por perfil, solução de problemas e histórico de versões;
@@ -87,6 +89,8 @@ A interface parte do celular como composição principal:
 - métricas e grupos de ações se empilham em telas estreitas;
 - a navegação usa uma sidebar recolhível e persistente no desktop e uma gaveta com ícones no celular;
 - modais de nova versão comunicam mudanças uma vez por usuário, com acesso direto ao manual;
+- ações importantes exibem o registro e suas consequências em um modal antes da confirmação;
+- mensagens de resultado aparecem como avisos flutuantes, sem deslocar o conteúdo da página;
 - a sidebar mostra o número de notificações não lidas e a central organiza os comprovantes em cartões responsivos;
 - campos de formulário têm 48 px de altura e estados de foco perceptíveis.
 
@@ -149,7 +153,7 @@ Crie um banco MySQL chamado `escala_facil` e ajuste o `.env`:
 APP_NAME="Escala Fácil"
 APP_URL=http://127.0.0.1:8000
 APP_TIMEZONE=America/Fortaleza
-APP_VERSION=1.5.0
+APP_VERSION=1.6.0
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR
 APP_FAKER_LOCALE=pt_BR

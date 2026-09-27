@@ -12,6 +12,8 @@ class NotificationsCenter extends Component
 {
     use WithPagination;
 
+    public bool $showMarkAllConfirmation = false;
+
     public function mount(): void
     {
         abort_unless(auth()->check(), 403);
@@ -31,7 +33,23 @@ class NotificationsCenter extends Component
     public function markAllAsRead(): void
     {
         auth()->user()->unreadNotifications()->update(['read_at' => now()]);
+        $this->showMarkAllConfirmation = false;
         $this->dispatch('notifications-updated');
+        session()->flash('status', 'Todas as notificações foram marcadas como lidas.');
+    }
+
+    public function requestMarkAllAsRead(): void
+    {
+        if (auth()->user()->unreadNotifications()->doesntExist()) {
+            return;
+        }
+
+        $this->showMarkAllConfirmation = true;
+    }
+
+    public function cancelMarkAllAsRead(): void
+    {
+        $this->showMarkAllConfirmation = false;
     }
 
     public function render(): View

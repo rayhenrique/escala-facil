@@ -38,6 +38,8 @@ class HelpAndVersioningTest extends TestCase
                 ->assertSee('Status, permissões e segurança')
                 ->assertSee('O que fazer quando algo não funciona')
                 ->assertSee('Como instalar o Escala Fácil')
+                ->assertSee('Confirmações e mensagens')
+                ->assertSee('Nenhum dado é alterado antes da confirmação explícita')
                 ->assertSee('Histórico de versões')
                 ->assertSee('PDF, JPG ou PNG de até 5 MB')
                 ->assertSee('quatro trocas aprovadas por mês')

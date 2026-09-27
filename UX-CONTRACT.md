@@ -21,14 +21,15 @@ Este documento registra o comportamento compartilhado das telas autenticadas. As
 | Cartão de plantão | `resources/views/components/shift-card.blade.php` | profissional, gerência e alerta | conteúdo equivalente em desktop e celular |
 | Cartão de cadastro | classe `record-card` em `resources/css/app.css` | usuários, setores e categorias | conteúdo e ações equivalentes à tabela |
 | Modal de cadastro | classes `modal-*` em `resources/css/app.css` | criar e editar plantões, usuários, setores e categorias | abertura por botão, foco inicial, validação, cancelamento e rolagem móvel |
+| Modal de confirmação | `resources/views/components/confirmation-modal.blade.php` | exclusões, trocas, ausência e leitura em massa | registro e consequência visíveis, foco no cancelamento, Escape, autorização e bloqueio durante o processamento |
 | Calendário mensal | `MonthlyCalendar` + classes `calendar-*` | consulta compartilhada e ações gerenciais condicionais | navegação entre meses, seleção de dia, lista completa de plantões e ausência de ações sem permissão |
 | Central de ajuda | `HelpCenter` | implantação inicial, rotinas por perfil, fluxos críticos, diagnóstico e versões | acesso pelos dois perfis, ordem inicial preservada, âncoras, acordeões e histórico completo |
 | Aplicativo PWA | `manifest.webmanifest` + `sw.js` + ação `data-pwa-install` | Android, iOS/iPadOS e Windows | instalação nativa quando suportada, modo independente, ícones válidos e fallback offline sem cache autenticado |
 | Novidades da versão | `ReleaseAnnouncement` + `last_seen_version` | primeiro acesso após lançamento | modal único por versão, confirmação persistida e acesso ao manual |
 | Notificações | `NotificationsCenter` + notificações em banco | solicitação, aceite, aprovação e rejeição | isolamento por usuário, contador de não lidas e controles de leitura |
 | Comprovante de troca | `resources/views/components/swap-receipt.blade.php` | imediato e histórico | retrato do evento com referência, plantão e participantes |
-| Feedback | bloco de sessão com `role="status"` | sucesso | mensagem após mutação sem alterar geometria |
-| Exclusão | confirmação contextual em Gestão de Escalas | excluir plantão | cancelamento disponível e teste do fluxo |
+| Feedback | `resources/views/components/flash-notifications.blade.php` | sucesso e erro | aviso flutuante, dispensável, sem alterar a geometria e com semântica de status ou alerta |
+| Exclusão | modal de confirmação compartilhado | plantões, usuários, setores e categorias | registro identificado, consequência descrita, cancelamento e teste do fluxo |
 | Scrollbar | regra global de `resources/css/app.css` | rolagem de página e painéis | inspeção no navegador |
 
 ## Navegação e permissões
@@ -49,11 +50,11 @@ Este documento registra o comportamento compartilhado das telas autenticadas. As
 | Operação | Estado em andamento | Sucesso | Falha e recuperação |
 | --- | --- | --- | --- |
 | Criar ou editar plantão | botão desabilitado e “Salvando…” | mensagem de sucesso e formulário limpo | erros junto aos campos; dados permanecem editáveis |
-| Excluir plantão | confirmação contextual antes da ação | item removido e mensagem de sucesso | item permanece disponível |
-| Solicitar ou aceitar troca | ação desabilitada durante envio | mensagem e atualização das listas | validação explica incompatibilidade ou cota |
-| Aprovar troca | ação desabilitada durante decisão | plantão transferido e pedido removido da fila | pedido permanece para nova análise |
-| Consultar notificações | contador e histórico carregados sem alterar a navegação | item pode ser marcado como lido e o comprovante permanece disponível | somente notificações do usuário autenticado podem ser consultadas |
-| Informar ausência | “Enviando…” durante upload | plantão descoberto e alerta gerencial | motivo e arquivo permanecem corrigíveis |
+| Excluir registro | modal identifica o registro e explica vínculos ou efeitos em cascata | item removido e aviso flutuante de sucesso | item permanece disponível e o aviso informa o bloqueio |
+| Solicitar ou aceitar troca | modal revisa plantão e participantes; confirmação fica desabilitada durante envio | aviso, comprovante e atualização das listas | validação explica incompatibilidade ou cota e preserva os dados editáveis |
+| Aprovar ou rejeitar troca | modal revisa plantão, solicitante, substituto e efeito da decisão | comprovante, aviso e atualização da fila | pedido permanece para nova análise |
+| Consultar notificações | contador e histórico carregados sem alterar a navegação; leitura em massa exige confirmação | item pode ser marcado como lido e o comprovante permanece disponível | somente notificações do usuário autenticado podem ser consultadas |
+| Informar ausência | modal revisa plantão, justificativa e consequência antes do envio | plantão descoberto, alerta gerencial e aviso de sucesso | motivo e arquivo permanecem corrigíveis |
 | Criar ou editar cadastro | modal aberto pelo botão “Adicionar” ou pela ação “Editar” | mensagem de sucesso, modal fechado e lista atualizada | modal permanece aberto com erros junto aos campos |
 | Conhecer uma nova versão | modal bloqueia a área até uma decisão consciente | versão registrada como visualizada e modal fechado, ou redirecionamento ao manual | sem confirmação, o modal volta a aparecer no próximo acesso |
 

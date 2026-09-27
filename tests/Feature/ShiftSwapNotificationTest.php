@@ -166,7 +166,14 @@ class ShiftSwapNotificationTest extends TestCase
         Livewire::actingAs($substitute)
             ->test(NotificationsCenter::class)
             ->assertSee('notificação não lida')
-            ->call('markAllAsRead');
+            ->call('requestMarkAllAsRead')
+            ->assertSet('showMarkAllConfirmation', true)
+            ->assertSee('Marcar todas como lidas?')
+            ->call('cancelMarkAllAsRead')
+            ->assertSet('showMarkAllConfirmation', false)
+            ->call('requestMarkAllAsRead')
+            ->call('markAllAsRead')
+            ->assertSee('Todas as notificações foram marcadas como lidas.');
 
         $this->assertSame(0, $substitute->unreadNotifications()->count());
     }

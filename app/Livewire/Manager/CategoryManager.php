@@ -22,6 +22,8 @@ class CategoryManager extends Component
 
     public ?int $pendingDeleteId = null;
 
+    public string $pendingDeleteName = '';
+
     public bool $showFormModal = false;
 
     public string $name = '';
@@ -88,6 +90,12 @@ class CategoryManager extends Component
         $category = Category::query()->findOrFail($categoryId);
         $this->authorize('delete', $category);
         $this->pendingDeleteId = $category->id;
+        $this->pendingDeleteName = $category->name;
+    }
+
+    public function cancelDelete(): void
+    {
+        $this->reset(['pendingDeleteId', 'pendingDeleteName']);
     }
 
     public function delete(): void
@@ -96,20 +104,20 @@ class CategoryManager extends Component
         $this->authorize('delete', $category);
 
         if ($category->users()->exists() || $category->shifts()->exists()) {
-            $this->pendingDeleteId = null;
+            $this->cancelDelete();
             session()->flash('error', 'A categoria não pode ser excluída porque está vinculada a usuários ou plantões.');
 
             return;
         }
 
         $category->delete();
-        $this->pendingDeleteId = null;
+        $this->cancelDelete();
         session()->flash('status', 'Categoria excluída.');
     }
 
     public function resetForm(): void
     {
-        $this->reset(['editingCategoryId', 'pendingDeleteId', 'showFormModal', 'name']);
+        $this->reset(['editingCategoryId', 'pendingDeleteId', 'pendingDeleteName', 'showFormModal', 'name']);
         $this->resetValidation();
     }
 

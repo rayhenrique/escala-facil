@@ -56,5 +56,13 @@
         @case('install')
             <path d="M12 3v12M7.5 10.5 12 15l4.5-4.5M5 20h14" />
             @break
+        @case('check-circle')
+            <circle cx="12" cy="12" r="9" />
+            <path d="m8 12 2.7 2.7L16.5 9" />
+            @break
+        @case('alert-triangle')
+            <path d="M10.3 3.8 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.8a2 2 0 0 0-3.4 0Z" />
+            <path d="M12 9v4M12 17h.01" />
+            @break
     @endswitch
 </svg>

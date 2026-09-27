@@ -3,9 +3,7 @@
     <h2 class="auth-title">Entre na sua conta</h2>
     <p class="auth-description">Use o e-mail e a senha fornecidos pela gestão.</p>
 
-    @if (session('status'))
-        <div class="status-success mt-6" role="status">{{ session('status') }}</div>
-    @endif
+    <x-flash-notifications />
 
     <form method="post" action="{{ route('login') }}" wire:submit="login" class="mt-8 space-y-5" novalidate>
         @csrf

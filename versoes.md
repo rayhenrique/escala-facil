@@ -6,6 +6,17 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.6.0 — 27/09/2026
+
+### Confirmações claras e feedback imediato
+
+- Exclusões de categorias, setores, usuários e plantões agora abrem um modal com o registro selecionado e a consequência da ação.
+- Solicitação e aceite de trocas, decisão da gerência e registro de ausência possuem uma etapa de revisão antes de alterar dados.
+- A leitura em massa da Central de Notificações exige confirmação e informa quantos avisos terão o estado alterado.
+- Mensagens de sucesso e erro foram padronizadas em avisos flutuantes, acessíveis e adaptados a telas pequenas.
+- Os modais críticos oferecem foco inicial, fechamento por Escape, bloqueio durante o processamento e texto explícito nos botões.
+- O manual, o contrato de experiência e os testes automatizados foram atualizados para os novos fluxos.
+
 ## 1.5.0 — 27/09/2026
 
 ### Aplicativo instalável e manual completo

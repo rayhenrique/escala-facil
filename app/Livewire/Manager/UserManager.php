@@ -30,6 +30,8 @@ class UserManager extends Component
 
     public ?int $pendingDeleteId = null;
 
+    public string $pendingDeleteName = '';
+
     public bool $showFormModal = false;
 
     public string $name = '';
@@ -170,6 +172,12 @@ class UserManager extends Component
         $user = User::query()->findOrFail($userId);
         $this->authorize('delete', $user);
         $this->pendingDeleteId = $user->id;
+        $this->pendingDeleteName = $user->name;
+    }
+
+    public function cancelDelete(): void
+    {
+        $this->reset(['pendingDeleteId', 'pendingDeleteName']);
     }
 
     public function delete(): void
@@ -201,7 +209,7 @@ class UserManager extends Component
         }
 
         $user->delete();
-        $this->pendingDeleteId = null;
+        $this->cancelDelete();
         session()->flash('status', 'Usuário excluído.');
     }
 
@@ -210,6 +218,7 @@ class UserManager extends Component
         $this->reset([
             'editingUserId',
             'pendingDeleteId',
+            'pendingDeleteName',
             'showFormModal',
             'name',
             'email',
@@ -258,7 +267,7 @@ class UserManager extends Component
 
     private function denyDeletion(string $message): void
     {
-        $this->pendingDeleteId = null;
+        $this->cancelDelete();
         session()->flash('error', $message);
     }
 

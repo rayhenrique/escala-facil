@@ -9,6 +9,7 @@ use App\Enums\ShiftSwapEvent;
 use App\Enums\ShiftSwapStatus;
 use App\Enums\UserRole;
 use App\Http\Requests\ReportAbsenceRequest;
+use App\Http\Requests\StoreShiftSwapRequest;
 use App\Models\Absence;
 use App\Models\Shift;
 use App\Models\ShiftSwap;
@@ -43,6 +44,13 @@ class MySchedule extends Component
 
     /** @var array<string, mixed>|null */
     public ?array $swapReceipt = null;
+
+    public ?string $pendingConfirmation = null;
+
+    public ?int $pendingAcceptSwapId = null;
+
+    /** @var array<string, string>|null */
+    public ?array $confirmationSummary = null;
 
     public function mount(): void
     {
@@ -116,8 +124,30 @@ class MySchedule extends Component
 
         $this->swapShiftId = null;
         $this->substituteId = '';
+        $this->cancelConfirmation();
         unset($this->eligibleSubstitutes);
         session()->flash('status', 'Solicitação enviada ao profissional selecionado.');
+    }
+
+    public function reviewSwapRequest(): void
+    {
+        $this->authorize('create', ShiftSwap::class);
+        $validated = (new StoreShiftSwapRequest)->validatePayload([
+            'shift_id' => $this->swapShiftId,
+            'substitute_id' => $this->substituteId,
+        ], auth()->user());
+
+        $shift = Shift::query()->with(['sector', 'category'])->findOrFail($validated['shift_id']);
+        $substitute = User::query()->findOrFail($validated['substitute_id']);
+
+        $this->pendingConfirmation = 'request_swap';
+        $this->confirmationSummary = $this->shiftSummary($shift) + ['substitute' => $substitute->name];
+    }
+
+    public function confirmSwapRequest(CreateShiftSwapAction $action, ShiftSwapReceipt $receipts): void
+    {
+        abort_unless($this->pendingConfirmation === 'request_swap', 404);
+        $this->requestSwap($action, $receipts);
     }
 
     public function acceptSwap(int $shiftSwapId, AcceptShiftSwapAction $action, ShiftSwapReceipt $receipts): void
@@ -127,7 +157,28 @@ class MySchedule extends Component
         $shiftSwap = $action->execute(auth()->user(), $shiftSwapId);
         $this->swapReceipt = $receipts->make($shiftSwap, ShiftSwapEvent::Accepted);
 
+        $this->cancelConfirmation();
         session()->flash('status', 'Troca aceita e encaminhada para aprovação da gerência.');
+    }
+
+    public function requestAcceptSwap(int $shiftSwapId): void
+    {
+        $shiftSwap = ShiftSwap::query()
+            ->with(['shift.sector', 'shift.category', 'requester'])
+            ->findOrFail($shiftSwapId);
+        $this->authorize('accept', $shiftSwap);
+
+        $this->pendingAcceptSwapId = $shiftSwap->id;
+        $this->pendingConfirmation = 'accept_swap';
+        $this->confirmationSummary = $this->shiftSummary($shiftSwap->shift) + [
+            'requester' => $shiftSwap->requester->name,
+        ];
+    }
+
+    public function confirmAcceptSwap(AcceptShiftSwapAction $action, ShiftSwapReceipt $receipts): void
+    {
+        abort_unless($this->pendingConfirmation === 'accept_swap' && $this->pendingAcceptSwapId, 404);
+        $this->acceptSwap($this->pendingAcceptSwapId, $action, $receipts);
     }
 
     public function openAbsence(int $shiftId): void
@@ -159,13 +210,57 @@ class MySchedule extends Component
         $this->absenceShiftId = null;
         $this->absenceReason = '';
         $this->attachment = null;
+        $this->cancelConfirmation();
         session()->flash('status', 'Ausência registrada. O plantão agora está descoberto.');
+    }
+
+    public function reviewAbsence(): void
+    {
+        $shift = Shift::query()->with(['sector', 'category'])->findOrFail($this->absenceShiftId);
+        $this->authorize('create', [Absence::class, $shift]);
+
+        (new ReportAbsenceRequest)->validatePayload([
+            'shift_id' => $shift->id,
+            'reason' => $this->absenceReason,
+            'attachment' => $this->attachment,
+        ], auth()->user());
+
+        $this->pendingConfirmation = 'absence';
+        $this->confirmationSummary = $this->shiftSummary($shift) + [
+            'reason' => $this->absenceReason,
+        ];
+    }
+
+    public function confirmAbsence(ReportAbsenceAction $action): void
+    {
+        abort_unless($this->pendingConfirmation === 'absence', 404);
+        $this->reportAbsence($action);
+    }
+
+    public function cancelConfirmation(): void
+    {
+        $this->reset(['pendingConfirmation', 'pendingAcceptSwapId', 'confirmationSummary']);
     }
 
     public function cancelAction(): void
     {
         $this->reset(['swapShiftId', 'substituteId', 'absenceShiftId', 'absenceReason', 'attachment']);
+        $this->cancelConfirmation();
         $this->resetValidation();
+    }
+
+    /** @return array<string, string> */
+    private function shiftSummary(Shift $shift): array
+    {
+        return [
+            'shift' => sprintf(
+                '%s, das %s às %s',
+                $shift->date->format('d/m/Y'),
+                substr((string) $shift->start_time, 0, 5),
+                substr((string) $shift->end_time, 0, 5),
+            ),
+            'location' => $shift->sector->name.' · '.$shift->category->name,
+        ];
     }
 
     private function normalizeMonth(string $month): string

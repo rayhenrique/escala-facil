@@ -58,7 +58,15 @@ class PhaseFourWorkflowTest extends TestCase
 
         $this->assertSame('20:00', substr((string) $shift->refresh()->end_time, 0, 5));
 
-        $component->call('requestDelete', $shift->id)->call('delete');
+        $component
+            ->call('requestDelete', $shift->id)
+            ->assertSee('Excluir plantão?')
+            ->assertSee('Emergência')
+            ->call('cancelDelete')
+            ->assertSet('pendingDeleteId', null)
+            ->call('requestDelete', $shift->id)
+            ->call('delete')
+            ->assertSee('Plantão excluído.');
         $this->assertDatabaseMissing('shifts', ['id' => $shift->id]);
     }
 
@@ -94,7 +102,11 @@ class PhaseFourWorkflowTest extends TestCase
             ->test(MySchedule::class)
             ->call('openSwap', $shift->id)
             ->set('substituteId', (string) $substitute->id)
-            ->call('requestSwap')
+            ->call('reviewSwapRequest')
+            ->assertSet('pendingConfirmation', 'request_swap')
+            ->assertSee('Enviar solicitação de troca?')
+            ->assertSee($substitute->name)
+            ->call('confirmSwapRequest')
             ->assertHasNoErrors();
 
         $swap = ShiftSwap::query()->sole();
@@ -102,14 +114,20 @@ class PhaseFourWorkflowTest extends TestCase
 
         Livewire::actingAs($substitute)
             ->test(MySchedule::class)
-            ->call('acceptSwap', $swap->id)
+            ->call('requestAcceptSwap', $swap->id)
+            ->assertSet('pendingConfirmation', 'accept_swap')
+            ->assertSee('Aceitar cobertura deste plantão?')
+            ->call('confirmAcceptSwap')
             ->assertHasNoErrors();
 
         $this->assertSame(ShiftSwapStatus::PendingManager, $swap->refresh()->status);
 
         Livewire::actingAs($manager)
             ->test(SwapApprovals::class)
-            ->call('approve', $swap->id)
+            ->call('requestDecision', $swap->id, 'approve')
+            ->assertSet('pendingDecision', 'approve')
+            ->assertSee('Aprovar e transferir plantão?')
+            ->call('confirmDecision')
             ->assertHasNoErrors();
 
         $this->assertSame(ShiftSwapStatus::Approved, $swap->refresh()->status);
@@ -154,7 +172,10 @@ class PhaseFourWorkflowTest extends TestCase
             ->call('openAbsence', $shift->id)
             ->set('absenceReason', 'Atendimento médico de urgência comprovado.')
             ->set('attachment', UploadedFile::fake()->create('atestado.pdf', 120, 'application/pdf'))
-            ->call('reportAbsence')
+            ->call('reviewAbsence')
+            ->assertSet('pendingConfirmation', 'absence')
+            ->assertSee('Registrar ausência?')
+            ->call('confirmAbsence')
             ->assertHasNoErrors();
 
         $absence = Absence::query()->sole();

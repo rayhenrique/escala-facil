@@ -6,11 +6,13 @@
             <p class="page-description">Acompanhe solicitações, aceites e decisões com o comprovante de cada movimentação.</p>
         </div>
         @if ($unreadCount)
-            <button type="button" wire:click="markAllAsRead" wire:loading.attr="disabled" class="button-secondary w-full sm:w-auto">
+            <button type="button" wire:click="requestMarkAllAsRead" wire:loading.attr="disabled" class="button-secondary w-full sm:w-auto">
                 Marcar todas como lidas
             </button>
         @endif
     </div>
+
+    <x-flash-notifications />
 
     <div class="mt-6 flex items-center gap-3" aria-live="polite">
         <span class="count-badge">{{ $unreadCount }}</span>
@@ -49,4 +51,12 @@
     </section>
 
     <div class="mt-6">{{ $notifications->links() }}</div>
+
+    <x-confirmation-modal :show="$showMarkAllConfirmation" id="mark-all-read" title="Marcar todas como lidas?" close-action="cancelMarkAllAsRead" tone="primary">
+        <p>As <strong>{{ $unreadCount }} notificações não lidas</strong> continuarão no histórico, mas deixarão de aparecer no contador da navegação.</p>
+        <x-slot:actions>
+            <button type="button" wire:click="cancelMarkAllAsRead" class="button-secondary w-full sm:w-auto" data-confirm-cancel>Cancelar</button>
+            <button type="button" wire:click="markAllAsRead" wire:loading.attr="disabled" wire:target="markAllAsRead" class="button-primary w-full sm:w-auto">Confirmar leitura</button>
+        </x-slot:actions>
+    </x-confirmation-modal>
 </div>

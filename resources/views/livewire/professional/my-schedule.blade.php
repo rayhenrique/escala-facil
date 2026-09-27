@@ -8,9 +8,7 @@
         <div class="w-full sm:w-auto"><label for="month" class="field-label">Mês exibido</label><input wire:model.live="month" id="month" type="month" class="field-input sm:w-48"></div>
     </div>
 
-    @if (session('status'))
-        <div class="status-success mt-6" role="status">{{ session('status') }}</div>
-    @endif
+    <x-flash-notifications />
 
     @if ($swapReceipt)
         <x-swap-receipt :receipt="$swapReceipt" class="mt-6" />
@@ -32,7 +30,7 @@
                         <h3 class="mt-4 text-lg font-semibold">{{ $swap->shift->date->format('d/m/Y') }} · {{ substr($swap->shift->start_time, 0, 5) }}–{{ substr($swap->shift->end_time, 0, 5) }}</h3>
                         <p class="mt-2 text-sm text-muted">{{ $swap->shift->sector->name }} · {{ $swap->shift->category->name }}</p>
                         <p class="mt-4 text-sm"><span class="text-muted">Solicitado por</span> <strong>{{ $swap->requester->name }}</strong></p>
-                        <button type="button" wire:click="acceptSwap({{ $swap->id }})" wire:loading.attr="disabled" class="button-primary mt-5 inline-flex w-full sm:w-auto" @disabled($swapLimitReached)>{{ $swapLimitReached ? 'Cota mensal atingida' : 'Aceitar e enviar à gerência' }}</button>
+                        <button type="button" wire:click="requestAcceptSwap({{ $swap->id }})" wire:loading.attr="disabled" class="button-primary mt-5 inline-flex w-full sm:w-auto" @disabled($swapLimitReached)>{{ $swapLimitReached ? 'Cota mensal atingida' : 'Aceitar e enviar à gerência' }}</button>
                     </article>
                 @endforeach
             </div>
@@ -42,7 +40,7 @@
     @if ($swapShiftId)
         <section class="panel mt-8 border-primary" aria-labelledby="swap-form-title">
             <div class="section-heading"><div><p class="eyebrow">Solicitação de troca</p><h2 id="swap-form-title">Escolha um substituto elegível</h2></div><button type="button" wire:click="cancelAction" class="button-secondary w-full sm:w-auto">Cancelar</button></div>
-            <form method="post" wire:submit="requestSwap" class="mt-6 max-w-xl" novalidate>
+            <form method="post" wire:submit="reviewSwapRequest" class="mt-6 max-w-xl" novalidate>
                 @csrf
                 <label for="substitute" class="field-label">Profissional substituto</label>
                 <select wire:model="substituteId" id="substitute" class="field-input" @error('substitute_id') aria-invalid="true" aria-describedby="substitute-error" @enderror>
@@ -52,7 +50,7 @@
                 @error('substitute_id') <p id="substitute-error" class="field-error">{{ $message }}</p> @enderror
                 @error('shift_id') <p class="field-error">{{ $message }}</p> @enderror
                 @if ($this->eligibleSubstitutes->isEmpty())<p class="mt-3 text-sm text-muted">Não há profissionais elegíveis e disponíveis na sua categoria e setor.</p>@endif
-                <button type="submit" class="button-primary mt-5 inline-flex w-full sm:w-auto" @disabled($this->eligibleSubstitutes->isEmpty()) wire:loading.attr="disabled">Enviar solicitação</button>
+                <button type="submit" class="button-primary mt-5 inline-flex w-full sm:w-auto" @disabled($this->eligibleSubstitutes->isEmpty()) wire:loading.attr="disabled" wire:target="reviewSwapRequest">Revisar solicitação</button>
             </form>
         </section>
     @endif
@@ -60,12 +58,12 @@
     @if ($absenceShiftId)
         <section class="panel mt-8 border-amber-300" aria-labelledby="absence-form-title">
             <div class="section-heading"><div><p class="eyebrow">Ausência justificada</p><h2 id="absence-form-title">Informe o motivo da ausência</h2></div><button type="button" wire:click="cancelAction" class="button-secondary w-full sm:w-auto">Cancelar</button></div>
-            <form method="post" wire:submit="reportAbsence" class="mt-6 max-w-2xl space-y-5" novalidate>
+            <form method="post" wire:submit="reviewAbsence" class="mt-6 max-w-2xl space-y-5" novalidate>
                 @csrf
                 <div><label for="absence-reason" class="field-label">Justificativa</label><textarea wire:model="absenceReason" id="absence-reason" rows="5" class="field-input min-h-32 resize-none" @error('reason') aria-invalid="true" aria-describedby="reason-error" @enderror></textarea>@error('reason') <p id="reason-error" class="field-error">{{ $message }}</p> @enderror</div>
                 <div><label for="attachment" class="field-label">Documento comprobatório <span class="font-normal text-muted">(opcional)</span></label><input wire:model="attachment" id="attachment" type="file" accept=".pdf,.jpg,.jpeg,.png" class="file-input" @error('attachment') aria-invalid="true" aria-describedby="attachment-error" @enderror><p class="mt-2 text-xs text-muted">PDF, JPG ou PNG de até 5 MB.</p>@error('attachment') <p id="attachment-error" class="field-error">{{ $message }}</p> @enderror</div>
                 @error('shift_id') <p class="field-error">{{ $message }}</p> @enderror
-                <button type="submit" class="button-primary inline-flex w-full sm:w-auto" wire:loading.attr="disabled" wire:target="reportAbsence,attachment"><span wire:loading.remove wire:target="reportAbsence">Registrar ausência</span><span wire:loading wire:target="reportAbsence,attachment">Enviando…</span></button>
+                <button type="submit" class="button-primary inline-flex w-full sm:w-auto" wire:loading.attr="disabled" wire:target="reviewAbsence,attachment"><span wire:loading.remove wire:target="reviewAbsence">Revisar ausência</span><span wire:loading wire:target="reviewAbsence,attachment">Validando…</span></button>
             </form>
         </section>
     @endif
@@ -105,4 +103,42 @@
             @endforelse
         </div>
     </section>
+
+    <x-confirmation-modal
+        :show="$pendingConfirmation !== null"
+        id="professional-action"
+        :title="match ($pendingConfirmation) {
+            'request_swap' => 'Enviar solicitação de troca?',
+            'accept_swap' => 'Aceitar cobertura deste plantão?',
+            'absence' => 'Registrar ausência?',
+            default => 'Confirmar ação?',
+        }"
+        close-action="cancelConfirmation"
+        :tone="$pendingConfirmation === 'absence' ? 'warning' : 'primary'"
+    >
+        @if ($confirmationSummary)
+            <p><strong>{{ $confirmationSummary['shift'] }}</strong></p>
+            <p>{{ $confirmationSummary['location'] }}</p>
+            @if ($pendingConfirmation === 'request_swap')
+                <p>Substituto: <strong>{{ $confirmationSummary['substitute'] }}</strong></p>
+                <p>O profissional receberá uma notificação para aceitar ou recusar a cobertura.</p>
+            @elseif ($pendingConfirmation === 'accept_swap')
+                <p>Solicitado por: <strong>{{ $confirmationSummary['requester'] }}</strong></p>
+                <p>Ao confirmar, o pedido seguirá para decisão da gerência.</p>
+            @elseif ($pendingConfirmation === 'absence')
+                <p>Justificativa: <strong>{{ $confirmationSummary['reason'] }}</strong></p>
+                <p>O plantão ficará descoberto e exigirá realocação pela gerência.</p>
+            @endif
+        @endif
+        <x-slot:actions>
+            <button type="button" wire:click="cancelConfirmation" class="button-secondary w-full sm:w-auto" data-confirm-cancel>Voltar e revisar</button>
+            @if ($pendingConfirmation === 'request_swap')
+                <button type="button" wire:click="confirmSwapRequest" wire:loading.attr="disabled" wire:target="confirmSwapRequest" class="button-primary w-full sm:w-auto">Confirmar envio</button>
+            @elseif ($pendingConfirmation === 'accept_swap')
+                <button type="button" wire:click="confirmAcceptSwap" wire:loading.attr="disabled" wire:target="confirmAcceptSwap" class="button-primary w-full sm:w-auto">Confirmar aceite</button>
+            @elseif ($pendingConfirmation === 'absence')
+                <button type="button" wire:click="confirmAbsence" wire:loading.attr="disabled" wire:target="confirmAbsence" class="button-danger w-full sm:w-auto">Confirmar ausência</button>
+            @endif
+        </x-slot:actions>
+    </x-confirmation-modal>
 </div>

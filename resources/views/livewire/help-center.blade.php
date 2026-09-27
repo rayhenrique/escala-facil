@@ -77,6 +77,10 @@
                 <h3>Novidades da versão</h3>
                 <p>Depois de uma atualização, o primeiro acesso apresenta as novidades. Escolha <strong>Entendi, continuar</strong> para entrar ou abra este manual. O aviso aparece uma vez para cada versão.</p>
             </article>
+            <article>
+                <h3>Confirmações e mensagens</h3>
+                <p>Ações importantes abrem um modal com o registro e a consequência. Leia o resumo e escolha o botão de confirmação ou volte para revisar. Depois da ação, um aviso flutuante informa sucesso ou explica por que ela não pôde ser concluída.</p>
+            </article>
         </div>
     </section>
 
@@ -96,7 +100,7 @@
                         <li>Selecione <strong>Adicionar categoria</strong>.</li>
                         <li>Informe um nome claro para a função ou especialidade e salve.</li>
                         <li>Use <strong>Editar</strong> para corrigir o nome sem perder os vínculos existentes.</li>
-                        <li>Use <strong>Excluir</strong> somente quando a categoria não estiver vinculada a usuários ou plantões.</li>
+                        <li>Use <strong>Excluir</strong> somente quando a categoria não estiver vinculada a usuários ou plantões. Confira o nome no modal e confirme a exclusão.</li>
                     </ol>
                     <p><strong>Resultado esperado:</strong> a categoria passa a aparecer nos formulários de profissionais e plantões. Se a exclusão for bloqueada, mantenha o cadastro para preservar o histórico operacional.</p>
                 </div>
@@ -109,7 +113,7 @@
                         <li>Selecione <strong>Adicionar setor</strong>.</li>
                         <li>Informe o nome do local ou área de atendimento e salve.</li>
                         <li>Use <strong>Editar</strong> quando precisar atualizar a identificação.</li>
-                        <li>Exclua apenas setores sem usuários ou plantões vinculados.</li>
+                        <li>Exclua apenas setores sem usuários ou plantões vinculados; o modal mostra o setor antes da confirmação.</li>
                     </ol>
                     <p><strong>Boa prática:</strong> use nomes reconhecidos pela equipe e evite cadastros duplicados com abreviações diferentes.</p>
                 </div>
@@ -131,7 +135,7 @@
                         <li>Na edição, deixe a senha vazia para mantê-la; preencha somente quando quiser substituí-la.</li>
                         <li>O sistema bloqueia alterações de perfil, categoria ou setor que tornariam plantões futuros incompatíveis.</li>
                         <li>A própria conta gerencial não pode ser rebaixada, e o último gerente precisa permanecer no sistema.</li>
-                        <li>Usuários com histórico de plantões, trocas ou ausências não podem ser excluídos.</li>
+                        <li>Usuários com histórico de plantões, trocas ou ausências não podem ser excluídos. O modal identifica a conta e o aviso informa quando a preservação do histórico bloqueia a ação.</li>
                     </ul>
                 </div>
             </details>
@@ -150,7 +154,7 @@
                     <h4>Manutenção</h4>
                     <ul>
                         <li>Use <strong>Editar</strong> para ajustar os dados; somente profissionais do mesmo setor e categoria ficam disponíveis.</li>
-                        <li>Antes de excluir, confira a confirmação apresentada pelo sistema. A exclusão remove o plantão da escala.</li>
+                        <li>Antes de excluir, confira no modal a data, o horário, o setor e a categoria. A exclusão remove o plantão e seus registros associados de troca e ausência.</li>
                         <li>Quando uma ausência é informada, o plantão perde a alocação e passa a exigir nova cobertura.</li>
                     </ul>
                 </div>
@@ -193,7 +197,8 @@
                         <li>Abra <strong>Trocas</strong>. A fila gerencial mostra apenas pedidos já aceitos pelo substituto.</li>
                         <li>Confira data, horário, setor, categoria, solicitante e substituto.</li>
                         <li>Selecione <strong>Aprovar</strong> para transferir o plantão ao substituto, ou <strong>Rejeitar</strong> para encerrar o pedido sem mudar a escala.</li>
-                        <li>Leia o comprovante da decisão e guarde a referência quando precisar localizar o evento depois.</li>
+                        <li>No modal, revise o plantão, o solicitante, o substituto e a consequência; depois confirme a decisão.</li>
+                        <li>Leia o aviso e o comprovante da decisão. Guarde a referência quando precisar localizar o evento depois.</li>
                     </ol>
                     <p>A decisão avisa os dois profissionais. A aprovação ainda revalida compatibilidade e limite mensal antes de alterar o plantão.</p>
                 </div>
@@ -203,7 +208,7 @@
                 <div>
                     <ul>
                         <li>O contador na sidebar mostra quantas notificações ainda não foram lidas.</li>
-                        <li>Abra <strong>Notificações</strong> para consultar o histórico, marcar um item como lido ou marcar todos.</li>
+                        <li>Abra <strong>Notificações</strong> para consultar o histórico, marcar um item como lido ou marcar todos. A leitura em massa mostra a quantidade e exige confirmação.</li>
                         <li>Cada comprovante registra uma referência, o plantão, os participantes, a situação e o responsável pela ação.</li>
                         <li>Os dados do comprovante permanecem como estavam no momento do evento, mesmo que um cadastro seja alterado depois.</li>
                     </ul>
@@ -247,8 +252,9 @@
                     <ol>
                         <li>Localize um plantão futuro atribuído a você.</li>
                         <li>Selecione <strong>Solicitar troca</strong>.</li>
-                        <li>Escolha um colega elegível da lista e confirme.</li>
-                        <li>Guarde a referência do comprovante apresentado.</li>
+                        <li>Escolha um colega elegível e selecione <strong>Revisar solicitação</strong>.</li>
+                        <li>Confira plantão e substituto no modal e selecione <strong>Confirmar envio</strong>.</li>
+                        <li>Confira a mensagem de sucesso e guarde a referência do comprovante apresentado.</li>
                     </ol>
                     <p>A lista inclui somente colegas do mesmo setor e categoria. O pedido fica como <strong>Aguardando profissional</strong> até o substituto responder.</p>
                 </div>
@@ -259,6 +265,7 @@
                     <ol>
                         <li>Abra o pedido recebido e confira todos os dados do plantão.</li>
                         <li>Selecione <strong>Aceitar</strong> somente se puder assumir o horário.</li>
+                        <li>Revise o plantão e o solicitante no modal e confirme o aceite.</li>
                         <li>Após o aceite, acompanhe o status <strong>Aguardando gerência</strong>.</li>
                         <li>Consulte a notificação final para saber se a troca foi aprovada ou rejeitada.</li>
                     </ol>
@@ -273,7 +280,8 @@
                         <li>Selecione <strong>Informar ausência</strong>.</li>
                         <li>Descreva o motivo de forma clara.</li>
                         <li>Se houver comprovante, anexe um arquivo PDF, JPG ou PNG de até 5 MB.</li>
-                        <li>Confirme o envio e confira a mensagem apresentada.</li>
+                        <li>Selecione <strong>Revisar ausência</strong>, confira a consequência no modal e confirme o registro.</li>
+                        <li>Confira a mensagem de sucesso apresentada no topo da tela.</li>
                     </ol>
                     <p>O arquivo fica protegido. Depois da confirmação, o plantão passa a descoberto, solicitações de troca abertas são encerradas e a gerência recebe o alerta.</p>
                 </div>
@@ -322,6 +330,10 @@
                 <h3>Valor do comprovante</h3>
                 <p>A referência identifica o evento. O resumo mantém data, horário, setor, categoria, participantes, situação e responsável pela ação para consulta posterior.</p>
             </article>
+            <article>
+                <h3>Antes de confirmar</h3>
+                <p>O modal é a última etapa de revisão. <strong>Voltar</strong> ou <strong>Cancelar</strong> não altera dados. A ação só acontece ao selecionar o botão explícito de envio, aceite, decisão, ausência ou exclusão.</p>
+            </article>
         </div>
     </section>
 
@@ -368,7 +380,11 @@
             </details>
             <details>
                 <summary>Uma notificação continua com contador</summary>
-                <div><p>Abra <strong>Notificações</strong> e use <strong>Marcar como lida</strong> no item, ou marque todas quando já tiver conferido o histórico. A atualização não remove o comprovante.</p></div>
+                <div><p>Abra <strong>Notificações</strong> e use <strong>Marcar como lida</strong> no item, ou marque todas quando já tiver conferido o histórico. Confira a quantidade no modal e confirme. A atualização não remove o comprovante.</p></div>
+            </details>
+            <details>
+                <summary>O modal foi aberto e não quero continuar</summary>
+                <div><p>Selecione <strong>Cancelar</strong>, <strong>Voltar</strong> ou pressione <kbd>Esc</kbd>. Nenhum dado é alterado antes da confirmação explícita. Mensagens verdes indicam sucesso; mensagens vermelhas explicam uma ação bloqueada e permanecem visíveis até serem fechadas.</p></div>
             </details>
         </div>
     </section>

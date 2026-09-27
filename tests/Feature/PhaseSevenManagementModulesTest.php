@@ -44,7 +44,16 @@ class PhaseSevenManagementModulesTest extends TestCase
 
         $this->assertDatabaseHas('categories', ['id' => $category->id, 'name' => 'Fisioterapia']);
 
-        $categories->call('requestDelete', $category->id)->call('delete');
+        $categories
+            ->call('requestDelete', $category->id)
+            ->assertSet('pendingDeleteName', 'Fisioterapia')
+            ->assertSee('Excluir categoria?')
+            ->assertSeeHtml('role="alertdialog"')
+            ->call('cancelDelete')
+            ->assertSet('pendingDeleteId', null)
+            ->call('requestDelete', $category->id)
+            ->call('delete')
+            ->assertSee('Categoria excluída.');
         $this->assertDatabaseMissing('categories', ['id' => $category->id]);
 
         $sectors = Livewire::actingAs($manager)
@@ -68,7 +77,12 @@ class PhaseSevenManagementModulesTest extends TestCase
 
         $this->assertDatabaseHas('sectors', ['id' => $sector->id, 'name' => 'Bloco cirúrgico']);
 
-        $sectors->call('requestDelete', $sector->id)->call('delete');
+        $sectors
+            ->call('requestDelete', $sector->id)
+            ->assertSet('pendingDeleteName', 'Bloco cirúrgico')
+            ->assertSee('Excluir setor?')
+            ->call('delete')
+            ->assertSee('Setor excluído.');
         $this->assertDatabaseMissing('sectors', ['id' => $sector->id]);
     }
 
@@ -115,7 +129,12 @@ class PhaseSevenManagementModulesTest extends TestCase
 
         $this->assertSame($passwordHash, $professional->refresh()->password);
 
-        $component->call('requestDelete', $professional->id)->call('delete');
+        $component
+            ->call('requestDelete', $professional->id)
+            ->assertSet('pendingDeleteName', 'Maria Souza')
+            ->assertSee('Excluir usuário?')
+            ->call('delete')
+            ->assertSee('Usuário excluído.');
         $this->assertDatabaseMissing('users', ['id' => $professional->id]);
     }
 

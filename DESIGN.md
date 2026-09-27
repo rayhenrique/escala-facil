@@ -94,6 +94,18 @@ components:
     backgroundColor: "{colors.surface}"
     textColor: "{colors.ink}"
     rounded: "{rounded.lg}"
+  confirmation-modal:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.lg}"
+  toast-success:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.coverage}"
+    rounded: "{rounded.lg}"
+  toast-error:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.danger}"
+    rounded: "{rounded.lg}"
 ---
 
 # Escala Fácil Design System
@@ -144,7 +156,7 @@ Hover altera tom sem mover o componente. Foco mostra contorno `focus`. Disabled 
 
 ### Buttons and actions
 
-A ação primária usa fundo `primary`; ações secundárias usam superfície e borda. Rótulos começam por verbos. Ações destrutivas futuras ficam separadas e usam confirmação contextual.
+A ação primária usa fundo `primary`; ações secundárias usam superfície e borda. Rótulos começam por verbos. Ações destrutivas ficam separadas e usam confirmação em modal com a consequência descrita antes da decisão.
 
 ### Navigation and data display
 
@@ -159,6 +171,10 @@ O painel gerencial usa o quadro `coverage-board` como ponto focal único: a faix
 Rótulos ficam sempre visíveis. Erros aparecem junto ao campo com `aria-invalid` e `aria-describedby`. Formulários usam `novalidate` para uma experiência consistente. Senhas têm controle de exibição e autocomplete adequado. Alertas usam `role="status"` ou tratamento semântico equivalente. Nos módulos com CRUD, o botão “Adicionar” abre o formulário em um modal; edição reutiliza o mesmo componente, com título e ação contextualizados. No celular, o modal ocupa a altura disponível e mantém o corpo rolável entre cabeçalho e rodapé fixos.
 
 O modal de nova versão é deliberado e não fecha por clique externo: o usuário escolhe continuar ou abrir o manual. O cabeçalho escuro o distingue de formulários, e os destaques usam uma lista curta com texto. A Central de Ajuda começa por um roteiro numerado de implantação, seguido por manuais de cada perfil, fluxos críticos, referência de status, solução de problemas e linha do tempo de versões. Atalhos, cartões e acordeões permitem leitura progressiva no celular e consulta detalhada no desktop.
+
+O modal de confirmação é reservado a ações com efeito relevante: excluir registros, enviar ou aceitar trocas, decidir uma troca, registrar ausência e alterar a leitura de todas as notificações. Ele usa `role="alertdialog"`, apresenta o registro e a consequência, inicia o foco no cancelamento e mantém verbos específicos nos botões. O fundo não executa nem confirma a ação; `Esc` equivale a cancelar.
+
+Mensagens após mutações aparecem em avisos flutuantes no topo. Sucesso fecha automaticamente após tempo suficiente para leitura e pode ser dispensado antes; erro permanece até o fechamento manual. Ícone, título e texto acompanham a cor para que o significado não dependa apenas dela. No celular, o aviso respeita as margens da tela e não altera a geometria do conteúdo.
 
 A ação **Instalar aplicativo** aparece somente quando o navegador disponibiliza o fluxo nativo de instalação e usa o mesmo padrão dos demais itens de suporte. A tela offline preserva a marca e informa claramente que dados operacionais exigem conexão, sem simular conteúdo desatualizado.
 

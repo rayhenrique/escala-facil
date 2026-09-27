@@ -4,9 +4,7 @@
     <h2 class="auth-title">Redefina sua senha</h2>
     <p class="auth-description">Informe seu e-mail institucional. Enviaremos as instruções para criar uma nova senha.</p>
 
-    @if (session('status'))
-        <div class="status-success mt-6" role="status">{{ session('status') }}</div>
-    @endif
+    <x-flash-notifications />
 
     <form method="post" wire:submit="sendResetLink" class="mt-8 space-y-6" novalidate>
         @csrf

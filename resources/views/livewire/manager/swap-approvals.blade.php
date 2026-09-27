@@ -3,9 +3,7 @@
     <h1 class="page-title">Aprovação de trocas</h1>
     <p class="page-description">Confira os participantes e transfira o plantão somente após o aceite do substituto.</p>
 
-    @if (session('status'))
-        <div class="status-success mt-6" role="status">{{ session('status') }}</div>
-    @endif
+    <x-flash-notifications />
 
     @if ($swapReceipt)
         <x-swap-receipt :receipt="$swapReceipt" class="mt-6" />
@@ -28,8 +26,8 @@
                         </div>
                     </div>
                     <div class="flex shrink-0 flex-col gap-2 sm:flex-row">
-                        <button type="button" wire:click="reject({{ $swap->id }})" wire:loading.attr="disabled" class="button-secondary">Rejeitar</button>
-                        <button type="button" wire:click="approve({{ $swap->id }})" wire:loading.attr="disabled" class="button-primary inline-flex">Aprovar e transferir</button>
+                        <button type="button" wire:click="requestDecision({{ $swap->id }}, 'reject')" wire:loading.attr="disabled" class="button-secondary">Rejeitar</button>
+                        <button type="button" wire:click="requestDecision({{ $swap->id }}, 'approve')" wire:loading.attr="disabled" class="button-primary inline-flex">Aprovar e transferir</button>
                     </div>
                 </div>
             </article>
@@ -39,4 +37,36 @@
     </section>
 
     <div class="mt-6">{{ $swaps->links() }}</div>
+
+    <x-confirmation-modal
+        :show="$pendingDecisionSwapId !== null"
+        id="decide-swap"
+        :title="$pendingDecision === 'approve' ? 'Aprovar e transferir plantão?' : 'Rejeitar solicitação de troca?'"
+        close-action="cancelDecision"
+        :tone="$pendingDecision === 'approve' ? 'primary' : 'danger'"
+    >
+        @if ($pendingDecisionSummary)
+            <p><strong>{{ $pendingDecisionSummary['shift'] }}</strong></p>
+            <p>{{ $pendingDecisionSummary['location'] }}</p>
+            <p>Solicitante: <strong>{{ $pendingDecisionSummary['requester'] }}</strong><br>Substituto: <strong>{{ $pendingDecisionSummary['substitute'] }}</strong></p>
+            <p>
+                {{ $pendingDecision === 'approve'
+                    ? 'O plantão será transferido ao substituto e ambos receberão um comprovante da decisão.'
+                    : 'O plantão permanecerá com o solicitante e ambos receberão um comprovante da rejeição.' }}
+            </p>
+        @endif
+        <x-slot:actions>
+            <button type="button" wire:click="cancelDecision" class="button-secondary w-full sm:w-auto" data-confirm-cancel>Voltar</button>
+            <button
+                type="button"
+                wire:click="confirmDecision"
+                wire:loading.attr="disabled"
+                wire:target="confirmDecision"
+                class="{{ $pendingDecision === 'approve' ? 'button-primary' : 'button-danger' }} w-full sm:w-auto"
+            >
+                <span wire:loading.remove wire:target="confirmDecision">{{ $pendingDecision === 'approve' ? 'Confirmar aprovação' : 'Confirmar rejeição' }}</span>
+                <span wire:loading wire:target="confirmDecision">Processando…</span>
+            </button>
+        </x-slot:actions>
+    </x-confirmation-modal>
 </div>

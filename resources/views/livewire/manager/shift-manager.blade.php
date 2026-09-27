@@ -14,9 +14,7 @@
         </div>
     </div>
 
-    @if (session('status'))
-        <div class="status-success mt-6" role="status">{{ session('status') }}</div>
-    @endif
+    <x-flash-notifications />
 
     @if ($showFormModal)
         <div class="modal-overlay" x-data x-init="$nextTick(() => $refs.firstField?.focus())" @keydown.escape.window="$wire.closeFormModal()">
@@ -98,13 +96,6 @@
             <span class="text-sm text-muted">{{ $shifts->total() }} registro(s)</span>
         </div>
 
-        @if ($pendingDeleteId)
-            <div class="mt-5 flex flex-col gap-3 rounded-lg border border-red-200 bg-danger-soft p-4 sm:flex-row sm:items-center sm:justify-between" role="alert">
-                <p class="text-sm text-danger">Excluir este plantão também remove suas trocas e ausências associadas.</p>
-                <div class="flex gap-2"><button type="button" wire:click="$set('pendingDeleteId', null)" class="button-secondary">Cancelar</button><button type="button" wire:click="delete" class="button-danger">Excluir plantão</button></div>
-            </div>
-        @endif
-
         <div class="mt-6 space-y-4 md:hidden" aria-label="Plantões cadastrados">
             @forelse ($shifts as $shift)
                 <x-shift-card :shift="$shift" :show-professional="true" wire:key="mobile-shift-{{ $shift->id }}">
@@ -138,4 +129,15 @@
         </div>
         <div class="mt-6">{{ $shifts->links() }}</div>
     </section>
+
+    <x-confirmation-modal :show="$pendingDeleteId !== null" id="delete-shift" title="Excluir plantão?" close-action="cancelDelete">
+        <p><strong>{{ $pendingDeleteLabel }}</strong></p>
+        <p>A exclusão também removerá as trocas e ausências associadas a este plantão.</p>
+        <x-slot:actions>
+            <button type="button" wire:click="cancelDelete" class="button-secondary w-full sm:w-auto" data-confirm-cancel>Manter plantão</button>
+            <button type="button" wire:click="delete" wire:loading.attr="disabled" wire:target="delete" class="button-danger w-full sm:w-auto">
+                <span wire:loading.remove wire:target="delete">Excluir plantão</span><span wire:loading wire:target="delete">Excluindo…</span>
+            </button>
+        </x-slot:actions>
+    </x-confirmation-modal>
 </div>
