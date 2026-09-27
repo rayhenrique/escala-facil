@@ -89,13 +89,17 @@
                         <p class="mt-2 text-sm font-semibold text-primary">{{ substr($shift->start_time, 0, 5) }}–{{ substr($shift->end_time, 0, 5) }}</p>
                         <p class="mt-1 text-sm text-muted">{{ $shift->sector->name }} · {{ $shift->category->name }}</p>
                     </div>
-                    <a href="{{ route('manager.shifts', ['month' => $month]) }}" wire:navigate class="table-action self-start">Abrir escala</a>
+                    @if ($canManageShifts)
+                        <a href="{{ route('manager.shifts', ['month' => $month]) }}" wire:navigate class="table-action self-start">Abrir escala</a>
+                    @endif
                 </article>
             @empty
                 <div class="empty-state xl:col-span-2">
                     <p class="font-semibold text-ink">Nenhum plantão cadastrado neste dia.</p>
-                    <p class="mt-2 text-sm">Selecione outra data ou cadastre um plantão na gestão de escalas.</p>
-                    <a href="{{ route('manager.shifts', ['month' => $month]) }}" wire:navigate class="button-secondary mt-5">Gerenciar plantões</a>
+                    <p class="mt-2 text-sm">{{ $canManageShifts ? 'Selecione outra data ou cadastre um plantão na gestão de escalas.' : 'Selecione outra data para consultar a escala.' }}</p>
+                    @if ($canManageShifts)
+                        <a href="{{ route('manager.shifts', ['month' => $month]) }}" wire:navigate class="button-secondary mt-5">Gerenciar plantões</a>
+                    @endif
                 </div>
             @endforelse
         </div>

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Manager;
+namespace App\Livewire;
 
 use App\Models\Shift;
 use Carbon\CarbonImmutable;
@@ -21,7 +21,7 @@ class MonthlyCalendar extends Component
 
     public function mount(): void
     {
-        $this->authorize('viewAny', Shift::class);
+        $this->authorize('viewCalendar', Shift::class);
 
         $this->month = $this->validMonth($this->month) ? $this->month : now()->format('Y-m');
         $this->selectedDate = $this->month === now()->format('Y-m')
@@ -107,12 +107,13 @@ class MonthlyCalendar extends Component
         $calendarDays = $this->calendarDays($monthStart, $monthEnd, $shiftsByDate);
         $selectedShifts = $shiftsByDate->get($this->selectedDate, collect());
 
-        return view('livewire.manager.monthly-calendar', [
+        return view('livewire.monthly-calendar', [
             'calendarDays' => $calendarDays,
             'monthLabel' => $monthStart->translatedFormat('F \d\e Y'),
             'selectedDateLabel' => CarbonImmutable::parse($this->selectedDate)->translatedFormat('l, d \d\e F \d\e Y'),
             'selectedShifts' => $selectedShifts,
             'assignedProfessionalsCount' => $selectedShifts->pluck('user_id')->filter()->unique()->count(),
+            'canManageShifts' => auth()->user()->can('create', Shift::class),
         ]);
     }
 

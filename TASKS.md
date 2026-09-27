@@ -87,3 +87,10 @@
   - [x] Normalizar filtros mensais e proteger a massa fictícia e os seeders em produção.
   - [x] Aplicar fallback `POST` e CSRF em todos os formulários Livewire.
   - [x] Validar a suíte completa, build de produção, dependências e script de deploy.
+
+- [x] **Fase 13: Calendário compartilhado**
+  - [x] Disponibilizar o calendário mensal no menu do profissional.
+  - [x] Permitir consulta de todos os plantões e plantonistas por dia.
+  - [x] Manter atalhos e ações de gestão exclusivos do gerente.
+  - [x] Atualizar manual, contratos, escopo e controle de versão.
+  - [x] Validar permissões, responsividade, testes e build de produção.

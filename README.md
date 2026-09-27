@@ -4,7 +4,7 @@
 
 Sistema interno para gestão de escalas médicas, plantões, trocas e ausências em unidades de saúde. A aplicação centraliza a operação da gerência, permite que profissionais acompanhem a própria agenda e aplica as regras de compatibilidade e limite mensal em todas as decisões de troca.
 
-**Versão atual:** `1.3.2` — consulte o histórico completo em [`versoes.md`](versoes.md).
+**Versão atual:** `1.4.0` — consulte o histórico completo em [`versoes.md`](versoes.md).
 
 Desenvolvido por [KL Tecnologia](https://kltecnologia.com).
 
@@ -16,7 +16,7 @@ O MVP está funcional e inclui:
 - painel gerencial com indicadores reais de cobertura e pendências;
 - cadastro completo de usuários, setores e categorias;
 - criação, edição, consulta e exclusão de plantões;
-- calendário mensal da gerência com todos os plantões e profissionais de cada dia;
+- calendário mensal compartilhado com todos os plantões e profissionais de cada dia;
 - agenda mensal do profissional;
 - solicitação, aceite e aprovação gerencial de trocas;
 - notificações persistentes para substitutos, solicitantes e gerentes em cada etapa da troca;
@@ -50,6 +50,7 @@ O gerente pode:
 O profissional pode:
 
 - consultar os próprios plantões por mês;
+- consultar o calendário mensal completo e os plantonistas escalados em cada dia;
 - solicitar troca com um colega elegível;
 - aceitar pedidos em que foi indicado como substituto;
 - receber notificações ao ser indicado e após aceite ou decisão da gerência;
@@ -135,7 +136,7 @@ Crie um banco MySQL chamado `escala_facil` e ajuste o `.env`:
 APP_NAME="Escala Fácil"
 APP_URL=http://127.0.0.1:8000
 APP_TIMEZONE=America/Fortaleza
-APP_VERSION=1.3.2
+APP_VERSION=1.4.0
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR
 APP_FAKER_LOCALE=pt_BR
@@ -274,6 +275,7 @@ O Escala Fácil e seu código-fonte são propriedade exclusiva da **KL Tecnologi
 | Categorias | `/manager/categories` | gerente |
 | Usuários | `/manager/users` | gerente |
 | Minha escala | `/professional/dashboard` | profissional |
+| Calendário mensal | `/professional/calendar` | profissional |
 | Notificações e comprovantes | `/notifications` | gerente e profissional |
 | Ajuda e versões | `/help` | gerente e profissional |
 
@@ -327,7 +329,7 @@ Valide o contrato visual:
 npx -p @google/design.md designmd lint DESIGN.md
 ```
 
-Na validação mais recente, a suíte possui **58 testes e 365 asserções**, todos aprovados.
+Na validação mais recente, a suíte possui **58 testes e 372 asserções**, todos aprovados.
 
 ## Documentação
 

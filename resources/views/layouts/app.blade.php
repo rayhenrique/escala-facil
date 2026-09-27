@@ -86,7 +86,10 @@
                             </a>
                         @else
                             <a href="{{ route('professional.dashboard') }}" wire:navigate title="Minha escala" class="sidebar-nav-link {{ request()->routeIs('professional.dashboard') ? 'sidebar-nav-link-active' : '' }}" @if(request()->routeIs('professional.dashboard')) aria-current="page" @endif>
-                                <x-nav-icon name="calendar" class="sidebar-nav-icon" /><span class="sidebar-label">Minha escala</span>
+                                <x-nav-icon name="schedule" class="sidebar-nav-icon" /><span class="sidebar-label">Minha escala</span>
+                            </a>
+                            <a href="{{ route('professional.calendar') }}" wire:navigate title="Calendário" class="sidebar-nav-link {{ request()->routeIs('professional.calendar') ? 'sidebar-nav-link-active' : '' }}" @if(request()->routeIs('professional.calendar')) aria-current="page" @endif>
+                                <x-nav-icon name="calendar" class="sidebar-nav-icon" /><span class="sidebar-label">Calendário</span>
                             </a>
                         @endif
                     </div>

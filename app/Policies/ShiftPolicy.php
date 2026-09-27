@@ -8,6 +8,11 @@ use App\Models\User;
 
 class ShiftPolicy
 {
+    public function viewCalendar(User $user): bool
+    {
+        return in_array($user->role, [UserRole::Manager, UserRole::Professional], true);
+    }
+
     public function viewAny(User $user): bool
     {
         return $user->role === UserRole::Manager;

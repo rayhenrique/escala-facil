@@ -6,6 +6,16 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.4.0 — 27/09/2026
+
+### Calendário compartilhado
+
+- O perfil profissional agora possui o item **Calendário** na sidebar.
+- Profissionais podem navegar pelos meses, selecionar um dia e consultar todos os plantões e plantonistas daquela data.
+- A visualização informa horário, setor, categoria, situação de cobertura e plantões ainda sem profissional.
+- Atalhos de criação, edição e gestão de plantões permanecem visíveis somente para gerentes.
+- O calendário passou a ser um componente compartilhado com autorização específica de consulta.
+
 ## 1.3.2 — 26/09/2026
 
 ### Robustez operacional e gerente inicial

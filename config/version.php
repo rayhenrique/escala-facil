@@ -1,9 +1,21 @@
 <?php
 
 return [
-    'current' => env('APP_VERSION', '1.3.2'),
+    'current' => env('APP_VERSION', '1.4.0'),
 
     'releases' => [
+        [
+            'version' => '1.4.0',
+            'date' => '2026-09-27',
+            'title' => 'Calendário compartilhado',
+            'summary' => 'Profissionais agora podem consultar o calendário mensal completo e visualizar os plantonistas escalados em cada dia.',
+            'highlights' => [
+                'Calendário adicionado à navegação do profissional.',
+                'Consulta mensal com plantões, horários, setores, categorias e profissionais.',
+                'Ações de gestão continuam exclusivas da gerência.',
+                'Manual, permissões e testes atualizados para o novo acesso.',
+            ],
+        ],
         [
             'version' => '1.3.2',
             'date' => '2026-09-26',

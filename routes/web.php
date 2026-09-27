@@ -4,11 +4,11 @@ use App\Http\Controllers\DashboardRedirectController;
 use App\Livewire\HelpCenter;
 use App\Livewire\Manager\CategoryManager;
 use App\Livewire\Manager\Dashboard;
-use App\Livewire\Manager\MonthlyCalendar;
 use App\Livewire\Manager\SectorManager;
 use App\Livewire\Manager\ShiftManager;
 use App\Livewire\Manager\SwapApprovals;
 use App\Livewire\Manager\UserManager;
+use App\Livewire\MonthlyCalendar;
 use App\Livewire\NotificationsCenter;
 use App\Livewire\Professional\MySchedule;
 use Illuminate\Support\Facades\Route;
@@ -32,6 +32,7 @@ Route::middleware(['auth', 'professional'])
     ->name('professional.')
     ->group(function () {
         Route::get('dashboard', MySchedule::class)->name('dashboard');
+        Route::get('calendar', MonthlyCalendar::class)->name('calendar');
     });
 
 Route::middleware(['auth', 'manager'])

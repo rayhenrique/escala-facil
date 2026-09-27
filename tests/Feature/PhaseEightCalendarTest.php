@@ -4,7 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\ShiftStatus;
 use App\Enums\UserRole;
-use App\Livewire\Manager\MonthlyCalendar;
+use App\Livewire\MonthlyCalendar;
 use App\Models\Category;
 use App\Models\Sector;
 use App\Models\Shift;
@@ -80,11 +80,45 @@ class PhaseEightCalendarTest extends TestCase
             ->assertSet('selectedDate', '2026-11-01');
     }
 
-    public function test_professional_cannot_access_the_manager_calendar(): void
+    public function test_professional_can_view_the_shared_calendar_without_management_actions(): void
     {
-        $professional = User::factory()->create(['role' => UserRole::Professional]);
+        $category = Category::query()->create(['name' => 'Enfermagem']);
+        $sector = Sector::query()->create(['name' => 'Emergência']);
+        $professional = User::factory()->create([
+            'role' => UserRole::Professional,
+            'category_id' => $category->id,
+            'sector_id' => $sector->id,
+        ]);
+        $colleague = User::factory()->create([
+            'name' => 'Colega Plantonista',
+            'role' => UserRole::Professional,
+            'category_id' => $category->id,
+            'sector_id' => $sector->id,
+        ]);
+        Shift::query()->create([
+            'date' => '2026-11-12',
+            'start_time' => '07:00',
+            'end_time' => '19:00',
+            'sector_id' => $sector->id,
+            'category_id' => $category->id,
+            'user_id' => $colleague->id,
+            'status' => ShiftStatus::Scheduled,
+        ]);
 
         $this->actingAs($professional)->get(route('manager.calendar'))->assertForbidden();
-        Livewire::actingAs($professional)->test(MonthlyCalendar::class)->assertForbidden();
+        $this->actingAs($professional)
+            ->get(route('professional.calendar', ['month' => '2026-11']))
+            ->assertOk()
+            ->assertSee('Calendário de plantões')
+            ->assertSeeInOrder(['Minha escala', 'Calendário', 'Notificações', 'Ajuda e versões'])
+            ->assertDontSee(route('manager.shifts'), false)
+            ->assertDontSee('Gerenciar plantões');
+
+        Livewire::actingAs($professional)
+            ->test(MonthlyCalendar::class)
+            ->set('month', '2026-11')
+            ->call('selectDate', '2026-11-12')
+            ->assertSee('Colega Plantonista')
+            ->assertDontSee('Abrir escala');
     }
 }

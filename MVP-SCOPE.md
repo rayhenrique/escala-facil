@@ -2,6 +2,7 @@
 
 ## O que ESTÁ INCLUÍDO (Core do MVP)
 * **Gestão de Escalas:** Interface para criação e delegação de plantões (Manager).
+* **Calendário Compartilhado:** Consulta mensal de todos os plantões e plantonistas por gerentes e profissionais, mantendo a edição exclusiva da gerência.
 * **Trocas 1-para-1:** Fluxo completo de troca de plantões exigindo aceite mútuo + aprovação gerencial.
 * **Controle de Compatibilidade:** Filtro estrito limitando trocas apenas entre mesma Categoria e Setor.
 * **Governança de Limite Mensal:** Trava absoluta de 4 trocas (aprovadas) por profissional/mês.

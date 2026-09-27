@@ -93,6 +93,10 @@
                 <div><p>Abra <strong>Minha escala</strong> e selecione o mês. Cada cartão mostra data, horário, setor, categoria e situação do plantão. Pedidos de troca recebidos e enviados aparecem na mesma área.</p></div>
             </details>
             <details>
+                <summary>Consultar o calendário completo</summary>
+                <div><p>Abra <strong>Calendário</strong>, escolha o mês e selecione um dia para consultar todos os plantões e profissionais escalados. A visualização também identifica plantões ainda sem profissional, mas as ações de gestão permanecem exclusivas da gerência.</p></div>
+            </details>
+            <details>
                 <summary>Solicitar uma troca</summary>
                 <div><ol><li>Localize um plantão futuro atribuído a você.</li><li>Escolha <strong>Solicitar troca</strong>.</li><li>Selecione um colega elegível e confirme.</li></ol><p>Somente profissionais do mesmo setor e categoria aparecem como opção. O colega recebe uma notificação, e você recebe um comprovante da solicitação.</p></div>
             </details>

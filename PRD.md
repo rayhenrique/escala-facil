@@ -5,12 +5,13 @@ Sistema interno para gerenciamento de escalas médicas e trocas de plantões em 
 
 ## 2. Perfis e Permissões (Roles)
 * **Manager (Gerente):** Acesso total ao painel de escalas. Pode criar turnos, alocar profissionais, aprovar ou rejeitar solicitações de troca e visualizar o status de cobertura de todos os setores.
-* **Professional (Plantonista):** Visualiza apenas a sua escala mensal e as solicitações de troca disponíveis para o seu setor/categoria. Pode solicitar trocas, aceitar pedidos de colegas e reportar ausências.
+* **Professional (Plantonista):** Visualiza a própria escala mensal, consulta em modo somente leitura o calendário completo de plantões e acompanha as solicitações de troca disponíveis para o seu setor/categoria. Pode solicitar trocas, aceitar pedidos de colegas e reportar ausências.
 
 ## 3. Requisitos Funcionais
 * **Módulo de Autenticação:** Login seguro e recuperação de senha. Redirecionamento baseado no `role` do usuário.
 * **Módulo de Cadastros Base:** CRUD de Categorias (ex: Médico, Enfermeiro) e Setores (ex: UTI, Pediatria).
 * **Módulo de Escala:** Interface para a gerência criar plantões informando Data, Hora de Início, Hora de Fim, Setor, Categoria exigida e o Profissional alocado.
+* **Módulo de Calendário:** Gerentes e profissionais podem navegar pelos meses e selecionar um dia para consultar todos os plantões e plantonistas. Somente a gerência recebe atalhos e permissões de manutenção da escala.
 * **Módulo de Trocas (Swap):**
   * Profissionais podem selecionar um plantão futuro e abrir um "Pedido de Troca".
   * O sistema lista colegas elegíveis (mesmo `sector_id` e `category_id`).
