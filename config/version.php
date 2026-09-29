@@ -1,9 +1,21 @@
 <?php
 
 return [
-    'current' => env('APP_VERSION', '1.6.0'),
+    'current' => env('APP_VERSION', '1.6.1'),
 
     'releases' => [
+        [
+            'version' => '1.6.1',
+            'date' => '2026-09-29',
+            'title' => 'Plantões noturnos e robustez temporal',
+            'summary' => 'Suporte ao cadastro de plantões noturnos que cruzam a meia-noite, contextualização da cota mensal e eliminação de instabilidade temporal na suíte de testes.',
+            'highlights' => [
+                'Permitido o cadastro de plantões noturnos (ex.: 19h às 07h) no formulário de escalas.',
+                'Eliminada a fragilidade temporal em testes que ocorrem no fim do mês.',
+                'Aviso de cota mensal agora contextualiza o mês corrente quando o profissional navega entre períodos.',
+                'Proteção de memória reforçada no comando de criação do primeiro gerente.',
+            ],
+        ],
         [
             'version' => '1.6.0',
             'date' => '2026-09-27',

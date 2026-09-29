@@ -16,7 +16,11 @@
 
     @if ($swapLimitReached)
         <div class="mt-6 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900" role="status">
-            Você atingiu a cota de quatro trocas aprovadas neste mês. Novas solicitações e aceites serão liberados no próximo mês.
+            @if ($month === now()->format('Y-m'))
+                Você atingiu a cota de quatro trocas aprovadas neste mês. Novas solicitações e aceites serão liberados no próximo mês.
+            @else
+                Você atingiu a cota de quatro trocas aprovadas no mês corrente ({{ now()->format('m/Y') }}). Novas solicitações e aceites serão liberados no próximo mês.
+            @endif
         </div>
     @endif
 

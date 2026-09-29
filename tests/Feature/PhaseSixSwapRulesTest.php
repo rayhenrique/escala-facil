@@ -24,6 +24,13 @@ class PhaseSixSwapRulesTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->travelTo(now()->startOfMonth()->addDays(5));
+    }
+
     public function test_four_approved_participations_block_a_fifth_swap_request(): void
     {
         [, $professional, $substitute, $category, $sector] = $this->team();

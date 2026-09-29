@@ -21,7 +21,7 @@ class SaveShiftRequest extends DataFormRequest
         return [
             'date' => ['required', 'date_format:Y-m-d', 'after_or_equal:today'],
             'start_time' => ['required', 'date_format:H:i'],
-            'end_time' => ['required', 'date_format:H:i', 'after:start_time'],
+            'end_time' => ['required', 'date_format:H:i', 'different:start_time'],
             'sector_id' => ['required', 'integer', 'exists:sectors,id'],
             'category_id' => ['required', 'integer', 'exists:categories,id'],
             'user_id' => ['nullable', 'integer', 'exists:users,id'],
@@ -61,7 +61,7 @@ class SaveShiftRequest extends DataFormRequest
     {
         return [
             'date.after_or_equal' => 'A data do plantão não pode estar no passado.',
-            'end_time.after' => 'O horário final deve ser posterior ao horário inicial.',
+            'end_time.different' => 'O horário final deve ser diferente do horário inicial.',
         ];
     }
 

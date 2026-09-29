@@ -116,3 +116,11 @@
   - [x] Confirmar a leitura em massa sem apagar o histórico de notificações.
   - [x] Padronizar mensagens de sucesso e erro em avisos flutuantes responsivos.
   - [x] Atualizar manual, contrato de experiência, versão e testes automatizados.
+
+- [x] **Fase 17: Plantões noturnos, robustez temporal e controle de versão (1.6.1)**
+  - [x] Permitir o cadastro de plantões noturnos que atravessam a meia-noite (ex.: 19h às 07h).
+  - [x] Eliminar a fragilidade temporal nos testes de limites de troca executados no encerramento do mês.
+  - [x] Contextualizar o alerta de cota mensal quando o profissional consulta períodos diferentes do mês corrente.
+  - [x] Limpar variáveis sensíveis de memória após hashing no comando interativo de criação de gerente.
+  - [x] Incrementar versão semântica para 1.6.1 e atualizar changelog em `versoes.md`, `config/version.php`, PWA cache e documentação.
+

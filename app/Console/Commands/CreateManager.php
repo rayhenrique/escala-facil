@@ -6,6 +6,7 @@ use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
@@ -56,14 +57,18 @@ class CreateManager extends Command
             return self::INVALID;
         }
 
+        $hashed = Hash::make($password);
+        unset($password, $passwordConfirmation);
+
         $user = DB::transaction(fn (): User => User::query()->create([
             'name' => $name,
             'email' => $email,
-            'password' => $password,
+            'password' => $hashed,
             'role' => UserRole::Manager,
             'category_id' => null,
             'sector_id' => null,
         ]));
+        unset($hashed);
 
         $this->info("Gerente criado com sucesso: {$user->email}");
 

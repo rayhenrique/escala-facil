@@ -70,6 +70,45 @@ class PhaseFourWorkflowTest extends TestCase
         $this->assertDatabaseMissing('shifts', ['id' => $shift->id]);
     }
 
+    public function test_manager_can_create_an_overnight_shift(): void
+    {
+        [$manager, $requester, , $category, $sector] = $this->team();
+
+        Livewire::actingAs($manager)
+            ->test(ShiftManager::class)
+            ->set('date', today()->addDays(3)->format('Y-m-d'))
+            ->set('startTime', '19:00')
+            ->set('endTime', '07:00')
+            ->set('sectorId', (string) $sector->id)
+            ->set('categoryId', (string) $category->id)
+            ->set('userId', (string) $requester->id)
+            ->call('save')
+            ->assertSet('showFormModal', false)
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('shifts', [
+            'start_time' => '19:00',
+            'end_time' => '07:00',
+            'user_id' => $requester->id,
+        ]);
+    }
+
+    public function test_manager_cannot_create_a_shift_with_identical_start_and_end_times(): void
+    {
+        [$manager, $requester, , $category, $sector] = $this->team();
+
+        Livewire::actingAs($manager)
+            ->test(ShiftManager::class)
+            ->set('date', today()->addDays(3)->format('Y-m-d'))
+            ->set('startTime', '07:00')
+            ->set('endTime', '07:00')
+            ->set('sectorId', (string) $sector->id)
+            ->set('categoryId', (string) $category->id)
+            ->set('userId', (string) $requester->id)
+            ->call('save')
+            ->assertHasErrors(['end_time']);
+    }
+
     public function test_manager_cannot_assign_a_professional_from_another_sector(): void
     {
         [$manager, , , $category, $sector] = $this->team();
