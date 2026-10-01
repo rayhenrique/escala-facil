@@ -6,7 +6,7 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
-## 1.12.0 — 01/10/2026
+## 1.12.0 — 30/09/2026
 
 ### Relatórios compartilhados e manual detalhado
 
@@ -14,7 +14,7 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - Manual com passo a passo detalhado do fechamento do mês e da consulta de relatórios.
 - Rotas gerenciais de relatórios seguem exclusivas da gerência.
 
-## 1.11.0 — 01/10/2026
+## 1.11.0 — 30/09/2026
 
 ### Dobras, desfazer troca e PDF para afixar
 
@@ -23,7 +23,7 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - Gerência pode desfazer trocas aprovadas futuras, com devolução do plantão, comprovante e liberação da cota.
 - Novo PDF para afixar com grade mensal, legenda, trocas destacadas e assinaturas.
 
-## 1.10.0 — 01/10/2026
+## 1.10.0 — 30/09/2026
 
 ### Cobertura de 24h no calendário
 
@@ -31,7 +31,7 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - Madrugadas de plantões noturnos contam para a cobertura do dia seguinte.
 - Legenda do calendário e descrição acessível atualizadas.
 
-## 1.9.0 — 01/10/2026
+## 1.9.0 — 30/09/2026
 
 ### Módulo Relatórios com exportação em PDF
 
@@ -40,7 +40,7 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - Plantões por setor, por categoria, por profissional (com cota de trocas e ausências) e trocas criadas no mês.
 - Exportação em PDF com os mesmos filtros exibidos na tela.
 
-## 1.8.0 — 01/10/2026
+## 1.8.0 — 30/09/2026
 
 ### Importação e exportação de plantões em XLSX
 
@@ -49,7 +49,7 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - Exportação dos plantões do mês exibido, pronta para editar e reimportar.
 - Profissional identificado pelo e-mail; plantão sem e-mail fica sem profissional alocado.
 
-## 1.7.0 — 01/10/2026
+## 1.7.0 — 30/09/2026
 
 ### Filtros do calendário por setor e categoria
 

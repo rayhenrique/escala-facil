@@ -6,7 +6,7 @@ return [
     'releases' => [
         [
             'version' => '1.12.0',
-            'date' => '2026-10-01',
+            'date' => '2026-09-30',
             'title' => 'Relatórios compartilhados e manual detalhado',
             'summary' => 'Profissionais também consultam relatórios e exportam PDFs, e o manual orienta cada rotina em detalhes.',
             'highlights' => [
@@ -17,7 +17,7 @@ return [
         ],
         [
             'version' => '1.11.0',
-            'date' => '2026-10-01',
+            'date' => '2026-09-30',
             'title' => 'Dobras, desfazer troca e PDF para afixar',
             'summary' => 'A escala sinaliza dobras no aceite e na aprovação, a gerência pode desfazer trocas e imprimir a escala de parede.',
             'highlights' => [
@@ -28,7 +28,7 @@ return [
         ],
         [
             'version' => '1.10.0',
-            'date' => '2026-10-01',
+            'date' => '2026-09-30',
             'title' => 'Cobertura de 24h no calendário',
             'summary' => 'O calendário agora marca com ✓ os dias com 24 horas cobertas por plantões com profissional.',
             'highlights' => [
@@ -39,7 +39,7 @@ return [
         ],
         [
             'version' => '1.9.0',
-            'date' => '2026-10-01',
+            'date' => '2026-09-30',
             'title' => 'Módulo Relatórios com exportação em PDF',
             'summary' => 'A gerência agora consulta cobertura, trocas, ausências e desempenho por profissional, com filtros e PDF.',
             'highlights' => [
@@ -51,7 +51,7 @@ return [
         ],
         [
             'version' => '1.8.0',
-            'date' => '2026-10-01',
+            'date' => '2026-09-30',
             'title' => 'Importação e exportação de plantões em XLSX',
             'summary' => 'A gestão de escalas agora importa e exporta plantões em planilha, com modelo padrão e referência de setores e categorias.',
             'highlights' => [
@@ -62,7 +62,7 @@ return [
         ],
         [
             'version' => '1.7.0',
-            'date' => '2026-10-01',
+            'date' => '2026-09-30',
             'title' => 'Filtros do calendário por setor e categoria',
             'summary' => 'O calendário mensal agora permite filtrar os plantões exibidos por setor e categoria.',
             'highlights' => [
