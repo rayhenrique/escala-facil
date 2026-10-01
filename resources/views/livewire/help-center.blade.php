@@ -157,6 +157,13 @@
                         <li>Antes de excluir, confira no modal a data, o horário, o setor e a categoria. A exclusão remove o plantão e seus registros associados de troca e ausência.</li>
                         <li>Quando uma ausência é informada, o plantão perde a alocação e passa a exigir nova cobertura.</li>
                     </ul>
+                    <h4>Importar e exportar plantões (XLSX)</h4>
+                    <ol>
+                        <li>Baixe o <strong>Modelo XLSX</strong> em Escalas: ele já traz os setores e categorias cadastrados para referência.</li>
+                        <li>Preencha data (DD/MM/AAAA), início e fim (HH:MM), setor e categoria com os nomes exatos do modelo, e o e-mail do profissional quando houver alocação.</li>
+                        <li>Use <strong>Exportar</strong> para baixar os plantões do mês exibido e aproveitá-los como base de edição.</li>
+                        <li>Envie o arquivo em <strong>Importar</strong>: linhas duplicadas são ignoradas, e qualquer erro em uma linha cancela toda a importação com o motivo indicado.</li>
+                    </ol>
                 </div>
             </details>
             <details id="consultar-calendario">

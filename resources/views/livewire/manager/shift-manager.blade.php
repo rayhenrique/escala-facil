@@ -5,12 +5,17 @@
             <h1 class="page-title">Gestão de escalas</h1>
             <p class="page-description">Crie plantões e mantenha setor, categoria e profissional compatíveis.</p>
         </div>
-        <div class="grid w-full gap-3 sm:w-auto sm:grid-cols-[12rem_auto] sm:items-end">
+        <div class="grid w-full gap-3 sm:w-auto sm:items-end">
             <div>
                 <label for="month" class="field-label">Mês exibido</label>
                 <input wire:model.live="month" id="month" type="month" class="field-input">
             </div>
-            <button type="button" wire:click="openCreateModal" class="button-primary w-full sm:w-auto">Adicionar plantão</button>
+            <div class="flex flex-col gap-2 sm:flex-row">
+                <a href="{{ route('manager.shifts.template') }}" class="button-secondary w-full text-center sm:w-auto">Modelo XLSX</a>
+                <a href="{{ route('manager.shifts.export', ['month' => $month]) }}" class="button-secondary w-full text-center sm:w-auto">Exportar</a>
+                <button type="button" wire:click="openImportModal" class="button-secondary w-full sm:w-auto">Importar</button>
+                <button type="button" wire:click="openCreateModal" class="button-primary w-full sm:w-auto">Adicionar plantão</button>
+            </div>
         </div>
     </div>
 
@@ -140,4 +145,53 @@
             </button>
         </x-slot:actions>
     </x-confirmation-modal>
+
+    @if ($showImportModal)
+        <div class="modal-overlay" x-data x-init="$nextTick(() => $refs.importField?.focus())" @keydown.escape.window="$wire.closeImportModal()">
+            <button type="button" wire:click="closeImportModal" class="modal-backdrop" aria-label="Fechar importação de plantões"></button>
+            <form method="post" wire:submit="confirmImport" class="modal-dialog max-w-2xl" role="dialog" aria-modal="true" aria-labelledby="shift-import-title" novalidate enctype="multipart/form-data">
+                @csrf
+                <header class="modal-header">
+                    <div>
+                        <p class="eyebrow">Planilha XLSX</p>
+                        <h2 id="shift-import-title">Importar plantões</h2>
+                    </div>
+                    <button type="button" wire:click="closeImportModal" class="modal-close-button" aria-label="Fechar importação">
+                        <x-nav-icon name="close" class="size-5" />
+                    </button>
+                </header>
+
+                <div class="modal-body grid gap-5">
+                    <p class="text-sm text-muted">Use o <a href="{{ route('manager.shifts.template') }}" class="table-action">modelo padrão</a> com os setores e categorias cadastrados. Linhas duplicadas são ignoradas; qualquer erro em uma linha cancela toda a importação.</p>
+                    <div>
+                        <label for="import-file" class="field-label">Arquivo XLSX (máximo 5 MB)</label>
+                        <input x-ref="importField" wire:model="importFile" id="import-file" type="file" accept=".xlsx" class="field-input" @error('file') aria-invalid="true" aria-describedby="import-file-error" @enderror>
+                        @error('file') <p id="import-file-error" class="field-error">{{ $message }}</p> @enderror
+                    </div>
+
+                    @if ($importErrors !== [])
+                        <div class="rounded-lg border border-danger/30 bg-danger-soft p-4" role="alert" aria-label="Erros da importação">
+                            <p class="font-semibold text-danger">A importação foi cancelada. Nenhum plantão foi criado.</p>
+                            <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-danger">
+                                @foreach (array_slice($importErrors, 0, 20) as $importError)
+                                    <li>{{ $importError }}</li>
+                                @endforeach
+                            </ul>
+                            @if (count($importErrors) > 20)
+                                <p class="mt-2 text-sm text-danger">…e mais {{ count($importErrors) - 20 }} erro(s).</p>
+                            @endif
+                        </div>
+                    @endif
+                </div>
+
+                <footer class="modal-footer">
+                    <button type="button" wire:click="closeImportModal" class="button-secondary w-full sm:w-auto">Cancelar</button>
+                    <button type="submit" class="button-primary w-full sm:w-auto" wire:loading.attr="disabled" wire:target="confirmImport,importFile">
+                        <span wire:loading.remove wire:target="confirmImport,importFile">Revisar e importar</span>
+                        <span wire:loading wire:target="confirmImport,importFile">Importando…</span>
+                    </button>
+                </footer>
+            </form>
+        </div>
+    @endif
 </div>

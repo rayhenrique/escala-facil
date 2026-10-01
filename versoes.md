@@ -6,6 +6,15 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.8.0 — 01/10/2026
+
+### Importação e exportação de plantões em XLSX
+
+- Modelo padrão de planilha com os setores e categorias cadastrados para referência exata.
+- Importação de plantões com validação por linha: qualquer erro cancela tudo e duplicatas são ignoradas.
+- Exportação dos plantões do mês exibido, pronta para editar e reimportar.
+- Profissional identificado pelo e-mail; plantão sem e-mail fica sem profissional alocado.
+
 ## 1.7.0 — 01/10/2026
 
 ### Filtros do calendário por setor e categoria

@@ -1,9 +1,20 @@
 <?php
 
 return [
-    'current' => env('APP_VERSION', '1.7.0'),
+    'current' => env('APP_VERSION', '1.8.0'),
 
     'releases' => [
+        [
+            'version' => '1.8.0',
+            'date' => '2026-10-01',
+            'title' => 'Importação e exportação de plantões em XLSX',
+            'summary' => 'A gestão de escalas agora importa e exporta plantões em planilha, com modelo padrão e referência de setores e categorias.',
+            'highlights' => [
+                'Modelo XLSX com abas de setores e categorias cadastrados no sistema.',
+                'Importação atômica com relatório de erros por linha e duplicatas ignoradas.',
+                'Exportação dos plantões do mês exibido para edição e backup.',
+            ],
+        ],
         [
             'version' => '1.7.0',
             'date' => '2026-10-01',

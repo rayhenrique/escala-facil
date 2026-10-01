@@ -130,3 +130,9 @@
   - [x] Oferecer limpeza dos filtros e mensagem específica quando nenhum plantão corresponde à seleção.
   - [x] Atualizar manual, contrato de experiência, versão e testes automatizados.
 
+- [x] **Fase 19: Importação e exportação de plantões em XLSX (1.8.0)**
+  - [x] Disponibilizar modelo padrão com setores e categorias cadastrados para referência exata.
+  - [x] Importar plantões com validação por linha, cancelamento total em caso de erro e duplicatas ignoradas.
+  - [x] Exportar os plantões do mês exibido para edição e backup.
+  - [x] Atualizar manual, contrato de experiência, versão e testes automatizados.
+

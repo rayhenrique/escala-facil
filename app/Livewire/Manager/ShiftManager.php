@@ -2,8 +2,10 @@
 
 namespace App\Livewire\Manager;
 
+use App\Actions\Shifts\ImportShiftsAction;
 use App\Enums\ShiftStatus;
 use App\Enums\UserRole;
+use App\Http\Requests\ImportShiftsRequest;
 use App\Http\Requests\SaveShiftRequest;
 use App\Models\Category;
 use App\Models\Sector;
@@ -12,15 +14,19 @@ use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\WithFileUploads;
 use Livewire\WithPagination;
 
 #[Layout('layouts.app', ['title' => 'Gestão de escalas'])]
 class ShiftManager extends Component
 {
+    use WithFileUploads;
     use WithPagination;
 
     #[Url]
@@ -47,6 +53,13 @@ class ShiftManager extends Component
     public string $userId = '';
 
     public string $status = 'scheduled';
+
+    public bool $showImportModal = false;
+
+    public $importFile = null;
+
+    /** @var list<string> */
+    public array $importErrors = [];
 
     public function mount(): void
     {
@@ -171,6 +184,51 @@ class ShiftManager extends Component
 
         $this->cancelDelete();
         session()->flash('status', 'Plantão excluído.');
+    }
+
+    public function openImportModal(): void
+    {
+        $this->authorize('create', Shift::class);
+        $this->reset(['importFile', 'importErrors']);
+        $this->showImportModal = true;
+    }
+
+    public function closeImportModal(): void
+    {
+        $this->reset(['showImportModal', 'importFile', 'importErrors']);
+    }
+
+    public function confirmImport(ImportShiftsAction $import): void
+    {
+        $this->authorize('create', Shift::class);
+        $this->reset('importErrors');
+
+        $validated = (new ImportShiftsRequest)->validatePayload(
+            ['file' => $this->importFile],
+            auth()->user(),
+        );
+
+        $storedPath = $validated['file']->store('shift-imports', 'local');
+        $absolutePath = Storage::disk('local')->path($storedPath);
+
+        try {
+            $result = $import->execute(auth()->user(), $absolutePath);
+        } catch (ValidationException $exception) {
+            $this->importErrors = collect($exception->errors())->flatten()->values()->all();
+
+            return;
+        } finally {
+            Storage::disk('local')->delete($storedPath);
+        }
+
+        $this->closeImportModal();
+        $this->resetPage();
+
+        session()->flash('status', sprintf(
+            'Importação concluída: %d plantão(ões) criado(s)%s.',
+            $result['created'],
+            $result['skipped'] > 0 ? " e {$result['skipped']} duplicata(s) ignorada(s)" : '',
+        ));
     }
 
     public function resetForm(): void

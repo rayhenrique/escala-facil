@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardRedirectController;
+use App\Http\Controllers\Manager\ShiftSpreadsheetController;
 use App\Livewire\HelpCenter;
 use App\Livewire\Manager\CategoryManager;
 use App\Livewire\Manager\Dashboard;
@@ -42,6 +43,8 @@ Route::middleware(['auth', 'manager'])
         Route::get('dashboard', Dashboard::class)->name('dashboard');
         Route::get('calendar', MonthlyCalendar::class)->name('calendar');
         Route::get('shifts', ShiftManager::class)->name('shifts');
+        Route::get('shifts/template', [ShiftSpreadsheetController::class, 'template'])->name('shifts.template');
+        Route::get('shifts/export', [ShiftSpreadsheetController::class, 'export'])->name('shifts.export');
         Route::get('swaps', SwapApprovals::class)->name('swaps');
         Route::get('sectors', SectorManager::class)->name('sectors');
         Route::get('categories', CategoryManager::class)->name('categories');
