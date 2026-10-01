@@ -14,6 +14,40 @@ use Illuminate\Support\Collection;
 class ShiftReportService
 {
     /** @return array<string, mixed> */
+    public function wallRoster(string $month, string $sectorId = '', string $categoryId = ''): array
+    {
+        [$year, $monthNumber] = array_pad(explode('-', $month), 2, null);
+        $monthStart = CarbonImmutable::createFromFormat('!Y-m-d', $month.'-01')->startOfMonth();
+        $monthEnd = $monthStart->endOfMonth();
+
+        $shifts = Shift::query()
+            ->with(['sector', 'category', 'user'])
+            ->when($year && $monthNumber, fn ($query) => $query->whereYear('date', $year)->whereMonth('date', $monthNumber))
+            ->when($sectorId !== '', fn ($query) => $query->where('sector_id', $sectorId))
+            ->when($categoryId !== '', fn ($query) => $query->where('category_id', $categoryId))
+            ->orderBy('date')
+            ->orderBy('start_time')
+            ->get();
+
+        $swappedShiftIds = ShiftSwap::query()
+            ->where('status', ShiftSwapStatus::Approved)
+            ->whereHas('shift', fn ($query) => $query
+                ->whereBetween('date', [$monthStart, $monthEnd])
+                ->when($sectorId !== '', fn ($shift) => $shift->where('sector_id', $sectorId))
+                ->when($categoryId !== '', fn ($shift) => $shift->where('category_id', $categoryId)))
+            ->pluck('shift_id')
+            ->unique()
+            ->all();
+
+        return [
+            'monthLabel' => $monthStart->translatedFormat('F \d\e Y'),
+            'days' => $shifts->groupBy(fn (Shift $shift): string => $shift->date->format('Y-m-d')),
+            'swappedShiftIds' => $swappedShiftIds,
+            'total' => $shifts->count(),
+        ];
+    }
+
+    /** @return array<string, mixed> */
     public function forPeriod(string $month, string $sectorId = '', string $categoryId = ''): array
     {
         [$year, $monthNumber] = array_pad(explode('-', $month), 2, null);

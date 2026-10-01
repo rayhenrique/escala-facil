@@ -2,13 +2,16 @@
 
 namespace Tests\Feature;
 
+use App\Actions\ShiftSwaps\DecideShiftSwapAction;
 use App\Enums\ShiftStatus;
 use App\Enums\UserRole;
 use App\Livewire\Manager\Reports;
 use App\Models\Category;
 use App\Models\Sector;
 use App\Models\Shift;
+use App\Models\ShiftSwap;
 use App\Models\User;
+use App\Services\ShiftReportService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -117,6 +120,65 @@ class ReportsTest extends TestCase
         $response->assertOk();
         $response->assertHeader('content-type', 'application/pdf');
         $this->assertStringStartsWith('%PDF', (string) $response->getContent());
+    }
+
+    public function test_manager_can_download_wall_roster_pdf(): void
+    {
+        [$manager, $ana, , $sector, $category] = $this->team();
+
+        Shift::factory()->create([
+            'date' => '2026-11-12',
+            'sector_id' => $sector->id,
+            'category_id' => $category->id,
+            'user_id' => $ana->id,
+            'status' => ShiftStatus::Scheduled,
+        ]);
+
+        $response = $this->actingAs($manager)->get(route('manager.reports.wall', ['month' => '2026-11']));
+
+        $response->assertOk();
+        $response->assertHeader('content-type', 'application/pdf');
+        $this->assertStringStartsWith('%PDF', (string) $response->getContent());
+    }
+
+    public function test_professional_cannot_download_wall_roster_pdf(): void
+    {
+        $professional = User::factory()->create(['role' => UserRole::Professional]);
+
+        $this->actingAs($professional)->get(route('manager.reports.wall'))->assertForbidden();
+    }
+
+    public function test_wall_roster_marks_shifts_received_through_approved_swaps(): void
+    {
+        [$manager, $ana, $bruno, $sector, $category] = $this->team();
+
+        $shift = Shift::factory()->create([
+            'date' => '2026-11-12',
+            'sector_id' => $sector->id,
+            'category_id' => $category->id,
+            'user_id' => $ana->id,
+            'status' => ShiftStatus::Scheduled,
+        ]);
+        $otherMonth = Shift::factory()->create([
+            'date' => '2026-12-12',
+            'sector_id' => $sector->id,
+            'category_id' => $category->id,
+            'user_id' => $ana->id,
+            'status' => ShiftStatus::Scheduled,
+        ]);
+
+        $swap = ShiftSwap::factory()->pendingManager()->create([
+            'shift_id' => $shift->id,
+            'requester_id' => $ana->id,
+            'substitute_id' => $bruno->id,
+        ]);
+        app(DecideShiftSwapAction::class)->approve($manager, $swap->id);
+
+        $roster = app(ShiftReportService::class)->wallRoster('2026-11');
+
+        $this->assertContains($shift->id, $roster['swappedShiftIds']);
+        $this->assertNotContains($otherMonth->id, $roster['swappedShiftIds']);
+        $this->assertSame(1, $roster['total']);
     }
 
     /** @return array{User, User, User, Sector, Category} */

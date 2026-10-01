@@ -55,6 +55,7 @@ Este documento registra o comportamento compartilhado das telas autenticadas. As
 | Excluir registro | modal identifica o registro e explica vínculos ou efeitos em cascata | item removido e aviso flutuante de sucesso | item permanece disponível e o aviso informa o bloqueio |
 | Solicitar ou aceitar troca | modal revisa plantão e participantes; confirmação fica desabilitada durante envio | aviso, comprovante e atualização das listas | validação explica incompatibilidade ou cota e preserva os dados editáveis |
 | Aprovar ou rejeitar troca | modal revisa plantão, solicitante, substituto e efeito da decisão | comprovante, aviso e atualização da fila | pedido permanece para nova análise |
+| Desfazer troca aprovada | modal revisa plantão, participantes e devolução ao solicitante | comprovante, aviso, plantão devolvido e cota liberada | troca permanece aprovada para nova tentativa |
 | Consultar notificações | contador e histórico carregados sem alterar a navegação; leitura em massa exige confirmação | item pode ser marcado como lido e o comprovante permanece disponível | somente notificações do usuário autenticado podem ser consultadas |
 | Informar ausência | modal revisa plantão, justificativa e consequência antes do envio | plantão descoberto, alerta gerencial e aviso de sucesso | motivo e arquivo permanecem corrigíveis |
 | Criar ou editar cadastro | modal aberto pelo botão “Adicionar” ou pela ação “Editar” | mensagem de sucesso, modal fechado e lista atualizada | modal permanece aberto com erros junto aos campos |

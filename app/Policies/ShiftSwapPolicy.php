@@ -81,4 +81,31 @@ class ShiftSwapPolicy
         return $user->role === UserRole::Manager
             && $shiftSwap->status === ShiftSwapStatus::PendingManager;
     }
+
+    public function revert(User $user, ShiftSwap $shiftSwap): bool
+    {
+        if ($user->role !== UserRole::Manager
+            || $shiftSwap->status !== ShiftSwapStatus::Approved) {
+            return false;
+        }
+
+        $shiftSwap->loadMissing('shift');
+
+        $shift = $shiftSwap->shift;
+
+        if (! $shift) {
+            return false;
+        }
+
+        return $shift->user_id === $shiftSwap->substitute_id
+            && $shift->status === ShiftStatus::Scheduled
+            && ! $shift->date->isBefore(today())
+            && ! $shift->swaps()
+                ->whereIn('status', [
+                    ShiftSwapStatus::PendingProfessional,
+                    ShiftSwapStatus::PendingManager,
+                ])
+                ->exists()
+            && ! $shift->absences()->exists();
+    }
 }

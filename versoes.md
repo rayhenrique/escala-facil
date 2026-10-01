@@ -6,6 +6,15 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.11.0 — 01/10/2026
+
+### Dobras, desfazer troca e PDF para afixar
+
+- Aceite de troca avisa o substituto quando emenda (dobra) com outro plantão seu.
+- Fila de aprovação exibe o selo Dobra para a gerência autorizar com consciência.
+- Gerência pode desfazer trocas aprovadas futuras, com devolução do plantão, comprovante e liberação da cota.
+- Novo PDF para afixar com grade mensal, legenda, trocas destacadas e assinaturas.
+
 ## 1.10.0 — 01/10/2026
 
 ### Cobertura de 24h no calendário

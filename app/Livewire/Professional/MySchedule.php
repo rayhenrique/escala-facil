@@ -14,6 +14,7 @@ use App\Models\Absence;
 use App\Models\Shift;
 use App\Models\ShiftSwap;
 use App\Models\User;
+use App\Support\ShiftCoverage;
 use App\Support\ShiftSwapReceipt;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
@@ -173,6 +174,12 @@ class MySchedule extends Component
         $this->confirmationSummary = $this->shiftSummary($shiftSwap->shift) + [
             'requester' => $shiftSwap->requester->name,
         ];
+
+        $doubleShift = ShiftCoverage::findDoubleShift(auth()->user(), $shiftSwap->shift);
+
+        if ($doubleShift) {
+            $this->confirmationSummary['double_shift'] = ShiftCoverage::doubleShiftLabel($doubleShift);
+        }
     }
 
     public function confirmAcceptSwap(AcceptShiftSwapAction $action, ShiftSwapReceipt $receipts): void

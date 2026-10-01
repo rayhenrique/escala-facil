@@ -3,6 +3,7 @@
 use App\Http\Controllers\DashboardRedirectController;
 use App\Http\Controllers\Manager\ReportPdfController;
 use App\Http\Controllers\Manager\ShiftSpreadsheetController;
+use App\Http\Controllers\Manager\WallRosterPdfController;
 use App\Livewire\HelpCenter;
 use App\Livewire\Manager\CategoryManager;
 use App\Livewire\Manager\Dashboard;
@@ -49,6 +50,7 @@ Route::middleware(['auth', 'manager'])
         Route::get('shifts/export', [ShiftSpreadsheetController::class, 'export'])->name('shifts.export');
         Route::get('reports', Reports::class)->name('reports');
         Route::get('reports/pdf', ReportPdfController::class)->name('reports.pdf');
+        Route::get('reports/wall', WallRosterPdfController::class)->name('reports.wall');
         Route::get('swaps', SwapApprovals::class)->name('swaps');
         Route::get('sectors', SectorManager::class)->name('sectors');
         Route::get('categories', CategoryManager::class)->name('categories');

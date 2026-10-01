@@ -40,7 +40,7 @@
 * `shift_id` (foreignId -> shifts.id, constrained, cascadeOnDelete)
 * `requester_id` (foreignId -> users.id, constrained) - Quem quer sair do plantão
 * `substitute_id` (foreignId -> users.id, constrained) - Quem vai assumir
-* `status` (enum: 'pending_professional', 'pending_manager', 'approved', 'rejected')
+* `status` (enum: 'pending_professional', 'pending_manager', 'approved', 'rejected', 'reverted')
 * `manager_id` (foreignId -> users.id, nullable, constrained) - Quem aprovou/rejeitou
 * `timestamps`
 

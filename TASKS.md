@@ -148,3 +148,9 @@
   - [x] Marcar dias com 24h cobertas com ✓, legenda e descrição acessível.
   - [x] Atualizar manual, contrato de experiência, versão e testes automatizados.
 
+- [x] **Fase 22: Dobras, desfazer troca e PDF para afixar (1.11.0)**
+  - [x] Alertar dobra no aceite do substituto e sinalizar na fila de aprovação gerencial.
+  - [x] Permitir desfazer trocas aprovadas futuras, com devolução, comprovante e liberação da cota.
+  - [x] Disponibilizar PDF para afixar com grade mensal, legenda, trocas e assinaturas.
+  - [x] Atualizar manual, contrato de experiência, versão e testes automatizados.
+

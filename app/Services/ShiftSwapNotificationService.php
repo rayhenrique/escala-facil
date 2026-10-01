@@ -88,6 +88,22 @@ class ShiftSwapNotificationService
         );
     }
 
+    public function reverted(ShiftSwap $shiftSwap): void
+    {
+        $shiftSwap->loadMissing(['requester', 'substitute', 'manager']);
+
+        Notification::send(
+            collect([$shiftSwap->requester, $shiftSwap->substitute]),
+            new ShiftSwapEventNotification($this->payload(
+                $shiftSwap,
+                ShiftSwapEvent::Reverted,
+                'Troca desfeita',
+                "{$shiftSwap->manager->name} desfez a troca e o plantão voltou para {$shiftSwap->requester->name}.",
+                route('notifications', [], false),
+            )),
+        );
+    }
+
     /** @return array<string, mixed> */
     private function payload(
         ShiftSwap $shiftSwap,

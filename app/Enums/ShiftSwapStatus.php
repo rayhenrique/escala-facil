@@ -8,6 +8,7 @@ enum ShiftSwapStatus: string
     case PendingManager = 'pending_manager';
     case Approved = 'approved';
     case Rejected = 'rejected';
+    case Reverted = 'reverted';
 
     public function label(): string
     {
@@ -16,6 +17,7 @@ enum ShiftSwapStatus: string
             self::PendingManager => 'Aguardando gerência',
             self::Approved => 'Aprovada',
             self::Rejected => 'Rejeitada',
+            self::Reverted => 'Desfeita',
         };
     }
 }

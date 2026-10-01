@@ -98,18 +98,33 @@ class ShiftCoverage
         $date = $candidate->date->format('Y-m-d');
         $previous = CarbonImmutable::parse($date)->subDay()->format('Y-m-d');
 
-        $candidateIntervals = self::intervalsOnDate($candidate, $date);
-
         $existing = Shift::query()
             ->where('user_id', $substitute->getKey())
             ->where('status', ShiftStatus::Scheduled)
-            ->whereIn('date', [$date, $previous])
+            ->where(fn ($query) => $query->whereDate('date', $date)->orWhereDate('date', $previous))
             ->where('id', '!=', $candidate->getKey())
             ->orderBy('date')
             ->orderBy('start_time')
             ->get();
 
-        foreach ($existing as $shift) {
+        return self::findDoubleShiftIn($existing, (int) $substitute->getKey(), $candidate);
+    }
+
+    /**
+     * @param  Collection<int, Shift>  $shifts
+     */
+    public static function findDoubleShiftIn(Collection $shifts, int $substituteId, Shift $candidate): ?Shift
+    {
+        $date = $candidate->date->format('Y-m-d');
+        $candidateIntervals = self::intervalsOnDate($candidate, $date);
+
+        foreach ($shifts as $shift) {
+            if ($shift->user_id !== $substituteId
+                || $shift->status !== ShiftStatus::Scheduled
+                || $shift->getKey() === $candidate->getKey()) {
+                continue;
+            }
+
             foreach (self::intervalsOnDate($shift, $date) as [$start, $end]) {
                 foreach ($candidateIntervals as [$candidateStart, $candidateEnd]) {
                     if ($start <= $candidateEnd && $candidateStart <= $end) {

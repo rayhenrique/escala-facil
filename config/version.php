@@ -1,9 +1,20 @@
 <?php
 
 return [
-    'current' => env('APP_VERSION', '1.10.0'),
+    'current' => env('APP_VERSION', '1.11.0'),
 
     'releases' => [
+        [
+            'version' => '1.11.0',
+            'date' => '2026-10-01',
+            'title' => 'Dobras, desfazer troca e PDF para afixar',
+            'summary' => 'A escala sinaliza dobras no aceite e na aprovação, a gerência pode desfazer trocas e imprimir a escala de parede.',
+            'highlights' => [
+                'Alerta de dobra (turnos emendados) para o substituto e selo na fila de aprovação.',
+                'Ação de desfazer troca aprovada, com devolução do plantão e liberação da cota.',
+                'PDF para afixar com grade mensal, legenda, trocas destacadas e assinaturas.',
+            ],
+        ],
         [
             'version' => '1.10.0',
             'date' => '2026-10-01',

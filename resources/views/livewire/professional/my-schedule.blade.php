@@ -128,6 +128,9 @@
                 <p>O profissional receberá uma notificação para aceitar ou recusar a cobertura.</p>
             @elseif ($pendingConfirmation === 'accept_swap')
                 <p>Solicitado por: <strong>{{ $confirmationSummary['requester'] }}</strong></p>
+                @if (! empty($confirmationSummary['double_shift']))
+                    <p class="mt-2 font-semibold text-amber-700">Atenção: este aceite emenda (dobra) com seu plantão de {{ $confirmationSummary['double_shift'] }}. A gerência decidirá com essa informação.</p>
+                @endif
                 <p>Ao confirmar, o pedido seguirá para decisão da gerência.</p>
             @elseif ($pendingConfirmation === 'absence')
                 <p>Justificativa: <strong>{{ $confirmationSummary['reason'] }}</strong></p>

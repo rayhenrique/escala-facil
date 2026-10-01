@@ -85,6 +85,8 @@
     .status-absence_reported { @apply bg-amber-100 text-amber-800; }
     .status-pending_professional { @apply bg-sky-100 text-sky-800; }
     .status-pending_manager { @apply bg-amber-100 text-amber-800; }
+    .status-double_shift { @apply bg-amber-100 text-amber-800; }
+    .status-reverted { @apply bg-slate-100 text-slate-700; }
     .count-badge { @apply inline-flex min-w-7 items-center justify-center rounded-full bg-primary px-2 py-1 text-xs font-semibold text-white; }
     .meta-label { @apply font-mono text-[0.6875rem] font-medium uppercase tracking-wider text-muted; }
     .file-input { @apply block w-full rounded-lg border border-line bg-white text-sm text-muted file:mr-4 file:min-h-11 file:border-0 file:border-r file:border-line file:bg-canvas file:px-4 file:py-3 file:font-semibold file:text-primary hover:file:bg-primary-soft; }

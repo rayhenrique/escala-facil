@@ -3,11 +3,16 @@
 namespace App\Livewire\Manager;
 
 use App\Actions\ShiftSwaps\DecideShiftSwapAction;
+use App\Actions\ShiftSwaps\RevertShiftSwapAction;
+use App\Enums\ShiftStatus;
 use App\Enums\ShiftSwapEvent;
 use App\Enums\ShiftSwapStatus;
+use App\Models\Shift;
 use App\Models\ShiftSwap;
+use App\Support\ShiftCoverage;
 use App\Support\ShiftSwapReceipt;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Collection;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -26,6 +31,11 @@ class SwapApprovals extends Component
 
     /** @var array<string, string>|null */
     public ?array $pendingDecisionSummary = null;
+
+    public ?int $pendingRevertSwapId = null;
+
+    /** @var array<string, string>|null */
+    public ?array $pendingRevertSummary = null;
 
     public function mount(): void
     {
@@ -64,6 +74,12 @@ class SwapApprovals extends Component
             'requester' => $shiftSwap->requester->name,
             'substitute' => $shiftSwap->substitute->name,
         ];
+
+        $doubleShift = ShiftCoverage::findDoubleShift($shiftSwap->substitute, $shiftSwap->shift);
+
+        if ($doubleShift) {
+            $this->pendingDecisionSummary['double_shift'] = ShiftCoverage::doubleShiftLabel($doubleShift);
+        }
     }
 
     public function confirmDecision(DecideShiftSwapAction $action, ShiftSwapReceipt $receipts): void
@@ -97,6 +113,46 @@ class SwapApprovals extends Component
         session()->flash('status', 'Solicitação de troca rejeitada.');
     }
 
+    public function requestRevert(int $shiftSwapId): void
+    {
+        $shiftSwap = ShiftSwap::query()
+            ->with(['shift.sector', 'shift.category', 'requester', 'substitute'])
+            ->findOrFail($shiftSwapId);
+        $this->authorize('revert', $shiftSwap);
+
+        $this->pendingRevertSwapId = $shiftSwap->id;
+        $this->pendingRevertSummary = [
+            'shift' => sprintf(
+                '%s, das %s às %s',
+                $shiftSwap->shift->date->format('d/m/Y'),
+                substr((string) $shiftSwap->shift->start_time, 0, 5),
+                substr((string) $shiftSwap->shift->end_time, 0, 5),
+            ),
+            'location' => $shiftSwap->shift->sector->name.' · '.$shiftSwap->shift->category->name,
+            'requester' => $shiftSwap->requester->name,
+            'substitute' => $shiftSwap->substitute->name,
+        ];
+    }
+
+    public function cancelRevert(): void
+    {
+        $this->reset(['pendingRevertSwapId', 'pendingRevertSummary']);
+    }
+
+    public function confirmRevert(RevertShiftSwapAction $action, ShiftSwapReceipt $receipts): void
+    {
+        abort_unless($this->pendingRevertSwapId, 404);
+
+        $shiftSwap = ShiftSwap::query()->findOrFail($this->pendingRevertSwapId);
+        $this->authorize('revert', $shiftSwap);
+        $shiftSwap = $action->execute(auth()->user(), $this->pendingRevertSwapId);
+        $this->swapReceipt = $receipts->make($shiftSwap, ShiftSwapEvent::Reverted);
+
+        $this->cancelRevert();
+
+        session()->flash('status', 'Troca desfeita e plantão devolvido ao solicitante.');
+    }
+
     public function render(): View
     {
         $swaps = ShiftSwap::query()
@@ -110,6 +166,64 @@ class SwapApprovals extends Component
             ->oldest()
             ->paginate(10);
 
-        return view('livewire.manager.swap-approvals', compact('swaps'));
+        return view('livewire.manager.swap-approvals', [
+            'swaps' => $swaps,
+            'doubleShifts' => $this->doubleShiftLabels($swaps->getCollection()),
+            'approvedSwaps' => ShiftSwap::query()
+                ->with([
+                    'shift.category',
+                    'shift.sector',
+                    'requester',
+                    'substitute',
+                ])
+                ->where('status', ShiftSwapStatus::Approved)
+                ->whereHas('shift', fn ($query) => $query
+                    ->whereDate('date', '>=', today())
+                    ->where('status', ShiftStatus::Scheduled))
+                ->latest()
+                ->limit(10)
+                ->get(),
+        ]);
+    }
+
+    /**
+     * @param  Collection<int, ShiftSwap>  $swaps
+     * @return array<int, string>
+     */
+    private function doubleShiftLabels($swaps): array
+    {
+        if ($swaps->isEmpty()) {
+            return [];
+        }
+
+        $dates = $swaps
+            ->map(fn (ShiftSwap $swap): array => [
+                $swap->shift->date->format('Y-m-d'),
+                $swap->shift->date->subDay()->format('Y-m-d'),
+            ])
+            ->flatten()
+            ->unique()
+            ->all();
+
+        $pool = Shift::query()
+            ->whereIn('user_id', $swaps->pluck('substitute_id')->unique()->all())
+            ->where(function ($query) use ($dates): void {
+                foreach ($dates as $date) {
+                    $query->orWhereDate('date', $date);
+                }
+            })
+            ->get();
+
+        $labels = [];
+
+        foreach ($swaps as $swap) {
+            $double = ShiftCoverage::findDoubleShiftIn($pool, $swap->substitute_id, $swap->shift);
+
+            if ($double) {
+                $labels[$swap->id] = ShiftCoverage::doubleShiftLabel($double);
+            }
+        }
+
+        return $labels;
     }
 }

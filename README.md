@@ -4,7 +4,7 @@
 
 Sistema interno para gestão de escalas médicas, plantões, trocas e ausências em unidades de saúde. A aplicação centraliza a operação da gerência, permite que profissionais acompanhem a própria agenda e aplica as regras de compatibilidade e limite mensal em todas as decisões de troca.
 
-**Versão atual:** `1.10.0` — consulte o histórico completo em [`versoes.md`](versoes.md).
+**Versão atual:** `1.11.0` — consulte o histórico completo em [`versoes.md`](versoes.md).
 
 Desenvolvido por [KL Tecnologia](https://kltecnologia.com).
 
@@ -18,7 +18,7 @@ O MVP está funcional e inclui:
 - criação, edição, consulta e exclusão de plantões, com modelo XLSX, importação validada e exportação mensal;
 - calendário mensal compartilhado com todos os plantões e profissionais de cada dia, com filtros por setor e categoria e marcador de dias com 24h cobertas;
 - agenda mensal do profissional;
-- solicitação, aceite e aprovação gerencial de trocas;
+- solicitação, aceite e aprovação gerencial de trocas, com alerta de dobras e desfazer troca aprovada;
 - notificações persistentes para substitutos, solicitantes e gerentes em cada etapa da troca;
 - comprovantes de solicitação, aceite e decisão com um retrato dos dados da movimentação;
 - modais de revisão para exclusões, trocas, ausências e demais ações importantes;
@@ -41,7 +41,7 @@ O progresso detalhado fica em [`TASKS.md`](TASKS.md).
 O gerente pode:
 
 - acompanhar cobertura, plantões descobertos e trocas pendentes;
-- consultar relatórios mensais de cobertura, trocas, ausências e desempenho por profissional, com exportação em PDF;
+- consultar relatórios mensais de cobertura, trocas, ausências e desempenho por profissional, com exportação em PDF e escala para afixar;
 - consultar o calendário mensal e abrir a relação completa de plantonistas por dia, filtrando por setor e categoria;
 - cadastrar e manter usuários, setores e categorias;
 - criar, editar, alocar e excluir plantões;
@@ -68,9 +68,10 @@ O cadastro público permanece desativado. Novas contas são criadas pela gerênc
 
 - Uma troca só pode envolver profissionais da mesma categoria e do mesmo setor do plantão.
 - Apenas o profissional indicado como substituto pode aceitar a solicitação.
-- O fluxo segue `Aguardando profissional` → `Aguardando gerência` → `Aprovada` ou `Rejeitada`.
+- O fluxo segue `Aguardando profissional` → `Aguardando gerência` → `Aprovada`, `Rejeitada` ou `Desfeita`.
 - Cada profissional pode participar de no máximo **quatro trocas aprovadas por mês**, somando solicitações e substituições.
-- A aprovação gerencial transfere o plantão ao substituto.
+- A aprovação gerencial transfere o plantão ao substituto; o aceite que emenda turnos exibe alerta de dobra para decisão consciente.
+- A gerência pode desfazer trocas aprovadas futuras, devolvendo o plantão ao solicitante e liberando a cota mensal.
 - Uma solicitação avisa o substituto; o aceite avisa o solicitante, o substituto e todos os gerentes; a decisão avisa os dois profissionais.
 - Cada etapa armazena um comprovante com referência, data, horário, setor, categoria e participantes conforme estavam no momento da movimentação.
 - Uma ausência justificada deixa o plantão descoberto e gera um alerta gerencial.
@@ -154,7 +155,7 @@ Crie um banco MySQL chamado `escala_facil` e ajuste o `.env`:
 APP_NAME="Escala Fácil"
 APP_URL=http://127.0.0.1:8000
 APP_TIMEZONE=America/Fortaleza
-APP_VERSION=1.10.0
+APP_VERSION=1.11.0
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR
 APP_FAKER_LOCALE=pt_BR

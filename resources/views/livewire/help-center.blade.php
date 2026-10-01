@@ -202,6 +202,7 @@
                         <li>Abra <strong>Relatórios</strong> e selecione o mês, o setor e a categoria.</li>
                         <li>Confira cobertura, trocas, ausências e o desempenho por profissional.</li>
                         <li>Use <strong>Exportar PDF</strong> para guardar ou compartilhar o fechamento.</li>
+                        <li>Use <strong>PDF para afixar</strong> para imprimir a escala do mês com legenda, trocas destacadas e assinaturas.</li>
                     </ol>
                 </div>
             </details>
@@ -214,8 +215,10 @@
                         <li>Selecione <strong>Aprovar</strong> para transferir o plantão ao substituto, ou <strong>Rejeitar</strong> para encerrar o pedido sem mudar a escala.</li>
                         <li>No modal, revise o plantão, o solicitante, o substituto e a consequência; depois confirme a decisão.</li>
                         <li>Leia o aviso e o comprovante da decisão. Guarde a referência quando precisar localizar o evento depois.</li>
+                        <li>O selo <strong>Dobra</strong> indica que o substituto emenda turnos; aprove somente se a dobra for autorizada.</li>
                     </ol>
                     <p>A decisão avisa os dois profissionais. A aprovação ainda revalida compatibilidade e limite mensal antes de alterar o plantão.</p>
+                    <p>Para corrigir uma troca já aprovada, use <strong>Desfazer troca</strong> na lista de aprovadas futuras: o plantão volta ao solicitante, a cota mensal é liberada e ambos recebem comprovante. Só é possível desfazer plantões futuros ainda com o substituto, sem ausência ou nova troca pendente.</p>
                 </div>
             </details>
             <details>
@@ -282,6 +285,7 @@
                         <li>Abra o pedido recebido e confira todos os dados do plantão.</li>
                         <li>Selecione <strong>Aceitar</strong> somente se puder assumir o horário.</li>
                         <li>Revise o plantão e o solicitante no modal e confirme o aceite.</li>
+                        <li>Se o aceite emendar com outro plantão seu, o modal avisa a dobra para decisão consciente.</li>
                         <li>Após o aceite, acompanhe o status <strong>Aguardando gerência</strong>.</li>
                         <li>Consulte a notificação final para saber se a troca foi aprovada ou rejeitada.</li>
                     </ol>

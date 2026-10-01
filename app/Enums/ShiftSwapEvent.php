@@ -8,6 +8,7 @@ enum ShiftSwapEvent: string
     case Accepted = 'accepted';
     case Approved = 'approved';
     case Rejected = 'rejected';
+    case Reverted = 'reverted';
 
     public function label(): string
     {
@@ -16,6 +17,7 @@ enum ShiftSwapEvent: string
             self::Accepted => 'Solicitação aceita',
             self::Approved => 'Troca aprovada',
             self::Rejected => 'Troca rejeitada',
+            self::Reverted => 'Troca desfeita',
         };
     }
 }
