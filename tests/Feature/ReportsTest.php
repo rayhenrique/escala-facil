@@ -95,12 +95,46 @@ class ReportsTest extends TestCase
             ->assertHasNoErrors();
     }
 
-    public function test_professional_cannot_open_reports_or_download_pdf(): void
+    public function test_professional_cannot_open_manager_reports_routes(): void
     {
         $professional = User::factory()->create(['role' => UserRole::Professional]);
 
         $this->actingAs($professional)->get(route('manager.reports'))->assertForbidden();
         $this->actingAs($professional)->get(route('manager.reports.pdf'))->assertForbidden();
+        $this->actingAs($professional)->get(route('manager.reports.wall'))->assertForbidden();
+    }
+
+    public function test_professional_can_view_shared_reports_and_download_pdfs(): void
+    {
+        [, $ana, , $sector, $category] = $this->team();
+
+        $professional = User::factory()->create([
+            'category_id' => $category->id,
+            'sector_id' => $sector->id,
+        ]);
+
+        Shift::factory()->create([
+            'date' => '2026-11-12',
+            'sector_id' => $sector->id,
+            'category_id' => $category->id,
+            'user_id' => $ana->id,
+            'status' => ShiftStatus::Scheduled,
+        ]);
+
+        $this->actingAs($professional)
+            ->get(route('professional.reports', ['month' => '2026-11']))
+            ->assertOk()
+            ->assertSee('Relatórios')
+            ->assertSeeInOrder(['Minha escala', 'Calendário', 'Relatórios', 'Notificações', 'Ajuda e versões'])
+            ->assertSee('Ana Plantonista');
+
+        $this->actingAs($professional)->get(route('professional.reports.pdf', ['month' => '2026-11']))->assertOk();
+        $this->actingAs($professional)->get(route('professional.reports.wall', ['month' => '2026-11']))->assertOk();
+
+        Livewire::actingAs($professional)
+            ->test(Reports::class)
+            ->set('month', '2026-11')
+            ->assertSee('1 plantão(ões) no período selecionado.');
     }
 
     public function test_manager_can_download_report_pdf(): void
@@ -139,13 +173,6 @@ class ReportsTest extends TestCase
         $response->assertOk();
         $response->assertHeader('content-type', 'application/pdf');
         $this->assertStringStartsWith('%PDF', (string) $response->getContent());
-    }
-
-    public function test_professional_cannot_download_wall_roster_pdf(): void
-    {
-        $professional = User::factory()->create(['role' => UserRole::Professional]);
-
-        $this->actingAs($professional)->get(route('manager.reports.wall'))->assertForbidden();
     }
 
     public function test_wall_roster_marks_shifts_received_through_approved_swaps(): void

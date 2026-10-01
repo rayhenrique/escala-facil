@@ -37,6 +37,9 @@ Route::middleware(['auth', 'professional'])
     ->group(function () {
         Route::get('dashboard', MySchedule::class)->name('dashboard');
         Route::get('calendar', MonthlyCalendar::class)->name('calendar');
+        Route::get('reports', Reports::class)->name('reports');
+        Route::get('reports/pdf', ReportPdfController::class)->name('reports.pdf');
+        Route::get('reports/wall', WallRosterPdfController::class)->name('reports.wall');
     });
 
 Route::middleware(['auth', 'manager'])

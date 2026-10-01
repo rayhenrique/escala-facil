@@ -1,9 +1,20 @@
 <?php
 
 return [
-    'current' => env('APP_VERSION', '1.11.0'),
+    'current' => env('APP_VERSION', '1.12.0'),
 
     'releases' => [
+        [
+            'version' => '1.12.0',
+            'date' => '2026-10-01',
+            'title' => 'Relatórios compartilhados e manual detalhado',
+            'summary' => 'Profissionais também consultam relatórios e exportam PDFs, e o manual orienta cada rotina em detalhes.',
+            'highlights' => [
+                'Relatórios, PDF gerencial e PDF para afixar disponíveis ao profissional.',
+                'Manual com passo a passo detalhado do fechamento do mês e da consulta de relatórios.',
+                'Rotas gerenciais de relatórios preservadas e exclusivas da gerência.',
+            ],
+        ],
         [
             'version' => '1.11.0',
             'date' => '2026-10-01',

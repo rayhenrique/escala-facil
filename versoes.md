@@ -6,6 +6,14 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.12.0 — 01/10/2026
+
+### Relatórios compartilhados e manual detalhado
+
+- Profissionais consultam relatórios, exportam o PDF gerencial e o PDF para afixar.
+- Manual com passo a passo detalhado do fechamento do mês e da consulta de relatórios.
+- Rotas gerenciais de relatórios seguem exclusivas da gerência.
+
 ## 1.11.0 — 01/10/2026
 
 ### Dobras, desfazer troca e PDF para afixar

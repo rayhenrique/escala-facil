@@ -154,3 +154,8 @@
   - [x] Disponibilizar PDF para afixar com grade mensal, legenda, trocas e assinaturas.
   - [x] Atualizar manual, contrato de experiência, versão e testes automatizados.
 
+- [x] **Fase 23: Relatórios compartilhados e manual detalhado (1.12.0)**
+  - [x] Disponibilizar relatórios e PDFs ao profissional, mantendo rotas gerenciais exclusivas.
+  - [x] Detalhar o passo a passo do fechamento do mês e da consulta de relatórios no manual.
+  - [x] Atualizar permissões, contrato de experiência, versão e testes automatizados.
+

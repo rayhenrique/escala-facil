@@ -110,7 +110,7 @@ class PhaseEightCalendarTest extends TestCase
             ->get(route('professional.calendar', ['month' => '2026-11']))
             ->assertOk()
             ->assertSee('Calendário de plantões')
-            ->assertSeeInOrder(['Minha escala', 'Calendário', 'Notificações', 'Ajuda e versões'])
+            ->assertSeeInOrder(['Minha escala', 'Calendário', 'Relatórios', 'Notificações', 'Ajuda e versões'])
             ->assertDontSee(route('manager.shifts'), false)
             ->assertDontSee('Gerenciar plantões');
 

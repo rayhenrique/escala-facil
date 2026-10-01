@@ -199,10 +199,13 @@
                     </ul>
                     <h4>Fechamento do mês</h4>
                     <ol>
-                        <li>Abra <strong>Relatórios</strong> e selecione o mês, o setor e a categoria.</li>
-                        <li>Confira cobertura, trocas, ausências e o desempenho por profissional.</li>
-                        <li>Use <strong>Exportar PDF</strong> para guardar ou compartilhar o fechamento.</li>
-                        <li>Use <strong>PDF para afixar</strong> para imprimir a escala do mês com legenda, trocas destacadas e assinaturas.</li>
+                        <li>Abra <strong>Relatórios</strong> e selecione o mês, o setor e a categoria. Todos os números da tela passam a refletir os filtros; use <strong>Limpar filtros</strong> para voltar à visão completa.</li>
+                        <li>Leia o quadro de resumo: <strong>Cobertura</strong> mostra o percentual de plantões com profissional; <strong>Descobertos</strong> conta os sem profissional; <strong>Trocas aprovadas</strong> soma as criadas no mês; <strong>Ausências</strong> soma as justificativas de plantões do mês.</li>
+                        <li>Confira <strong>Plantões por setor</strong> e <strong>por categoria</strong> para localizar onde faltou cobertura.</li>
+                        <li>Em <strong>Plantões por profissional</strong>, cada linha mostra plantões, trocas aprovadas no formato <strong>X de 4</strong> (a cota mensal) e ausências. Use essa tabela para conversas de alinhamento e para antecipar estouro de cota.</li>
+                        <li>Em <strong>Trocas criadas no mês</strong>, acompanhe solicitante, substituto e situação de cada pedido.</li>
+                        <li>Use <strong>Exportar PDF</strong> para guardar ou compartilhar o fechamento com os mesmos filtros da tela.</li>
+                        <li>Use <strong>PDF para afixar</strong> para imprimir a escala do mês com legenda, trocas destacadas (● Troca) e linhas de assinatura da gerência e do responsável.</li>
                     </ol>
                 </div>
             </details>
@@ -263,6 +266,19 @@
                         <li>Consulte todos os plantões e plantonistas daquela data, incluindo horário, setor, categoria e cobertura.</li>
                     </ol>
                     <p>Plantões ainda sem profissional também aparecem. A consulta não permite criar, editar ou excluir registros.</p>
+                </div>
+            </details>
+            <details>
+                <summary>Consultar relatórios</summary>
+                <div>
+                    <ol>
+                        <li>Abra <strong>Relatórios</strong> na sidebar e selecione o mês desejado.</li>
+                        <li>Use os filtros de setor e categoria para focar em parte da escala; o resumo, as tabelas e as trocas acompanham os filtros.</li>
+                        <li>No quadro de resumo, acompanhe a cobertura do mês, os plantões descobertos, as trocas aprovadas e as ausências.</li>
+                        <li>Em <strong>Plantões por profissional</strong>, localize sua linha para ver seus plantões, suas trocas aprovadas (<strong>X de 4</strong>) e suas ausências no mês.</li>
+                        <li>Use <strong>Exportar PDF</strong> para salvar o relatório ou <strong>PDF para afixar</strong> para imprimir a escala do mês.</li>
+                    </ol>
+                    <p>A consulta é somente leitura: relatórios não permitem criar, editar ou excluir registros.</p>
                 </div>
             </details>
             <details>

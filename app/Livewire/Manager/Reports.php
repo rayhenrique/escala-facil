@@ -26,7 +26,7 @@ class Reports extends Component
 
     public function mount(): void
     {
-        $this->authorize('viewAny', Shift::class);
+        $this->authorize('viewCalendar', Shift::class);
         $this->month = $this->normalizeMonth($this->month);
     }
 
@@ -84,6 +84,8 @@ class Reports extends Component
 
     public function render(): View
     {
-        return view('livewire.manager.reports');
+        return view('livewire.manager.reports', [
+            'routePrefix' => request()->routeIs('professional.*') ? 'professional.' : 'manager.',
+        ]);
     }
 }

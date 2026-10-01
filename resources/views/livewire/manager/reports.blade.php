@@ -10,8 +10,8 @@
                 <label for="report-month" class="field-label">Mês exibido</label>
                 <input wire:model.live="month" id="report-month" type="month" class="field-input">
             </div>
-            <a href="{{ route('manager.reports.pdf', ['month' => $month, 'sector_id' => $sectorId, 'category_id' => $categoryId]) }}" class="button-secondary w-full text-center sm:w-auto">Exportar PDF</a>
-            <a href="{{ route('manager.reports.wall', ['month' => $month, 'sector_id' => $sectorId, 'category_id' => $categoryId]) }}" class="button-secondary w-full text-center sm:w-auto">PDF para afixar</a>
+            <a href="{{ route($routePrefix.'reports.pdf', ['month' => $month, 'sector_id' => $sectorId, 'category_id' => $categoryId]) }}" class="button-secondary w-full text-center sm:w-auto">Exportar PDF</a>
+            <a href="{{ route($routePrefix.'reports.wall', ['month' => $month, 'sector_id' => $sectorId, 'category_id' => $categoryId]) }}" class="button-secondary w-full text-center sm:w-auto">PDF para afixar</a>
         </div>
     </div>
 

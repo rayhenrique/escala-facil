@@ -4,7 +4,7 @@
 
 Sistema interno para gestão de escalas médicas, plantões, trocas e ausências em unidades de saúde. A aplicação centraliza a operação da gerência, permite que profissionais acompanhem a própria agenda e aplica as regras de compatibilidade e limite mensal em todas as decisões de troca.
 
-**Versão atual:** `1.11.0` — consulte o histórico completo em [`versoes.md`](versoes.md).
+**Versão atual:** `1.12.0` — consulte o histórico completo em [`versoes.md`](versoes.md).
 
 Desenvolvido por [KL Tecnologia](https://kltecnologia.com).
 
@@ -55,6 +55,7 @@ O profissional pode:
 
 - consultar os próprios plantões por mês;
 - consultar o calendário mensal completo e os plantonistas escalados em cada dia, com filtros por setor e categoria;
+- consultar relatórios mensais de cobertura, trocas e ausências, com exportação em PDF;
 - solicitar troca com um colega elegível;
 - aceitar pedidos em que foi indicado como substituto;
 - receber notificações ao ser indicado e após aceite ou decisão da gerência;
@@ -155,7 +156,7 @@ Crie um banco MySQL chamado `escala_facil` e ajuste o `.env`:
 APP_NAME="Escala Fácil"
 APP_URL=http://127.0.0.1:8000
 APP_TIMEZONE=America/Fortaleza
-APP_VERSION=1.11.0
+APP_VERSION=1.12.0
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR
 APP_FAKER_LOCALE=pt_BR
@@ -296,6 +297,7 @@ O Escala Fácil e seu código-fonte são propriedade exclusiva da **KL Tecnologi
 | Usuários | `/manager/users` | gerente |
 | Minha escala | `/professional/dashboard` | profissional |
 | Calendário mensal | `/professional/calendar` | profissional |
+| Relatórios | `/professional/reports` | profissional |
 | Notificações e comprovantes | `/notifications` | gerente e profissional |
 | Ajuda e versões | `/help` | gerente e profissional |
 

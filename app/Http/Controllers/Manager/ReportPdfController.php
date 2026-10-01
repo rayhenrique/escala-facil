@@ -18,7 +18,7 @@ class ReportPdfController extends Controller
 
     public function __invoke(Request $request, ShiftReportService $reports): Response
     {
-        $this->authorize('viewAny', Shift::class);
+        $this->authorize('viewCalendar', Shift::class);
 
         $month = $request->string('month')->toString();
         $month = preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $month) ? $month : now()->format('Y-m');

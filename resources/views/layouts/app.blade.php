@@ -95,6 +95,9 @@
                             <a href="{{ route('professional.calendar') }}" wire:navigate title="Calendário" class="sidebar-nav-link {{ request()->routeIs('professional.calendar') ? 'sidebar-nav-link-active' : '' }}" @if(request()->routeIs('professional.calendar')) aria-current="page" @endif>
                                 <x-nav-icon name="calendar" class="sidebar-nav-icon" /><span class="sidebar-label">Calendário</span>
                             </a>
+                            <a href="{{ route('professional.reports') }}" wire:navigate title="Relatórios" class="sidebar-nav-link {{ request()->routeIs('professional.reports*') ? 'sidebar-nav-link-active' : '' }}" @if(request()->routeIs('professional.reports*')) aria-current="page" @endif>
+                                <x-nav-icon name="report" class="sidebar-nav-icon" /><span class="sidebar-label">Relatórios</span>
+                            </a>
                         @endif
                     </div>
 
