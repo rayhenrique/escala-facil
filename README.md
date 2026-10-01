@@ -4,7 +4,7 @@
 
 Sistema interno para gestão de escalas médicas, plantões, trocas e ausências em unidades de saúde. A aplicação centraliza a operação da gerência, permite que profissionais acompanhem a própria agenda e aplica as regras de compatibilidade e limite mensal em todas as decisões de troca.
 
-**Versão atual:** `1.8.0` — consulte o histórico completo em [`versoes.md`](versoes.md).
+**Versão atual:** `1.10.0` — consulte o histórico completo em [`versoes.md`](versoes.md).
 
 Desenvolvido por [KL Tecnologia](https://kltecnologia.com).
 
@@ -16,7 +16,7 @@ O MVP está funcional e inclui:
 - painel gerencial com indicadores reais de cobertura e pendências;
 - cadastro completo de usuários, setores e categorias;
 - criação, edição, consulta e exclusão de plantões, com modelo XLSX, importação validada e exportação mensal;
-- calendário mensal compartilhado com todos os plantões e profissionais de cada dia, com filtros por setor e categoria;
+- calendário mensal compartilhado com todos os plantões e profissionais de cada dia, com filtros por setor e categoria e marcador de dias com 24h cobertas;
 - agenda mensal do profissional;
 - solicitação, aceite e aprovação gerencial de trocas;
 - notificações persistentes para substitutos, solicitantes e gerentes em cada etapa da troca;
@@ -41,6 +41,7 @@ O progresso detalhado fica em [`TASKS.md`](TASKS.md).
 O gerente pode:
 
 - acompanhar cobertura, plantões descobertos e trocas pendentes;
+- consultar relatórios mensais de cobertura, trocas, ausências e desempenho por profissional, com exportação em PDF;
 - consultar o calendário mensal e abrir a relação completa de plantonistas por dia, filtrando por setor e categoria;
 - cadastrar e manter usuários, setores e categorias;
 - criar, editar, alocar e excluir plantões;
@@ -153,7 +154,7 @@ Crie um banco MySQL chamado `escala_facil` e ajuste o `.env`:
 APP_NAME="Escala Fácil"
 APP_URL=http://127.0.0.1:8000
 APP_TIMEZONE=America/Fortaleza
-APP_VERSION=1.8.0
+APP_VERSION=1.10.0
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR
 APP_FAKER_LOCALE=pt_BR
@@ -288,6 +289,7 @@ O Escala Fácil e seu código-fonte são propriedade exclusiva da **KL Tecnologi
 | Calendário mensal | `/manager/calendar` | gerente |
 | Escalas | `/manager/shifts` | gerente |
 | Trocas | `/manager/swaps` | gerente |
+| Relatórios | `/manager/reports` | gerente |
 | Setores | `/manager/sectors` | gerente |
 | Categorias | `/manager/categories` | gerente |
 | Usuários | `/manager/users` | gerente |

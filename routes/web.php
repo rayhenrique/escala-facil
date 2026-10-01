@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Controllers\DashboardRedirectController;
+use App\Http\Controllers\Manager\ReportPdfController;
 use App\Http\Controllers\Manager\ShiftSpreadsheetController;
 use App\Livewire\HelpCenter;
 use App\Livewire\Manager\CategoryManager;
 use App\Livewire\Manager\Dashboard;
+use App\Livewire\Manager\Reports;
 use App\Livewire\Manager\SectorManager;
 use App\Livewire\Manager\ShiftManager;
 use App\Livewire\Manager\SwapApprovals;
@@ -45,6 +47,8 @@ Route::middleware(['auth', 'manager'])
         Route::get('shifts', ShiftManager::class)->name('shifts');
         Route::get('shifts/template', [ShiftSpreadsheetController::class, 'template'])->name('shifts.template');
         Route::get('shifts/export', [ShiftSpreadsheetController::class, 'export'])->name('shifts.export');
+        Route::get('reports', Reports::class)->name('reports');
+        Route::get('reports/pdf', ReportPdfController::class)->name('reports.pdf');
         Route::get('swaps', SwapApprovals::class)->name('swaps');
         Route::get('sectors', SectorManager::class)->name('sectors');
         Route::get('categories', CategoryManager::class)->name('categories');

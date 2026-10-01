@@ -6,6 +6,23 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.10.0 — 01/10/2026
+
+### Cobertura de 24h no calendário
+
+- Dias com 24 horas cobertas por plantões com profissional recebem o marcador ✓.
+- Madrugadas de plantões noturnos contam para a cobertura do dia seguinte.
+- Legenda do calendário e descrição acessível atualizadas.
+
+## 1.9.0 — 01/10/2026
+
+### Módulo Relatórios com exportação em PDF
+
+- Novo item Relatórios no menu da gerência com resumo de cobertura, trocas e ausências do mês.
+- Filtros de mês, setor e categoria aplicados a todos os números e tabelas.
+- Plantões por setor, por categoria, por profissional (com cota de trocas e ausências) e trocas criadas no mês.
+- Exportação em PDF com os mesmos filtros exibidos na tela.
+
 ## 1.8.0 — 01/10/2026
 
 ### Importação e exportação de plantões em XLSX

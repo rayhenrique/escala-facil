@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Category;
 use App\Models\Sector;
 use App\Models\Shift;
+use App\Support\ShiftCoverage;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\View\View;
@@ -136,17 +137,17 @@ class MonthlyCalendar extends Component
         $monthStart = CarbonImmutable::createFromFormat('!Y-m-d', $this->month.'-01')->startOfMonth();
         $monthEnd = $monthStart->endOfMonth();
 
-        $shifts = Shift::query()
+        $allShifts = Shift::query()
             ->with(['category', 'sector', 'user'])
-            ->whereBetween('date', [$monthStart, $monthEnd])
+            ->whereBetween('date', [$monthStart->subDay(), $monthEnd])
             ->when($this->sectorId !== '', fn ($query) => $query->where('sector_id', $this->sectorId))
             ->when($this->categoryId !== '', fn ($query) => $query->where('category_id', $this->categoryId))
             ->orderBy('date')
             ->orderBy('start_time')
             ->get();
 
-        $shiftsByDate = $shifts->groupBy(fn (Shift $shift): string => $shift->date->format('Y-m-d'));
-        $calendarDays = $this->calendarDays($monthStart, $monthEnd, $shiftsByDate);
+        $shiftsByDate = $allShifts->groupBy(fn (Shift $shift): string => $shift->date->format('Y-m-d'));
+        $calendarDays = $this->calendarDays($monthStart, $monthEnd, $shiftsByDate, $allShifts);
         $selectedShifts = $shiftsByDate->get($this->selectedDate, collect());
 
         return view('livewire.monthly-calendar', [
@@ -162,12 +163,14 @@ class MonthlyCalendar extends Component
 
     /**
      * @param  Collection<string, Collection<int, Shift>>  $shiftsByDate
-     * @return Collection<int, array{date: string, day: string, in_month: bool, is_today: bool, shifts_count: int, uncovered_count: int}>
+     * @param  Collection<int, Shift>  $allShifts
+     * @return Collection<int, array{date: string, day: string, in_month: bool, is_today: bool, shifts_count: int, uncovered_count: int, covered_24h: bool}>
      */
     private function calendarDays(
         CarbonImmutable $monthStart,
         CarbonImmutable $monthEnd,
         Collection $shiftsByDate,
+        Collection $allShifts,
     ): Collection {
         $days = collect();
         $cursor = $monthStart->startOfWeek(CarbonInterface::SUNDAY);
@@ -175,15 +178,19 @@ class MonthlyCalendar extends Component
 
         while ($cursor->lessThanOrEqualTo($gridEnd)) {
             $date = $cursor->format('Y-m-d');
-            $dayShifts = $shiftsByDate->get($date, collect());
+            $inMonth = $cursor->month === $monthStart->month;
+            $dayShifts = $inMonth ? $shiftsByDate->get($date, collect()) : collect();
 
             $days->push([
                 'date' => $date,
                 'day' => $cursor->format('d'),
-                'in_month' => $cursor->month === $monthStart->month,
+                'in_month' => $inMonth,
                 'is_today' => $cursor->isToday(),
                 'shifts_count' => $dayShifts->count(),
                 'uncovered_count' => $dayShifts->whereNull('user_id')->count(),
+                'covered_24h' => $inMonth
+                    && $dayShifts->isNotEmpty()
+                    && ShiftCoverage::isDayFullyCovered($allShifts, $date),
             ]);
 
             $cursor = $cursor->addDay();

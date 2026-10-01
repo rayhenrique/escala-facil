@@ -1,9 +1,32 @@
 <?php
 
 return [
-    'current' => env('APP_VERSION', '1.8.0'),
+    'current' => env('APP_VERSION', '1.10.0'),
 
     'releases' => [
+        [
+            'version' => '1.10.0',
+            'date' => '2026-10-01',
+            'title' => 'Cobertura de 24h no calendário',
+            'summary' => 'O calendário agora marca com ✓ os dias com 24 horas cobertas por plantões com profissional.',
+            'highlights' => [
+                'Indicador de 24h cobertas em cada dia do calendário mensal.',
+                'Plantões noturnos contam a madrugada seguinte na cobertura do dia.',
+                'Legenda e descrição acessível do estado de cobertura.',
+            ],
+        ],
+        [
+            'version' => '1.9.0',
+            'date' => '2026-10-01',
+            'title' => 'Módulo Relatórios com exportação em PDF',
+            'summary' => 'A gerência agora consulta cobertura, trocas, ausências e desempenho por profissional, com filtros e PDF.',
+            'highlights' => [
+                'Novo item Relatórios no menu da gerência com resumo de cobertura do mês.',
+                'Filtros de mês, setor e categoria aplicados a todos os números.',
+                'Tabelas por setor, categoria, profissional e trocas criadas no mês.',
+                'Exportação em PDF com os mesmos filtros da tela.',
+            ],
+        ],
         [
             'version' => '1.8.0',
             'date' => '2026-10-01',

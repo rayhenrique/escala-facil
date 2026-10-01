@@ -234,4 +234,53 @@ class PhaseEightCalendarTest extends TestCase
 
         return [$manager, $emergency, $icu, $category];
     }
+
+    public function test_calendar_marks_days_with_full_24h_coverage(): void
+    {
+        $manager = User::factory()->create(['role' => UserRole::Manager]);
+        $category = Category::query()->create(['name' => 'Medicina']);
+        $sector = Sector::query()->create(['name' => 'Emergência']);
+        $ana = User::factory()->create([
+            'category_id' => $category->id,
+            'sector_id' => $sector->id,
+        ]);
+
+        $cover = fn (string $date, string $start, string $end, ?int $userId): Shift => Shift::query()->create([
+            'date' => $date,
+            'start_time' => $start,
+            'end_time' => $end,
+            'sector_id' => $sector->id,
+            'category_id' => $category->id,
+            'user_id' => $userId,
+            'status' => $userId ? ShiftStatus::Scheduled : ShiftStatus::Uncovered,
+        ]);
+
+        // Dia 12: madrugada herdada do noturno do dia 11 + 07–19 + 19–07 → 24h.
+        $cover('2026-11-11', '19:00', '07:00', $ana->id);
+        $cover('2026-11-12', '07:00', '19:00', $ana->id);
+        $cover('2026-11-12', '19:00', '07:00', $ana->id);
+        // Dia 13: só 07–19 → parcial.
+        $cover('2026-11-13', '07:00', '19:00', $ana->id);
+        // Dia 14: só o noturno 19–07 → parcial (cobre 19–24).
+        $cover('2026-11-14', '19:00', '07:00', $ana->id);
+        // Dia 15: madrugada herdada do noturno do dia 14 + 07–19 + 19–07 → 24h.
+        $cover('2026-11-15', '07:00', '19:00', $ana->id);
+        $cover('2026-11-15', '19:00', '07:00', $ana->id);
+        // Dia 16: manhã sem profissional não conta → parcial.
+        $cover('2026-11-16', '07:00', '19:00', null);
+        $cover('2026-11-16', '19:00', '07:00', $ana->id);
+
+        $component = Livewire::actingAs($manager)
+            ->test(MonthlyCalendar::class)
+            ->set('month', '2026-11')
+            ->assertSee('24h cobertas');
+
+        $days = $component->viewData('calendarDays')->keyBy('date');
+
+        $this->assertTrue($days['2026-11-12']['covered_24h']);
+        $this->assertTrue($days['2026-11-15']['covered_24h']);
+        $this->assertFalse($days['2026-11-13']['covered_24h']);
+        $this->assertFalse($days['2026-11-14']['covered_24h']);
+        $this->assertFalse($days['2026-11-16']['covered_24h']);
+    }
 }

@@ -29,6 +29,7 @@
             <div class="flex flex-wrap gap-3 text-xs text-muted" aria-label="Legenda do calendário">
                 <span class="inline-flex items-center gap-2"><span class="size-2.5 rounded-full bg-coverage"></span>Com plantão</span>
                 <span class="inline-flex items-center gap-2"><span class="size-2.5 rounded-full bg-danger"></span>Sem profissional</span>
+                <span class="inline-flex items-center gap-2"><span class="font-bold text-coverage" aria-hidden="true">✓</span>24h cobertas</span>
             </div>
         </div>
 
@@ -73,7 +74,7 @@
                     @disabled(! $day['in_month'])
                     role="gridcell"
                     @if ($selectedDate === $day['date']) aria-selected="true" @endif
-                    aria-label="{{ \Carbon\CarbonImmutable::parse($day['date'])->format('d/m/Y') }}, {{ $day['shifts_count'] }} plantão(ões)"
+                    aria-label="{{ \Carbon\CarbonImmutable::parse($day['date'])->format('d/m/Y') }}, {{ $day['shifts_count'] }} plantão(ões){{ $day['covered_24h'] ? ', 24h cobertas' : '' }}"
                 >
                     <span class="calendar-day-number {{ $day['is_today'] ? 'calendar-day-today' : '' }}">{{ $day['day'] }}</span>
 
@@ -84,6 +85,8 @@
 
                     @if ($day['in_month'] && $day['uncovered_count'] > 0)
                         <span class="calendar-day-alert" title="{{ $day['uncovered_count'] }} plantão(ões) sem profissional" aria-label="{{ $day['uncovered_count'] }} plantão(ões) sem profissional"></span>
+                    @elseif ($day['covered_24h'])
+                        <span class="calendar-day-full" title="24h cobertas" aria-label="24h cobertas">✓</span>
                     @elseif ($day['in_month'] && $day['shifts_count'] > 0)
                         <span class="calendar-day-covered" aria-hidden="true"></span>
                     @endif

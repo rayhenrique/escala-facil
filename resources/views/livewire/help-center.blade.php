@@ -173,6 +173,7 @@
                         <li>Abra <strong>Calendário</strong>.</li>
                         <li>Navegue pelas setas ou selecione diretamente o mês desejado.</li>
                         <li>Observe a quantidade de plantões em cada dia e o indicador de itens descobertos.</li>
+                        <li>O marcador ✓ indica os dias com 24 horas cobertas por plantões com profissional.</li>
                         <li>Use os filtros de setor e categoria para focar em parte da escala; limpe os filtros para voltar à visão completa.</li>
                         <li>Selecione um dia para listar todos os plantões com horário, setor, categoria, profissional e status.</li>
                         <li>Use os atalhos de gestão para corrigir a escala quando necessário.</li>
@@ -196,6 +197,12 @@
                         <li>Verifique se não há decisões gerenciais pendentes.</li>
                         <li>Revise alertas gerados por ausências e providencie a nova alocação.</li>
                     </ul>
+                    <h4>Fechamento do mês</h4>
+                    <ol>
+                        <li>Abra <strong>Relatórios</strong> e selecione o mês, o setor e a categoria.</li>
+                        <li>Confira cobertura, trocas, ausências e o desempenho por profissional.</li>
+                        <li>Use <strong>Exportar PDF</strong> para guardar ou compartilhar o fechamento.</li>
+                    </ol>
                 </div>
             </details>
             <details>

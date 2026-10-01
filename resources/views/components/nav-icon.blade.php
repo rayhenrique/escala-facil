@@ -64,5 +64,9 @@
             <path d="M10.3 3.8 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.8a2 2 0 0 0-3.4 0Z" />
             <path d="M12 9v4M12 17h.01" />
             @break
+        @case('report')
+            <path d="M5 20V10M12 20V4M19 20v-7" />
+            <path d="M3 20h18" />
+            @break
     @endswitch
 </svg>

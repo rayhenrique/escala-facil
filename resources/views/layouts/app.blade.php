@@ -76,6 +76,9 @@
                             <a href="{{ route('manager.swaps') }}" wire:navigate title="Trocas" class="sidebar-nav-link {{ request()->routeIs('manager.swaps') ? 'sidebar-nav-link-active' : '' }}" @if(request()->routeIs('manager.swaps')) aria-current="page" @endif>
                                 <x-nav-icon name="swap" class="sidebar-nav-icon" /><span class="sidebar-label">Trocas</span>
                             </a>
+                            <a href="{{ route('manager.reports') }}" wire:navigate title="Relatórios" class="sidebar-nav-link {{ request()->routeIs('manager.reports*') ? 'sidebar-nav-link-active' : '' }}" @if(request()->routeIs('manager.reports*')) aria-current="page" @endif>
+                                <x-nav-icon name="report" class="sidebar-nav-icon" /><span class="sidebar-label">Relatórios</span>
+                            </a>
                             <a href="{{ route('manager.sectors') }}" wire:navigate title="Setores" class="sidebar-nav-link {{ request()->routeIs('manager.sectors') ? 'sidebar-nav-link-active' : '' }}" @if(request()->routeIs('manager.sectors')) aria-current="page" @endif>
                                 <x-nav-icon name="building" class="sidebar-nav-icon" /><span class="sidebar-label">Setores</span>
                             </a>

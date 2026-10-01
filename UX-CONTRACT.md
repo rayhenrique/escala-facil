@@ -31,12 +31,13 @@ Este documento registra o comportamento compartilhado das telas autenticadas. As
 | Feedback | `resources/views/components/flash-notifications.blade.php` | sucesso e erro | aviso flutuante, dispensável, sem alterar a geometria e com semântica de status ou alerta |
 | Exclusão | modal de confirmação compartilhado | plantões, usuários, setores e categorias | registro identificado, consequência descrita, cancelamento e teste do fluxo |
 | Importação e exportação | `ShiftManager` + `ShiftSpreadsheetController` + modal de importação | modelo XLSX, importação e exportação mensal de plantões | referência de setores/categorias, validação por linha com cancelamento total, duplicatas ignoradas e teste do fluxo |
+| Relatórios | `Manager\Reports` + `ReportPdfController` | resumo de cobertura, distribuições, desempenho e trocas | filtros de mês, setor e categoria, limpeza, exportação em PDF e teste do fluxo |
 | Scrollbar | regra global de `resources/css/app.css` | rolagem de página e painéis | inspeção no navegador |
 
 ## Navegação e permissões
 
 - Após o login, o usuário é redirecionado ao painel correspondente ao seu perfil.
-- O gerente acessa Visão geral, Calendário, Escalas, Trocas, Setores, Categorias e Usuários, nesta ordem. O profissional acessa Minha escala e Calendário.
+- O gerente acessa Visão geral, Calendário, Escalas, Trocas, Relatórios, Setores, Categorias e Usuários, nesta ordem. O profissional acessa Minha escala e Calendário.
 - Links podem antecipar a navegação com Livewire, mas a autorização permanece obrigatória no servidor.
 - A rota ativa recebe indicação visual e `aria-current="page"`.
 - No desktop, o toggle alterna a sidebar entre 18rem e 6rem e persiste a preferência no navegador; Usuários é o último item dos módulos gerenciais.
@@ -62,7 +63,7 @@ Este documento registra o comportamento compartilhado das telas autenticadas. As
 ## Estados de dados
 
 - Listas vazias explicam o que está ausente e onde novos itens aparecerão.
-- O calendário está disponível para gerente e profissional, mostra a quantidade de plantões em cada dia e diferencia cobertura completa de plantões sem profissional; filtros de setor e categoria refinam as contagens e a lista do dia, com opção de limpar a seleção. Ao selecionar uma data, lista todos os registros daquele dia. Ações de gestão aparecem somente para gerentes.
+- O calendário está disponível para gerente e profissional, mostra a quantidade de plantões em cada dia e diferencia cobertura completa de plantões sem profissional; dias com 24h cobertas recebem o marcador ✓ com descrição acessível. Filtros de setor e categoria refinam as contagens e a lista do dia, com opção de limpar a seleção. Ao selecionar uma data, lista todos os registros daquele dia. Ações de gestão aparecem somente para gerentes.
 - Números do painel representam consultas reais. Zero significa ausência confirmada de registros no filtro descrito.
 - O painel gerencial mostra plantões descobertos de hoje em diante e trocas com status `pending_manager`.
 - A criação da solicitação notifica o substituto; o aceite notifica os profissionais e todos os gerentes; aprovação ou rejeição notifica solicitante e substituto.

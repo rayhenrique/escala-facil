@@ -136,3 +136,15 @@
   - [x] Exportar os plantões do mês exibido para edição e backup.
   - [x] Atualizar manual, contrato de experiência, versão e testes automatizados.
 
+- [x] **Fase 20: Módulo Relatórios com exportação em PDF (1.9.0)**
+  - [x] Criar item Relatórios no menu da gerência com resumo de cobertura do mês.
+  - [x] Filtrar todos os números por mês, setor e categoria.
+  - [x] Exibir plantões por setor, categoria, profissional e trocas criadas no mês.
+  - [x] Exportar o relatório em PDF com os mesmos filtros da tela.
+  - [x] Atualizar manual, contrato de experiência, versão e testes automatizados.
+
+- [x] **Fase 21: Cobertura de 24h no calendário (1.10.0)**
+  - [x] Calcular a cobertura diária pela união dos horários com profissional, incluindo madrugadas de noturnos.
+  - [x] Marcar dias com 24h cobertas com ✓, legenda e descrição acessível.
+  - [x] Atualizar manual, contrato de experiência, versão e testes automatizados.
+
