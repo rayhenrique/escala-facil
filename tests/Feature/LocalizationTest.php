@@ -19,7 +19,7 @@ class LocalizationTest extends TestCase
     public function test_application_uses_brazilian_portuguese_and_local_timezone(): void
     {
         $this->assertSame('pt_BR', app()->getLocale());
-        $this->assertSame('America/Fortaleza', config('app.timezone'));
+        $this->assertSame('America/Maceio', config('app.timezone'));
 
         $validator = Validator::make([], ['email' => ['required', 'email']]);
 

@@ -82,7 +82,7 @@ O cadastro público permanece desativado. Novas contas são criadas pela gerênc
 
 ## Interface, idioma e responsividade
 
-O sistema usa `pt-BR` em textos, validações, paginação, páginas de erro e e-mails de recuperação de senha. Datas são exibidas no padrão brasileiro, horários usam o formato de 24 horas e o fuso padrão é `America/Fortaleza`.
+O sistema usa `pt-BR` em textos, validações, paginação, páginas de erro e e-mails de recuperação de senha. Datas são exibidas no padrão brasileiro, horários usam o formato de 24 horas e o fuso padrão é `America/Maceio`.
 
 A interface parte do celular como composição principal:
 
@@ -155,7 +155,7 @@ Crie um banco MySQL chamado `escala_facil` e ajuste o `.env`:
 ```dotenv
 APP_NAME="Escala Fácil"
 APP_URL=http://127.0.0.1:8000
-APP_TIMEZONE=America/Fortaleza
+APP_TIMEZONE=America/Maceio
 APP_VERSION=1.12.0
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR

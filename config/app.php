@@ -65,7 +65,7 @@ return [
     |
     */
 
-    'timezone' => env('APP_TIMEZONE', 'America/Fortaleza'),
+    'timezone' => env('APP_TIMEZONE', 'America/Maceio'),
 
     /*
     |--------------------------------------------------------------------------
