@@ -6,6 +6,14 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.7.0 — 01/10/2026
+
+### Filtros do calendário por setor e categoria
+
+- Calendário mensal com filtros de setor e categoria para gerentes e profissionais.
+- Contagens diárias e relação de plantões do dia passam a refletir os filtros ativos.
+- Botão para limpar os filtros e mensagem específica quando nenhum plantão corresponde à seleção.
+
 ## 1.6.1 — 29/09/2026
 
 ### Plantões noturnos e robustez temporal

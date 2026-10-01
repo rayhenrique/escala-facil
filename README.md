@@ -4,7 +4,7 @@
 
 Sistema interno para gestão de escalas médicas, plantões, trocas e ausências em unidades de saúde. A aplicação centraliza a operação da gerência, permite que profissionais acompanhem a própria agenda e aplica as regras de compatibilidade e limite mensal em todas as decisões de troca.
 
-**Versão atual:** `1.6.1` — consulte o histórico completo em [`versoes.md`](versoes.md).
+**Versão atual:** `1.7.0` — consulte o histórico completo em [`versoes.md`](versoes.md).
 
 Desenvolvido por [KL Tecnologia](https://kltecnologia.com).
 
@@ -16,7 +16,7 @@ O MVP está funcional e inclui:
 - painel gerencial com indicadores reais de cobertura e pendências;
 - cadastro completo de usuários, setores e categorias;
 - criação, edição, consulta e exclusão de plantões;
-- calendário mensal compartilhado com todos os plantões e profissionais de cada dia;
+- calendário mensal compartilhado com todos os plantões e profissionais de cada dia, com filtros por setor e categoria;
 - agenda mensal do profissional;
 - solicitação, aceite e aprovação gerencial de trocas;
 - notificações persistentes para substitutos, solicitantes e gerentes em cada etapa da troca;
@@ -41,7 +41,7 @@ O progresso detalhado fica em [`TASKS.md`](TASKS.md).
 O gerente pode:
 
 - acompanhar cobertura, plantões descobertos e trocas pendentes;
-- consultar o calendário mensal e abrir a relação completa de plantonistas por dia;
+- consultar o calendário mensal e abrir a relação completa de plantonistas por dia, filtrando por setor e categoria;
 - cadastrar e manter usuários, setores e categorias;
 - criar, editar, alocar e excluir plantões;
 - aprovar ou rejeitar trocas aceitas pelo substituto;
@@ -53,7 +53,7 @@ O gerente pode:
 O profissional pode:
 
 - consultar os próprios plantões por mês;
-- consultar o calendário mensal completo e os plantonistas escalados em cada dia;
+- consultar o calendário mensal completo e os plantonistas escalados em cada dia, com filtros por setor e categoria;
 - solicitar troca com um colega elegível;
 - aceitar pedidos em que foi indicado como substituto;
 - receber notificações ao ser indicado e após aceite ou decisão da gerência;
@@ -153,7 +153,7 @@ Crie um banco MySQL chamado `escala_facil` e ajuste o `.env`:
 APP_NAME="Escala Fácil"
 APP_URL=http://127.0.0.1:8000
 APP_TIMEZONE=America/Fortaleza
-APP_VERSION=1.6.1
+APP_VERSION=1.7.0
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR
 APP_FAKER_LOCALE=pt_BR

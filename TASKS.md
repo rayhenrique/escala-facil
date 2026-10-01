@@ -124,3 +124,9 @@
   - [x] Limpar variáveis sensíveis de memória após hashing no comando interativo de criação de gerente.
   - [x] Incrementar versão semântica para 1.6.1 e atualizar changelog em `versoes.md`, `config/version.php`, PWA cache e documentação.
 
+- [x] **Fase 18: Filtros do calendário por setor e categoria (1.7.0)**
+  - [x] Adicionar filtros de setor e categoria ao calendário mensal compartilhado.
+  - [x] Aplicar os filtros às contagens dos dias e à relação de plantões do dia selecionado.
+  - [x] Oferecer limpeza dos filtros e mensagem específica quando nenhum plantão corresponde à seleção.
+  - [x] Atualizar manual, contrato de experiência, versão e testes automatizados.
+

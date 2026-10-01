@@ -32,6 +32,34 @@
             </div>
         </div>
 
+        <div class="mt-6 grid gap-4 sm:grid-cols-2">
+            <div>
+                <label for="calendar-sector" class="field-label">Setor</label>
+                <select wire:model.live="sectorId" id="calendar-sector" class="field-input">
+                    <option value="">Todos os setores</option>
+                    @foreach ($this->sectors as $sector)
+                        <option value="{{ $sector->id }}">{{ $sector->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label for="calendar-category" class="field-label">Categoria</label>
+                <select wire:model.live="categoryId" id="calendar-category" class="field-input">
+                    <option value="">Todas as categorias</option>
+                    @foreach ($this->categories as $category)
+                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+
+        @if ($hasActiveFilters)
+            <div class="mt-4 flex flex-wrap items-center gap-3">
+                <p class="text-sm text-muted">Exibindo plantões filtrados.</p>
+                <button type="button" wire:click="clearFilters" class="table-action">Limpar filtros</button>
+            </div>
+        @endif
+
         <div class="calendar-grid mt-6" role="grid" aria-label="Calendário de {{ $monthLabel }}">
             @foreach (['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'] as $weekday)
                 <div class="calendar-weekday" role="columnheader">{{ $weekday }}</div>
@@ -95,9 +123,11 @@
                 </article>
             @empty
                 <div class="empty-state xl:col-span-2">
-                    <p class="font-semibold text-ink">Nenhum plantão cadastrado neste dia.</p>
-                    <p class="mt-2 text-sm">{{ $canManageShifts ? 'Selecione outra data ou cadastre um plantão na gestão de escalas.' : 'Selecione outra data para consultar a escala.' }}</p>
-                    @if ($canManageShifts)
+                    <p class="font-semibold text-ink">{{ $hasActiveFilters ? 'Nenhum plantão encontrado para os filtros selecionados.' : 'Nenhum plantão cadastrado neste dia.' }}</p>
+                    <p class="mt-2 text-sm">{{ $hasActiveFilters ? 'Ajuste os filtros de setor e categoria ou selecione outra data.' : ($canManageShifts ? 'Selecione outra data ou cadastre um plantão na gestão de escalas.' : 'Selecione outra data para consultar a escala.') }}</p>
+                    @if ($hasActiveFilters)
+                        <button type="button" wire:click="clearFilters" class="button-secondary mt-5">Limpar filtros</button>
+                    @elseif ($canManageShifts)
                         <a href="{{ route('manager.shifts', ['month' => $month]) }}" wire:navigate class="button-secondary mt-5">Gerenciar plantões</a>
                     @endif
                 </div>

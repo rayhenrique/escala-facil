@@ -2,11 +2,15 @@
 
 namespace App\Livewire;
 
+use App\Models\Category;
+use App\Models\Sector;
 use App\Models\Shift;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -18,6 +22,10 @@ class MonthlyCalendar extends Component
     public string $month = '';
 
     public string $selectedDate = '';
+
+    public string $sectorId = '';
+
+    public string $categoryId = '';
 
     public function mount(): void
     {
@@ -38,6 +46,33 @@ class MonthlyCalendar extends Component
         $this->selectedDate = $this->month === now()->format('Y-m')
             ? today()->format('Y-m-d')
             : $this->month.'-01';
+    }
+
+    public function updatedSectorId(string $sectorId): void
+    {
+        $this->sectorId = $this->validFilterId($sectorId, Sector::class) ? $sectorId : '';
+    }
+
+    public function updatedCategoryId(string $categoryId): void
+    {
+        $this->categoryId = $this->validFilterId($categoryId, Category::class) ? $categoryId : '';
+    }
+
+    public function clearFilters(): void
+    {
+        $this->reset('sectorId', 'categoryId');
+    }
+
+    #[Computed]
+    public function sectors(): EloquentCollection
+    {
+        return Sector::query()->orderBy('name')->get();
+    }
+
+    #[Computed]
+    public function categories(): EloquentCollection
+    {
+        return Category::query()->orderBy('name')->get();
     }
 
     public function previousMonth(): void
@@ -91,6 +126,11 @@ class MonthlyCalendar extends Component
         return $date !== false && $date->format('Y-m') === $month;
     }
 
+    private function validFilterId(string $value, string $model): bool
+    {
+        return ctype_digit($value) && $model::query()->whereKey($value)->exists();
+    }
+
     public function render(): View
     {
         $monthStart = CarbonImmutable::createFromFormat('!Y-m-d', $this->month.'-01')->startOfMonth();
@@ -99,6 +139,8 @@ class MonthlyCalendar extends Component
         $shifts = Shift::query()
             ->with(['category', 'sector', 'user'])
             ->whereBetween('date', [$monthStart, $monthEnd])
+            ->when($this->sectorId !== '', fn ($query) => $query->where('sector_id', $this->sectorId))
+            ->when($this->categoryId !== '', fn ($query) => $query->where('category_id', $this->categoryId))
             ->orderBy('date')
             ->orderBy('start_time')
             ->get();
@@ -114,6 +156,7 @@ class MonthlyCalendar extends Component
             'selectedShifts' => $selectedShifts,
             'assignedProfessionalsCount' => $selectedShifts->pluck('user_id')->filter()->unique()->count(),
             'canManageShifts' => auth()->user()->can('create', Shift::class),
+            'hasActiveFilters' => $this->sectorId !== '' || $this->categoryId !== '',
         ]);
     }
 

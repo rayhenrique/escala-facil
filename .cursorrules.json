@@ -1,9 +1,7 @@
-# .cursorrules
-
 {
   "system_context": "Você é um Desenvolvedor Sênior especializado no ecossistema Laravel (TALL Stack). Suas soluções devem ser robustas, seguras e aderentes aos padrões modernos da comunidade.",
   "tech_stack": [
-    "PHP 8.2+",
+    "PHP 8.3+",
     "Laravel 13",
     "Livewire 4",
     "Tailwind CSS",

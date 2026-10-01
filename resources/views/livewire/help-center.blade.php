@@ -166,6 +166,7 @@
                         <li>Abra <strong>Calendário</strong>.</li>
                         <li>Navegue pelas setas ou selecione diretamente o mês desejado.</li>
                         <li>Observe a quantidade de plantões em cada dia e o indicador de itens descobertos.</li>
+                        <li>Use os filtros de setor e categoria para focar em parte da escala; limpe os filtros para voltar à visão completa.</li>
                         <li>Selecione um dia para listar todos os plantões com horário, setor, categoria, profissional e status.</li>
                         <li>Use os atalhos de gestão para corrigir a escala quando necessário.</li>
                     </ol>
@@ -241,6 +242,7 @@
                     <ol>
                         <li>Abra <strong>Calendário</strong> na sidebar.</li>
                         <li>Navegue até o mês desejado e escolha um dia.</li>
+                        <li>Use os filtros de setor e categoria para focar em parte da escala.</li>
                         <li>Consulte todos os plantões e plantonistas daquela data, incluindo horário, setor, categoria e cobertura.</li>
                     </ol>
                     <p>Plantões ainda sem profissional também aparecem. A consulta não permite criar, editar ou excluir registros.</p>

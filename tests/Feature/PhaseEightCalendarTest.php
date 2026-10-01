@@ -121,4 +121,117 @@ class PhaseEightCalendarTest extends TestCase
             ->assertSee('Colega Plantonista')
             ->assertDontSee('Abrir escala');
     }
+
+    public function test_manager_can_filter_calendar_by_sector(): void
+    {
+        [$manager, $emergency, $icu, $category] = $this->twoSectorSetup();
+
+        Livewire::actingAs($manager)
+            ->test(MonthlyCalendar::class)
+            ->set('month', '2026-11')
+            ->call('selectDate', '2026-11-12')
+            ->assertSee('Ana da Emergência')
+            ->assertSee('Bruno da UTI')
+            ->set('sectorId', (string) $icu->id)
+            ->assertSet('sectorId', (string) $icu->id)
+            ->assertSee('Bruno da UTI')
+            ->assertDontSee('Ana da Emergência')
+            ->assertSee('1 plantão(ões) · 1 profissional(is)');
+    }
+
+    public function test_manager_can_filter_calendar_by_category(): void
+    {
+        $manager = User::factory()->create(['role' => UserRole::Manager]);
+        $sector = Sector::query()->create(['name' => 'Emergência']);
+        $medicine = Category::query()->create(['name' => 'Medicina']);
+        $nursing = Category::query()->create(['name' => 'Enfermagem']);
+        $doctor = User::factory()->create([
+            'name' => 'Médico Plantonista',
+            'category_id' => $medicine->id,
+            'sector_id' => $sector->id,
+        ]);
+        $nurse = User::factory()->create([
+            'name' => 'Enfermeira Plantonista',
+            'category_id' => $nursing->id,
+            'sector_id' => $sector->id,
+        ]);
+
+        foreach ([[$doctor, $medicine], [$nurse, $nursing]] as [$professional, $category]) {
+            Shift::query()->create([
+                'date' => '2026-11-12',
+                'start_time' => '07:00',
+                'end_time' => '19:00',
+                'sector_id' => $sector->id,
+                'category_id' => $category->id,
+                'user_id' => $professional->id,
+                'status' => ShiftStatus::Scheduled,
+            ]);
+        }
+
+        Livewire::actingAs($manager)
+            ->test(MonthlyCalendar::class)
+            ->set('month', '2026-11')
+            ->call('selectDate', '2026-11-12')
+            ->set('categoryId', (string) $nursing->id)
+            ->assertSee('Enfermeira Plantonista')
+            ->assertDontSee('Médico Plantonista')
+            ->assertSee('1 plantão(ões) · 1 profissional(is)');
+    }
+
+    public function test_calendar_filters_can_be_combined_cleared_and_reject_unknown_ids(): void
+    {
+        [$manager, $emergency, $icu, $category] = $this->twoSectorSetup();
+
+        Livewire::actingAs($manager)
+            ->test(MonthlyCalendar::class)
+            ->set('month', '2026-11')
+            ->call('selectDate', '2026-11-12')
+            ->set('sectorId', (string) $emergency->id)
+            ->set('categoryId', (string) $category->id)
+            ->assertSee('Ana da Emergência')
+            ->assertDontSee('Bruno da UTI')
+            ->assertSee('Limpar filtros')
+            ->call('clearFilters')
+            ->assertSet('sectorId', '')
+            ->assertSet('categoryId', '')
+            ->assertSee('Ana da Emergência')
+            ->assertSee('Bruno da UTI')
+            ->set('sectorId', '999999')
+            ->assertSet('sectorId', '')
+            ->assertSee('Ana da Emergência')
+            ->assertSee('Bruno da UTI');
+    }
+
+    /** @return array{User, Sector, Sector, Category} */
+    private function twoSectorSetup(): array
+    {
+        $manager = User::factory()->create(['role' => UserRole::Manager]);
+        $category = Category::query()->create(['name' => 'Medicina']);
+        $emergency = Sector::query()->create(['name' => 'Emergência']);
+        $icu = Sector::query()->create(['name' => 'UTI']);
+        $ana = User::factory()->create([
+            'name' => 'Ana da Emergência',
+            'category_id' => $category->id,
+            'sector_id' => $emergency->id,
+        ]);
+        $bruno = User::factory()->create([
+            'name' => 'Bruno da UTI',
+            'category_id' => $category->id,
+            'sector_id' => $icu->id,
+        ]);
+
+        foreach ([[$ana, $emergency], [$bruno, $icu]] as [$professional, $sector]) {
+            Shift::query()->create([
+                'date' => '2026-11-12',
+                'start_time' => '07:00',
+                'end_time' => '19:00',
+                'sector_id' => $sector->id,
+                'category_id' => $category->id,
+                'user_id' => $professional->id,
+                'status' => ShiftStatus::Scheduled,
+            ]);
+        }
+
+        return [$manager, $emergency, $icu, $category];
+    }
 }

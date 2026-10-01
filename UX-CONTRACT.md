@@ -22,7 +22,7 @@ Este documento registra o comportamento compartilhado das telas autenticadas. As
 | Cartão de cadastro | classe `record-card` em `resources/css/app.css` | usuários, setores e categorias | conteúdo e ações equivalentes à tabela |
 | Modal de cadastro | classes `modal-*` em `resources/css/app.css` | criar e editar plantões, usuários, setores e categorias | abertura por botão, foco inicial, validação, cancelamento e rolagem móvel |
 | Modal de confirmação | `resources/views/components/confirmation-modal.blade.php` | exclusões, trocas, ausência e leitura em massa | registro e consequência visíveis, foco no cancelamento, Escape, autorização e bloqueio durante o processamento |
-| Calendário mensal | `MonthlyCalendar` + classes `calendar-*` | consulta compartilhada e ações gerenciais condicionais | navegação entre meses, seleção de dia, lista completa de plantões e ausência de ações sem permissão |
+| Calendário mensal | `MonthlyCalendar` + classes `calendar-*` | consulta compartilhada, filtros de setor/categoria e ações gerenciais condicionais | navegação entre meses, seleção de dia, filtros com limpeza, lista completa de plantões e ausência de ações sem permissão |
 | Central de ajuda | `HelpCenter` | implantação inicial, rotinas por perfil, fluxos críticos, diagnóstico e versões | acesso pelos dois perfis, ordem inicial preservada, âncoras, acordeões e histórico completo |
 | Aplicativo PWA | `manifest.webmanifest` + `sw.js` + ação `data-pwa-install` | Android, iOS/iPadOS e Windows | instalação nativa quando suportada, modo independente, ícones válidos e fallback offline sem cache autenticado |
 | Novidades da versão | `ReleaseAnnouncement` + `last_seen_version` | primeiro acesso após lançamento | modal único por versão, confirmação persistida e acesso ao manual |
@@ -61,7 +61,7 @@ Este documento registra o comportamento compartilhado das telas autenticadas. As
 ## Estados de dados
 
 - Listas vazias explicam o que está ausente e onde novos itens aparecerão.
-- O calendário está disponível para gerente e profissional, mostra a quantidade de plantões em cada dia e diferencia cobertura completa de plantões sem profissional; ao selecionar uma data, lista todos os registros daquele dia. Ações de gestão aparecem somente para gerentes.
+- O calendário está disponível para gerente e profissional, mostra a quantidade de plantões em cada dia e diferencia cobertura completa de plantões sem profissional; filtros de setor e categoria refinam as contagens e a lista do dia, com opção de limpar a seleção. Ao selecionar uma data, lista todos os registros daquele dia. Ações de gestão aparecem somente para gerentes.
 - Números do painel representam consultas reais. Zero significa ausência confirmada de registros no filtro descrito.
 - O painel gerencial mostra plantões descobertos de hoje em diante e trocas com status `pending_manager`.
 - A criação da solicitação notifica o substituto; o aceite notifica os profissionais e todos os gerentes; aprovação ou rejeição notifica solicitante e substituto.

@@ -1,9 +1,20 @@
 <?php
 
 return [
-    'current' => env('APP_VERSION', '1.6.1'),
+    'current' => env('APP_VERSION', '1.7.0'),
 
     'releases' => [
+        [
+            'version' => '1.7.0',
+            'date' => '2026-10-01',
+            'title' => 'Filtros do calendário por setor e categoria',
+            'summary' => 'O calendário mensal agora permite filtrar os plantões exibidos por setor e categoria.',
+            'highlights' => [
+                'Filtros de setor e categoria no calendário da gerência e do profissional.',
+                'Contagens dos dias e lista do dia selecionado respeitam os filtros ativos.',
+                'Opção de limpar os filtros com um toque e mensagem própria quando nada é encontrado.',
+            ],
+        ],
         [
             'version' => '1.6.1',
             'date' => '2026-09-29',
