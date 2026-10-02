@@ -7,6 +7,7 @@ use App\Livewire\ReleaseAnnouncement;
 use App\Models\User;
 use App\Support\ApplicationVersion;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -48,7 +49,7 @@ class HelpAndVersioningTest extends TestCase
                 ->assertSee('KL Tecnologia');
         }
 
-        auth()->logout();
+        Auth::logout();
         $this->get(route('help'))->assertRedirect(route('login'));
     }
 
@@ -106,6 +107,30 @@ class HelpAndVersioningTest extends TestCase
             ->test(ReleaseAnnouncement::class)
             ->assertSet('show', false)
             ->assertDontSee('Novidades da versão');
+    }
+
+    public function test_user_with_previous_version_sees_announcement_modal_on_first_access_after_update(): void
+    {
+        $currentVersion = app(ApplicationVersion::class)->current();
+        $user = User::factory()->create([
+            'role' => UserRole::Manager,
+            'last_seen_version' => '1.12.0',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('manager.dashboard'))
+            ->assertOk()
+            ->assertSeeLivewire(ReleaseAnnouncement::class);
+
+        Livewire::actingAs($user)
+            ->test(ReleaseAnnouncement::class)
+            ->assertSet('show', true)
+            ->assertSee('Novidades da versão '.$currentVersion)
+            ->assertSee('Notificações PWA, comprovante detalhado e trocas destacadas')
+            ->call('acknowledge')
+            ->assertSet('show', false);
+
+        $this->assertSame($currentVersion, $user->fresh()->last_seen_version);
     }
 
     public function test_version_registry_and_markdown_history_stay_in_sync(): void

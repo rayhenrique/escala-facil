@@ -40,9 +40,13 @@ class ReleaseAnnouncement extends Component
 
     private function markAsSeen(ApplicationVersion $versions): void
     {
-        auth()->user()->forceFill([
-            'last_seen_version' => $versions->current(),
-        ])->save();
+        $user = auth()->user();
+
+        if ($user instanceof \App\Models\User) {
+            $user->forceFill([
+                'last_seen_version' => $versions->current(),
+            ])->save();
+        }
     }
 
     public function render(): View
