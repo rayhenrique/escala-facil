@@ -209,19 +209,19 @@
                     </ol>
                 </div>
             </details>
-            <details>
+            <details id="gerenciar-trocas">
                 <summary>7. Aprovar ou rejeitar trocas</summary>
                 <div>
                     <ol>
-                        <li>Abra <strong>Trocas</strong>. A fila gerencial mostra apenas pedidos já aceitos pelo substituto.</li>
-                        <li>Confira data, horário, setor, categoria, solicitante e substituto.</li>
-                        <li>Selecione <strong>Aprovar</strong> para transferir o plantão ao substituto, ou <strong>Rejeitar</strong> para encerrar o pedido sem mudar a escala.</li>
-                        <li>No modal, revise o plantão, o solicitante, o substituto e a consequência; depois confirme a decisão.</li>
-                        <li>Leia o aviso e o comprovante da decisão. Guarde a referência quando precisar localizar o evento depois.</li>
-                        <li>O selo <strong>Dobra</strong> indica que o substituto emenda turnos; aprove somente se a dobra for autorizada.</li>
+                        <li>Abra <strong>Trocas</strong> na sidebar. A fila gerencial exibe exclusivamente pedidos já aceitos pelo substituto.</li>
+                        <li>Confira a <strong>visão geral da troca</strong>: o dia sendo substituído e o dia que vai substituir. Em trocas mútuas com contrapartida, o quadro detalha quem assume cada data e a faixa de horário completa (ex.: <em>Profissional A vai para o dia tal e Profissional B vai para o dia tal</em>).</li>
+                        <li>Observe o selo <strong>Dobra</strong>: ele sinaliza quando a assunção do plantão faz o substituto emendar turnos consecutivos, permitindo autorizar com plena consciência.</li>
+                        <li>Para <strong>Aprovar</strong>: selecione o botão, confira a movimentação detalhada no modal e confirme. O sistema revalida as cotas e transfere a titularidade dos plantões imediatamente. Um comprovante detalhado com botão de impressão é disponibilizado.</li>
+                        <li>Para <strong>Rejeitar</strong>: selecione o botão e preencha obrigatoriamente o campo de <strong>justificativa</strong> no modal. A recusa encerra o pedido sem alterar a escala, e o motivo é enviado aos dois profissionais com o comprovante.</li>
+                        <li>Guarde o código de referência do comprovante para fins de auditoria quando necessário.</li>
                     </ol>
-                    <p>A decisão avisa os dois profissionais. A aprovação ainda revalida compatibilidade e limite mensal antes de alterar o plantão.</p>
-                    <p>Para corrigir uma troca já aprovada, use <strong>Desfazer troca</strong> na lista de aprovadas futuras: o plantão volta ao solicitante, a cota mensal é liberada e ambos recebem comprovante. Só é possível desfazer plantões futuros ainda com o substituto, sem ausência ou nova troca pendente.</p>
+                    <p>A decisão notifica automaticamente o solicitante e o substituto. A aprovação revalida a compatibilidade de setor/categoria e a cota mensal antes de efetivar qualquer alteração.</p>
+                    <p>Para corrigir uma necessidade operacional futura, use <strong>Desfazer troca</strong> na lista de trocas aprovadas: os plantões voltam aos responsáveis originais, a cota mensal é liberada e ambos recebem comprovante de cancelamento. Apenas plantões futuros ainda sob titularidade do substituto e sem pendências podem ser desfeitos.</p>
                 </div>
             </details>
             <details>
@@ -281,31 +281,34 @@
                     <p>A consulta é somente leitura: relatórios não permitem criar, editar ou excluir registros.</p>
                 </div>
             </details>
-            <details>
+            <details id="solicitar-troca">
                 <summary>Solicitar uma troca</summary>
                 <div>
                     <ol>
-                        <li>Localize um plantão futuro atribuído a você.</li>
-                        <li>Selecione <strong>Solicitar troca</strong>.</li>
-                        <li>Escolha um colega elegível e selecione <strong>Revisar solicitação</strong>.</li>
-                        <li>Confira plantão e substituto no modal e selecione <strong>Confirmar envio</strong>.</li>
-                        <li>Confira a mensagem de sucesso e guarde a referência do comprovante apresentado.</li>
+                        <li>Localize um plantão futuro atribuído a você na página <strong>Minha escala</strong>.</li>
+                        <li>Selecione o botão <strong>Solicitar troca</strong>.</li>
+                        <li>Escolha um colega elegível no campo <strong>Substituto</strong> (o sistema lista apenas profissionais do mesmo setor e categoria que ainda não atingiram o limite mensal).</li>
+                        <li><strong>Troca mútua (contrapartida):</strong> se combinou de cobrir um plantão do colega em retorno, selecione o plantão dele no campo <em>Plantão de contrapartida</em>. Caso deseje apenas transferir o seu plantão sem assumir outro, deixe o campo em branco (troca simples).</li>
+                        <li>Selecione <strong>Revisar solicitação</strong> para abrir o modal de conferência.</li>
+                        <li>Confira data, horário, setor, categoria e o plantão de contrapartida (se houver) e confirme em <strong>Confirmar envio</strong>.</li>
+                        <li>Confira o aviso de sucesso e guarde a referência do comprovante gerado.</li>
                     </ol>
-                    <p>A lista inclui somente colegas do mesmo setor e categoria. O pedido fica como <strong>Aguardando profissional</strong> até o substituto responder.</p>
+                    <p>O pedido passa para o status <strong>Aguardando profissional</strong>. O colega recebe notificação no sistema, o ícone do aplicativo PWA instalado atualiza o crachá com o número de avisos (badge) e uma notificação é enviada no aparelho celular.</p>
                 </div>
             </details>
-            <details>
+            <details id="responder-troca">
                 <summary>Responder a um pedido recebido</summary>
                 <div>
                     <ol>
-                        <li>Abra o pedido recebido e confira todos os dados do plantão.</li>
-                        <li>Selecione <strong>Aceitar</strong> somente se puder assumir o horário.</li>
-                        <li>Revise o plantão e o solicitante no modal e confirme o aceite.</li>
-                        <li>Se o aceite emendar com outro plantão seu, o modal avisa a dobra para decisão consciente.</li>
-                        <li>Após o aceite, acompanhe o status <strong>Aguardando gerência</strong>.</li>
-                        <li>Consulte a notificação final para saber se a troca foi aprovada ou rejeitada.</li>
+                        <li>Abra a notificação recebida ou consulte a aba de pedidos recebidos em <strong>Minha escala</strong>.</li>
+                        <li>Confira data, horário, setor e se há um plantão seu de contrapartida indicado no pedido.</li>
+                        <li>Se o plantão recebido for contíguo (emendar turno) com outro horário seu, observe o alerta de <strong>Dobra</strong> para decidir com segurança.</li>
+                        <li>Selecione <strong>Aceitar</strong> somente se tiver disponibilidade real para o compromisso.</li>
+                        <li>Revise todos os dados e a consequência no modal e confirme o aceite.</li>
+                        <li>Após o aceite, o status avança para <strong>Aguardando gerência</strong>, e a gerência é notificada para análise.</li>
+                        <li>Aguarde a decisão: a escala oficial permanece inalterada até que o gestor conclua a aprovação. Uma notificação com o comprovante final (aprovado ou com a justificativa de recusa) será enviada a você.</li>
                     </ol>
-                    <p>O aceite ainda não muda a escala. A transferência ocorre somente depois da aprovação gerencial.</p>
+                    <p>O aceite do substituto não muda a titularidade do plantão imediatamente; a transferência só é efetivada após a aprovação da gerência.</p>
                 </div>
             </details>
             <details>
@@ -341,7 +344,123 @@
             <span>04</span>
             <div><p class="eyebrow">Fluxos críticos</p><h2 id="critical-flows-title">Trocas, ausências e notificações</h2></div>
         </div>
-        <div class="help-content-grid">
+
+        <div class="manual-callout mt-6" role="note">
+            <strong>Como funciona a troca de escala no Escala Fácil</strong>
+            <p>O módulo de trocas substitui acordos informais por um fluxo formal, auditável e seguro em 3 etapas (Solicitação → Aceite → Decisão Gerencial). O sistema suporta trocas simples e trocas mútuas com contrapartida, valida a compatibilidade de setor e categoria, controla o limite mensal de quatro trocas por profissional, alerta dobras de plantão e exige justificativa em caso de rejeição pela gerência.</p>
+        </div>
+
+        <div class="help-accordion mt-6">
+            <details id="modalidades-troca" open>
+                <summary>1. Modalidades de troca: simples e mútua (com contrapartida)</summary>
+                <div>
+                    <p>O Escala Fácil oferece duas formas de solicitar uma troca de plantão:</p>
+                    <ul>
+                        <li><strong>Troca Simples (1 via):</strong> o solicitante transfere a titularidade do seu plantão para o colega substituto, sem assumir nenhum plantão em contrapartida. Útil quando um profissional precisa se ausentar e o colega apenas assume o turno.</li>
+                        <li><strong>Troca Mútua (2 vias / com contrapartida):</strong> o solicitante transfere o seu plantão para o colega E seleciona qual plantão futuro do colega irá cobrir em retorno. Quando a gerência aprova, ambos os plantões mudam de responsável simultaneamente na escala oficial.</li>
+                    </ul>
+                    <p>Em ambas as modalidades, a troca só altera a escala física após o aceite do colega e a aprovação formal da gerência.</p>
+                </div>
+            </details>
+
+            <details id="regras-troca">
+                <summary>2. Regras obrigatórias e condições de elegibilidade</summary>
+                <div>
+                    <p>Para manter a escala equilibrada e juridicamente segura, o sistema impõe quatro regras inegociáveis:</p>
+                    <ol>
+                        <li><strong>Compatibilidade estrita de setor e categoria:</strong> solicitante e substituto devem pertencer à mesma categoria profissional (ex.: Médico Clínico, Enfermeiro) e estar vinculados ao mesmo setor de atuação (ex.: UTI, Pronto Atendimento). O sistema impede a escolha de profissionais incompatíveis.</li>
+                        <li><strong>Limite mensal de quatro trocas aprovadas:</strong> cada profissional pode participar de até <strong>quatro trocas aprovadas por mês</strong>, somando tanto as solicitações criadas quanto as substituições assumidas. A 5ª participação é bloqueada no envio, no aceite e na aprovação.</li>
+                        <li><strong>Plantão elegível e futuro:</strong> a troca só pode ser iniciada sobre plantões futuros atribuídos ao profissional, com status <em>Agendado</em>, sem registro de ausência e sem outro pedido de troca pendente.</li>
+                        <li><strong>Revalidação automática:</strong> as regras de compatibilidade e o saldo da cota mensal são rechecados pelo sistema em tempo real no momento do aceite do substituto e na decisão do gerente.</li>
+                    </ol>
+                </div>
+            </details>
+
+            <details id="passo-solicitante">
+                <summary>3. Etapa 1 — Como solicitar uma troca (Solicitante)</summary>
+                <div>
+                    <ol>
+                        <li>Acesse <strong>Minha escala</strong> no menu lateral e navegue até o mês do plantão que deseja trocar.</li>
+                        <li>No cartão do plantão desejado, clique no botão <strong>Solicitar troca</strong>.</li>
+                        <li>No campo <strong>Substituto</strong>, escolha o colega na lista. Somente aparecem profissionais compatíveis (mesmo setor e categoria) e que ainda possuem cota disponível no mês.</li>
+                        <li><em>(Opcional para troca mútua)</em> No campo <strong>Plantão de contrapartida</strong>, selecione o plantão futuro do colega que você assumirá em troca. Se quiser apenas repassar o seu plantão, deixe a opção em branco.</li>
+                        <li>Clique em <strong>Revisar solicitação</strong> para abrir o modal de conferência.</li>
+                        <li>Verifique com atenção as datas, horários e os dois profissionais envolvidos. Clique em <strong>Confirmar envio</strong>.</li>
+                        <li>Um comprovante imediato com código único de referência é gerado, e o pedido assume o status <strong>Aguardando profissional</strong>. O substituto recebe aviso no aplicativo, no celular e no badge do ícone do PWA.</li>
+                    </ol>
+                </div>
+            </details>
+
+            <details id="passo-substituto">
+                <summary>4. Etapa 2 — Como o substituto responde e o alerta de dobra</summary>
+                <div>
+                    <ol>
+                        <li>O substituto é avisado por notificação e localiza o pedido na aba de pedidos recebidos em <strong>Minha escala</strong> ou na <strong>Central de Notificações</strong>.</li>
+                        <li>Abre o pedido para conferir a data e o horário do plantão oferecido e se há contrapartida de um plantão seu.</li>
+                        <li><strong>Alerta inteligente de Dobra:</strong> se o plantão recebido for contíguo (emendar turno) com outro plantão já escalado para o substituto, o sistema exibe o aviso em destaque <strong>Dobra de plantão</strong>, permitindo avaliar o descanso antes de concordar.</li>
+                        <li>Para concordar, o substituto clica em <strong>Aceitar</strong>, confere a confirmação no modal e confirma. Para recusar, clica em <strong>Recusar</strong>.</li>
+                        <li>Ao aceitar, o status muda para <strong>Aguardando gerência</strong>. O solicitante e todos os gerentes da unidade recebem notificação e comprovante de aceite.</li>
+                        <li><strong>Importante:</strong> o aceite ainda não transfere o plantão na escala. A escala só é alterada quando a gerência aprovar.</li>
+                    </ol>
+                </div>
+            </details>
+
+            <details id="passo-gerencia">
+                <summary>5. Etapa 3 — Como a gerência aprova ou rejeita (Visão do Gestor)</summary>
+                <div>
+                    <ol>
+                        <li>O gestor acessa o módulo <strong>Trocas</strong> na sidebar, onde visualiza a fila de pedidos pendentes de decisão.</li>
+                        <li><strong>Visão geral da troca:</strong> o gestor vê exatamente o dia que está sendo substituído e o dia que vai substituir, com data, dia da semana e horários detalhados de ambos (ex.: <em>Profissional A vai para o dia tal e Profissional B vai para o dia tal</em>).</li>
+                        <li>O gestor também visualiza o selo <strong>Dobra</strong> caso a troca crie turnos consecutivos sem descanso regulamentar para o substituto.</li>
+                        <li><strong>Para Aprovar:</strong> clique em <strong>Aprovar</strong>, revise a movimentação completa no modal e confirme. O sistema valida as cotas, transfere a titularidade dos plantões na escala de forma atômica, gera o comprovante detalhado de movimentação com botão de impressão e notifica ambos os profissionais.</li>
+                        <li><strong>Para Rejeitar:</strong> clique em <strong>Rejeitar</strong>. Um campo obrigatório de <strong>Justificativa</strong> é apresentado no modal. O gestor informa o motivo operacional da recusa e confirma. O pedido é encerrado sem alterar a escala, e a justificativa é enviada com o comprovante ao solicitante e ao substituto.</li>
+                    </ol>
+                </div>
+            </details>
+
+            <details id="desfazer-troca">
+                <summary>6. Como desfazer uma troca aprovada (Reversão pela Gerência)</summary>
+                <div>
+                    <p>Caso ocorra um imprevisto operacional ou erro de agendamento em um plantão futuro cuja troca já havia sido aprovada, a gerência pode revertê-la:</p>
+                    <ol>
+                        <li>No módulo <strong>Trocas</strong>, localize a troca na lista de <em>Trocas aprovadas</em> (plantões futuros).</li>
+                        <li>Clique em <strong>Desfazer troca</strong> e confira no modal o resumo dos profissionais e plantões que serão devolvidos.</li>
+                        <li>Ao confirmar, o plantão original retorna para o solicitante (e o plantão de contrapartida, se houver, retorna para o substituto).</li>
+                        <li>A cota mensal consumida (1 das 4 participações permitidas) é liberada e devolvida automaticamente a ambos os profissionais.</li>
+                        <li>Um comprovante de cancelamento da troca é gerado e registrado na Central de Notificações dos profissionais envolvidos.</li>
+                    </ol>
+                    <p><em>Condição:</em> apenas plantões com data futura que ainda estejam sob posse do substituto e que não possuam ausência ou nova troca em andamento podem ser desfeitos.</p>
+                </div>
+            </details>
+
+            <details id="sinalizacao-calendario">
+                <summary>7. Destaque visual no Calendário Mensal e no PDF para afixar</summary>
+                <div>
+                    <p>Para garantir que toda a equipe e a gerência identifiquem facilmente os dias em que houve troca:</p>
+                    <ul>
+                        <li><strong>Calendário Mensal online:</strong> os dias que contêm plantões transferidos por troca aprovada são destacados em <strong>tom laranja</strong> com fundo suave, borda temática e o símbolo <strong>⇄</strong>.</li>
+                        <li><strong>Cartões de plantão do dia:</strong> ao clicar no dia do calendário, o plantão que sofreu troca exibe o selo em destaque <strong>⇄ Troca realizada</strong>.</li>
+                        <li><strong>Legenda do calendário:</strong> o item explicativo <em>⇄ Troca realizada</em> permanece visível na barra de legendas do calendário.</li>
+                        <li><strong>PDF para afixar (Escala do mês):</strong> a escala mensal para mural exibe o marcador especial <strong>● Troca</strong> ao lado do nome do profissional substituto, garantindo conferência física clara no setor.</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details id="comprovantes-notificacoes">
+                <summary>8. Comprovantes com impressão, badges no PWA e notificações no celular</summary>
+                <div>
+                    <p>O fluxo de trocas conta com auditoria e notificações integradas para manter todos os participantes alinhados:</p>
+                    <ul>
+                        <li><strong>Comprovante oficial:</strong> toda solicitação, aceite, aprovação, rejeição ou reversão gera um comprovante com código de referência único (ex.: <em>TRC-2026-XXXX</em>), dados imutáveis do momento da ação e identificação do responsável.</li>
+                        <li><strong>Botão Imprimir comprovante:</strong> dentro do modal do comprovante, o botão de impressão permite imprimir diretamente ou salvar como PDF para arquivo pessoal ou apresentação de documentos.</li>
+                        <li><strong>Badges no ícone do PWA instalado:</strong> usuários que instalam o aplicativo no celular ou desktop visualizam a contagem de avisos e trocas pendentes como um número diretamente sobre o ícone do aplicativo (App Badging API).</li>
+                        <li><strong>Avisos no aparelho celular:</strong> com as notificações do dispositivo ativadas na Central de Notificações, o usuário recebe avisos sonoros e visuais no celular quando uma troca for solicitada, aceita, aprovada ou rejeitada.</li>
+                    </ul>
+                </div>
+            </details>
+        </div>
+
+        <div class="help-content-grid mt-6">
             <article>
                 <h3>Fluxo completo da troca</h3>
                 <ol class="manual-list"><li>Solicitante escolhe o substituto.</li><li>Substituto recebe a notificação.</li><li>Substituto aceita o pedido.</li><li>Gerentes recebem a pendência.</li><li>Gerente aprova ou rejeita.</li><li>Os profissionais recebem a decisão e o comprovante.</li></ol>

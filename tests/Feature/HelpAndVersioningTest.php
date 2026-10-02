@@ -120,4 +120,28 @@ class HelpAndVersioningTest extends TestCase
             $this->assertStringContainsString('## '.$release['version'].' —', $history);
         }
     }
+
+    public function test_manual_details_shift_swap_workflow_and_features(): void
+    {
+        $user = User::factory()->create([
+            'role' => UserRole::Professional,
+            'last_seen_version' => app(ApplicationVersion::class)->current(),
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('help'))
+            ->assertOk()
+            ->assertSee('Como funciona a troca de escala no Escala Fácil')
+            ->assertSee('Modalidades de troca: simples e mútua (com contrapartida)')
+            ->assertSee('Troca Simples (1 via)')
+            ->assertSee('Troca Mútua (2 vias / com contrapartida)')
+            ->assertSee('Regras obrigatórias e condições de elegibilidade')
+            ->assertSee('Etapa 1 — Como solicitar uma troca')
+            ->assertSee('Etapa 2 — Como o substituto responde e o alerta de dobra')
+            ->assertSee('Etapa 3 — Como a gerência aprova ou rejeita')
+            ->assertSee('Como desfazer uma troca aprovada')
+            ->assertSee('Destaque visual no Calendário Mensal e no PDF para afixar')
+            ->assertSee('Comprovantes com impressão, badges no PWA e notificações no celular');
+    }
 }
+
