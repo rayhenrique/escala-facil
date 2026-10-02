@@ -24,9 +24,15 @@ class AcceptShiftSwapAction
                 ->findOrFail($shiftId);
 
             $shiftSwap = ShiftSwap::query()
-                ->with(['requester', 'substitute', 'shift'])
+                ->with(['requester', 'substitute', 'shift', 'substituteShift'])
                 ->lockForUpdate()
                 ->findOrFail($shiftSwapId);
+
+            if ($shiftSwap->substitute_shift_id) {
+                Shift::query()
+                    ->lockForUpdate()
+                    ->findOrFail($shiftSwap->substitute_shift_id);
+            }
 
             Gate::forUser($substitute)->authorize('accept', $shiftSwap);
 

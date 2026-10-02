@@ -33,6 +33,9 @@
                         <x-status-badge :status="$swap->status" label="Aguardando você" />
                         <h3 class="mt-4 text-lg font-semibold">{{ $swap->shift->date->format('d/m/Y') }} · {{ substr($swap->shift->start_time, 0, 5) }}–{{ substr($swap->shift->end_time, 0, 5) }}</h3>
                         <p class="mt-2 text-sm text-muted">{{ $swap->shift->sector->name }} · {{ $swap->shift->category->name }}</p>
+                        @if ($swap->substituteShift)
+                            <p class="mt-2 text-xs font-semibold text-coverage">Contrapartida: você cederá seu plantão de {{ $swap->substituteShift->date->format('d/m/Y') }} ({{ substr($swap->substituteShift->start_time, 0, 5) }}–{{ substr($swap->substituteShift->end_time, 0, 5) }}).</p>
+                        @endif
                         <p class="mt-4 text-sm"><span class="text-muted">Solicitado por</span> <strong>{{ $swap->requester->name }}</strong></p>
                         <button type="button" wire:click="requestAcceptSwap({{ $swap->id }})" wire:loading.attr="disabled" class="button-primary mt-5 inline-flex w-full sm:w-auto" @disabled($swapLimitReached)>{{ $swapLimitReached ? 'Cota mensal atingida' : 'Aceitar e enviar à gerência' }}</button>
                     </article>
@@ -47,11 +50,26 @@
             <form method="post" wire:submit="reviewSwapRequest" class="mt-6 max-w-xl" novalidate>
                 @csrf
                 <label for="substitute" class="field-label">Profissional substituto</label>
-                <select wire:model="substituteId" id="substitute" class="field-input" @error('substitute_id') aria-invalid="true" aria-describedby="substitute-error" @enderror>
+                <select wire:model.live="substituteId" id="substitute" class="field-input" @error('substitute_id') aria-invalid="true" aria-describedby="substitute-error" @enderror>
                     <option value="">Selecione</option>
                     @foreach ($this->eligibleSubstitutes as $professional)<option value="{{ $professional->id }}">{{ $professional->name }}</option>@endforeach
                 </select>
                 @error('substitute_id') <p id="substitute-error" class="field-error">{{ $message }}</p> @enderror
+
+                @if ($substituteId && $this->eligibleSubstituteShifts->isNotEmpty())
+                    <div class="mt-4">
+                        <label for="substitute-shift" class="field-label">Plantão de contrapartida <span class="font-normal text-muted">(opcional — troca de dias)</span></label>
+                        <select wire:model="substituteShiftId" id="substitute-shift" class="field-input" @error('substitute_shift_id') aria-invalid="true" aria-describedby="substitute-shift-error" @enderror>
+                            <option value="">Apenas cobertura (sem plantão de volta)</option>
+                            @foreach ($this->eligibleSubstituteShifts as $s)
+                                <option value="{{ $s->id }}">{{ $s->date->format('d/m/Y') }} · {{ substr($s->start_time, 0, 5) }}–{{ substr($s->end_time, 0, 5) }} ({{ $s->sector->name }})</option>
+                            @endforeach
+                        </select>
+                        <p class="mt-1 text-xs text-muted">Selecione para realizar uma troca mútua de dias com o colega.</p>
+                        @error('substitute_shift_id') <p id="substitute-shift-error" class="field-error">{{ $message }}</p> @enderror
+                    </div>
+                @endif
+
                 @error('shift_id') <p class="field-error">{{ $message }}</p> @enderror
                 @if ($this->eligibleSubstitutes->isEmpty())<p class="mt-3 text-sm text-muted">Não há profissionais elegíveis e disponíveis na sua categoria e setor.</p>@endif
                 <button type="submit" class="button-primary mt-5 inline-flex w-full sm:w-auto" @disabled($this->eligibleSubstitutes->isEmpty()) wire:loading.attr="disabled" wire:target="reviewSwapRequest">Revisar solicitação</button>
@@ -125,9 +143,15 @@
             <p>{{ $confirmationSummary['location'] }}</p>
             @if ($pendingConfirmation === 'request_swap')
                 <p>Substituto: <strong>{{ $confirmationSummary['substitute'] }}</strong></p>
-                <p>O profissional receberá uma notificação para aceitar ou recusar a cobertura.</p>
+                @if (! empty($confirmationSummary['counterpart']))
+                    <p class="mt-2 font-semibold text-coverage">Contrapartida: você assumirá o plantão do colega em {{ $confirmationSummary['counterpart'] }}.</p>
+                @endif
+                <p>O profissional receberá uma notificação para aceitar ou recusar a troca.</p>
             @elseif ($pendingConfirmation === 'accept_swap')
                 <p>Solicitado por: <strong>{{ $confirmationSummary['requester'] }}</strong></p>
+                @if (! empty($confirmationSummary['counterpart']))
+                    <p class="mt-2 font-semibold text-coverage">Contrapartida: você cederá seu plantão de {{ $confirmationSummary['counterpart'] }} ao solicitante.</p>
+                @endif
                 @if (! empty($confirmationSummary['double_shift']))
                     <p class="mt-2 font-semibold text-amber-700">Atenção: este aceite emenda (dobra) com seu plantão de {{ $confirmationSummary['double_shift'] }}. A gerência decidirá com essa informação.</p>
                 @endif

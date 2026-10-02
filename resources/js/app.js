@@ -50,3 +50,78 @@ if ('serviceWorker' in navigator) {
         });
     }, { once: true });
 }
+
+let lastNotifiedUnreadCount = null;
+
+const showDeviceNotification = async (unreadCount) => {
+    if (! ('Notification' in window) || Notification.permission !== 'granted') {
+        return;
+    }
+
+    const title = 'Escala Fácil';
+    const body = unreadCount === 1
+        ? 'Você tem 1 nova notificação sobre sua escala.'
+        : `Você tem ${unreadCount} novas notificações sobre sua escala.`;
+
+    const options = {
+        body,
+        icon: '/icons/pwa-192x192.png',
+        badge: '/icons/pwa-192x192.png',
+        tag: 'escala-facil-notif',
+        data: { url: '/notificacoes' },
+    };
+
+    try {
+        if ('serviceWorker' in navigator) {
+            const registration = await navigator.serviceWorker.ready;
+            if (registration && 'showNotification' in registration) {
+                await registration.showNotification(title, options);
+                return;
+            }
+        }
+        new Notification(title, options);
+    } catch {
+        // Ignora silenciosamente se o navegador bloquear notificações em segundo plano.
+    }
+};
+
+export const syncAppBadge = (count) => {
+    const numericCount = parseInt(count, 10) || 0;
+
+    if ('setAppBadge' in navigator) {
+        if (numericCount > 0) {
+            navigator.setAppBadge(numericCount).catch(() => {});
+        } else {
+            navigator.clearAppBadge().catch(() => {});
+        }
+    }
+
+    if (lastNotifiedUnreadCount !== null && numericCount > lastNotifiedUnreadCount) {
+        showDeviceNotification(numericCount);
+    }
+    lastNotifiedUnreadCount = numericCount;
+};
+
+export const requestDeviceNotificationPermission = async () => {
+    if (! ('Notification' in window)) {
+        return 'unsupported';
+    }
+
+    try {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+            const countEl = document.querySelector('[data-unread-count]');
+            const count = countEl ? parseInt(countEl.getAttribute('data-unread-count'), 10) : 0;
+            if (count > 0) {
+                showDeviceNotification(count);
+            }
+        }
+        return permission;
+    } catch {
+        return 'denied';
+    }
+};
+
+window.syncAppBadge = syncAppBadge;
+window.requestDeviceNotificationPermission = requestDeviceNotificationPermission;
+

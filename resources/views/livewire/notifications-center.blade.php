@@ -19,6 +19,29 @@
         <p class="text-sm text-muted">{{ $unreadCount === 1 ? 'notificação não lida' : 'notificações não lidas' }}</p>
     </div>
 
+    <div
+        x-data="{
+            supported: 'Notification' in window,
+            permission: 'Notification' in window ? Notification.permission : 'denied',
+            requestNotification() {
+                if (typeof window.requestDeviceNotificationPermission === 'function') {
+                    window.requestDeviceNotificationPermission().then(p => this.permission = p);
+                }
+            }
+        }"
+        x-show="supported && permission === 'default'"
+        x-cloak
+        class="mt-6 flex flex-col gap-3 rounded-xl border border-primary/20 bg-primary-soft/50 p-4 sm:flex-row sm:items-center sm:justify-between"
+    >
+        <div>
+            <p class="text-sm font-semibold text-ink">Notificações no celular ou computador</p>
+            <p class="text-xs text-muted">Ative para receber avisos imediatos na tela do seu aparelho quando houver pedidos ou respostas de troca.</p>
+        </div>
+        <button type="button" @click="requestNotification" class="button-primary min-h-9 px-3.5 py-1.5 text-xs shrink-0">
+            Ativar avisos no aparelho
+        </button>
+    </div>
+
     <section class="mt-8 space-y-4" aria-label="Histórico de notificações">
         @forelse ($notifications as $notification)
             <article class="notification-card {{ $notification->read_at ? '' : 'notification-card-unread' }}" wire:key="notification-{{ $notification->id }}">

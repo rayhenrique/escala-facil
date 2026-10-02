@@ -30,6 +30,7 @@
                 <span class="inline-flex items-center gap-2"><span class="size-2.5 rounded-full bg-coverage"></span>Com plantão</span>
                 <span class="inline-flex items-center gap-2"><span class="size-2.5 rounded-full bg-danger"></span>Sem profissional</span>
                 <span class="inline-flex items-center gap-2"><span class="font-bold text-coverage" aria-hidden="true">✓</span>24h cobertas</span>
+                <span class="inline-flex items-center gap-2"><span class="size-2.5 rounded-full bg-amber-500"></span><span class="font-bold text-amber-600" aria-hidden="true">⇄</span>Troca realizada</span>
             </div>
         </div>
 
@@ -74,7 +75,7 @@
                     @disabled(! $day['in_month'])
                     role="gridcell"
                     @if ($selectedDate === $day['date']) aria-selected="true" @endif
-                    aria-label="{{ \Carbon\CarbonImmutable::parse($day['date'])->format('d/m/Y') }}, {{ $day['shifts_count'] }} plantão(ões){{ $day['covered_24h'] ? ', 24h cobertas' : '' }}"
+                    aria-label="{{ \Carbon\CarbonImmutable::parse($day['date'])->format('d/m/Y') }}, {{ $day['shifts_count'] }} plantão(ões){{ $day['covered_24h'] ? ', 24h cobertas' : '' }}{{ $day['has_swap'] ? ', com troca de plantão' : '' }}"
                 >
                     <span class="calendar-day-number {{ $day['is_today'] ? 'calendar-day-today' : '' }}">{{ $day['day'] }}</span>
 
@@ -89,6 +90,10 @@
                         <span class="calendar-day-full" title="24h cobertas" aria-label="24h cobertas">✓</span>
                     @elseif ($day['in_month'] && $day['shifts_count'] > 0)
                         <span class="calendar-day-covered" aria-hidden="true"></span>
+                    @endif
+
+                    @if ($day['in_month'] && $day['has_swap'])
+                        <span class="calendar-day-swap" title="Dia com troca de plantão aprovada" aria-label="Dia com troca de plantão">⇄</span>
                     @endif
                 </button>
             @endforeach
@@ -108,7 +113,7 @@
 
         <div class="mt-5 grid gap-4 xl:grid-cols-2">
             @forelse ($selectedShifts as $shift)
-                <article class="daily-shift-card" wire:key="calendar-shift-{{ $shift->id }}">
+                <article class="daily-shift-card {{ in_array($shift->id, $swappedShiftIds, true) ? 'daily-shift-card-swapped' : '' }}" wire:key="calendar-shift-{{ $shift->id }}">
                     <div class="professional-avatar {{ $shift->user ? '' : 'professional-avatar-empty' }}" aria-hidden="true">
                         {{ $shift->user ? mb_strtoupper(mb_substr($shift->user->name, 0, 1)) : '!' }}
                     </div>
@@ -116,6 +121,11 @@
                         <div class="flex flex-wrap items-center gap-2">
                             <h3 class="font-semibold">{{ $shift->user?->name ?? 'Plantão sem profissional' }}</h3>
                             <x-status-badge :status="$shift->status" />
+                            @if (in_array($shift->id, $swappedShiftIds, true))
+                                <span class="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-800">
+                                    <span aria-hidden="true">⇄</span> Troca realizada
+                                </span>
+                            @endif
                         </div>
                         <p class="mt-2 text-sm font-semibold text-primary">{{ substr($shift->start_time, 0, 5) }}–{{ substr($shift->end_time, 0, 5) }}</p>
                         <p class="mt-1 text-sm text-muted">{{ $shift->sector->name }} · {{ $shift->category->name }}</p>

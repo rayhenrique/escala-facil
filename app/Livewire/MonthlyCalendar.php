@@ -2,9 +2,11 @@
 
 namespace App\Livewire;
 
+use App\Enums\ShiftSwapStatus;
 use App\Models\Category;
 use App\Models\Sector;
 use App\Models\Shift;
+use App\Models\ShiftSwap;
 use App\Support\ShiftCoverage;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
@@ -147,7 +149,19 @@ class MonthlyCalendar extends Component
             ->get();
 
         $shiftsByDate = $allShifts->groupBy(fn (Shift $shift): string => $shift->date->format('Y-m-d'));
-        $calendarDays = $this->calendarDays($monthStart, $monthEnd, $shiftsByDate, $allShifts);
+
+        $swappedShiftIds = ShiftSwap::query()
+            ->where('status', ShiftSwapStatus::Approved)
+            ->where(function ($query) use ($monthStart, $monthEnd): void {
+                $query->whereHas('shift', fn ($q) => $q->whereBetween('date', [$monthStart->subDay(), $monthEnd]))
+                    ->orWhereHas('substituteShift', fn ($q) => $q->whereBetween('date', [$monthStart->subDay(), $monthEnd]));
+            })
+            ->get()
+            ->flatMap(fn (ShiftSwap $swap) => array_filter([$swap->shift_id, $swap->substitute_shift_id]))
+            ->unique()
+            ->all();
+
+        $calendarDays = $this->calendarDays($monthStart, $monthEnd, $shiftsByDate, $allShifts, $swappedShiftIds);
         $selectedShifts = $shiftsByDate->get($this->selectedDate, collect());
 
         return view('livewire.monthly-calendar', [
@@ -155,6 +169,7 @@ class MonthlyCalendar extends Component
             'monthLabel' => $monthStart->translatedFormat('F \d\e Y'),
             'selectedDateLabel' => CarbonImmutable::parse($this->selectedDate)->translatedFormat('l, d \d\e F \d\e Y'),
             'selectedShifts' => $selectedShifts,
+            'swappedShiftIds' => $swappedShiftIds,
             'assignedProfessionalsCount' => $selectedShifts->pluck('user_id')->filter()->unique()->count(),
             'canManageShifts' => auth()->user()->can('create', Shift::class),
             'hasActiveFilters' => $this->sectorId !== '' || $this->categoryId !== '',
@@ -164,13 +179,15 @@ class MonthlyCalendar extends Component
     /**
      * @param  Collection<string, Collection<int, Shift>>  $shiftsByDate
      * @param  Collection<int, Shift>  $allShifts
-     * @return Collection<int, array{date: string, day: string, in_month: bool, is_today: bool, shifts_count: int, uncovered_count: int, covered_24h: bool}>
+     * @param  list<int>  $swappedShiftIds
+     * @return Collection<int, array{date: string, day: string, in_month: bool, is_today: bool, shifts_count: int, uncovered_count: int, covered_24h: bool, has_swap: bool}>
      */
     private function calendarDays(
         CarbonImmutable $monthStart,
         CarbonImmutable $monthEnd,
         Collection $shiftsByDate,
         Collection $allShifts,
+        array $swappedShiftIds = [],
     ): Collection {
         $days = collect();
         $cursor = $monthStart->startOfWeek(CarbonInterface::SUNDAY);
@@ -191,6 +208,8 @@ class MonthlyCalendar extends Component
                 'covered_24h' => $inMonth
                     && $dayShifts->isNotEmpty()
                     && ShiftCoverage::isDayFullyCovered($allShifts, $date),
+                'has_swap' => $inMonth
+                    && $dayShifts->contains(fn (Shift $shift) => in_array($shift->id, $swappedShiftIds, true)),
             ]);
 
             $cursor = $cursor->addDay();

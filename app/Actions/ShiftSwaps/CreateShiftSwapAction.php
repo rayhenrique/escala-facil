@@ -14,11 +14,15 @@ class CreateShiftSwapAction
 {
     public function __construct(private readonly ShiftSwapNotificationService $notifications) {}
 
-    /** @param array{shift_id: int|string, substitute_id: int|string} $payload */
+    /** @param array{shift_id: int|string, substitute_id: int|string, substitute_shift_id?: int|string|null} $payload */
     public function execute(User $requester, array $payload): ShiftSwap
     {
         return DB::transaction(function () use ($requester, $payload): ShiftSwap {
             Shift::query()->lockForUpdate()->findOrFail($payload['shift_id']);
+
+            if (! empty($payload['substitute_shift_id'])) {
+                Shift::query()->lockForUpdate()->findOrFail($payload['substitute_shift_id']);
+            }
 
             $validated = (new StoreShiftSwapRequest)->validatePayload($payload, $requester);
 

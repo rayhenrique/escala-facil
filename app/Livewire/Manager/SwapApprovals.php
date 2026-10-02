@@ -29,12 +29,14 @@ class SwapApprovals extends Component
 
     public ?string $pendingDecision = null;
 
-    /** @var array<string, string>|null */
+    public string $rejectionReason = '';
+
+    /** @var array<string, string|null>|null */
     public ?array $pendingDecisionSummary = null;
 
     public ?int $pendingRevertSwapId = null;
 
-    /** @var array<string, string>|null */
+    /** @var array<string, string|null>|null */
     public ?array $pendingRevertSummary = null;
 
     public function mount(): void
@@ -57,12 +59,15 @@ class SwapApprovals extends Component
         abort_unless(in_array($decision, ['approve', 'reject'], true), 404);
 
         $shiftSwap = ShiftSwap::query()
-            ->with(['shift.sector', 'shift.category', 'requester', 'substitute'])
+            ->with(['shift.sector', 'shift.category', 'substituteShift.sector', 'substituteShift.category', 'requester', 'substitute'])
             ->findOrFail($shiftSwapId);
         $this->authorize($decision, $shiftSwap);
 
         $this->pendingDecisionSwapId = $shiftSwap->id;
         $this->pendingDecision = $decision;
+        $this->rejectionReason = '';
+        $this->resetValidation();
+
         $this->pendingDecisionSummary = [
             'shift' => sprintf(
                 '%s, das %s às %s',
@@ -73,6 +78,13 @@ class SwapApprovals extends Component
             'location' => $shiftSwap->shift->sector->name.' · '.$shiftSwap->shift->category->name,
             'requester' => $shiftSwap->requester->name,
             'substitute' => $shiftSwap->substitute->name,
+            'counterpart' => $shiftSwap->substituteShift ? sprintf(
+                '%s, das %s às %s',
+                $shiftSwap->substituteShift->date->format('d/m/Y'),
+                substr((string) $shiftSwap->substituteShift->start_time, 0, 5),
+                substr((string) $shiftSwap->substituteShift->end_time, 0, 5),
+            ) : null,
+            'counterpart_location' => $shiftSwap->substituteShift ? $shiftSwap->substituteShift->sector->name.' · '.$shiftSwap->substituteShift->category->name : null,
         ];
 
         $doubleShift = ShiftCoverage::findDoubleShift($shiftSwap->substitute, $shiftSwap->shift);
@@ -92,7 +104,13 @@ class SwapApprovals extends Component
         if ($decision === 'approve') {
             $this->approve($shiftSwapId, $action, $receipts);
         } else {
-            $this->reject($shiftSwapId, $action, $receipts);
+            $this->validate([
+                'rejectionReason' => ['required', 'string', 'min:3', 'max:1000'],
+            ], [], [
+                'rejectionReason' => 'justificativa',
+            ]);
+
+            $this->reject($shiftSwapId, $action, $receipts, $this->rejectionReason);
         }
 
         $this->cancelDecision();
@@ -100,23 +118,24 @@ class SwapApprovals extends Component
 
     public function cancelDecision(): void
     {
-        $this->reset(['pendingDecisionSwapId', 'pendingDecision', 'pendingDecisionSummary']);
+        $this->reset(['pendingDecisionSwapId', 'pendingDecision', 'pendingDecisionSummary', 'rejectionReason']);
+        $this->resetValidation();
     }
 
-    public function reject(int $shiftSwapId, DecideShiftSwapAction $action, ShiftSwapReceipt $receipts): void
+    public function reject(int $shiftSwapId, DecideShiftSwapAction $action, ShiftSwapReceipt $receipts, ?string $reason = null): void
     {
         $shiftSwap = ShiftSwap::query()->findOrFail($shiftSwapId);
         $this->authorize('reject', $shiftSwap);
-        $shiftSwap = $action->reject(auth()->user(), $shiftSwapId);
+        $shiftSwap = $action->reject(auth()->user(), $shiftSwapId, $reason);
         $this->swapReceipt = $receipts->make($shiftSwap, ShiftSwapEvent::Rejected);
 
-        session()->flash('status', 'Solicitação de troca rejeitada.');
+        session()->flash('status', 'Solicitação de troca rejeitada e comprovante gerado.');
     }
 
     public function requestRevert(int $shiftSwapId): void
     {
         $shiftSwap = ShiftSwap::query()
-            ->with(['shift.sector', 'shift.category', 'requester', 'substitute'])
+            ->with(['shift.sector', 'shift.category', 'substituteShift.sector', 'substituteShift.category', 'requester', 'substitute'])
             ->findOrFail($shiftSwapId);
         $this->authorize('revert', $shiftSwap);
 
@@ -131,6 +150,12 @@ class SwapApprovals extends Component
             'location' => $shiftSwap->shift->sector->name.' · '.$shiftSwap->shift->category->name,
             'requester' => $shiftSwap->requester->name,
             'substitute' => $shiftSwap->substitute->name,
+            'counterpart' => $shiftSwap->substituteShift ? sprintf(
+                '%s, das %s às %s',
+                $shiftSwap->substituteShift->date->format('d/m/Y'),
+                substr((string) $shiftSwap->substituteShift->start_time, 0, 5),
+                substr((string) $shiftSwap->substituteShift->end_time, 0, 5),
+            ) : null,
         ];
     }
 
@@ -159,6 +184,8 @@ class SwapApprovals extends Component
             ->with([
                 'shift.category',
                 'shift.sector',
+                'substituteShift.category',
+                'substituteShift.sector',
                 'requester',
                 'substitute',
             ])
@@ -173,6 +200,8 @@ class SwapApprovals extends Component
                 ->with([
                     'shift.category',
                     'shift.sector',
+                    'substituteShift.category',
+                    'substituteShift.sector',
                     'requester',
                     'substitute',
                 ])

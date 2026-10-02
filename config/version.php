@@ -1,9 +1,22 @@
 <?php
 
 return [
-    'current' => env('APP_VERSION', '1.12.0'),
+    'current' => env('APP_VERSION', '1.13.0'),
 
     'releases' => [
+        [
+            'version' => '1.13.0',
+            'date' => '2026-10-02',
+            'title' => 'Notificações PWA, comprovante detalhado e trocas destacadas',
+            'summary' => 'Badging no ícone do aplicativo PWA, visão geral dos dois plantões na aprovação, justificativa obrigatória na rejeição com comprovante e destaque visual de trocas no calendário.',
+            'highlights' => [
+                'Contador de notificações pendentes exibido no ícone do PWA instalado (App Badging API) e suporte a notificações do dispositivo.',
+                'Aprovação de troca exibe o dia que vai substituir e o dia substituído (troca geral com horários detalhados de ambos).',
+                'Comprovante detalhado de movimentação com opção de impressão direta e histórico preservado.',
+                'Rejeição de troca com justificativa obrigatória enviada ao solicitante e ao substituto.',
+                'Destaque visual em tom laranja com símbolo e legenda no calendário para dias com plantão transferido por troca.',
+            ],
+        ],
         [
             'version' => '1.12.0',
             'date' => '2026-09-30',

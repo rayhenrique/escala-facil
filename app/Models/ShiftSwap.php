@@ -15,10 +15,12 @@ class ShiftSwap extends Model
 
     protected $fillable = [
         'shift_id',
+        'substitute_shift_id',
         'requester_id',
         'substitute_id',
         'status',
         'manager_id',
+        'rejection_reason',
     ];
 
     protected function casts(): array
@@ -26,6 +28,7 @@ class ShiftSwap extends Model
         return [
             'id' => 'integer',
             'shift_id' => 'integer',
+            'substitute_shift_id' => 'integer',
             'requester_id' => 'integer',
             'substitute_id' => 'integer',
             'manager_id' => 'integer',
@@ -36,6 +39,11 @@ class ShiftSwap extends Model
     public function shift(): BelongsTo
     {
         return $this->belongsTo(Shift::class);
+    }
+
+    public function substituteShift(): BelongsTo
+    {
+        return $this->belongsTo(Shift::class, 'substitute_shift_id');
     }
 
     public function requester(): BelongsTo

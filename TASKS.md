@@ -159,3 +159,11 @@
   - [x] Detalhar o passo a passo do fechamento do mês e da consulta de relatórios no manual.
   - [x] Atualizar permissões, contrato de experiência, versão e testes automatizados.
 
+- [x] **Fase 24: Notificações PWA, comprovante detalhado e trocas destacadas (1.13.0)**
+  - [x] Integrar contagem de notificações não lidas ao ícone do PWA instalado (App Badging API) e suporte a notificações do dispositivo.
+  - [x] Exibir visão geral dos dois plantões na aprovação gerencial (troca mútua) e gerar comprovante detalhado com horários e impressão.
+  - [x] Destacar dias e plantões com troca realizada no calendário mensal (tom laranja, símbolo e legenda).
+  - [x] Exigir justificativa no cancelamento/rejeição de troca pelo gestor e enviar comprovante aos dois profissionais.
+  - [x] Atualizar documentação, versões e testes automatizados.
+
+

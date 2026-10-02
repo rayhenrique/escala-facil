@@ -57,6 +57,15 @@ class DecideShiftSwapAction
                 'status' => ShiftStatus::Scheduled,
             ]);
 
+            if ($shiftSwap->substitute_shift_id) {
+                $substituteShift = Shift::query()->lockForUpdate()->findOrFail($shiftSwap->substitute_shift_id);
+                $substituteShift->update([
+                    'user_id' => $shiftSwap->requester_id,
+                    'status' => ShiftStatus::Scheduled,
+                ]);
+                $shiftSwap->setRelation('substituteShift', $substituteShift);
+            }
+
             $shiftSwap = $shiftSwap->refresh();
             $this->notifications->approved($shiftSwap);
 
@@ -64,9 +73,9 @@ class DecideShiftSwapAction
         });
     }
 
-    public function reject(User $manager, int $shiftSwapId): ShiftSwap
+    public function reject(User $manager, int $shiftSwapId, ?string $reason = null): ShiftSwap
     {
-        return DB::transaction(function () use ($manager, $shiftSwapId): ShiftSwap {
+        return DB::transaction(function () use ($manager, $shiftSwapId, $reason): ShiftSwap {
             $shiftSwap = ShiftSwap::query()->lockForUpdate()->findOrFail($shiftSwapId);
 
             Gate::forUser($manager)->authorize('reject', $shiftSwap);
@@ -74,6 +83,7 @@ class DecideShiftSwapAction
             $shiftSwap->update([
                 'status' => ShiftSwapStatus::Rejected,
                 'manager_id' => $manager->id,
+                'rejection_reason' => $reason,
             ]);
 
             $shiftSwap = $shiftSwap->refresh();

@@ -5,6 +5,9 @@
     title="Notificações{{ $unreadCount ? ' — '.$unreadCount.' não lida(s)' : '' }}"
     class="sidebar-nav-link {{ request()->routeIs('notifications') ? 'sidebar-nav-link-active' : '' }}"
     @if(request()->routeIs('notifications')) aria-current="page" @endif
+    data-unread-count="{{ $unreadCount }}"
+    x-init="if (typeof window.syncAppBadge === 'function') window.syncAppBadge({{ $unreadCount }})"
+    x-effect="if (typeof window.syncAppBadge === 'function') window.syncAppBadge({{ $unreadCount }})"
 >
     <span class="relative shrink-0">
         <x-nav-icon name="bell" class="sidebar-nav-icon" />

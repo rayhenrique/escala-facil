@@ -33,6 +33,15 @@ class RevertShiftSwapAction
                 'status' => ShiftStatus::Scheduled,
             ]);
 
+            if ($shiftSwap->substitute_shift_id) {
+                $substituteShift = Shift::query()->lockForUpdate()->findOrFail($shiftSwap->substitute_shift_id);
+                $substituteShift->update([
+                    'user_id' => $shiftSwap->substitute_id,
+                    'status' => ShiftStatus::Scheduled,
+                ]);
+                $shiftSwap->setRelation('substituteShift', $substituteShift);
+            }
+
             $shiftSwap->update([
                 'status' => ShiftSwapStatus::Reverted,
                 'manager_id' => $manager->id,

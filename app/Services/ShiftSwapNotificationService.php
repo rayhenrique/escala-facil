@@ -76,13 +76,19 @@ class ShiftSwapNotificationService
     {
         $shiftSwap->loadMissing(['requester', 'substitute', 'manager']);
 
+        $message = "{$shiftSwap->manager->name} rejeitou a solicitação. A escala original foi mantida.";
+
+        if ($shiftSwap->rejection_reason) {
+            $message = "{$shiftSwap->manager->name} rejeitou a solicitação. Justificativa: {$shiftSwap->rejection_reason}. A escala original foi mantida.";
+        }
+
         Notification::send(
             collect([$shiftSwap->requester, $shiftSwap->substitute]),
             new ShiftSwapEventNotification($this->payload(
                 $shiftSwap,
                 ShiftSwapEvent::Rejected,
                 'Troca rejeitada',
-                "{$shiftSwap->manager->name} rejeitou a solicitação. A escala original foi mantida.",
+                $message,
                 route('notifications', [], false),
             )),
         );

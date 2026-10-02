@@ -5,6 +5,7 @@ namespace App\Livewire\Professional;
 use App\Actions\Absences\ReportAbsenceAction;
 use App\Actions\ShiftSwaps\AcceptShiftSwapAction;
 use App\Actions\ShiftSwaps\CreateShiftSwapAction;
+use App\Enums\ShiftStatus;
 use App\Enums\ShiftSwapEvent;
 use App\Enums\ShiftSwapStatus;
 use App\Enums\UserRole;
@@ -37,6 +38,8 @@ class MySchedule extends Component
 
     public string $substituteId = '';
 
+    public string $substituteShiftId = '';
+
     public ?int $absenceShiftId = null;
 
     public string $absenceReason = '';
@@ -50,7 +53,7 @@ class MySchedule extends Component
 
     public ?int $pendingAcceptSwapId = null;
 
-    /** @var array<string, string>|null */
+    /** @var array<string, string|null>|null */
     public ?array $confirmationSummary = null;
 
     public function mount(): void
@@ -61,6 +64,43 @@ class MySchedule extends Component
     public function updatedMonth(): void
     {
         $this->month = $this->normalizeMonth($this->month);
+    }
+
+    public function updatedSubstituteId(): void
+    {
+        $this->substituteShiftId = '';
+    }
+
+    #[Computed]
+    public function eligibleSubstituteShifts(): Collection
+    {
+        if (! $this->swapShiftId || ! $this->substituteId) {
+            return new Collection;
+        }
+
+        $shift = Shift::query()
+            ->where('user_id', auth()->id())
+            ->find($this->swapShiftId);
+
+        if (! $shift) {
+            return new Collection;
+        }
+
+        return Shift::query()
+            ->with(['sector', 'category'])
+            ->where('user_id', $this->substituteId)
+            ->whereDate('date', '>', today())
+            ->where('status', ShiftStatus::Scheduled)
+            ->where('sector_id', $shift->sector_id)
+            ->where('category_id', $shift->category_id)
+            ->whereDoesntHave('swaps', fn ($query) => $query->whereIn('status', [
+                ShiftSwapStatus::PendingProfessional,
+                ShiftSwapStatus::PendingManager,
+                ShiftSwapStatus::Approved,
+            ]))
+            ->orderBy('date')
+            ->orderBy('start_time')
+            ->get();
     }
 
     #[Computed]
@@ -109,9 +149,11 @@ class MySchedule extends Component
 
         $this->swapShiftId = $shift->id;
         $this->substituteId = '';
+        $this->substituteShiftId = '';
         $this->absenceShiftId = null;
         $this->resetValidation();
         unset($this->eligibleSubstitutes);
+        unset($this->eligibleSubstituteShifts);
     }
 
     public function requestSwap(CreateShiftSwapAction $action, ShiftSwapReceipt $receipts): void
@@ -120,13 +162,16 @@ class MySchedule extends Component
         $shiftSwap = $action->execute(auth()->user(), [
             'shift_id' => $this->swapShiftId,
             'substitute_id' => $this->substituteId,
+            'substitute_shift_id' => $this->substituteShiftId ?: null,
         ]);
         $this->swapReceipt = $receipts->make($shiftSwap, ShiftSwapEvent::Requested);
 
         $this->swapShiftId = null;
         $this->substituteId = '';
+        $this->substituteShiftId = '';
         $this->cancelConfirmation();
         unset($this->eligibleSubstitutes);
+        unset($this->eligibleSubstituteShifts);
         session()->flash('status', 'Solicitação enviada ao profissional selecionado.');
     }
 
@@ -136,13 +181,20 @@ class MySchedule extends Component
         $validated = (new StoreShiftSwapRequest)->validatePayload([
             'shift_id' => $this->swapShiftId,
             'substitute_id' => $this->substituteId,
+            'substitute_shift_id' => $this->substituteShiftId ?: null,
         ], auth()->user());
 
         $shift = Shift::query()->with(['sector', 'category'])->findOrFail($validated['shift_id']);
         $substitute = User::query()->findOrFail($validated['substitute_id']);
+        $counterpart = ! empty($validated['substitute_shift_id'])
+            ? Shift::query()->with(['sector', 'category'])->find($validated['substitute_shift_id'])
+            : null;
 
         $this->pendingConfirmation = 'request_swap';
-        $this->confirmationSummary = $this->shiftSummary($shift) + ['substitute' => $substitute->name];
+        $this->confirmationSummary = $this->shiftSummary($shift) + [
+            'substitute' => $substitute->name,
+            'counterpart' => $counterpart ? $this->shiftSummary($counterpart)['shift'] : null,
+        ];
     }
 
     public function confirmSwapRequest(CreateShiftSwapAction $action, ShiftSwapReceipt $receipts): void
@@ -165,7 +217,7 @@ class MySchedule extends Component
     public function requestAcceptSwap(int $shiftSwapId): void
     {
         $shiftSwap = ShiftSwap::query()
-            ->with(['shift.sector', 'shift.category', 'requester'])
+            ->with(['shift.sector', 'shift.category', 'substituteShift.sector', 'substituteShift.category', 'requester'])
             ->findOrFail($shiftSwapId);
         $this->authorize('accept', $shiftSwap);
 
@@ -173,6 +225,7 @@ class MySchedule extends Component
         $this->pendingConfirmation = 'accept_swap';
         $this->confirmationSummary = $this->shiftSummary($shiftSwap->shift) + [
             'requester' => $shiftSwap->requester->name,
+            'counterpart' => $shiftSwap->substituteShift ? $this->shiftSummary($shiftSwap->substituteShift)['shift'] : null,
         ];
 
         $doubleShift = ShiftCoverage::findDoubleShift(auth()->user(), $shiftSwap->shift);
@@ -251,7 +304,7 @@ class MySchedule extends Component
 
     public function cancelAction(): void
     {
-        $this->reset(['swapShiftId', 'substituteId', 'absenceShiftId', 'absenceReason', 'attachment']);
+        $this->reset(['swapShiftId', 'substituteId', 'substituteShiftId', 'absenceShiftId', 'absenceReason', 'attachment']);
         $this->cancelConfirmation();
         $this->resetValidation();
     }
@@ -297,14 +350,14 @@ class MySchedule extends Component
             ->get();
 
         $incomingSwaps = ShiftSwap::query()
-            ->with(['shift.category', 'shift.sector', 'requester'])
+            ->with(['shift.category', 'shift.sector', 'substituteShift.category', 'substituteShift.sector', 'requester'])
             ->where('substitute_id', auth()->id())
             ->where('status', ShiftSwapStatus::PendingProfessional)
             ->oldest()
             ->get();
 
         $mySwaps = ShiftSwap::query()
-            ->with(['shift', 'substitute'])
+            ->with(['shift', 'substituteShift', 'substitute'])
             ->where('requester_id', auth()->id())
             ->latest()
             ->limit(8)

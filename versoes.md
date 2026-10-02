@@ -6,6 +6,16 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.13.0 — 02/10/2026
+
+### Notificações PWA, comprovante detalhado e trocas destacadas
+
+- Contador de notificações pendentes integrado ao ícone do aplicativo PWA instalado (App Badging API) e suporte a avisos no aparelho.
+- Tela de aprovação exibe a troca geral com o dia que vai substituir e o dia que está sendo substituído, além de horários detalhados.
+- Comprovante detalhado de movimentação da escala com resumo de para onde cada profissional foi e botão de impressão direta.
+- Rejeição de troca com campo obrigatório de justificativa, registrado em banco e devolvido ao solicitante e ao substituto com comprovante.
+- Destaque visual em tom laranja com símbolo e legenda no calendário mensal e nos cartões de plantão do dia para trocas aprovadas.
+
 ## 1.12.0 — 30/09/2026
 
 ### Relatórios compartilhados e manual detalhado
