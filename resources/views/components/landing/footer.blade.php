@@ -35,10 +35,21 @@
             </div>
         </div>
 
-        <!-- Copyright -->
+        <!-- Copyright, Credits & Version -->
         <div class="mt-8 pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400 text-center sm:text-left">
             <p>© {{ date('Y') }} Escala Fácil. Todos os direitos reservados.</p>
-            <p>Desenvolvido por <strong class="text-slate-600 font-semibold">KL Tecnologia</strong></p>
+            <div class="flex flex-wrap items-center justify-center sm:justify-end gap-3">
+                <p>
+                    Desenvolvido por
+                    <a href="https://kltecnologia.com" target="_blank" rel="noopener noreferrer" class="font-semibold text-slate-600 hover:text-emerald-700 underline decoration-slate-300 hover:decoration-emerald-600 transition-colors">
+                        KL Tecnologia
+                    </a>
+                </p>
+                <span class="text-slate-300" aria-hidden="true">·</span>
+                <span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 font-mono text-[11px] font-medium text-slate-600 border border-slate-200/80">
+                    Versão {{ config('version.current') }}
+                </span>
+            </div>
         </div>
     </div>
 </footer>

@@ -57,4 +57,17 @@ class LandingPageTest extends TestCase
         $response->assertSee('<meta name="theme-color" content="#059669">', false);
         $response->assertSee('<body id="landing-page"', false);
     }
+
+    public function test_landing_page_footer_contains_author_link_and_dynamic_version(): void
+    {
+        $currentVersion = config('version.current');
+
+        $response = $this->get(route('landing'));
+
+        $response->assertOk();
+        $response->assertSee('Desenvolvido por');
+        $response->assertSee('https://kltecnologia.com', false);
+        $response->assertSee('KL Tecnologia');
+        $response->assertSee('Versão '.$currentVersion);
+    }
 }
