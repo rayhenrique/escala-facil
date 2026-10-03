@@ -21,9 +21,16 @@ class Reports extends Component
     #[Url]
     public string $month = '';
 
+    #[Url]
+    public string $tab = 'all';
+
     public string $sectorId = '';
 
     public string $categoryId = '';
+
+    public string $searchProfessional = '';
+
+    public string $swapStatusFilter = '';
 
     public function mount(): void
     {
@@ -35,11 +42,22 @@ class Reports extends Component
         }
 
         $this->month = $this->normalizeMonth($this->month);
+        $this->tab = $this->normalizeTab($this->tab);
     }
 
     public function updatedMonth(): void
     {
         $this->month = $this->normalizeMonth($this->month);
+    }
+
+    public function updatedTab(): void
+    {
+        $this->tab = $this->normalizeTab($this->tab);
+    }
+
+    public function setTab(string $tab): void
+    {
+        $this->tab = $this->normalizeTab($tab);
     }
 
     public function updatedSectorId(string $sectorId): void
@@ -62,6 +80,9 @@ class Reports extends Component
     public function clearFilters(): void
     {
         $user = auth()->user();
+        $this->searchProfessional = '';
+        $this->swapStatusFilter = '';
+
         if ($user?->role === UserRole::Professional) {
             $this->reset('categoryId');
             $this->sectorId = (string) ($user->sector_id ?? '');
@@ -100,12 +121,51 @@ class Reports extends Component
             ? (string) ($user->sector_id ?? 0)
             : $this->sectorId;
 
-        return app(ShiftReportService::class)->forPeriod(
+        $report = app(ShiftReportService::class)->forPeriod(
             $this->month,
             $effectiveSectorId,
             $this->categoryId,
             $user
         );
+
+        if ($this->searchProfessional !== '') {
+            $term = mb_strtolower(trim($this->searchProfessional));
+            $report['byProfessional'] = $report['byProfessional']->filter(
+                fn (array $row): bool => str_contains(mb_strtolower($row['name']), $term) || str_contains(mb_strtolower($row['team']), $term)
+            )->values();
+        }
+
+        if ($this->swapStatusFilter !== '') {
+            $report['swaps'] = $report['swaps']->filter(
+                fn ($swap): bool => $swap->status->value === $this->swapStatusFilter
+            )->values();
+        }
+
+        return $report;
+    }
+
+    /** @return array<string, mixed> */
+    #[Computed]
+    public function wallRoster(): array
+    {
+        $user = auth()->user();
+        $effectiveSectorId = ($user?->role === UserRole::Professional)
+            ? (string) ($user->sector_id ?? 0)
+            : $this->sectorId;
+
+        return app(ShiftReportService::class)->wallRoster(
+            $this->month,
+            $effectiveSectorId,
+            $this->categoryId,
+            $user
+        );
+    }
+
+    private function normalizeTab(string $tab): string
+    {
+        return in_array($tab, ['all', 'coverage', 'professionals', 'swaps', 'absences', 'wall'], true)
+            ? $tab
+            : 'all';
     }
 
     private function normalizeMonth(string $month): string

@@ -88,7 +88,7 @@ class ShiftReportService
             : $allSwaps->filter(fn (ShiftSwap $swap) => $swap->requester_id === $forUser->id || $swap->substitute_id === $forUser->id)->values();
 
         $absences = Absence::query()
-            ->with(['user', 'shift'])
+            ->with(['user', 'shift.sector', 'shift.category'])
             ->whereHas('shift', fn ($query) => $query
                 ->whereBetween('date', [$monthStart, $monthEnd])
                 ->when($sectorId !== '', fn ($shift) => $shift->where('sector_id', $sectorId))
@@ -117,6 +117,9 @@ class ShiftReportService
             'byCategory' => $this->groupByRelation($shifts, 'category'),
             'byProfessional' => $this->professionalRows($shifts, $allSwaps, $absences),
             'swaps' => $visibleSwaps,
+            'absencesList' => $isManager
+                ? $absences
+                : $absences->filter(fn (Absence $absence) => $absence->user_id === $forUser?->id)->values(),
             'isManager' => $isManager,
             'hasActiveFilters' => $isManager ? ($sectorId !== '' || $categoryId !== '') : ($categoryId !== ''),
         ];

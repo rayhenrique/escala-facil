@@ -326,6 +326,67 @@ class ReportsTest extends TestCase
         $this->assertSame('Emergência', $anaWall['days']['2026-11-12']->first()->sector->name);
     }
 
+    public function test_manager_can_navigate_submodules_and_use_submodule_filters(): void
+    {
+        [$manager, $ana, , $sector, $category] = $this->team();
+
+        Shift::factory()->create([
+            'date' => '2026-11-12',
+            'start_time' => '07:00',
+            'end_time' => '19:00',
+            'sector_id' => $sector->id,
+            'category_id' => $category->id,
+            'user_id' => $ana->id,
+            'status' => ShiftStatus::Scheduled,
+        ]);
+
+        $component = Livewire::actingAs($manager)
+            ->test(Reports::class)
+            ->set('month', '2026-11');
+
+        // Defaults to 'all' tab showing all submodules
+        $component->assertSet('tab', 'all')
+            ->assertSee('Visão Consolidada')
+            ->assertSee('Cobertura e Indicadores')
+            ->assertSee('Por Profissional')
+            ->assertSee('Trocas de Plantão')
+            ->assertSee('Ausências')
+            ->assertSee('Escala de Mural');
+
+        // Switch to 'coverage' tab
+        $component->set('tab', 'coverage')
+            ->assertSee('Cobertura e Indicadores Operacionais')
+            ->assertSee('Plantões por setor')
+            ->assertDontSee('Plantões por profissional');
+
+        // Switch to 'professionals' tab
+        $component->set('tab', 'professionals')
+            ->assertSee('Plantões por profissional')
+            ->assertSee('Ana Plantonista')
+            ->assertDontSee('Cobertura e Indicadores Operacionais');
+
+        // Test search filter in 'professionals' tab
+        $component->set('searchProfessional', 'Inexistente')
+            ->assertDontSee('Ana Plantonista')
+            ->set('searchProfessional', 'Ana')
+            ->assertSee('Ana Plantonista');
+
+        // Switch to 'swaps' tab
+        $component->set('tab', 'swaps')
+            ->assertSee('Trocas criadas no mês')
+            ->assertDontSee('Cobertura & Indicadores Operacionais');
+
+        // Switch to 'absences' tab
+        $component->set('tab', 'absences')
+            ->assertSee('Ausências e justificativas')
+            ->assertDontSee('Plantões por profissional');
+
+        // Switch to 'wall' tab
+        $component->set('tab', 'wall')
+            ->assertSee('Escala de mural (afixação oficial)')
+            ->assertSee('Baixar PDF para afixar');
+    }
+
     /** @return array{User, User, User, Sector, Category} */
     private function team(): array
     {

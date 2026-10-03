@@ -6,6 +6,19 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.16.0 — 03/10/2026
+
+### Submódulos de relatórios, impressão isolada e salvamento de comprovante em PDF
+
+- **Submódulos no módulo Relatórios:** Criação de abas e visões analíticas especializadas: Visão Consolidada, Cobertura e Indicadores, Por Profissional, Trocas de Plantão, Ausências e Justificativas, e Escala de Mural.
+- **Filtro e cota por profissional:** Busca instantânea por colaborador e visualização direta da cota de trocas aprovadas no mês com indicador de limite (`X de 4`).
+- **Filtro de situação em trocas:** Tabela de auditoria com filtro por status (Aprovadas, Aguardando gerência, Aguardando profissional, Rejeitadas) e download direto de comprovantes.
+- **Escala de mural integrada:** Visualização da grade diária de plantões e botão direto para download do PDF oficial de afixação (A4 horizontal).
+- **Submenu no menu lateral:** Atalhos diretos para cada submódulo de relatórios na barra lateral de navegação.
+- **Impressão isolada de comprovante de troca:** O botão "Imprimir" isola o comprovante selecionado via iframe oculto com cabeçalho oficial e assinaturas físicas, sem imprimir o restante da página.
+- **Download de comprovante em PDF:** Botão dedicado "Salvar PDF" com rota segura `/swaps/{swap}/receipt/pdf` e template A4 oficial com dados dos plantões e histórico de decisões.
+- **Rodapé dinâmico:** Link oficial para `kltecnologia.com` e versão dinâmica do sistema exibida no rodapé institucional.
+
 ## 1.15.0 — 02/10/2026
 
 ### Isolamento de setor para profissionais e iniciais no calendário

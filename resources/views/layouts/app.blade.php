@@ -79,6 +79,16 @@
                             <a href="{{ route('manager.reports') }}" wire:navigate title="Relatórios" class="sidebar-nav-link {{ request()->routeIs('manager.reports*') ? 'sidebar-nav-link-active' : '' }}" @if(request()->routeIs('manager.reports*')) aria-current="page" @endif>
                                 <x-nav-icon name="report" class="sidebar-nav-icon" /><span class="sidebar-label">Relatórios</span>
                             </a>
+                            @if (request()->routeIs('manager.reports*'))
+                                <div class="sidebar-label ml-8 mt-1 mb-2 space-y-0.5 border-l border-white/20 pl-2 text-xs">
+                                    <a href="{{ route('manager.reports', ['tab' => 'all']) }}" wire:navigate class="block rounded px-2 py-1 text-white/70 hover:bg-white/10 hover:text-white {{ request()->query('tab', 'all') === 'all' ? 'font-semibold text-white bg-white/10' : '' }}">Consolidado</a>
+                                    <a href="{{ route('manager.reports', ['tab' => 'coverage']) }}" wire:navigate class="block rounded px-2 py-1 text-white/70 hover:bg-white/10 hover:text-white {{ request()->query('tab') === 'coverage' ? 'font-semibold text-white bg-white/10' : '' }}">Cobertura</a>
+                                    <a href="{{ route('manager.reports', ['tab' => 'professionals']) }}" wire:navigate class="block rounded px-2 py-1 text-white/70 hover:bg-white/10 hover:text-white {{ request()->query('tab') === 'professionals' ? 'font-semibold text-white bg-white/10' : '' }}">Por Profissional</a>
+                                    <a href="{{ route('manager.reports', ['tab' => 'swaps']) }}" wire:navigate class="block rounded px-2 py-1 text-white/70 hover:bg-white/10 hover:text-white {{ request()->query('tab') === 'swaps' ? 'font-semibold text-white bg-white/10' : '' }}">Trocas</a>
+                                    <a href="{{ route('manager.reports', ['tab' => 'absences']) }}" wire:navigate class="block rounded px-2 py-1 text-white/70 hover:bg-white/10 hover:text-white {{ request()->query('tab') === 'absences' ? 'font-semibold text-white bg-white/10' : '' }}">Ausências</a>
+                                    <a href="{{ route('manager.reports', ['tab' => 'wall']) }}" wire:navigate class="block rounded px-2 py-1 text-white/70 hover:bg-white/10 hover:text-white {{ request()->query('tab') === 'wall' ? 'font-semibold text-white bg-white/10' : '' }}">Mural (Afixar)</a>
+                                </div>
+                            @endif
                             <a href="{{ route('manager.sectors') }}" wire:navigate title="Setores" class="sidebar-nav-link {{ request()->routeIs('manager.sectors') ? 'sidebar-nav-link-active' : '' }}" @if(request()->routeIs('manager.sectors')) aria-current="page" @endif>
                                 <x-nav-icon name="building" class="sidebar-nav-icon" /><span class="sidebar-label">Setores</span>
                             </a>
@@ -98,6 +108,16 @@
                             <a href="{{ route('professional.reports') }}" wire:navigate title="Relatórios" class="sidebar-nav-link {{ request()->routeIs('professional.reports*') ? 'sidebar-nav-link-active' : '' }}" @if(request()->routeIs('professional.reports*')) aria-current="page" @endif>
                                 <x-nav-icon name="report" class="sidebar-nav-icon" /><span class="sidebar-label">Relatórios</span>
                             </a>
+                            @if (request()->routeIs('professional.reports*'))
+                                <div class="sidebar-label ml-8 mt-1 mb-2 space-y-0.5 border-l border-white/20 pl-2 text-xs">
+                                    <a href="{{ route('professional.reports', ['tab' => 'all']) }}" wire:navigate class="block rounded px-2 py-1 text-white/70 hover:bg-white/10 hover:text-white {{ request()->query('tab', 'all') === 'all' ? 'font-semibold text-white bg-white/10' : '' }}">Consolidado</a>
+                                    <a href="{{ route('professional.reports', ['tab' => 'coverage']) }}" wire:navigate class="block rounded px-2 py-1 text-white/70 hover:bg-white/10 hover:text-white {{ request()->query('tab') === 'coverage' ? 'font-semibold text-white bg-white/10' : '' }}">Cobertura</a>
+                                    <a href="{{ route('professional.reports', ['tab' => 'professionals']) }}" wire:navigate class="block rounded px-2 py-1 text-white/70 hover:bg-white/10 hover:text-white {{ request()->query('tab') === 'professionals' ? 'font-semibold text-white bg-white/10' : '' }}">Por Profissional</a>
+                                    <a href="{{ route('professional.reports', ['tab' => 'swaps']) }}" wire:navigate class="block rounded px-2 py-1 text-white/70 hover:bg-white/10 hover:text-white {{ request()->query('tab') === 'swaps' ? 'font-semibold text-white bg-white/10' : '' }}">Minhas Trocas</a>
+                                    <a href="{{ route('professional.reports', ['tab' => 'absences']) }}" wire:navigate class="block rounded px-2 py-1 text-white/70 hover:bg-white/10 hover:text-white {{ request()->query('tab') === 'absences' ? 'font-semibold text-white bg-white/10' : '' }}">Minhas Ausências</a>
+                                    <a href="{{ route('professional.reports', ['tab' => 'wall']) }}" wire:navigate class="block rounded px-2 py-1 text-white/70 hover:bg-white/10 hover:text-white {{ request()->query('tab') === 'wall' ? 'font-semibold text-white bg-white/10' : '' }}">Mural (Afixar)</a>
+                                </div>
+                            @endif
                         @endif
                     </div>
 

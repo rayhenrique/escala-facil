@@ -199,6 +199,41 @@ class ShiftSwapEnhancementsTest extends TestCase
             ->assertSee($substitute->name);
     }
 
+    public function test_swap_receipt_pdf_download_and_authorization(): void
+    {
+        [$manager, $requester, $substitute, $shift] = $this->team();
+
+        $swap = app(CreateShiftSwapAction::class)->execute($requester, [
+            'shift_id' => $shift->id,
+            'substitute_id' => $substitute->id,
+        ]);
+        app(AcceptShiftSwapAction::class)->execute($substitute, $swap->id);
+        app(DecideShiftSwapAction::class)->approve($manager, $swap->id);
+
+        $url = route('swaps.receipt.pdf', $swap->id);
+
+        // Guest redirected to login
+        $this->get($url)->assertRedirect(route('login'));
+
+        // Unauthorized professional receives 403 Forbidden
+        $otherUser = User::factory()->create([
+            'role' => UserRole::Professional,
+        ]);
+        $this->actingAs($otherUser)->get($url)->assertForbidden();
+
+        // Requester can download PDF
+        $response = $this->actingAs($requester)->get($url);
+        $response->assertOk();
+        $response->assertHeader('content-type', 'application/pdf');
+        $this->assertStringContainsString('comprovante-TROCA-', (string) $response->headers->get('content-disposition'));
+
+        // Substitute can download PDF
+        $this->actingAs($substitute)->get($url)->assertOk()->assertHeader('content-type', 'application/pdf');
+
+        // Manager can download PDF
+        $this->actingAs($manager)->get($url)->assertOk()->assertHeader('content-type', 'application/pdf');
+    }
+
     /**
      * @return array{0: User, 1: User, 2: User, 3: Shift}
      */

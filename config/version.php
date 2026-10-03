@@ -1,9 +1,23 @@
 <?php
 
 return [
-    'current' => env('APP_VERSION', '1.15.0'),
+    'current' => env('APP_VERSION', '1.16.0'),
 
     'releases' => [
+        [
+            'version' => '1.16.0',
+            'date' => '2026-10-03',
+            'title' => 'Submódulos de relatórios, impressão isolada e comprovante em PDF',
+            'summary' => 'Reestruturação do módulo de Relatórios com submódulos analíticos dedicados, impressão isolada de comprovantes de troca via iframe, download de comprovante oficial em PDF e rodapé dinâmico.',
+            'highlights' => [
+                'Submódulos de relatórios: navegação rápida entre Visão Consolidada, Cobertura e Indicadores, Por Profissional, Trocas de Plantão, Ausências e Escala de Mural.',
+                'Filtro instantâneo por profissional: busca rápida por nome e acompanhamento da cota de trocas (X de 4) no submódulo individual.',
+                'Filtro por situação de troca: auditoria de permutas e solicitações com filtro de status no submódulo de trocas.',
+                'Impressão isolada de comprovante: impressão exclusiva do card selecionado com cabeçalho oficial e assinaturas sem imprimir a página inteira.',
+                'Comprovante oficial em PDF: botão direto no comprovante para salvar o documento formatado em PDF A4 com controle de autorização.',
+                'Rodapé institucional com link para KL Tecnologia e versão dinâmica do sistema.',
+            ],
+        ],
         [
             'version' => '1.15.0',
             'date' => '2026-10-02',

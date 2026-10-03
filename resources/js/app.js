@@ -131,6 +131,12 @@ export const requestDeviceNotificationPermission = async () => {
     }
 };
 
+export const printSwapReceipt = (triggerElement) => {
+    if (typeof window.printSwapReceipt === 'function') {
+        window.printSwapReceipt(triggerElement);
+    }
+};
+
 window.syncAppBadge = syncAppBadge;
 window.requestDeviceNotificationPermission = requestDeviceNotificationPermission;
 

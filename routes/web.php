@@ -4,6 +4,7 @@ use App\Http\Controllers\DashboardRedirectController;
 use App\Http\Controllers\Manager\ReportPdfController;
 use App\Http\Controllers\Manager\ShiftSpreadsheetController;
 use App\Http\Controllers\Manager\WallRosterPdfController;
+use App\Http\Controllers\SwapReceiptPdfController;
 use App\Livewire\HelpCenter;
 use App\Livewire\Manager\CategoryManager;
 use App\Livewire\Manager\Dashboard;
@@ -34,6 +35,10 @@ Route::get('help', HelpCenter::class)
 Route::get('notifications', NotificationsCenter::class)
     ->middleware('auth')
     ->name('notifications');
+
+Route::get('swaps/{swap}/receipt/pdf', SwapReceiptPdfController::class)
+    ->middleware('auth')
+    ->name('swaps.receipt.pdf');
 
 Route::middleware(['auth', 'professional'])
     ->prefix('professional')
