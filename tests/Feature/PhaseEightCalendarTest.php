@@ -132,11 +132,21 @@ class PhaseEightCalendarTest extends TestCase
             ->call('selectDate', '2026-11-12')
             ->assertSee('Ana da Emergência')
             ->assertSee('Bruno da UTI')
+            ->assertDontSeeHtml('calendar-day-initials')
             ->set('sectorId', (string) $icu->id)
             ->assertSet('sectorId', (string) $icu->id)
             ->assertSee('Bruno da UTI')
             ->assertDontSee('Ana da Emergência')
-            ->assertSee('1 plantão(ões) · 1 profissional(is)');
+            ->assertSee('1 plantão(ões) · 1 profissional(is)')
+            ->assertSeeHtml('calendar-day-initials')
+            ->assertSee('BU')
+            ->assertDontSee('AE')
+            ->assertSee('Iniciais do plantonista');
+
+        $this->assertSame('CS', MonthlyCalendar::initialsForName('Carlos Silva'));
+        $this->assertSame('AN', MonthlyCalendar::initialsForName('Ana'));
+        $this->assertSame('CO', MonthlyCalendar::initialsForName('Carla de Oliveira'));
+        $this->assertSame('CE', MonthlyCalendar::initialsForName('Dr. Carlos Eduardo'));
     }
 
     public function test_manager_can_filter_calendar_by_category(): void
@@ -282,5 +292,45 @@ class PhaseEightCalendarTest extends TestCase
         $this->assertFalse($days['2026-11-13']['covered_24h']);
         $this->assertFalse($days['2026-11-14']['covered_24h']);
         $this->assertFalse($days['2026-11-16']['covered_24h']);
+    }
+
+    public function test_professional_only_sees_own_sector_shifts_in_monthly_calendar(): void
+    {
+        [$manager, $emergency, $icu, $category] = $this->twoSectorSetup();
+
+        $ana = User::query()->where('name', 'Ana da Emergência')->firstOrFail();
+        $bruno = User::query()->where('name', 'Bruno da UTI')->firstOrFail();
+
+        Livewire::actingAs($ana)
+            ->test(MonthlyCalendar::class)
+            ->set('month', '2026-11')
+            ->call('selectDate', '2026-11-12')
+            ->assertSet('sectorId', (string) $emergency->id)
+            ->assertSee('Ana da Emergência')
+            ->assertDontSee('Bruno da UTI')
+            ->assertSeeHtml('value="Emergência"')
+            ->assertSeeHtml('disabled')
+            ->assertSee('AE')
+            ->assertDontSee('BU')
+            ->set('sectorId', (string) $icu->id)
+            ->assertSet('sectorId', (string) $emergency->id)
+            ->assertSee('Ana da Emergência')
+            ->assertDontSee('Bruno da UTI')
+            ->call('clearFilters')
+            ->assertSet('sectorId', (string) $emergency->id)
+            ->assertSee('Ana da Emergência')
+            ->assertDontSee('Bruno da UTI');
+
+        Livewire::actingAs($bruno)
+            ->test(MonthlyCalendar::class)
+            ->set('month', '2026-11')
+            ->call('selectDate', '2026-11-12')
+            ->assertSet('sectorId', (string) $icu->id)
+            ->assertSee('Bruno da UTI')
+            ->assertDontSee('Ana da Emergência')
+            ->assertSeeHtml('value="UTI"')
+            ->assertSeeHtml('disabled')
+            ->assertSee('BU')
+            ->assertDontSee('AE');
     }
 }

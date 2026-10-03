@@ -31,18 +31,25 @@
                 <span class="inline-flex items-center gap-2"><span class="size-2.5 rounded-full bg-danger"></span>Sem profissional</span>
                 <span class="inline-flex items-center gap-2"><span class="font-bold text-coverage" aria-hidden="true">✓</span>24h cobertas</span>
                 <span class="inline-flex items-center gap-2"><span class="size-2.5 rounded-full bg-amber-500"></span><span class="font-bold text-amber-600" aria-hidden="true">⇄</span>Troca realizada</span>
+                @if ($hasSectorFilter)
+                    <span class="inline-flex items-center gap-1.5"><span class="rounded bg-primary/10 px-1 py-0.5 font-mono text-[10px] font-bold text-primary border border-primary/20">AB</span>Iniciais do plantonista</span>
+                @endif
             </div>
         </div>
 
         <div class="mt-6 grid gap-4 sm:grid-cols-2">
             <div>
                 <label for="calendar-sector" class="field-label">Setor</label>
-                <select wire:model.live="sectorId" id="calendar-sector" class="field-input">
-                    <option value="">Todos os setores</option>
-                    @foreach ($this->sectors as $sector)
-                        <option value="{{ $sector->id }}">{{ $sector->name }}</option>
-                    @endforeach
-                </select>
+                @if ($isProfessional)
+                    <input type="text" id="calendar-sector" class="field-input bg-surface-muted text-muted font-medium cursor-not-allowed" value="{{ auth()->user()->sector?->name ?? 'Seu setor' }}" disabled readonly aria-label="Setor vinculado">
+                @else
+                    <select wire:model.live="sectorId" id="calendar-sector" class="field-input">
+                        <option value="">Todos os setores</option>
+                        @foreach ($this->sectors as $sector)
+                            <option value="{{ $sector->id }}">{{ $sector->name }}</option>
+                        @endforeach
+                    </select>
+                @endif
             </div>
             <div>
                 <label for="calendar-category" class="field-label">Categoria</label>
@@ -82,6 +89,27 @@
                     @if ($day['in_month'] && $day['shifts_count'] > 0)
                         <span class="calendar-day-count">{{ $day['shifts_count'] }}</span>
                         <span class="sr-only">plantão(ões)</span>
+                    @endif
+
+                    @if ($day['in_month'] && $hasSectorFilter && ! empty($day['professionals']))
+                        <div class="calendar-day-initials" aria-label="Profissionais escalados">
+                            @foreach (array_slice($day['professionals'], 0, 3) as $prof)
+                                <span
+                                    class="calendar-initial-badge {{ $prof['is_uncovered'] ? 'calendar-initial-uncovered' : ($prof['is_swapped'] ? 'calendar-initial-swapped' : 'calendar-initial-default') }}"
+                                    title="{{ $prof['name'] }} ({{ $prof['time'] }}){{ $prof['is_swapped'] ? ' · Troca realizada' : '' }}"
+                                >
+                                    {{ $prof['initials'] }}
+                                </span>
+                            @endforeach
+                            @if (count($day['professionals']) > 3)
+                                <span
+                                    class="calendar-initial-badge calendar-initial-more"
+                                    title="{{ count($day['professionals']) - 3 }} outro(s) profissional(is): {{ collect(array_slice($day['professionals'], 3))->pluck('name')->implode(', ') }}"
+                                >
+                                    +{{ count($day['professionals']) - 3 }}
+                                </span>
+                            @endif
+                        </div>
                     @endif
 
                     @if ($day['in_month'] && $day['uncovered_count'] > 0)
@@ -178,7 +206,7 @@
             @empty
                 <div class="empty-state xl:col-span-2">
                     <p class="font-semibold text-ink">{{ $hasActiveFilters ? 'Nenhum plantão encontrado para os filtros selecionados.' : 'Nenhum plantão cadastrado neste dia.' }}</p>
-                    <p class="mt-2 text-sm">{{ $hasActiveFilters ? 'Ajuste os filtros de setor e categoria ou selecione outra data.' : ($canManageShifts ? 'Selecione outra data ou cadastre um plantão na gestão de escalas.' : 'Selecione outra data para consultar a escala.') }}</p>
+                    <p class="mt-2 text-sm">{{ $hasActiveFilters ? ($isProfessional ? 'Ajuste o filtro de categoria ou selecione outra data.' : 'Ajuste os filtros de setor e categoria ou selecione outra data.') : ($canManageShifts ? 'Selecione outra data ou cadastre um plantão na gestão de escalas.' : 'Selecione outra data para consultar a escala.') }}</p>
                     @if ($hasActiveFilters)
                         <button type="button" wire:click="clearFilters" class="button-secondary mt-5">Limpar filtros</button>
                     @elseif ($canManageShifts)

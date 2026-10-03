@@ -173,4 +173,12 @@
   - [x] Exibir participantes da troca ao passar o mouse nas células de dias com troca no calendário mensal.
   - [x] Atualizar controle de versão, documentações e testes automatizados.
 
+- [x] **Fase 26: Isolamento de setor para profissionais e monogramas no calendário (1.15.0)**
+  - [x] Confinar visualização da escala no calendário e relatórios estritamente ao setor do profissional.
+  - [x] Bloquear e desabilitar seletor de setor na interface do profissional com o nome da sua unidade.
+  - [x] Proteger controllers de exportação de PDF e serviços contra forja de parâmetros de setor.
+  - [x] Exibir monogramas de duas letras com as iniciais dos plantonistas nas células do calendário mensal.
+  - [x] Atualizar documentações, service worker cache, versões e testes automatizados.
+
+
 

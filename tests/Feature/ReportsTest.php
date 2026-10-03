@@ -263,6 +263,69 @@ class ReportsTest extends TestCase
             ->assertSee('Carlos Silva → Daniel Souza');
     }
 
+    public function test_professional_only_sees_own_sector_in_reports_and_pdf_exports(): void
+    {
+        [$manager, $ana, $bruno, $emergency, $icu, $category] = $this->twoSectorTeam();
+
+        Shift::factory()->create([
+            'date' => '2026-11-12',
+            'sector_id' => $emergency->id,
+            'category_id' => $category->id,
+            'user_id' => $ana->id,
+            'status' => ShiftStatus::Scheduled,
+        ]);
+
+        Shift::factory()->create([
+            'date' => '2026-11-12',
+            'sector_id' => $icu->id,
+            'category_id' => $category->id,
+            'user_id' => $bruno->id,
+            'status' => ShiftStatus::Scheduled,
+        ]);
+
+        Livewire::actingAs($ana)
+            ->test(Reports::class)
+            ->set('month', '2026-11')
+            ->assertSet('sectorId', (string) $emergency->id)
+            ->assertSee('1 plantão(ões) no período selecionado.')
+            ->assertSee('Ana Plantonista')
+            ->assertDontSee('Bruno Plantonista')
+            ->assertSee('Emergência')
+            ->assertDontSee('UTI')
+            ->assertSeeHtml('value="Emergência"')
+            ->assertSeeHtml('disabled')
+            ->set('sectorId', (string) $icu->id)
+            ->assertSet('sectorId', (string) $emergency->id)
+            ->assertSee('Ana Plantonista')
+            ->assertDontSee('Bruno Plantonista')
+            ->call('clearFilters')
+            ->assertSet('sectorId', (string) $emergency->id)
+            ->assertSee('Ana Plantonista')
+            ->assertDontSee('Bruno Plantonista');
+
+        $pdfResponse = $this->actingAs($ana)->get(route('professional.reports.pdf', [
+            'month' => '2026-11',
+            'sector_id' => $icu->id,
+        ]));
+        $pdfResponse->assertOk();
+
+        $wallResponse = $this->actingAs($ana)->get(route('professional.reports.wall', [
+            'month' => '2026-11',
+            'sector_id' => $icu->id,
+        ]));
+        $wallResponse->assertOk();
+
+        $service = app(ShiftReportService::class);
+        $anaReport = $service->forPeriod('2026-11', (string) $icu->id, '', $ana);
+        $this->assertSame(1, $anaReport['summary']['total']);
+        $this->assertSame('Emergência', $anaReport['bySector']->first()['name']);
+        $this->assertCount(1, $anaReport['bySector']);
+
+        $anaWall = $service->wallRoster('2026-11', (string) $icu->id, '', $ana);
+        $this->assertSame(1, $anaWall['total']);
+        $this->assertSame('Emergência', $anaWall['days']['2026-11-12']->first()->sector->name);
+    }
+
     /** @return array{User, User, User, Sector, Category} */
     private function team(): array
     {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Manager;
 
+use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Sector;
@@ -23,13 +24,18 @@ class WallRosterPdfController extends Controller
         $month = $request->string('month')->toString();
         $month = preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $month) ? $month : now()->format('Y-m');
 
-        $sectorId = $request->string('sector_id')->toString();
-        $sectorId = ctype_digit($sectorId) && Sector::query()->whereKey($sectorId)->exists() ? $sectorId : '';
+        $user = $request->user();
+        if ($user?->role === UserRole::Professional) {
+            $sectorId = (string) ($user->sector_id ?? '');
+        } else {
+            $sectorId = $request->string('sector_id')->toString();
+            $sectorId = ctype_digit($sectorId) && Sector::query()->whereKey($sectorId)->exists() ? $sectorId : '';
+        }
 
         $categoryId = $request->string('category_id')->toString();
         $categoryId = ctype_digit($categoryId) && Category::query()->whereKey($categoryId)->exists() ? $categoryId : '';
 
-        $roster = $reports->wallRoster($month, $sectorId, $categoryId);
+        $roster = $reports->wallRoster($month, $sectorId, $categoryId, $user);
 
         return Pdf::loadView('reports.wall-roster', [
             'roster' => $roster,

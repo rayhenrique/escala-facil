@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Manager;
 
+use App\Enums\UserRole;
 use App\Models\Category;
 use App\Models\Sector;
 use App\Models\Shift;
@@ -27,6 +28,12 @@ class Reports extends Component
     public function mount(): void
     {
         $this->authorize('viewCalendar', Shift::class);
+
+        $user = auth()->user();
+        if ($user?->role === UserRole::Professional) {
+            $this->sectorId = (string) ($user->sector_id ?? '');
+        }
+
         $this->month = $this->normalizeMonth($this->month);
     }
 
@@ -37,6 +44,13 @@ class Reports extends Component
 
     public function updatedSectorId(string $sectorId): void
     {
+        $user = auth()->user();
+        if ($user?->role === UserRole::Professional) {
+            $this->sectorId = (string) ($user->sector_id ?? '');
+
+            return;
+        }
+
         $this->sectorId = ctype_digit($sectorId) && Sector::query()->whereKey($sectorId)->exists() ? $sectorId : '';
     }
 
@@ -47,12 +61,27 @@ class Reports extends Component
 
     public function clearFilters(): void
     {
+        $user = auth()->user();
+        if ($user?->role === UserRole::Professional) {
+            $this->reset('categoryId');
+            $this->sectorId = (string) ($user->sector_id ?? '');
+
+            return;
+        }
+
         $this->reset('sectorId', 'categoryId');
     }
 
     #[Computed]
     public function sectors(): EloquentCollection
     {
+        $user = auth()->user();
+        if ($user?->role === UserRole::Professional) {
+            return $user->sector_id
+                ? Sector::query()->whereKey($user->sector_id)->get()
+                : new EloquentCollection;
+        }
+
         return Sector::query()->orderBy('name')->get();
     }
 
@@ -66,11 +95,16 @@ class Reports extends Component
     #[Computed]
     public function report(): array
     {
+        $user = auth()->user();
+        $effectiveSectorId = ($user?->role === UserRole::Professional)
+            ? (string) ($user->sector_id ?? 0)
+            : $this->sectorId;
+
         return app(ShiftReportService::class)->forPeriod(
             $this->month,
-            $this->sectorId,
+            $effectiveSectorId,
             $this->categoryId,
-            auth()->user()
+            $user
         );
     }
 
@@ -89,8 +123,11 @@ class Reports extends Component
 
     public function render(): View
     {
+        $user = auth()->user();
+
         return view('livewire.manager.reports', [
             'routePrefix' => request()->routeIs('professional.*') ? 'professional.' : 'manager.',
+            'isProfessional' => $user?->role === UserRole::Professional,
         ]);
     }
 }

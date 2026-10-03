@@ -1,9 +1,21 @@
 <?php
 
 return [
-    'current' => env('APP_VERSION', '1.14.0'),
+    'current' => env('APP_VERSION', '1.15.0'),
 
     'releases' => [
+        [
+            'version' => '1.15.0',
+            'date' => '2026-10-02',
+            'title' => 'Isolamento de setor para profissionais e iniciais no calendário',
+            'summary' => 'Profissionais agora visualizam estritamente a escala, calendário e relatórios do seu próprio setor de lotação, com monograma de iniciais dos plantonistas nos dias da escala.',
+            'highlights' => [
+                'Isolamento completo de setor: profissionais visualizam exclusivamente plantões, relatórios e métricas pertencentes ao seu setor de vinculação.',
+                'Filtro de setor fixo e bloqueado: na visão do profissional, o seletor exibe seu setor como fixo/desabilitado, prevenindo manipulação de dados de outros setores.',
+                'Exportações PDF seguras: relatórios gerais e escalas de parede para impressão solicitadas por profissionais contêm unicamente os dados do seu setor.',
+                'Monograma de identificação visual: iniciais dos plantonistas exibidas diretamente nas células do calendário mensal.',
+            ],
+        ],
         [
             'version' => '1.14.0',
             'date' => '2026-10-02',

@@ -15,8 +15,13 @@ use Illuminate\Support\Collection;
 class ShiftReportService
 {
     /** @return array<string, mixed> */
-    public function wallRoster(string $month, string $sectorId = '', string $categoryId = ''): array
+    public function wallRoster(string $month, string $sectorId = '', string $categoryId = '', ?User $forUser = null): array
     {
+        $isManager = ! $forUser || $forUser->role === UserRole::Manager;
+        if (! $isManager) {
+            $sectorId = (string) ($forUser->sector_id ?? 0);
+        }
+
         [$year, $monthNumber] = array_pad(explode('-', $month), 2, null);
         $monthStart = CarbonImmutable::createFromFormat('!Y-m-d', $month.'-01')->startOfMonth();
         $monthEnd = $monthStart->endOfMonth();
@@ -51,6 +56,11 @@ class ShiftReportService
     /** @return array<string, mixed> */
     public function forPeriod(string $month, string $sectorId = '', string $categoryId = '', ?User $forUser = null): array
     {
+        $isManager = ! $forUser || $forUser->role === UserRole::Manager;
+        if (! $isManager) {
+            $sectorId = (string) ($forUser->sector_id ?? 0);
+        }
+
         [$year, $monthNumber] = array_pad(explode('-', $month), 2, null);
         $monthStart = CarbonImmutable::createFromFormat('!Y-m-d', $month.'-01')->startOfMonth();
         $monthEnd = $monthStart->endOfMonth();
@@ -63,8 +73,6 @@ class ShiftReportService
             ->orderBy('date')
             ->orderBy('start_time')
             ->get();
-
-        $isManager = ! $forUser || $forUser->role === UserRole::Manager;
 
         $allSwaps = ShiftSwap::query()
             ->with(['shift.sector', 'shift.category', 'requester', 'substitute'])
@@ -110,7 +118,7 @@ class ShiftReportService
             'byProfessional' => $this->professionalRows($shifts, $allSwaps, $absences),
             'swaps' => $visibleSwaps,
             'isManager' => $isManager,
-            'hasActiveFilters' => $sectorId !== '' || $categoryId !== '',
+            'hasActiveFilters' => $isManager ? ($sectorId !== '' || $categoryId !== '') : ($categoryId !== ''),
         ];
     }
 

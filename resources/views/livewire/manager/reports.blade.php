@@ -19,12 +19,16 @@
         <div class="grid gap-4 sm:grid-cols-2">
             <div>
                 <label for="report-sector" class="field-label">Setor</label>
-                <select wire:model.live="sectorId" id="report-sector" class="field-input">
-                    <option value="">Todos os setores</option>
-                    @foreach ($this->sectors as $sector)
-                        <option value="{{ $sector->id }}">{{ $sector->name }}</option>
-                    @endforeach
-                </select>
+                @if ($isProfessional)
+                    <input type="text" id="report-sector" class="field-input bg-surface-muted text-muted font-medium cursor-not-allowed" value="{{ auth()->user()->sector?->name ?? 'Seu setor' }}" disabled readonly aria-label="Setor vinculado">
+                @else
+                    <select wire:model.live="sectorId" id="report-sector" class="field-input">
+                        <option value="">Todos os setores</option>
+                        @foreach ($this->sectors as $sector)
+                            <option value="{{ $sector->id }}">{{ $sector->name }}</option>
+                        @endforeach
+                    </select>
+                @endif
             </div>
             <div>
                 <label for="report-category" class="field-label">Categoria</label>

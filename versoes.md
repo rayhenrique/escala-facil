@@ -6,6 +6,15 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.15.0 — 02/10/2026
+
+### Isolamento de setor para profissionais e iniciais no calendário
+
+- **Isolamento de setor em todos os módulos:** O usuário com perfil profissional agora visualiza estritamente os plantões, relatórios e métricas pertencentes ao seu setor de vinculação.
+- **Bloqueio rígido no calendário e relatórios:** Na visão do profissional, o seletor de setor permanece travado e desabilitado exibindo o nome de sua unidade de lotação, impedindo a visualização ou filtro de outros setores.
+- **Segurança em relatórios e PDFs:** Exportações de relatório gerencial e escala para afixar solicitadas por profissionais contêm unicamente os dados do setor vinculado, prevenindo vazamento de informações mesmo se parâmetros de requisição forem alterados.
+- **Monogramas visuais no calendário:** Identificação dos plantonistas por iniciais (duas letras) nas células do calendário mensal.
+
 ## 1.14.0 — 02/10/2026
 
 ### Landing page cinematográfica, privacidade de trocas e tooltips detalhadas

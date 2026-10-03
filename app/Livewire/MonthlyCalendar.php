@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Enums\ShiftSwapStatus;
+use App\Enums\UserRole;
 use App\Models\Category;
 use App\Models\Sector;
 use App\Models\Shift;
@@ -34,6 +35,11 @@ class MonthlyCalendar extends Component
     {
         $this->authorize('viewCalendar', Shift::class);
 
+        $user = auth()->user();
+        if ($user?->role === UserRole::Professional) {
+            $this->sectorId = (string) ($user->sector_id ?? '');
+        }
+
         $this->month = $this->validMonth($this->month) ? $this->month : now()->format('Y-m');
         $this->selectedDate = $this->month === now()->format('Y-m')
             ? today()->format('Y-m-d')
@@ -53,6 +59,13 @@ class MonthlyCalendar extends Component
 
     public function updatedSectorId(string $sectorId): void
     {
+        $user = auth()->user();
+        if ($user?->role === UserRole::Professional) {
+            $this->sectorId = (string) ($user->sector_id ?? '');
+
+            return;
+        }
+
         $this->sectorId = $this->validFilterId($sectorId, Sector::class) ? $sectorId : '';
     }
 
@@ -63,12 +76,27 @@ class MonthlyCalendar extends Component
 
     public function clearFilters(): void
     {
+        $user = auth()->user();
+        if ($user?->role === UserRole::Professional) {
+            $this->reset('categoryId');
+            $this->sectorId = (string) ($user->sector_id ?? '');
+
+            return;
+        }
+
         $this->reset('sectorId', 'categoryId');
     }
 
     #[Computed]
     public function sectors(): EloquentCollection
     {
+        $user = auth()->user();
+        if ($user?->role === UserRole::Professional) {
+            return $user->sector_id
+                ? Sector::query()->whereKey($user->sector_id)->get()
+                : new EloquentCollection;
+        }
+
         return Sector::query()->orderBy('name')->get();
     }
 
@@ -136,6 +164,12 @@ class MonthlyCalendar extends Component
 
     public function render(): View
     {
+        $user = auth()->user();
+        $isProfessional = $user?->role === UserRole::Professional;
+        $effectiveSectorId = $isProfessional
+            ? (string) ($user->sector_id ?? 0)
+            : $this->sectorId;
+
         $monthStart = CarbonImmutable::createFromFormat('!Y-m-d', $this->month.'-01')->startOfMonth();
         $monthEnd = $monthStart->endOfMonth();
 
@@ -144,7 +178,8 @@ class MonthlyCalendar extends Component
         $swappedShiftsDetails = $this->getSwappedShiftsDetails($monthStart, $monthEnd);
         $swappedShiftIds = array_keys($swappedShiftsDetails);
 
-        $calendarDays = $this->calendarDays($monthStart, $monthEnd, $shiftsByDate, $allShifts, $swappedShiftsDetails);
+        $hasSectorFilter = $effectiveSectorId !== '';
+        $calendarDays = $this->calendarDays($monthStart, $monthEnd, $shiftsByDate, $allShifts, $swappedShiftsDetails, $hasSectorFilter);
         $selectedShifts = $shiftsByDate->get($this->selectedDate, collect());
 
         return view('livewire.monthly-calendar', [
@@ -155,8 +190,10 @@ class MonthlyCalendar extends Component
             'swappedShiftIds' => $swappedShiftIds,
             'swappedShiftsDetails' => $swappedShiftsDetails,
             'assignedProfessionalsCount' => $selectedShifts->pluck('user_id')->filter()->unique()->count(),
-            'canManageShifts' => auth()->user()?->can('create', Shift::class) ?? false,
-            'hasActiveFilters' => $this->sectorId !== '' || $this->categoryId !== '',
+            'canManageShifts' => $user?->can('create', Shift::class) ?? false,
+            'hasActiveFilters' => $isProfessional ? ($this->categoryId !== '') : ($this->sectorId !== '' || $this->categoryId !== ''),
+            'hasSectorFilter' => $hasSectorFilter,
+            'isProfessional' => $isProfessional,
         ]);
     }
 
@@ -165,10 +202,15 @@ class MonthlyCalendar extends Component
      */
     private function getShiftsForMonth(CarbonImmutable $monthStart, CarbonImmutable $monthEnd): EloquentCollection
     {
+        $user = auth()->user();
+        $effectiveSectorId = ($user?->role === UserRole::Professional)
+            ? (string) ($user->sector_id ?? 0)
+            : $this->sectorId;
+
         return Shift::query()
             ->with(['category', 'sector', 'user'])
             ->whereBetween('date', [$monthStart->subDay(), $monthEnd])
-            ->when($this->sectorId !== '', fn ($query) => $query->where('sector_id', $this->sectorId))
+            ->when($effectiveSectorId !== '', fn ($query) => $query->where('sector_id', $effectiveSectorId))
             ->when($this->categoryId !== '', fn ($query) => $query->where('category_id', $this->categoryId))
             ->orderBy('date')
             ->orderBy('start_time')
@@ -186,12 +228,22 @@ class MonthlyCalendar extends Component
      */
     private function getSwappedShiftsDetails(CarbonImmutable $monthStart, CarbonImmutable $monthEnd): array
     {
+        $user = auth()->user();
+        $effectiveSectorId = ($user?->role === UserRole::Professional)
+            ? (string) ($user->sector_id ?? 0)
+            : $this->sectorId;
+
         $swaps = ShiftSwap::query()
             ->where('status', ShiftSwapStatus::Approved)
             ->with(['requester', 'substitute'])
-            ->where(function ($query) use ($monthStart, $monthEnd): void {
-                $query->whereHas('shift', fn ($q) => $q->whereBetween('date', [$monthStart->subDay(), $monthEnd]))
-                    ->orWhereHas('substituteShift', fn ($q) => $q->whereBetween('date', [$monthStart->subDay(), $monthEnd]));
+            ->where(function ($query) use ($monthStart, $monthEnd, $effectiveSectorId): void {
+                $query->whereHas('shift', fn ($q) => $q
+                    ->whereBetween('date', [$monthStart->subDay(), $monthEnd])
+                    ->when($effectiveSectorId !== '', fn ($sq) => $sq->where('sector_id', $effectiveSectorId))
+                )->orWhereHas('substituteShift', fn ($q) => $q
+                    ->whereBetween('date', [$monthStart->subDay(), $monthEnd])
+                    ->when($effectiveSectorId !== '', fn ($sq) => $sq->where('sector_id', $effectiveSectorId))
+                );
             })
             ->get();
 
@@ -246,10 +298,50 @@ class MonthlyCalendar extends Component
     }
 
     /**
+     * Extrai exatamente duas letras iniciais para identificação visual do profissional.
+     * Ex.: "Ana Silva" -> "AS", "Carlos" -> "CA", "Carla de Oliveira" -> "CO", "Alice Martins (Demo)" -> "AM".
+     */
+    public static function initialsForName(string $name): string
+    {
+        $cleaned = preg_replace('/\s*\([^)]*\)/u', '', $name);
+        $cleaned = preg_replace('/[^\p{L}\s]/u', '', (string) $cleaned);
+
+        $parts = preg_split('/\s+/u', trim((string) $cleaned)) ?: [];
+        $meaningful = array_values(array_filter(
+            $parts,
+            fn (string $part) => ! in_array(mb_strtolower($part), ['de', 'da', 'do', 'dos', 'das', 'e', 'dr.', 'dra.', 'dr', 'dra'], true) && mb_strlen($part) > 0
+        ));
+
+        if (count($meaningful) >= 2) {
+            $first = mb_substr($meaningful[0], 0, 1);
+            $second = mb_substr(end($meaningful), 0, 1);
+
+            return mb_strtoupper($first.$second);
+        }
+
+        if (count($meaningful) === 1) {
+            return mb_strtoupper(mb_substr($meaningful[0], 0, 2));
+        }
+
+        return mb_strtoupper(mb_substr($name, 0, 2));
+    }
+
+    /**
      * @param  Collection<string, Collection<int, Shift>>  $shiftsByDate
      * @param  Collection<int, Shift>  $allShifts
      * @param  array<int, array{requester_name: string, substitute_name: string, is_mutual: bool, headline: string, tooltip: string}>  $swappedShiftsDetails
-     * @return Collection<int, array{date: string, day: string, in_month: bool, is_today: bool, shifts_count: int, uncovered_count: int, covered_24h: bool, has_swap: bool, swap_tooltip: ?string}>
+     * @return Collection<int, array{
+     *     date: string,
+     *     day: string,
+     *     in_month: bool,
+     *     is_today: bool,
+     *     shifts_count: int,
+     *     uncovered_count: int,
+     *     covered_24h: bool,
+     *     has_swap: bool,
+     *     swap_tooltip: ?string,
+     *     professionals: list<array{shift_id: int, name: string, initials: string, time: string, is_swapped: bool, is_uncovered: bool}>
+     * }>
      */
     private function calendarDays(
         CarbonImmutable $monthStart,
@@ -257,6 +349,7 @@ class MonthlyCalendar extends Component
         Collection $shiftsByDate,
         Collection $allShifts,
         array $swappedShiftsDetails = [],
+        bool $hasSectorFilter = false,
     ): Collection {
         $days = collect();
         $cursor = $monthStart->startOfWeek(WeekDay::Sunday);
@@ -281,6 +374,32 @@ class MonthlyCalendar extends Component
                 $swapTooltip = 'Troca(s) realizada(s): '.$swapSummaries->implode(' · ');
             }
 
+            $professionals = [];
+            if ($hasSectorFilter && $inMonth && $dayShifts->isNotEmpty()) {
+                foreach ($dayShifts as $shift) {
+                    $time = substr((string) $shift->start_time, 0, 5).'–'.substr((string) $shift->end_time, 0, 5);
+                    if ($shift->user) {
+                        $professionals[] = [
+                            'shift_id' => $shift->id,
+                            'name' => $shift->user->name,
+                            'initials' => self::initialsForName($shift->user->name),
+                            'time' => $time,
+                            'is_swapped' => isset($swappedShiftsDetails[$shift->id]),
+                            'is_uncovered' => false,
+                        ];
+                    } else {
+                        $professionals[] = [
+                            'shift_id' => $shift->id,
+                            'name' => 'Plantão sem profissional',
+                            'initials' => '--',
+                            'time' => $time,
+                            'is_swapped' => false,
+                            'is_uncovered' => true,
+                        ];
+                    }
+                }
+            }
+
             $days->push([
                 'date' => $date,
                 'day' => $cursor->format('d'),
@@ -293,6 +412,7 @@ class MonthlyCalendar extends Component
                     && ShiftCoverage::isDayFullyCovered($allShifts, $date),
                 'has_swap' => $hasSwap,
                 'swap_tooltip' => $swapTooltip,
+                'professionals' => $professionals,
             ]);
 
             $cursor = $cursor->addDay();
