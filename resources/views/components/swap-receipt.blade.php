@@ -94,7 +94,21 @@
     <div class="border-t border-line bg-white p-5 sm:p-6">
         <p class="meta-label">Movimentação detalhada da escala</p>
         <div class="mt-3 space-y-2 text-sm text-ink">
-            @if ($hasCounterpart && $counterpartDate)
+            @if ($receipt['status'] === 'rejected')
+                <div class="flex items-start gap-2.5 rounded-lg border border-red-200 bg-red-50/70 p-3 text-red-800">
+                    <span class="font-bold text-danger">✕</span>
+                    <div>
+                        <strong>Solicitação rejeitada pela gerência</strong> — A escala original foi mantida sem alterações.
+                    </div>
+                </div>
+            @elseif ($receipt['status'] === 'reverted')
+                <div class="flex items-start gap-2.5 rounded-lg border border-stone-200 bg-stone-50 p-3 text-stone-700">
+                    <span class="font-bold text-muted">↺</span>
+                    <div>
+                        <strong>Troca desfeita pela gerência</strong> — A escala original foi restabelecida.
+                    </div>
+                </div>
+            @elseif ($hasCounterpart && $counterpartDate)
                 <div class="flex items-start gap-2.5 rounded-lg border border-line bg-canvas p-3">
                     <span class="font-bold text-coverage">⇄</span>
                     <div>

@@ -219,6 +219,45 @@ class ShiftSwapNotificationTest extends TestCase
         $this->assertDatabaseCount('notifications', 0);
     }
 
+    public function test_manager_rejection_synchronizes_existing_notifications_and_receipt_matches_pdf(): void
+    {
+        [$manager, $requester, $substitute, $shift] = $this->team();
+
+        $shiftSwap = app(CreateShiftSwapAction::class)->execute($requester, [
+            'shift_id' => $shift->id,
+            'substitute_id' => $substitute->id,
+        ]);
+        app(AcceptShiftSwapAction::class)->execute($substitute, $shiftSwap->id);
+
+        $managerNotification = $manager->notifications()->sole();
+        $this->assertSame('Troca aguardando aprovação', $managerNotification->data['title']);
+        $this->assertSame('Aguardando gerência', $managerNotification->data['receipt']['status_label']);
+
+        // Manager rejects with justification
+        $justification = 'Colocar o horário do turno correto. Está ficando 20/10 MT por 20/10 mt';
+        app(DecideShiftSwapAction::class)->reject($manager, $shiftSwap->id, $justification);
+
+        // Manager's notification was updated in place
+        $updatedNotification = $manager->refresh()->notifications()->sole();
+        $this->assertSame('Troca rejeitada', $updatedNotification->data['title']);
+        $this->assertSame('Rejeitada', $updatedNotification->data['receipt']['status_label']);
+        $this->assertSame($manager->name, $updatedNotification->data['receipt']['manager']);
+        $this->assertSame($justification, $updatedNotification->data['receipt']['rejection_reason']);
+        $this->assertStringContainsString($justification, $updatedNotification->data['message']);
+
+        // Notifications center renders matching rejection status and reason
+        Livewire::actingAs($manager)
+            ->test(NotificationsCenter::class)
+            ->assertSee('Troca rejeitada')
+            ->assertSee('Rejeitada')
+            ->assertSee($justification)
+            ->assertSee($manager->name);
+
+        // PDF download also matches
+        $response = $this->actingAs($manager)->get(route('swaps.receipt.pdf', $shiftSwap->id));
+        $response->assertOk();
+    }
+
     /** @return array{User, User, User, Shift} */
     private function team(): array
     {

@@ -1,9 +1,22 @@
 <?php
 
 return [
-    'current' => env('APP_VERSION', '1.16.0'),
+    'current' => env('APP_VERSION', '1.16.1'),
 
     'releases' => [
+        [
+            'version' => '1.16.1',
+            'date' => '2026-10-03',
+            'title' => 'Sincronização em tempo real de notificações de troca e comprovantes',
+            'summary' => 'Sincronização dinâmica entre notificações, cards de comprovante e arquivos PDF oficiais de trocas decididas, eliminando divergências de status após aprovação ou rejeição pela gerência.',
+            'highlights' => [
+                'Sincronização em tempo real na Central de Notificações: cards de notificações têm status e comprovantes confrontados dinamicamente com o banco de dados.',
+                'Atualização imediata de decisões: a aprovação, rejeição ou reversão de trocas atualiza instantaneamente as notificações pendentes da gerência e dos participantes.',
+                'Coerência total entre tela e PDF: o comprovante exibido em tela reflete exatamente a mesma situação, justificativa e gestor responsável presentes no PDF oficial baixado.',
+                'Banner informativo de rejeição e desfazimento: aviso claro na movimentação da escala indicando que a solicitação foi rejeitada e a escala original mantida.',
+                'Comando artisan app:sync-swap-notifications para manutenção e sincronização de notificações legadas.',
+            ],
+        ],
         [
             'version' => '1.16.0',
             'date' => '2026-10-03',

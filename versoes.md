@@ -6,6 +6,16 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.16.1 — 03/10/2026
+
+### Sincronização em tempo real de notificações de troca e comprovantes
+
+- **Sincronização em tempo real na Central de Notificações:** As notificações de trocas agora têm seu status, comprovante e justificativas atualizados dinamicamente com base no estado real do banco de dados ao serem visualizadas.
+- **Atualização ativa nas decisões da gerência:** Ao aprovar, rejeitar ou reverter uma troca, todas as notificações preexistentes daquela troca são atualizadas imediatamente no banco de dados.
+- **Harmonização completa entre tela e PDF:** O card do comprovante exibido em notificações reflete exatamente os mesmos dados do PDF oficial (situação Rejeitada/Aprovada, responsável pela decisão e justificativa detalhada).
+- **Banner informativo na movimentação da escala:** O comprovante exibe um alerta visual claro informando que a solicitação foi rejeitada pela gerência e que a escala original foi preservada.
+- **Comando artisan de manutenção:** Disponibilizado o comando `php artisan app:sync-swap-notifications` para sincronização em massa de notificações existentes.
+
 ## 1.16.0 — 03/10/2026
 
 ### Submódulos de relatórios, impressão isolada e salvamento de comprovante em PDF
