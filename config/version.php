@@ -1,9 +1,21 @@
 <?php
 
 return [
-    'current' => env('APP_VERSION', '1.13.0'),
+    'current' => env('APP_VERSION', '1.14.0'),
 
     'releases' => [
+        [
+            'version' => '1.14.0',
+            'date' => '2026-10-02',
+            'title' => 'Landing page cinematográfica, privacidade de trocas e tooltips detalhadas',
+            'summary' => 'Nova landing page mobile-first de alta conversão, restrição de visualização de trocas para manter a privacidade dos profissionais e tooltips com participantes das trocas no calendário.',
+            'highlights' => [
+                'Landing page cinematográfica com Lenis smooth scroll, animações GSAP/ScrollTrigger e componentes Blade modulares.',
+                'Privacidade de trocas: profissionais visualizam exclusivamente as suas próprias solicitações nos relatórios e agenda, enquanto gestores mantêm visão global.',
+                'Tooltips detalhadas ao passar o mouse sobre o selo de troca informando quem solicitou e quem assumiu o plantão (simples ou permuta mútua).',
+                'Marcador de trocas na grade mensal com resumo dos participantes do dia ao passar o mouse.',
+            ],
+        ],
         [
             'version' => '1.13.0',
             'date' => '2026-10-02',

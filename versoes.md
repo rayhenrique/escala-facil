@@ -6,6 +6,15 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.14.0 — 02/10/2026
+
+### Landing page cinematográfica, privacidade de trocas e tooltips detalhadas
+
+- **Landing page cinematográfica:** Implementação completa mobile-first em Blade, Tailwind CSS, Lenis (smooth scroll) e GSAP/ScrollTrigger com componentes modulares anônimos, animações de atrito vs fluidez e demonstração interativa.
+- **Privacidade e restrição de trocas:** Usuários profissionais visualizam exclusivamente as suas próprias solicitações de troca (onde figuram como solicitante ou substituto) nos relatórios, extratos e agenda, enquanto gestores e administradores mantêm a visão global da escala.
+- **Tooltips interativas de trocas:** Ao passar o mouse sobre o selo `⇄ Troca realizada`, surge um card flutuante indicando quem solicitou e quem assumiu o plantão, além de diferenciar trocas simples de permutas mútuas.
+- **Identificação no calendário mensal:** O símbolo `⇄` nas células de dias com trocas aprovadas apresenta ao passar o mouse a lista de participantes que trocaram naquele dia.
+
 ## 1.13.0 — 02/10/2026
 
 ### Notificações PWA, comprovante detalhado e trocas destacadas

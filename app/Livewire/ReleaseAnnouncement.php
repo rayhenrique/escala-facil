@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\User;
 use App\Support\ApplicationVersion;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
@@ -31,18 +32,18 @@ class ReleaseAnnouncement extends Component
         $this->show = false;
     }
 
-    public function openHelp(ApplicationVersion $versions): mixed
+    public function openHelp(ApplicationVersion $versions): void
     {
         $this->markAsSeen($versions);
 
-        return $this->redirectRoute('help', navigate: true);
+        $this->redirectRoute('help', navigate: true);
     }
 
     private function markAsSeen(ApplicationVersion $versions): void
     {
         $user = auth()->user();
 
-        if ($user instanceof \App\Models\User) {
+        if ($user instanceof User) {
             $user->forceFill([
                 'last_seen_version' => $versions->current(),
             ])->save();

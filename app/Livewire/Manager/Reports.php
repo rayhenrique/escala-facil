@@ -66,7 +66,12 @@ class Reports extends Component
     #[Computed]
     public function report(): array
     {
-        return app(ShiftReportService::class)->forPeriod($this->month, $this->sectorId, $this->categoryId);
+        return app(ShiftReportService::class)->forPeriod(
+            $this->month,
+            $this->sectorId,
+            $this->categoryId,
+            auth()->user()
+        );
     }
 
     private function normalizeMonth(string $month): string

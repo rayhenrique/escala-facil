@@ -17,7 +17,11 @@ use App\Livewire\NotificationsCenter;
 use App\Livewire\Professional\MySchedule;
 use Illuminate\Support\Facades\Route;
 
-Route::redirect('/', '/login');
+Route::get('/', function () {
+    return auth()->check() ? redirect()->route('dashboard') : view('landing');
+})->name('home');
+
+Route::view('/landing', 'landing')->name('landing');
 
 Route::get('dashboard', DashboardRedirectController::class)
     ->middleware('auth')

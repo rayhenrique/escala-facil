@@ -208,6 +208,61 @@ class ReportsTest extends TestCase
         $this->assertSame(1, $roster['total']);
     }
 
+    public function test_professional_only_sees_own_swaps_in_reports_while_manager_sees_all_swaps(): void
+    {
+        [$manager, $ana, $bruno, $sector, $category] = $this->team();
+        $bruno->update(['name' => 'Bruno Santos']);
+        $carlos = User::factory()->create(['name' => 'Carlos Silva', 'category_id' => $category->id, 'sector_id' => $sector->id]);
+        $daniel = User::factory()->create(['name' => 'Daniel Souza', 'category_id' => $category->id, 'sector_id' => $sector->id]);
+
+        $shiftAna = Shift::factory()->create([
+            'date' => '2026-11-10',
+            'sector_id' => $sector->id,
+            'category_id' => $category->id,
+            'user_id' => $ana->id,
+            'status' => ShiftStatus::Scheduled,
+        ]);
+        $shiftCarlos = Shift::factory()->create([
+            'date' => '2026-11-15',
+            'sector_id' => $sector->id,
+            'category_id' => $category->id,
+            'user_id' => $carlos->id,
+            'status' => ShiftStatus::Scheduled,
+        ]);
+
+        // Swap 1: between Ana and Bruno
+        $swapAna = ShiftSwap::factory()->create([
+            'shift_id' => $shiftAna->id,
+            'requester_id' => $ana->id,
+            'substitute_id' => $bruno->id,
+            'created_at' => '2026-11-05 10:00:00',
+        ]);
+
+        // Swap 2: between Carlos and Daniel
+        $swapCarlos = ShiftSwap::factory()->create([
+            'shift_id' => $shiftCarlos->id,
+            'requester_id' => $carlos->id,
+            'substitute_id' => $daniel->id,
+            'created_at' => '2026-11-06 14:00:00',
+        ]);
+
+        // Professional (Ana) accesses reports: sees Swap 1, but DOES NOT see Swap 2
+        Livewire::actingAs($ana)
+            ->test(Reports::class)
+            ->set('month', '2026-11')
+            ->assertSee('Minhas trocas no mês')
+            ->assertSee('Ana Plantonista → Bruno Santos')
+            ->assertDontSee('Carlos Silva → Daniel Souza');
+
+        // Manager accesses reports: sees BOTH swaps
+        Livewire::actingAs($manager)
+            ->test(Reports::class)
+            ->set('month', '2026-11')
+            ->assertSee('Trocas criadas no mês')
+            ->assertSee('Ana Plantonista → Bruno Santos')
+            ->assertSee('Carlos Silva → Daniel Souza');
+    }
+
     /** @return array{User, User, User, Sector, Category} */
     private function team(): array
     {

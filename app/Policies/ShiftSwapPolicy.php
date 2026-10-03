@@ -12,7 +12,7 @@ class ShiftSwapPolicy
 {
     public function viewAny(User $user): bool
     {
-        return true;
+        return $user->role === UserRole::Manager;
     }
 
     public function view(User $user, ShiftSwap $shiftSwap): bool

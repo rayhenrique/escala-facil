@@ -94,11 +94,64 @@
         <div><p class="eyebrow">Agenda mensal</p><h2 id="schedule-title" class="mt-2 text-xl font-semibold">Seus plantões</h2></div>
         <div class="mt-5 grid gap-4 lg:grid-cols-2">
             @forelse ($shifts as $shift)
-                @php($hasActiveSwap = $shift->swaps->contains(fn ($swap) => in_array($swap->status, [\App\Enums\ShiftSwapStatus::PendingProfessional, \App\Enums\ShiftSwapStatus::PendingManager, \App\Enums\ShiftSwapStatus::Approved], true)))
+                @php
+                    $hasActiveSwap = $shift->swaps->contains(fn ($swap) => in_array($swap->status, [\App\Enums\ShiftSwapStatus::PendingProfessional, \App\Enums\ShiftSwapStatus::PendingManager, \App\Enums\ShiftSwapStatus::Approved], true));
+                    $hasPendingSwap = $shift->swaps->contains(fn ($swap) => in_array($swap->status, [\App\Enums\ShiftSwapStatus::PendingProfessional, \App\Enums\ShiftSwapStatus::PendingManager], true));
+                @endphp
                 <article class="shift-card" wire:key="my-shift-{{ $shift->id }}">
                     <div class="shift-card-date"><span>{{ $shift->date->translatedFormat('D') }}</span><strong>{{ $shift->date->format('d') }}</strong><small>{{ $shift->date->translatedFormat('M') }}</small></div>
                     <div class="min-w-0 flex-1">
-                        <div class="flex flex-wrap items-center gap-2"><x-status-badge :status="$shift->status" />@if($hasActiveSwap)<x-status-badge status="pending_professional" label="Troca em andamento" />@endif</div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <x-status-badge :status="$shift->status" />
+                            @if (isset($swappedShiftsDetails[$shift->id]))
+                                @php($swapInfo = $swappedShiftsDetails[$shift->id])
+                                <div class="relative inline-flex items-center group">
+                                    <span
+                                        tabindex="0"
+                                        role="note"
+                                        aria-label="{{ $swapInfo['tooltip'] }}"
+                                        title="{{ $swapInfo['tooltip'] }}"
+                                        class="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-800 cursor-help transition-all hover:bg-amber-100 hover:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                                    >
+                                        <span aria-hidden="true">⇄</span> Troca realizada
+                                    </span>
+
+                                    <!-- Tooltip flutuante com detalhes da troca -->
+                                    <div
+                                        role="tooltip"
+                                        class="pointer-events-none absolute bottom-full left-0 sm:left-1/2 sm:-translate-x-1/2 mb-2 hidden group-hover:flex group-focus-within:flex flex-col items-start sm:items-center z-50 transition-all duration-150 drop-shadow-xl"
+                                    >
+                                        <div class="w-64 max-w-xs rounded-xl bg-slate-900/95 backdrop-blur p-3 text-xs text-white shadow-2xl ring-1 ring-white/10 text-left">
+                                            <div class="flex items-center justify-between gap-2 border-b border-slate-700/80 pb-1.5 mb-2 font-semibold">
+                                                <span class="inline-flex items-center gap-1.5 text-amber-300">
+                                                    <span aria-hidden="true" class="text-sm">⇄</span>
+                                                    Troca realizada
+                                                </span>
+                                                @if ($swapInfo['is_mutual'])
+                                                    <span class="rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-medium text-amber-300">Mútua</span>
+                                                @endif
+                                            </div>
+                                            <p class="font-medium text-slate-100 leading-snug">
+                                                {{ $swapInfo['headline'] }}
+                                            </p>
+                                            <div class="mt-2 space-y-1 rounded-md bg-slate-800/80 p-2 text-[11px]">
+                                                <div class="flex items-center justify-between gap-2">
+                                                    <span class="text-slate-400">Solicitante:</span>
+                                                    <span class="font-medium text-slate-100 truncate text-right">{{ $swapInfo['requester_name'] }}</span>
+                                                </div>
+                                                <div class="flex items-center justify-between gap-2">
+                                                    <span class="text-slate-400">Substituto:</span>
+                                                    <span class="font-medium text-slate-100 truncate text-right">{{ $swapInfo['substitute_name'] }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="size-2 -mt-1 rotate-45 bg-slate-900/95 ring-1 ring-white/10 border-r border-b border-slate-700 sm:self-center ml-4 sm:ml-0"></div>
+                                    </div>
+                                </div>
+                            @elseif ($hasPendingSwap)
+                                <x-status-badge status="pending_professional" label="Troca em andamento" />
+                            @endif
+                        </div>
                         <h3 class="mt-3 text-lg font-semibold">{{ substr($shift->start_time, 0, 5) }}–{{ substr($shift->end_time, 0, 5) }}</h3>
                         <p class="mt-1 text-sm text-muted">{{ $shift->sector->name }} · {{ $shift->category->name }}</p>
                         @if ($shift->date->isAfter(today()) && $shift->status === \App\Enums\ShiftStatus::Scheduled)
@@ -119,9 +172,22 @@
         <p class="eyebrow">Acompanhamento</p><h2 id="my-swaps-title" class="mt-2 text-xl font-semibold">Minhas solicitações de troca</h2>
         <div class="mt-5 divide-y divide-line">
             @forelse ($mySwaps as $swap)
-                <div class="flex flex-col gap-2 py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between" wire:key="my-swap-{{ $swap->id }}"><div><p class="font-semibold">{{ $swap->shift->date->format('d/m/Y') }} · {{ $swap->substitute->name }}</p><p class="mt-1 text-sm text-muted">Atualizado em {{ $swap->updated_at->format('d/m/Y H:i') }}</p></div><x-status-badge :status="$swap->status" /></div>
+                <div class="flex flex-col gap-2 py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between" wire:key="my-swap-{{ $swap->id }}">
+                    <div>
+                        <p class="font-semibold">
+                            {{ $swap->shift->date->format('d/m/Y') }} · 
+                            @if ($swap->requester_id === auth()->id())
+                                {{ $swap->substitute->name }}
+                            @else
+                                Solicitado por {{ $swap->requester->name }}
+                            @endif
+                        </p>
+                        <p class="mt-1 text-sm text-muted">Atualizado em {{ $swap->updated_at->format('d/m/Y H:i') }}</p>
+                    </div>
+                    <x-status-badge :status="$swap->status" />
+                </div>
             @empty
-                <p class="py-4 text-sm text-muted">Você ainda não solicitou trocas.</p>
+                <p class="py-4 text-sm text-muted">Você ainda não possui solicitações de troca.</p>
             @endforelse
         </div>
     </section>

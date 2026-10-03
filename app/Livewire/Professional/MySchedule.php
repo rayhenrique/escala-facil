@@ -349,6 +349,56 @@ class MySchedule extends Component
             ->orderBy('start_time')
             ->get();
 
+        $shiftIds = $shifts->pluck('id')->all();
+        $approvedSwaps = ! empty($shiftIds)
+            ? ShiftSwap::query()
+                ->where('status', ShiftSwapStatus::Approved)
+                ->with(['requester', 'substitute'])
+                ->where(function ($query) use ($shiftIds): void {
+                    $query->whereIn('shift_id', $shiftIds)
+                        ->orWhereIn('substitute_shift_id', $shiftIds);
+                })
+                ->get()
+            : collect();
+
+        $swappedShiftsDetails = [];
+        foreach ($approvedSwaps as $swap) {
+            $requesterName = $swap->requester?->name ?? 'Profissional';
+            $substituteName = $swap->substitute?->name ?? 'Profissional';
+            $isMutual = $swap->substitute_shift_id !== null;
+
+            if ($swap->shift_id && in_array($swap->shift_id, $shiftIds, true)) {
+                $headline = $isMutual
+                    ? "Troca mútua realizada entre {$requesterName} e {$substituteName}"
+                    : "Troca realizada: {$requesterName} cedeu para {$substituteName}";
+
+                $tooltip = $isMutual
+                    ? "Troca mútua realizada entre {$requesterName} e {$substituteName} (Solicitante: {$requesterName} ⇄ Substituto: {$substituteName})"
+                    : "Troca realizada: {$requesterName} trocou com {$substituteName} (Solicitante: {$requesterName} → Substituto: {$substituteName})";
+
+                $swappedShiftsDetails[$swap->shift_id] = [
+                    'requester_name' => $requesterName,
+                    'substitute_name' => $substituteName,
+                    'is_mutual' => $isMutual,
+                    'headline' => $headline,
+                    'tooltip' => $tooltip,
+                ];
+            }
+
+            if ($swap->substitute_shift_id && in_array($swap->substitute_shift_id, $shiftIds, true)) {
+                $headline = "Troca mútua realizada entre {$requesterName} e {$substituteName}";
+                $tooltip = "Troca mútua realizada entre {$requesterName} e {$substituteName} (Solicitante: {$requesterName} ⇄ Substituto: {$substituteName})";
+
+                $swappedShiftsDetails[$swap->substitute_shift_id] = [
+                    'requester_name' => $requesterName,
+                    'substitute_name' => $substituteName,
+                    'is_mutual' => true,
+                    'headline' => $headline,
+                    'tooltip' => $tooltip,
+                ];
+            }
+        }
+
         $incomingSwaps = ShiftSwap::query()
             ->with(['shift.category', 'shift.sector', 'substituteShift.category', 'substituteShift.sector', 'requester'])
             ->where('substitute_id', auth()->id())
@@ -357,8 +407,11 @@ class MySchedule extends Component
             ->get();
 
         $mySwaps = ShiftSwap::query()
-            ->with(['shift', 'substituteShift', 'substitute'])
-            ->where('requester_id', auth()->id())
+            ->with(['shift', 'substituteShift', 'substitute', 'requester'])
+            ->where(function ($query) {
+                $query->where('requester_id', auth()->id())
+                    ->orWhere('substitute_id', auth()->id());
+            })
             ->latest()
             ->limit(8)
             ->get();
@@ -368,6 +421,7 @@ class MySchedule extends Component
             'incomingSwaps',
             'mySwaps',
             'swapLimitReached',
+            'swappedShiftsDetails',
         ));
     }
 }

@@ -93,7 +93,7 @@
                     @endif
 
                     @if ($day['in_month'] && $day['has_swap'])
-                        <span class="calendar-day-swap" title="Dia com troca de plantão aprovada" aria-label="Dia com troca de plantão">⇄</span>
+                        <span class="calendar-day-swap" title="{{ $day['swap_tooltip'] ?? 'Dia com troca de plantão aprovada' }}" aria-label="{{ $day['swap_tooltip'] ?? 'Dia com troca de plantão' }}">⇄</span>
                     @endif
                 </button>
             @endforeach
@@ -121,10 +121,51 @@
                         <div class="flex flex-wrap items-center gap-2">
                             <h3 class="font-semibold">{{ $shift->user?->name ?? 'Plantão sem profissional' }}</h3>
                             <x-status-badge :status="$shift->status" />
-                            @if (in_array($shift->id, $swappedShiftIds, true))
-                                <span class="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-800">
-                                    <span aria-hidden="true">⇄</span> Troca realizada
-                                </span>
+                            @if (isset($swappedShiftsDetails[$shift->id]))
+                                @php($swapInfo = $swappedShiftsDetails[$shift->id])
+                                <div class="relative inline-flex items-center group">
+                                    <span
+                                        tabindex="0"
+                                        role="note"
+                                        aria-label="{{ $swapInfo['tooltip'] }}"
+                                        title="{{ $swapInfo['tooltip'] }}"
+                                        class="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-800 cursor-help transition-all hover:bg-amber-100 hover:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                                    >
+                                        <span aria-hidden="true">⇄</span> Troca realizada
+                                    </span>
+
+                                    <!-- Tooltip flutuante com detalhes da troca -->
+                                    <div
+                                        role="tooltip"
+                                        class="pointer-events-none absolute bottom-full left-0 sm:left-1/2 sm:-translate-x-1/2 mb-2 hidden group-hover:flex group-focus-within:flex flex-col items-start sm:items-center z-50 transition-all duration-150 drop-shadow-xl"
+                                    >
+                                        <div class="w-64 max-w-xs rounded-xl bg-slate-900/95 backdrop-blur p-3 text-xs text-white shadow-2xl ring-1 ring-white/10 text-left">
+                                            <div class="flex items-center justify-between gap-2 border-b border-slate-700/80 pb-1.5 mb-2 font-semibold">
+                                                <span class="inline-flex items-center gap-1.5 text-amber-300">
+                                                    <span aria-hidden="true" class="text-sm">⇄</span>
+                                                    Troca realizada
+                                                </span>
+                                                @if ($swapInfo['is_mutual'])
+                                                    <span class="rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-medium text-amber-300">Mútua</span>
+                                                @endif
+                                            </div>
+                                            <p class="font-medium text-slate-100 leading-snug">
+                                                {{ $swapInfo['headline'] }}
+                                            </p>
+                                            <div class="mt-2 space-y-1 rounded-md bg-slate-800/80 p-2 text-[11px]">
+                                                <div class="flex items-center justify-between gap-2">
+                                                    <span class="text-slate-400">Solicitante:</span>
+                                                    <span class="font-medium text-slate-100 truncate text-right">{{ $swapInfo['requester_name'] }}</span>
+                                                </div>
+                                                <div class="flex items-center justify-between gap-2">
+                                                    <span class="text-slate-400">Substituto:</span>
+                                                    <span class="font-medium text-slate-100 truncate text-right">{{ $swapInfo['substitute_name'] }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="size-2 -mt-1 rotate-45 bg-slate-900/95 ring-1 ring-white/10 border-r border-b border-slate-700 sm:self-center ml-4 sm:ml-0"></div>
+                                    </div>
+                                </div>
                             @endif
                         </div>
                         <p class="mt-2 text-sm font-semibold text-primary">{{ substr($shift->start_time, 0, 5) }}–{{ substr($shift->end_time, 0, 5) }}</p>

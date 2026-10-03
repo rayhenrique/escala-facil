@@ -29,7 +29,7 @@ class ReportPdfController extends Controller
         $categoryId = $request->string('category_id')->toString();
         $categoryId = ctype_digit($categoryId) && Category::query()->whereKey($categoryId)->exists() ? $categoryId : '';
 
-        $report = $reports->forPeriod($month, $sectorId, $categoryId);
+        $report = $reports->forPeriod($month, $sectorId, $categoryId, $request->user());
 
         return Pdf::loadView('reports.shifts', [
             'report' => $report,

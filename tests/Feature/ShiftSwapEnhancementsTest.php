@@ -6,6 +6,7 @@ use App\Actions\ShiftSwaps\AcceptShiftSwapAction;
 use App\Actions\ShiftSwaps\CreateShiftSwapAction;
 use App\Actions\ShiftSwaps\DecideShiftSwapAction;
 use App\Enums\ShiftStatus;
+use App\Enums\ShiftSwapEvent;
 use App\Enums\ShiftSwapStatus;
 use App\Enums\UserRole;
 use App\Livewire\Manager\SwapApprovals;
@@ -18,6 +19,7 @@ use App\Models\Sector;
 use App\Models\Shift;
 use App\Models\ShiftSwap;
 use App\Models\User;
+use App\Support\ShiftSwapReceipt;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -114,10 +116,18 @@ class ShiftSwapEnhancementsTest extends TestCase
         $this->assertSame($requester->id, $shiftB->refresh()->user_id);
 
         // Receipts show detailed movements
-        $receipt = app(\App\Support\ShiftSwapReceipt::class)->make($swap, \App\Enums\ShiftSwapEvent::Approved);
+        $receipt = app(ShiftSwapReceipt::class)->make($swap, ShiftSwapEvent::Approved);
         $this->assertTrue($receipt['has_counterpart']);
         $this->assertStringContainsString($requester->name, $receipt['requester_movement']);
         $this->assertStringContainsString($substitute->name, $receipt['substitute_movement']);
+
+        Livewire::actingAs($manager)
+            ->test(MonthlyCalendar::class)
+            ->set('month', $shiftA->date->format('Y-m'))
+            ->call('selectDate', $shiftA->date->format('Y-m-d'))
+            ->assertSee('Troca realizada')
+            ->assertSee('Mútua')
+            ->assertSee('Troca mútua realizada entre '.$requester->name.' e '.$substitute->name);
     }
 
     public function test_manager_rejection_requires_justification_and_notifies_both_with_comprovante(): void
@@ -176,7 +186,17 @@ class ShiftSwapEnhancementsTest extends TestCase
             ->call('selectDate', $shift->date->format('Y-m-d'))
             ->assertSee('Troca realizada')
             ->assertSee('⇄')
-            ->assertSeeHtml('daily-shift-card-swapped');
+            ->assertSeeHtml('daily-shift-card-swapped')
+            ->assertSee($requester->name)
+            ->assertSee($substitute->name)
+            ->assertSeeHtml('title="Troca realizada: '.$requester->name.' trocou com '.$substitute->name.' (Solicitante: '.$requester->name.' → Substituto: '.$substitute->name.')"');
+
+        Livewire::actingAs($substitute)
+            ->test(MySchedule::class)
+            ->set('month', $shift->date->format('Y-m'))
+            ->assertSee('Troca realizada')
+            ->assertSee($requester->name)
+            ->assertSee($substitute->name);
     }
 
     /**

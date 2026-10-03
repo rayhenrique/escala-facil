@@ -166,4 +166,11 @@
   - [x] Exigir justificativa no cancelamento/rejeição de troca pelo gestor e enviar comprovante aos dois profissionais.
   - [x] Atualizar documentação, versões e testes automatizados.
 
+- [x] **Fase 25: Landing page cinematográfica, privacidade de trocas e tooltips detalhadas (1.14.0)**
+  - [x] Implementar landing page mobile-first de alta conversão com Lenis, GSAP, ScrollTrigger e Blade.
+  - [x] Restringir a visualização de trocas nos relatórios e agenda para que profissionais vejam apenas seus próprios registros.
+  - [x] Exibir tooltip informativa no hover do selo de troca identificando solicitante, substituto e tipo de troca.
+  - [x] Exibir participantes da troca ao passar o mouse nas células de dias com troca no calendário mensal.
+  - [x] Atualizar controle de versão, documentações e testes automatizados.
+
 

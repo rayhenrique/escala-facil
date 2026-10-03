@@ -111,7 +111,8 @@ class HelpAndVersioningTest extends TestCase
 
     public function test_user_with_previous_version_sees_announcement_modal_on_first_access_after_update(): void
     {
-        $currentVersion = app(ApplicationVersion::class)->current();
+        $currentRelease = app(ApplicationVersion::class)->currentRelease();
+        $currentVersion = $currentRelease['version'];
         $user = User::factory()->create([
             'role' => UserRole::Manager,
             'last_seen_version' => '1.12.0',
@@ -126,7 +127,7 @@ class HelpAndVersioningTest extends TestCase
             ->test(ReleaseAnnouncement::class)
             ->assertSet('show', true)
             ->assertSee('Novidades da versão '.$currentVersion)
-            ->assertSee('Notificações PWA, comprovante detalhado e trocas destacadas')
+            ->assertSee($currentRelease['title'])
             ->call('acknowledge')
             ->assertSet('show', false);
 
@@ -169,4 +170,3 @@ class HelpAndVersioningTest extends TestCase
             ->assertSee('Comprovantes com impressão, badges no PWA e notificações no celular');
     }
 }
-

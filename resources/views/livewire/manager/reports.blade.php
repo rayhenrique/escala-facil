@@ -181,7 +181,7 @@
         <div class="section-heading">
             <div>
                 <p class="eyebrow">Movimentações</p>
-                <h2 id="report-swaps-title">Trocas criadas no mês</h2>
+                <h2 id="report-swaps-title">{{ ($this->report['isManager'] ?? true) ? 'Trocas criadas no mês' : 'Minhas trocas no mês' }}</h2>
             </div>
             <span class="text-sm text-muted">{{ $this->report['swaps']->count() }} troca(s)</span>
         </div>
@@ -196,7 +196,7 @@
                             <td><x-status-badge :status="$swap->status" /></td>
                         </tr>
                     @empty
-                        <tr><td colspan="3" class="py-12 text-center text-muted">Nenhuma troca criada neste mês.</td></tr>
+                        <tr><td colspan="3" class="py-12 text-center text-muted">{{ ($this->report['isManager'] ?? true) ? 'Nenhuma troca criada neste mês.' : 'Você não possui trocas neste mês.' }}</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -211,7 +211,7 @@
                     <p class="mt-1 text-sm text-muted">{{ $swap->requester->name }} → {{ $swap->substitute->name }} · {{ $swap->shift->sector->name }}</p>
                 </article>
             @empty
-                <div class="empty-state compact-empty"><p class="font-semibold text-ink">Nenhuma troca criada neste mês.</p></div>
+                <div class="empty-state compact-empty"><p class="font-semibold text-ink">{{ ($this->report['isManager'] ?? true) ? 'Nenhuma troca criada neste mês.' : 'Você não possui trocas neste mês.' }}</p></div>
             @endforelse
         </div>
     </section>

@@ -1,8 +1,17 @@
 import './bootstrap';
 
 import { Livewire } from '../../vendor/livewire/livewire/dist/livewire.esm';
+import { initLandingPage } from './landing';
 
 Livewire.start();
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initLandingPage);
+} else {
+    initLandingPage();
+}
+
+document.addEventListener('livewire:navigated', initLandingPage);
 
 let deferredInstallPrompt = null;
 

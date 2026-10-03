@@ -65,7 +65,7 @@
         </tbody>
     </table>
 
-    <h2>Trocas criadas no mês</h2>
+    <h2>{{ ($report['isManager'] ?? true) ? 'Trocas criadas no mês' : 'Minhas trocas no mês' }}</h2>
     <table>
         <thead><tr><th>Plantão</th><th>Solicitante → substituto</th><th>Status</th></tr></thead>
         <tbody>
@@ -76,7 +76,7 @@
                     <td>{{ $swap->status->label() }}</td>
                 </tr>
             @empty
-                <tr><td colspan="3">Nenhuma troca criada neste mês.</td></tr>
+                <tr><td colspan="3">{{ ($report['isManager'] ?? true) ? 'Nenhuma troca criada neste mês.' : 'Você não possui trocas neste mês.' }}</td></tr>
             @endforelse
         </tbody>
     </table>

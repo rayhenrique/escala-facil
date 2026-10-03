@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\ShiftStatus;
 use App\Enums\ShiftSwapStatus;
+use App\Enums\UserRole;
 use App\Models\Absence;
 use App\Models\Shift;
 use App\Models\ShiftSwap;
@@ -48,7 +49,7 @@ class ShiftReportService
     }
 
     /** @return array<string, mixed> */
-    public function forPeriod(string $month, string $sectorId = '', string $categoryId = ''): array
+    public function forPeriod(string $month, string $sectorId = '', string $categoryId = '', ?User $forUser = null): array
     {
         [$year, $monthNumber] = array_pad(explode('-', $month), 2, null);
         $monthStart = CarbonImmutable::createFromFormat('!Y-m-d', $month.'-01')->startOfMonth();
@@ -63,7 +64,9 @@ class ShiftReportService
             ->orderBy('start_time')
             ->get();
 
-        $swaps = ShiftSwap::query()
+        $isManager = ! $forUser || $forUser->role === UserRole::Manager;
+
+        $allSwaps = ShiftSwap::query()
             ->with(['shift.sector', 'shift.category', 'requester', 'substitute'])
             ->whereYear('created_at', $monthStart->year)
             ->whereMonth('created_at', $monthStart->month)
@@ -71,6 +74,10 @@ class ShiftReportService
             ->when($categoryId !== '', fn ($query) => $query->whereHas('shift', fn ($shift) => $shift->where('category_id', $categoryId)))
             ->oldest()
             ->get();
+
+        $visibleSwaps = $isManager
+            ? $allSwaps
+            : $allSwaps->filter(fn (ShiftSwap $swap) => $swap->requester_id === $forUser->id || $swap->substitute_id === $forUser->id)->values();
 
         $absences = Absence::query()
             ->with(['user', 'shift'])
@@ -93,15 +100,16 @@ class ShiftReportService
                 'absenceReported' => $shifts->where('status', ShiftStatus::AbsenceReported)->count(),
                 'coverageRate' => $total > 0 ? (int) round($covered / $total * 100) : null,
                 'absences' => $absences->count(),
-                'swapsPendingProfessional' => $swaps->where('status', ShiftSwapStatus::PendingProfessional)->count(),
-                'swapsPendingManager' => $swaps->where('status', ShiftSwapStatus::PendingManager)->count(),
-                'swapsApproved' => $swaps->where('status', ShiftSwapStatus::Approved)->count(),
-                'swapsRejected' => $swaps->where('status', ShiftSwapStatus::Rejected)->count(),
+                'swapsPendingProfessional' => $visibleSwaps->where('status', ShiftSwapStatus::PendingProfessional)->count(),
+                'swapsPendingManager' => $visibleSwaps->where('status', ShiftSwapStatus::PendingManager)->count(),
+                'swapsApproved' => $visibleSwaps->where('status', ShiftSwapStatus::Approved)->count(),
+                'swapsRejected' => $visibleSwaps->where('status', ShiftSwapStatus::Rejected)->count(),
             ],
             'bySector' => $this->groupByRelation($shifts, 'sector'),
             'byCategory' => $this->groupByRelation($shifts, 'category'),
-            'byProfessional' => $this->professionalRows($shifts, $swaps, $absences),
-            'swaps' => $swaps,
+            'byProfessional' => $this->professionalRows($shifts, $allSwaps, $absences),
+            'swaps' => $visibleSwaps,
+            'isManager' => $isManager,
             'hasActiveFilters' => $sectorId !== '' || $categoryId !== '',
         ];
     }

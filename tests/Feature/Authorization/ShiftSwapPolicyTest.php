@@ -80,6 +80,26 @@ class ShiftSwapPolicyTest extends TestCase
         $this->assertFalse(Gate::forUser($manager)->allows('approve', $swap->refresh()));
     }
 
+    public function test_only_manager_can_view_any_swap_and_professionals_can_only_view_own_swaps(): void
+    {
+        [$requester, $substitute, $shift] = $this->assignment();
+        $manager = User::factory()->create(['role' => UserRole::Manager]);
+        $unrelated = User::factory()->create(['role' => UserRole::Professional]);
+        $swap = $this->makeSwap($shift, $requester, $substitute);
+
+        // viewAny: only manager can view all swaps
+        $this->assertTrue(Gate::forUser($manager)->allows('viewAny', ShiftSwap::class));
+        $this->assertFalse(Gate::forUser($requester)->allows('viewAny', ShiftSwap::class));
+        $this->assertFalse(Gate::forUser($substitute)->allows('viewAny', ShiftSwap::class));
+        $this->assertFalse(Gate::forUser($unrelated)->allows('viewAny', ShiftSwap::class));
+
+        // view: manager, requester and substitute can view; unrelated user cannot
+        $this->assertTrue(Gate::forUser($manager)->allows('view', $swap));
+        $this->assertTrue(Gate::forUser($requester)->allows('view', $swap));
+        $this->assertTrue(Gate::forUser($substitute)->allows('view', $swap));
+        $this->assertFalse(Gate::forUser($unrelated)->allows('view', $swap));
+    }
+
     /** @return array{User, User, Shift} */
     private function assignment(): array
     {
