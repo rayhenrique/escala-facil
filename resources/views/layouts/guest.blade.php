@@ -2,7 +2,7 @@
 <html lang="pt-BR">
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <title>{{ $title ?? 'Acesso' }} · {{ config('app.name') }}</title>
         <x-pwa-head />
@@ -11,44 +11,38 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @livewireStyles
     </head>
-    <body class="min-h-screen bg-canvas text-ink antialiased">
+    <body id="auth-page" class="bg-canvas text-ink antialiased">
         <main class="auth-shell">
-            <section class="auth-context" aria-labelledby="product-name">
+            <section class="auth-context" aria-labelledby="auth-context-title">
                 <div class="relative z-10 max-w-lg">
                     <a href="{{ route('login') }}" class="brand-lockup" wire:navigate>
                         <x-application-logo class="size-11" />
                         <span id="product-name">Escala Fácil</span>
                     </a>
 
-                    <p class="mt-16 font-mono text-xs font-medium uppercase tracking-[0.2em] text-teal-100">Gestão de plantões</p>
-                    <h1 class="mt-4 max-w-md text-4xl font-semibold leading-[1.08] tracking-[-0.035em] text-white sm:text-5xl">
-                        A escala certa, com cada decisão no lugar.
-                    </h1>
-                    <p class="mt-6 max-w-md text-base leading-7 text-teal-50/80">
-                        Acompanhe plantões, trocas e coberturas em um ambiente seguro para gestores e profissionais.
+                    <p class="mt-12 font-mono text-xs font-medium uppercase tracking-[0.17em] text-primary-soft">Gestão hospitalar</p>
+                    <h2 id="auth-context-title" class="mt-4 max-w-md text-4xl font-semibold leading-tight tracking-[-0.035em] text-white xl:text-5xl">
+                        Plantões, trocas e cobertura em um só lugar.
+                    </h2>
+                    <p class="mt-5 max-w-md text-base leading-7 text-primary-soft">
+                        A gerência organiza a escala e acompanha a cobertura. Os profissionais consultam seus plantões e seguem cada etapa das solicitações de troca.
                     </p>
-
-                    <div class="mt-12 grid grid-cols-3 gap-2" aria-hidden="true">
-                        <span class="h-2 rounded-full bg-white/85"></span>
-                        <span class="h-2 rounded-full bg-coverage"></span>
-                        <span class="h-2 rounded-full bg-amber-300"></span>
-                    </div>
                 </div>
             </section>
 
             <section class="auth-form-panel">
-                <div class="my-auto w-full max-w-md py-10">
-                    <div class="mb-10 flex items-center gap-3 lg:hidden">
+                <div class="auth-content">
+                    <a href="{{ route('landing') }}" class="mb-7 flex min-h-11 w-fit items-center gap-3 rounded-lg hover:text-primary lg:hidden" wire:navigate>
                         <x-application-logo class="size-10" />
                         <span class="text-lg font-semibold tracking-tight">Escala Fácil</span>
-                    </div>
+                    </a>
                     {{ $slot }}
-                    <button type="button" class="button-secondary mt-6 w-full" data-pwa-install hidden>Instalar aplicativo</button>
-                    <p class="mt-10 text-sm leading-6 text-muted">
+                    <p class="mt-6 text-sm leading-6 text-muted">
                         Acesso exclusivo para usuários cadastrados pela gestão.
                     </p>
+                    <x-auth.install-help />
                 </div>
-                <x-system-footer class="w-full max-w-md" />
+                <x-system-footer class="mt-auto w-full max-w-md" />
             </section>
         </main>
         @livewireScriptConfig

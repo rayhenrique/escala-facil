@@ -2,7 +2,11 @@ import './bootstrap';
 
 import { Livewire } from '../../vendor/livewire/livewire/dist/livewire.esm';
 import { initLandingPage } from './landing';
+import { registerAuthUi } from './auth';
+import { initPwaInstall } from './pwa-install';
 
+registerAuthUi(Livewire);
+initPwaInstall();
 Livewire.start();
 
 if (document.readyState === 'loading') {
@@ -12,45 +16,6 @@ if (document.readyState === 'loading') {
 }
 
 document.addEventListener('livewire:navigated', initLandingPage);
-
-let deferredInstallPrompt = null;
-
-const isRunningAsInstalledApp = () => window.matchMedia('(display-mode: standalone)').matches
-    || window.navigator.standalone === true;
-
-const updateInstallButtons = () => {
-    document.querySelectorAll('[data-pwa-install]').forEach((button) => {
-        button.hidden = deferredInstallPrompt === null || isRunningAsInstalledApp();
-    });
-};
-
-window.addEventListener('beforeinstallprompt', (event) => {
-    event.preventDefault();
-    deferredInstallPrompt = event;
-    updateInstallButtons();
-});
-
-window.addEventListener('appinstalled', () => {
-    deferredInstallPrompt = null;
-    updateInstallButtons();
-});
-
-document.addEventListener('click', async (event) => {
-    const installButton = event.target.closest('[data-pwa-install]');
-
-    if (! installButton || deferredInstallPrompt === null) {
-        return;
-    }
-
-    installButton.disabled = true;
-    await deferredInstallPrompt.prompt();
-    await deferredInstallPrompt.userChoice;
-    deferredInstallPrompt = null;
-    installButton.disabled = false;
-    updateInstallButtons();
-});
-
-document.addEventListener('livewire:navigated', updateInstallButtons);
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {

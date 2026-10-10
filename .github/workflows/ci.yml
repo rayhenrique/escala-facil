@@ -94,3 +94,6 @@ jobs:
 
       - name: Test PWA release cache invalidation
         run: npm run test:pwa
+
+      - name: Test authentication presentation lifecycle
+        run: npm run test:auth

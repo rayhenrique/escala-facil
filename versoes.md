@@ -6,6 +6,13 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.23.1 — 10/10/2026
+
+### Acesso mais fácil pelo celular
+
+- Formulários mais claros no celular, com mensagens de erro e foco nos campos que precisam de revisão.
+- Instalação opcional com menos destaque e orientação para adicionar o aplicativo no iPhone e iPad.
+
 ## 1.23.0 — 10/10/2026
 
 ### Apresentação mais clara do aplicativo

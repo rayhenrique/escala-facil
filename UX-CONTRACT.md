@@ -16,6 +16,7 @@ Este documento registra o comportamento compartilhado das telas autenticadas. As
 | --- | --- | --- | --- |
 | Navegação | sidebar em `resources/views/layouts/app.blade.php` | fixa e recolhível no desktop; gaveta no celular | rota ativa, persistência do toggle, ícones com texto e fechamento da gaveta |
 | Campos e formulários | classes compartilhadas de `resources/css/app.css` + Form Requests | criar, editar, troca e ausência | validação próxima ao campo e testes Livewire |
+| Acesso e recuperação | `layouts/guest` + componentes `auth/form`, `auth/password-field`, `auth/submit` + módulos Livewire Auth | login, solicitar recuperação e definir senha | campos nativos com autofill, erros associados, foco no primeiro inválido, carregamento, recuperação de falha e política de sessão preservada |
 | Seleção | elemento HTML `select` com `field-input` | simples | rótulo, teclado e valor persistido |
 | Data e período | inputs HTML `date`, `time` e `month` | data, hora e mês | locale visível e validação no servidor |
 | Badge de status | `resources/views/components/status-badge.blade.php` | enums de plantão, troca e ausência | texto semântico e contraste |
@@ -50,10 +51,13 @@ Este documento registra o comportamento compartilhado das telas autenticadas. As
 - Notificações e Ajuda e versões pertencem ao grupo Suporte e estão disponíveis para gerente e profissional; o número da versão atual aparece na sidebar.
 - O item Notificações mostra um contador de não lidas, inclusive quando a sidebar está recolhida, e atualiza o total periodicamente.
 - A ação Instalar aplicativo fica oculta até o navegador emitir a oferta nativa e desaparece quando o sistema já está em modo instalado.
+- Na autenticação, instalação é uma ação textual secundária e opcional. iPhone e iPad em contexto seguro recebem orientação expansível para usar Compartilhar → Adicionar à Tela de Início no Safari; essa orientação não simula uma oferta nativa. A oferta é consumida uma vez, impede cliques simultâneos e recupera o estado em cancelamento ou falha.
 
 ## Fluxos e retorno
 
 A landing oferece um atalho para o conteúdo e âncoras identificadas. Com Lenis, a navegação atualiza o hash e leva o foco à seção após a rolagem; sem JavaScript ou com movimento reduzido, usa a navegação nativa. O menu público é uma expansão não modal: fecha ao escolher uma seção ou usar `Esc`, que devolve o foco ao botão. Sem JavaScript, há links visíveis para as seções. O exemplo de troca apresenta solicitação, aceite e decisão simultaneamente, informa a possibilidade de rejeição e nunca sugere aprovação automática. A prévia não consulta nem publica registros de usuários. O acesso depende de credenciais da instituição; o CTA orienta quem ainda não as possui.
+
+Os formulários de acesso não abrem o teclado automaticamente. E-mail usa teclado apropriado sem correção ou capitalização; senhas mantêm `current-password` ou `new-password`, nome e tipo nativos. Os valores atuais do autofill são sincronizados antes do envio, sem requisição adicional. Após validação, o foco vai ao primeiro campo inválido e a mensagem permanece associada a ele. Falhas de requisição ficam no formulário e permitem tentar novamente; expiração da página oferece recarga deliberada. Duração de sessão, lembrar acesso, limites de tentativas, autorização, tokens de recuperação e regras de senha continuam definidos pelo backend. Confirmações de recuperação e troca de senha permanecem inline, com `role="status"`.
 
 | Operação | Estado em andamento | Sucesso | Falha e recuperação |
 | --- | --- | --- | --- |

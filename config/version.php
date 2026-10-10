@@ -2,9 +2,19 @@
 
 return [
     // Versão do código instalado. APP_VERSION não pode sobrepor este registro.
-    'current' => '1.23.0',
+    'current' => '1.23.1',
 
     'releases' => [
+        [
+            'version' => '1.23.1',
+            'date' => '2026-10-10',
+            'title' => 'Acesso mais fácil pelo celular',
+            'summary' => 'Melhoramos o acesso pelo celular e a orientação para instalar o aplicativo.',
+            'highlights' => [
+                'Formulários mais claros no celular, com mensagens de erro e foco nos campos que precisam de revisão.',
+                'Instalação opcional com menos destaque e orientação para adicionar o aplicativo no iPhone e iPad.',
+            ],
+        ],
         [
             'version' => '1.23.0',
             'date' => '2026-10-10',

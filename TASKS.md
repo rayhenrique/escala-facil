@@ -1,5 +1,11 @@
 # TASKS - Plano de Execução Sequencial
 
+- [x] **Acesso pelo celular e instalação (1.23.1)**
+  - [x] Preservar duas colunas institucionais e simplificar composição móvel sem decoração.
+  - [x] Compartilhar campos de senha, carregamento e erros; corrigir autofill e foco de validação.
+  - [x] Tornar instalação opcional e discreta, com orientação iOS e recuperação de falha.
+  - [x] Verificar sessão, recuperação, interface, acessibilidade, Pint e build.
+
 - [x] **Clareza da landing (1.23.0)**
   - [x] Preservar identidade e revisar hierarquia, ritmo, comparação, recursos e acesso institucional.
   - [x] Usar componentes reais com dados ilustrativos e substituir promessas sem evidência.
