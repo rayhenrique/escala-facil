@@ -100,6 +100,22 @@ class DeployScriptTest extends TestCase
         $this->assertStringContainsString('mysqldump', $guide);
     }
 
+    public function test_target_version_is_read_from_the_remote_commit_and_confirmed_after_fast_forward(): void
+    {
+        $script = $this->script();
+        $this->assertStringContainsString('git show origin/main:config/version.php', $script);
+        $this->assertStringContainsString('scripts/read-release-version.php config/version.php', $script);
+        $this->assertStringContainsString('"$installed_version" == "$release_version"', $script);
+        $this->assertStringNotContainsString("grep '^APP_VERSION=' .env.example", $script);
+        $this->assertStringNotContainsString('sed -i', $script);
+        $this->assertStringContainsString('artisan config:clear', $script);
+        $this->assertStringContainsString('artisan version:check --json', $script);
+        $this->assertStringContainsString('app-version', $script);
+        $this->assertStringContainsString('escala-facil-static-v${release_version}', $script);
+        $this->assertLessThan(strpos($script, 'git merge --ff-only'), strpos($script, 'git show origin/main:config/version.php'));
+        $this->assertGreaterThan(strpos($script, 'git merge --ff-only'), strpos($script, 'installed_version='));
+    }
+
     private function script(): string
     {
         return file_get_contents(base_path('scripts/deploy-production.sh'));

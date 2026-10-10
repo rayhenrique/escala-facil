@@ -1,5 +1,11 @@
 # TASKS - Plano de Execução Sequencial
 
+- [x] **Consistência de versão (1.22.1)**
+  - [x] Auditar APP_VERSION, registro, documentação, deploy, caches e PWA.
+  - [x] Usar o código instalado como fonte canônica e preservar .env e dados de usuários.
+  - [x] Corrigir release:prepare, versão de destino do deploy e conferir metadados servidos.
+  - [x] Cobrir divergências, cache antigo e telas por regressões; documentar conferência em produção.
+
 - [x] **Horários e duração dos plantões (1.22.0)**
   - [x] Auditar cadastro, XLSX, calendário, dashboard, relatórios, trocas, cobertura e PDFs.
   - [x] Acrescentar término explícito para 24h, preservando dados antigos e documentando ambiguidades institucionais.

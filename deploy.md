@@ -135,7 +135,7 @@ APP_KEY=
 APP_DEBUG=false
 APP_URL=https://escalafacil.kltecnologia.com
 APP_TIMEZONE=America/Maceio
-APP_VERSION=1.22.0
+APP_VERSION=1.22.1
 
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR
@@ -373,11 +373,11 @@ cd ~/htdocs/escalafacil.kltecnologia.com
 bash scripts/deploy-production.sh
 ```
 
-Na **fase de pré-voo** (antes de qualquer alteração ou manutenção), o script valida: execução como usuário do site (nunca `root`), comandos exigidos (`git`, `php8.5`, `node`, `npm`, `curl`, `mysqldump` ou `clpctl`), PHP 8.3+ e Node.js 20+, espaço livre mínimo de 1 GiB (`DEPLOY_MIN_DISK_KB`), chaves obrigatórias do `.env`, `APP_VERSION` no `.env.example`, árvore Git limpa, fast-forward possível para `origin/main` e `composer validate --strict`. Qualquer falha aqui interrompe o processo sem tocar no sistema.
+Na **fase de pré-voo** (antes de qualquer alteração ou manutenção), o script valida: execução como usuário do site (nunca `root`), comandos exigidos (`git`, `php8.5`, `node`, `npm`, `curl`, `mysqldump` ou `clpctl`), PHP 8.3+ e Node.js 20+, espaço livre mínimo de 1 GiB (`DEPLOY_MIN_DISK_KB`), chaves obrigatórias do `.env`, árvore Git limpa, fast-forward possível para `origin/main` e `composer validate --strict`. A versão de destino é lida de `config/version.php` no commit remoto após o fetch. Qualquer falha aqui interrompe o processo sem tocar no sistema.
 
-Na **fase de manutenção**, o script registra o commit atual para rollback, entra em manutenção, atualiza a branch somente por fast-forward, instala dependências, compila o frontend (com verificação de `public/build/manifest.json`), sincroniza o `APP_VERSION` no `.env` (com `chmod 600`), gera **backup automático do banco antes das migrations** (ver seção 18), executa `migrate --force`, otimiza caches, recarrega workers e reabre o sistema.
+Na **fase de manutenção**, o script registra o commit atual para rollback, entra em manutenção, atualiza a branch somente por fast-forward, confirma a versão do código instalado e limpa o cache antigo de configuração. Instala dependências, compila o frontend (com verificação de `public/build/manifest.json`), preserva o conteúdo do `.env`, gera **backup automático do banco antes das migrations** (ver seção 18), executa `migrate --force`, otimiza caches, confere `version:check --json`, recarrega workers e reabre o sistema.
 
-Na **fase de fumaça** (sistema já no ar), o script confirma `/up`, `/login`, o bundle do Livewire (sem `livewire.min.js`, com `window.livewireScriptConfig`), o manifesto e o service worker da PWA.
+Na **fase de fumaça** (sistema já no ar), o script confirma `/up`, o bundle do Livewire (sem `livewire.min.js`, com `window.livewireScriptConfig`), a versão em `/login` e `/landing`, o manifesto e a versão do service worker da PWA.
 
 Em caso de falha em etapa crítica, o script interrompe com diagnóstico (`merged`, `migrated`, caminho do backup) e reabre o sistema. Falhas antes das migrations revertem código e assets automaticamente; **migrations nunca são revertidas automaticamente** (`migrate:rollback` não existe no script). O procedimento de recuperação está na seção 18.
 
@@ -398,14 +398,15 @@ php8.5 /usr/local/bin/composer install --no-dev --prefer-dist --optimize-autoloa
 npm ci
 npm run build
 test -f public/build/manifest.json
-release_version=$(grep '^APP_VERSION=' .env.example | cut -d= -f2-)
-sed -i "s/^APP_VERSION=.*/APP_VERSION=$release_version/" .env
+release_version=$(php8.5 scripts/read-release-version.php config/version.php)
+php8.5 artisan config:clear
 chmod 600 .env
 MYSQL_PWD="$(grep '^DB_PASSWORD=' .env | cut -d= -f2- | tr -d '"')" mysqldump -h 127.0.0.1 -P 3306 -u escala_facil escala_facil | gzip > ~/escala-facil-backups/escala_facil-$(date +%F-%H%M)-pre-${release_version}.sql.gz
 chmod 600 ~/escala-facil-backups/escala_facil-$(date +%F-%H%M)-pre-${release_version}.sql.gz
 php8.5 artisan migrate --force
 php8.5 artisan optimize:clear
 php8.5 artisan optimize
+php8.5 artisan version:check --json
 php8.5 artisan reload
 php8.5 artisan up
 trap - EXIT
@@ -416,12 +417,13 @@ Verifique a versão e a saúde:
 ```bash
 git log -1 --oneline
 php8.5 artisan about --only=environment
+php8.5 artisan version:check --json
 curl -I https://escalafacil.kltecnologia.com/up
 curl -I https://escalafacil.kltecnologia.com/manifest.webmanifest
 curl -I https://escalafacil.kltecnologia.com/sw.js
 ```
 
-O comando `artisan reload` encerra de forma controlada workers que usam código antigo; o Supervisor os inicia novamente.
+O comando `artisan reload` encerra de forma controlada workers que usam código antigo; o Supervisor os inicia novamente. A conferência completa de versão, HTML e PWA está em [`docs/versioning.md`](docs/versioning.md). `APP_VERSION` no `.env` não precisa ser sincronizada. Logs antigos de deploy registram o que ocorreu na ocasião e não são reescritos.
 
 ## 18. Backup, rollback e recuperação
 
@@ -451,7 +453,7 @@ clpctl db:import --databaseName=escala_facil --file=/root/NOME-DO-BACKUP.sql.gz
 
 A restauração substitui dados e deve ser usada somente após confirmar o arquivo, o banco de destino e a necessidade de rollback.
 
-**Rollback de código e assets (sem tocar no banco):** se o deploy falhar antes das migrations, o próprio script já reverte o commit (`git reset --hard`), reinstala as dependências do `composer.lock` anterior, restaura `public/build` e devolve o `APP_VERSION`. Manualmente:
+**Rollback de código e assets (sem tocar no banco):** se o deploy falhar antes das migrations, o próprio script já reverte o commit (`git reset --hard`), reinstala as dependências do `composer.lock` anterior, restaura `public/build` e reconstrói caches. A versão acompanha o checkout revertido, sem editar o `.env`. Manualmente:
 
 ```bash
 cd ~/htdocs/escalafacil.kltecnologia.com
@@ -459,7 +461,6 @@ git log -1 --oneline
 git reset --hard COMMIT-ANTERIOR
 php8.5 /usr/local/bin/composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
 npm ci && npm run build
-sed -i "s/^APP_VERSION=.*/APP_VERSION=VERSAO-ANTERIOR/" .env
 php8.5 artisan optimize:clear && php8.5 artisan optimize
 php8.5 artisan up
 ```

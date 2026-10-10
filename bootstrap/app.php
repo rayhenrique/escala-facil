@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\EnsureUserIsManager;
 use App\Http\Middleware\EnsureUserIsProfessional;
+use App\Http\Middleware\InstalledVersion;
 use App\Support\ErrorReporting;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -14,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->web(append: [InstalledVersion::class]);
         $middleware->alias([
             'manager' => EnsureUserIsManager::class,
             'professional' => EnsureUserIsProfessional::class,

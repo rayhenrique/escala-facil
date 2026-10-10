@@ -3,6 +3,7 @@
     "private": true,
     "type": "module",
     "scripts": {
+        "test:pwa": "node --test tests/js/service-worker.test.mjs",
         "test:landing": "node --test tests/js/landing.test.mjs",
         "test:landing:browser": "node tests/browser/landing.mjs",
         "build": "vite build",

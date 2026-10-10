@@ -6,6 +6,12 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.22.1 — 10/10/2026
+
+### Versão correta em todas as telas
+
+- A versão do aplicativo agora aparece corretamente em todas as telas.
+
 ## 1.22.0 — 10/10/2026
 
 ### Plantões de 24h e horários mais claros

@@ -1,9 +1,19 @@
 <?php
 
 return [
-    'current' => env('APP_VERSION', '1.22.0'),
+    // Versão do código instalado. APP_VERSION não pode sobrepor este registro.
+    'current' => '1.22.1',
 
     'releases' => [
+        [
+            'version' => '1.22.1',
+            'date' => '2026-10-10',
+            'title' => 'Versão correta em todas as telas',
+            'summary' => 'A versão do aplicativo agora aparece corretamente em todas as telas.',
+            'highlights' => [
+                'A versão do aplicativo agora aparece corretamente em todas as telas.',
+            ],
+        ],
         [
             'version' => '1.22.0',
             'date' => '2026-10-10',

@@ -54,7 +54,7 @@ document.addEventListener('livewire:navigated', updateInstallButtons);
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(() => {
+        navigator.serviceWorker.register('/sw.js', { scope: '/', updateViaCache: 'none' }).catch(() => {
             // A aplicação continua funcional quando o navegador bloqueia service workers.
         });
     }, { once: true });

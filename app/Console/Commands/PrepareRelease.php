@@ -74,12 +74,35 @@ class PrepareRelease extends Command
         $date = CarbonImmutable::now('America/Maceio')->format('Y-m-d');
         $displayDate = CarbonImmutable::createFromFormat('Y-m-d', $date, 'America/Maceio')->format('d/m/Y');
 
+        foreach ([$envExampleFile, $readmeFile, $deployFile] as $file) {
+            if (! preg_match('/^APP_VERSION=.*$/m', File::get($file))) {
+                $this->error("Marcador APP_VERSION não encontrado em {$file}.");
+
+                return self::FAILURE;
+            }
+        }
+        if (! preg_match('/\*\*Versão atual:\*\* `[^`]+`/', File::get($readmeFile))
+            || ! str_contains(File::get($historyFile), "\n## ")
+            || ! preg_match("/const CACHE_VERSION = 'escala-facil-static-v[^']+';/", File::get($serviceWorkerFile))) {
+            $this->error('Marcadores de versão ausentes no README, histórico ou service worker.');
+
+            return self::FAILURE;
+        }
+
         $this->updateVersionFile($versionFile, $current, $version, $date, $title, $summary, $highlights);
         $this->updateEnvLine($envExampleFile, $version);
         $this->updateEnvLine($readmeFile, $version);
+        $this->updateReadmeVersion($readmeFile, $version);
         $this->updateEnvLine($deployFile, $version);
         $this->updateHistoryFile($historyFile, $version, $displayDate, $title, $highlights);
         $this->updateServiceWorker($serviceWorkerFile, $version);
+
+        config()->set('version', require $versionFile);
+        if ($this->call('config:clear') !== self::SUCCESS || $this->laravel->configurationIsCached()) {
+            $this->error('Release preparado, mas o cache antigo não pôde ser removido. Confira as permissões de bootstrap/cache.');
+
+            return self::FAILURE;
+        }
 
         $this->info("Versão {$version} preparada com sucesso ({$displayDate}).");
         $this->info('Arquivos atualizados: config/version.php, .env.example, README.md, deploy.md, versoes.md, public/sw.js.');
@@ -92,7 +115,7 @@ class PrepareRelease extends Command
     {
         $contents = File::get($versionFile);
 
-        if (! preg_match("/'current'\s*=>\s*env\(\s*'APP_VERSION'\s*,\s*'([^']+)'\s*\)/", $contents, $matches)) {
+        if (! preg_match("/'current'\s*=>\s*'([^']+)'/", $contents, $matches)) {
             throw new RuntimeException('Não foi possível identificar a versão atual em config/version.php.');
         }
 
@@ -124,8 +147,8 @@ class PrepareRelease extends Command
         $contents = File::get($versionFile);
 
         $contents = preg_replace(
-            "/'current'\s*=>\s*env\(\s*'APP_VERSION'\s*,\s*'".preg_quote($current, '/')."'\s*\)/",
-            "'current' => env('APP_VERSION', '{$version}')",
+            "/'current'\s*=>\s*'".preg_quote($current, '/')."'/",
+            "'current' => '{$version}'",
             $contents,
             1
         ) ?? throw new RuntimeException('Falha ao atualizar a versão atual em config/version.php.');
@@ -154,7 +177,7 @@ class PrepareRelease extends Command
         $insertAt = $position + strlen($anchor);
         $contents = substr($contents, 0, $insertAt)."\n".$entry.substr($contents, $insertAt);
 
-        File::put($versionFile, $contents);
+        File::replace($versionFile, $contents);
     }
 
     private function updateEnvLine(string $file, string $version): void
@@ -169,7 +192,7 @@ class PrepareRelease extends Command
 
         // Quando a versão já era a desejada, preg_replace não altera; mantém o arquivo intacto.
         if ($updated !== $contents) {
-            File::put($file, $updated);
+            File::replace($file, $updated);
         }
     }
 
@@ -199,7 +222,16 @@ class PrepareRelease extends Command
 
         $contents = substr($contents, 0, $position + 1).$entry.substr($contents, $position + 1);
 
-        File::put($historyFile, $contents);
+        File::replace($historyFile, $contents);
+    }
+
+    private function updateReadmeVersion(string $file, string $version): void
+    {
+        $updated = preg_replace('/(\*\*Versão atual:\*\* )`[^`]+`/', '$1'.'`'.$version.'`', File::get($file), 1);
+        if ($updated === null) {
+            throw new RuntimeException('Falha ao atualizar a versão no README.');
+        }
+        File::replace($file, $updated);
     }
 
     private function updateServiceWorker(string $serviceWorkerFile, string $version): void
@@ -218,7 +250,7 @@ class PrepareRelease extends Command
         }
 
         if ($updated !== $contents) {
-            File::put($serviceWorkerFile, $updated);
+            File::replace($serviceWorkerFile, $updated);
         }
     }
 }

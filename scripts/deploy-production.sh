@@ -48,11 +48,6 @@ rollback_code() {
             || log "AVISO: restauração de public/build falhou; execute npm ci && npm run build."
     fi
 
-    if [[ -n "$prev_version" ]]; then
-        sed -i "s/^APP_VERSION=.*/APP_VERSION=$prev_version/" .env \
-            || log "AVISO: não foi possível restaurar APP_VERSION no .env."
-    fi
-
     "$php_bin" artisan optimize:clear >/dev/null 2>&1 || true
     "$php_bin" artisan optimize >/dev/null 2>&1 || true
 }
@@ -122,9 +117,6 @@ if [[ "$(env_value APP_DEBUG)" == "true" ]]; then
     log "AVISO: APP_DEBUG=true no .env de produção; recomendado APP_DEBUG=false."
 fi
 
-release_version="$(grep '^APP_VERSION=' .env.example | cut -d= -f2-)"
-[[ -n "$release_version" ]] || fail "APP_VERSION ausente no .env.example."
-
 if [[ -n "$(git status --porcelain)" ]]; then
     git status --short >&2
     fail "O repositório possui alterações locais. Revise ou guarde essas alterações antes do deploy."
@@ -135,6 +127,10 @@ git fetch origin main || fail "Falha ao buscar origin/main."
 git merge-base --is-ancestor HEAD origin/main \
     || fail "A branch local divergiu de origin/main. O deploy foi interrompido antes da manutenção."
 
+# A versão de destino pertence ao commit remoto, não ao checkout anterior.
+release_version="$(git show origin/main:config/version.php | "$php_bin" scripts/read-release-version.php)" \
+    || fail "Não foi possível identificar a versão de destino em origin/main."
+
 "$php_bin" "$composer_bin" validate --strict \
     || fail "composer validate --strict reprovou; corrija composer.json/composer.lock antes do deploy."
 
@@ -144,7 +140,7 @@ log "Pré-voo concluído. Versão de destino: $release_version."
 # FASE B — manutenção (alterações + migrations + build)
 # ---------------------------------------------------------------------------
 prev_head="$(git rev-parse HEAD)"
-prev_version="$(env_value APP_VERSION)"
+prev_version="$("$php_bin" scripts/read-release-version.php config/version.php)"
 log "FASE B: manutenção (versão atual: ${prev_version:-desconhecida})."
 
 "$php_bin" artisan down --retry=60 || fail "Falha ao colocar a aplicação em manutenção."
@@ -152,6 +148,11 @@ trap '"$php_bin" artisan up >/dev/null 2>&1 || true' EXIT
 
 git merge --ff-only origin/main || fail "Falha no fast-forward para origin/main."
 merged=1
+installed_version="$("$php_bin" scripts/read-release-version.php config/version.php)" \
+    || fail "Versão instalada inválida após o fast-forward."
+[[ "$installed_version" == "$release_version" ]] \
+    || fail "A versão instalada diverge do commit de destino."
+"$php_bin" artisan config:clear || fail "Falha ao invalidar o cache da configuração anterior."
 
 if [[ -d public/build ]]; then
     build_backup_dir="$(mktemp -d)/build"
@@ -165,8 +166,7 @@ npm run build || fail "Falha em npm run build."
 [[ -f public/build/manifest.json ]] \
     || fail "Build do frontend incompleto: public/build/manifest.json não gerado."
 
-sed -i "s/^APP_VERSION=.*/APP_VERSION=$release_version/" .env \
-    || fail "Falha ao sincronizar APP_VERSION no .env."
+# APP_VERSION é legada: o deploy não reescreve configurações do .env.
 chmod 600 .env || fail "Falha ao restringir permissões do .env."
 
 chmod -R ug+rwX storage bootstrap/cache \
@@ -206,6 +206,7 @@ migrated=1
 
 "$php_bin" artisan optimize:clear || fail "Falha em optimize:clear."
 "$php_bin" artisan optimize || fail "Falha em optimize."
+"$php_bin" artisan version:check --json || fail "Metadados de versão inconsistentes após otimização."
 "$php_bin" artisan reload || fail "Falha em reload dos workers."
 
 "$php_bin" artisan up || fail "Falha ao reabrir a aplicação."
@@ -231,6 +232,15 @@ if ! grep -q 'window.livewireScriptConfig' <<<"$login_html"; then
     fail "Smoke falhou: a configuração do bundle do Livewire não foi encontrada."
 fi
 
+if ! grep -Fq "<meta name=\"app-version\" content=\"$release_version\">" <<<"$login_html"; then
+    fail "Smoke falhou: o login não exibe a versão instalada."
+fi
+landing_html="$(curl --fail --silent --show-error "$app_url/landing")" \
+    || fail "Smoke falhou: landing inacessível."
+if ! grep -Fq "<meta name=\"app-version\" content=\"$release_version\">" <<<"$landing_html"; then
+    fail "Smoke falhou: a landing não exibe a versão instalada."
+fi
+
 manifest_json="$(curl --fail --silent --show-error "$app_url/manifest.webmanifest")" \
     || fail "Smoke falhou: manifesto da PWA inacessível."
 
@@ -241,7 +251,7 @@ fi
 service_worker="$(curl --fail --silent --show-error "$app_url/sw.js")" \
     || fail "Smoke falhou: service worker inacessível."
 
-if ! grep -q 'CACHE_VERSION' <<<"$service_worker" || ! grep -q '/offline.html' <<<"$service_worker"; then
+if ! grep -Fq "const CACHE_VERSION = 'escala-facil-static-v${release_version}';" <<<"$service_worker" || ! grep -q '/offline.html' <<<"$service_worker"; then
     fail "Smoke falhou: o service worker da PWA está incompleto."
 fi
 

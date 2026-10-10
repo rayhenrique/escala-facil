@@ -4,7 +4,7 @@
 
 Sistema interno para gestão de escalas médicas, plantões, trocas e ausências em unidades de saúde. A aplicação centraliza a operação da gerência, permite que profissionais acompanhem a própria agenda e aplica as regras de compatibilidade e limite mensal em todas as decisões de troca.
 
-**Versão atual:** `1.15.0` — consulte o histórico completo em [`versoes.md`](versoes.md).
+**Versão atual:** `1.22.1` — consulte o histórico completo em [`versoes.md`](versoes.md).
 
 Desenvolvido por [KL Tecnologia](https://kltecnologia.com).
 
@@ -156,7 +156,7 @@ Crie um banco MySQL chamado `escala_facil` e ajuste o `.env`:
 APP_NAME="Escala Fácil"
 APP_URL=http://127.0.0.1:8000
 APP_TIMEZONE=America/Maceio
-APP_VERSION=1.22.0
+APP_VERSION=1.22.1
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR
 APP_FAKER_LOCALE=pt_BR
@@ -240,7 +240,7 @@ O comando usa `demo_data_batches` como manifesto dos IDs criados e preserva os r
 
 ## Versionamento e lançamentos
 
-O Escala Fácil usa versionamento semântico `MAIOR.MENOR.CORREÇÃO`. A versão executada fica em `APP_VERSION`, com valor padrão em [`config/version.php`](config/version.php). O mesmo arquivo fornece ao sistema os títulos e destaques mostrados no módulo Ajuda e no modal de novidades.
+O Escala Fácil usa versionamento semântico `MAIOR.MENOR.CORREÇÃO`. A fonte canônica da versão do código instalado é [`config/version.php`](config/version.php), inclusive para títulos e destaques em Ajuda e no modal de novidades. `APP_VERSION` é informação legada: um valor antigo no `.env` não altera a versão exibida. O `.env` é preservado.
 
 Para preparar uma nova versão, use o comando centralizado (não edite os arquivos de versão manualmente):
 
@@ -252,6 +252,11 @@ O comando valida o SemVer, impede regressão e duplicação e sincroniza `config
 
 1. revise o histórico gerado;
 2. execute migrations, testes, Pint, build e inspeção visual.
+
+Confira a instalação sem modificar arquivos ou usuários com `php artisan version:check`
+ou `php artisan version:check --json`. O comando aponta divergências entre o código,
+cache, documentação, histórico e service worker. Consulte [`docs/versioning.md`](docs/versioning.md)
+para verificar produção e invalidar caches.
 
 Cada usuário possui `last_seen_version`. Quando esse valor difere da versão atual, o sistema apresenta o modal de novidades no primeiro acesso e só grava a confirmação quando o usuário escolhe continuar ou abrir o manual.
 

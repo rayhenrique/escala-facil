@@ -91,3 +91,6 @@ jobs:
 
       - name: Test landing animation lifecycle
         run: npm run test:landing
+
+      - name: Test PWA release cache invalidation
+        run: npm run test:pwa
