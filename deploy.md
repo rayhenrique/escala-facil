@@ -135,7 +135,7 @@ APP_KEY=
 APP_DEBUG=false
 APP_URL=https://escalafacil.kltecnologia.com
 APP_TIMEZONE=America/Maceio
-APP_VERSION=1.18.1
+APP_VERSION=1.19.0
 
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR

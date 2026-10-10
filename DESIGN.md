@@ -90,6 +90,10 @@ components:
     backgroundColor: "{colors.primary-strong}"
     textColor: "{colors.surface}"
     rounded: "{rounded.lg}"
+  landing-page:
+    backgroundColor: "{colors.canvas}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.lg}"
   operational-alert:
     backgroundColor: "{colors.surface}"
     textColor: "{colors.ink}"
@@ -184,9 +188,13 @@ A Central de Notificações usa cartões com uma faixa suave para itens não lid
 
 Ícones futuros devem usar traço simples de 1,5 a 2px, entre 16 e 20px, acompanhados por texto quando representam uma ação. O símbolo da marca é o único ícone preenchido recorrente.
 
+### Landing page
+
+A página pública usa os mesmos tokens do sistema (`ink`, `muted`, `primary`, `primary-strong`, `primary-soft`, `coverage`, `canvas`, `line`) e a mesma tipografia (Instrument Sans para títulos e texto, IBM Plex Mono para rótulos operacionais). Gradientes, vidro (`backdrop-blur`), blobs com blur, sombras customizadas e deslocamentos no hover foram removidos; botões usam raio de 0,5rem e pílulas ficam restritas a status curtos. O bloco de conversão segue o padrão do quadro de cobertura: faixa escura em `primary-strong` com texto claro. A navegação pública contém apenas âncoras da própria página e o acesso à plataforma; o menu móvel usa rótulo dinâmico, controle de expansão e fechamento por `Esc`.
+
 ### Motion
 
-Transições de cor duram até 160ms e comunicam resposta. Carregamentos mantêm geometria. `prefers-reduced-motion` reduz animações e transições a duração mínima.
+Transições de cor duram até 160ms e comunicam resposta. Carregamentos mantêm geometria. `prefers-reduced-motion` reduz animações e transições a duração mínima. Na landing, Lenis, parallax e animações GSAP são ignorados com movimento reduzido e a simulação exibe o estado final estático, mantendo todo o conteúdo visível.
 
 ### Content and data visualization
 

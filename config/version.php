@@ -1,9 +1,21 @@
 <?php
 
 return [
-    'current' => env('APP_VERSION', '1.18.1'),
+    'current' => env('APP_VERSION', '1.19.0'),
 
     'releases' => [
+        [
+            'version' => '1.19.0',
+            'date' => '2026-10-10',
+            'title' => 'Landing unificada ao design system',
+            'summary' => 'Página pública com os mesmos tokens, tipografia e padrões do sistema, sem decoração genérica de template SaaS e com movimento reduzido respeitado.',
+            'highlights' => [
+                'Paleta da landing migrada para ink, muted, primary, coverage, canvas e line, com botões em rounded-lg e pílulas só para status.',
+                'Removidos gradientes, vidro, blobs com blur, sombras customizadas e deslocamentos no hover; bloco de conversão na faixa escura primary-strong.',
+                'Navegação pública sem links para rotas autenticadas, menu móvel por teclado e simulação estática com prefers-reduced-motion.',
+                'DESIGN.md e UX-CONTRACT.md atualizados com os padrões da landing unificada.',
+            ],
+        ],
         [
             'version' => '1.18.1',
             'date' => '2026-10-10',

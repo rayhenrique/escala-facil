@@ -51,19 +51,7 @@ export function initLandingPage() {
         });
     });
 
-    // 2. Animação infinita de flutuação no Mockup do Celular (Executa em todos os dispositivos)
-    const floatingMockup = document.querySelector('.gsap-floating-mockup');
-    if (floatingMockup) {
-        gsap.to(floatingMockup, {
-            y: 15,
-            duration: 4,
-            repeat: -1,
-            yoyo: true,
-            ease: 'sine.inOut',
-        });
-    }
-
-    // 3. Orquestração Responsiva com gsap.matchMedia()
+    // 2. Orquestração Responsiva com gsap.matchMedia()
     const mm = gsap.matchMedia();
 
     // Desktop & Tablet (>= 768px): Animações cinematográficas com Blur Reveal e ScrollTriggers avançados

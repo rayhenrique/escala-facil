@@ -6,6 +6,15 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.19.0 — 10/10/2026
+
+### Landing unificada ao design system
+
+- Paleta da landing migrada para ink, muted, primary, coverage, canvas e line, com botões em rounded-lg e pílulas só para status.
+- Removidos gradientes, vidro, blobs com blur, sombras customizadas e deslocamentos no hover; bloco de conversão na faixa escura primary-strong.
+- Navegação pública sem links para rotas autenticadas, menu móvel por teclado e simulação estática com prefers-reduced-motion.
+- DESIGN.md e UX-CONTRACT.md atualizados com os padrões da landing unificada.
+
 ## 1.18.1 — 10/10/2026
 
 ### Acessibilidade e navegação da landing page

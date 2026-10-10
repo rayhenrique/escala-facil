@@ -54,7 +54,7 @@ class LandingPageTest extends TestCase
         $response = $this->get(route('landing'));
 
         $response->assertOk();
-        $response->assertSee('<meta name="theme-color" content="#059669">', false);
+        $response->assertSee('<meta name="theme-color" content="#0A4D59">', false);
         $response->assertSee('<body id="landing-page"', false);
     }
 

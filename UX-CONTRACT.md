@@ -25,6 +25,7 @@ Este documento registra o comportamento compartilhado das telas autenticadas. As
 | Calendário mensal | `MonthlyCalendar` + classes `calendar-*` | consulta compartilhada, filtros de setor/categoria e ações gerenciais condicionais | navegação entre meses, seleção de dia, filtros com limpeza, lista completa de plantões e ausência de ações sem permissão |
 | Central de ajuda | `HelpCenter` | implantação inicial, rotinas por perfil, fluxos críticos, diagnóstico e versões | acesso pelos dois perfis, ordem inicial preservada, âncoras, acordeões e histórico completo |
 | Aplicativo PWA | `manifest.webmanifest` + `sw.js` + ação `data-pwa-install` | Android, iOS/iPadOS e Windows | instalação nativa quando suportada, modo independente, ícones válidos e fallback offline sem cache autenticado |
+| Página pública | `landing.blade.php` + componentes `landing/*` | seções com âncora, simulação e bloco de conversão | mesmos tokens e tipografia do sistema, sem links para rotas autenticadas, menu móvel por teclado e estado final estático com movimento reduzido |
 | Novidades da versão | `ReleaseAnnouncement` + `last_seen_version` | primeiro acesso após lançamento | modal único por versão, confirmação persistida e acesso ao manual |
 | Notificações | `NotificationsCenter` + notificações em banco | solicitação, aceite, aprovação e rejeição | isolamento por usuário, contador de não lidas e controles de leitura |
 | Comprovante de troca | `resources/views/components/swap-receipt.blade.php` | imediato e histórico | retrato do evento com referência, plantão e participantes |

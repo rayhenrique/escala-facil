@@ -7,7 +7,7 @@
 
         <title>Escala Fácil · O seu plantão, sob o seu controle</title>
         <meta name="description" content="Plataforma PWA moderna para gestão de plantões na saúde. Trocas em um clique, calendário no bolso e zero confusão de WhatsApp.">
-        <meta name="theme-color" content="#059669">
+        <meta name="theme-color" content="#0A4D59">
 
         <!-- Open Graph / Meta Compartilhamento -->
         <meta property="og:type" content="website">
@@ -25,7 +25,7 @@
         <!-- Vite Assets (Tailwind CSS, GSAP, Lenis, Alpine.js) -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body id="landing-page" class="bg-slate-50 text-slate-900 antialiased selection:bg-emerald-500 selection:text-white overflow-x-hidden min-h-screen flex flex-col justify-between">
+    <body id="landing-page" class="bg-canvas text-ink antialiased selection:bg-coverage selection:text-white overflow-x-clip min-h-screen flex flex-col justify-between">
         <!-- Navegação Flutuante -->
         <x-landing.navbar />
 
