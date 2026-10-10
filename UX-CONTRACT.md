@@ -6,6 +6,7 @@ Este documento registra o comportamento compartilhado das telas autenticadas. As
 
 - **Público:** gestores de escala e profissionais plantonistas.
 - **Idioma e formatos:** português do Brasil, datas em `dd/mm/aaaa` e horários em 24 horas.
+- **Intervalos de plantões:** exibir duração e, quando atravessam a meia-noite, “dia seguinte” com a data de término. Plantões de 24h usam horários iguais com término explícito no dia seguinte. 07:00–07:01 no mesmo dia vale 1 minuto. Registros antigos mantêm sua interpretação; contrato e ambiguidades em `docs/shift-timing.md`.
 - **Dispositivos:** celular como base para todos os fluxos; telas maiores ampliam a densidade da gestão sem alterar capacidades.
 - **Acessibilidade:** controles com rótulos visíveis, foco perceptível, status com texto e cor, áreas interativas com pelo menos 40 px e respeito a `prefers-reduced-motion`.
 

@@ -7,6 +7,25 @@ use App\Models\ShiftSwap;
 
 class ShiftSwapReceipt
 {
+    /** Enriquecimento apenas para leitura de comprovantes antigos, sem regravar notificações. */
+    public static function withTimeLabels(array $receipt): array
+    {
+        foreach (['' => 'shift_date', 'counterpart_' => 'counterpart_shift_date'] as $prefix => $dateKey) {
+            if (empty($receipt[$dateKey])) {
+                continue;
+            }
+            $period = new ShiftPeriod($receipt[$dateKey], $receipt[$prefix.'start_time'], $receipt[$prefix.'end_time'], $receipt[$prefix.'end_date'] ?? null);
+            $receipt[$prefix.'end_date'] = $period->end->format('Y-m-d');
+            $receipt[$prefix.'start_at'] = $period->start->toIso8601String();
+            $receipt[$prefix.'end_at'] = $period->end->toIso8601String();
+            $receipt[$prefix.'duration_minutes'] = $period->durationMinutes;
+            $receipt[$prefix.'time_label'] = $period->timeLabel();
+            $receipt[$prefix.'end_time_label'] = $period->endLabel().' · '.$period->durationLabel();
+        }
+
+        return $receipt;
+    }
+
     /** @return array<string, mixed> */
     public function make(ShiftSwap $shiftSwap, ShiftSwapEvent $event): array
     {
@@ -28,7 +47,7 @@ class ShiftSwapReceipt
                 $shiftSwap->requester->name,
                 $shiftSwap->substituteShift->date->format('d/m/Y'),
                 substr((string) $shiftSwap->substituteShift->start_time, 0, 5),
-                substr((string) $shiftSwap->substituteShift->end_time, 0, 5),
+                $shiftSwap->substituteShift->period()->endLabel().' · '.$shiftSwap->substituteShift->period()->durationLabel(),
                 $shiftSwap->substituteShift->sector->name,
                 $shiftSwap->substituteShift->category->name,
             )
@@ -39,12 +58,12 @@ class ShiftSwapReceipt
             $shiftSwap->substitute->name,
             $shiftSwap->shift->date->format('d/m/Y'),
             substr((string) $shiftSwap->shift->start_time, 0, 5),
-            substr((string) $shiftSwap->shift->end_time, 0, 5),
+            $shiftSwap->shift->period()->endLabel().' · '.$shiftSwap->shift->period()->durationLabel(),
             $shiftSwap->shift->sector->name,
             $shiftSwap->shift->category->name,
         );
 
-        return [
+        return self::withTimeLabels([
             'reference' => sprintf('TROCA-%06d', $shiftSwap->id),
             'shift_swap_id' => $shiftSwap->id,
             'event' => $event->value,
@@ -56,6 +75,7 @@ class ShiftSwapReceipt
             'shift_date_label' => $shiftSwap->shift->date->format('d/m/Y'),
             'start_time' => substr((string) $shiftSwap->shift->start_time, 0, 5),
             'end_time' => substr((string) $shiftSwap->shift->end_time, 0, 5),
+            'end_date' => $shiftSwap->shift->period()->end->format('Y-m-d'),
             'sector' => $shiftSwap->shift->sector->name,
             'category' => $shiftSwap->shift->category->name,
             'has_counterpart' => $hasCounterpart,
@@ -63,6 +83,7 @@ class ShiftSwapReceipt
             'counterpart_shift_date_label' => $shiftSwap->substituteShift?->date->format('d/m/Y'),
             'counterpart_start_time' => $shiftSwap->substituteShift ? substr((string) $shiftSwap->substituteShift->start_time, 0, 5) : null,
             'counterpart_end_time' => $shiftSwap->substituteShift ? substr((string) $shiftSwap->substituteShift->end_time, 0, 5) : null,
+            'counterpart_end_date' => $shiftSwap->substituteShift?->period()->end->format('Y-m-d'),
             'counterpart_sector' => $shiftSwap->substituteShift?->sector->name,
             'counterpart_category' => $shiftSwap->substituteShift?->category->name,
             'requester_movement' => $requesterMovement,
@@ -71,6 +92,6 @@ class ShiftSwapReceipt
             'requester' => $shiftSwap->requester->name,
             'substitute' => $shiftSwap->substitute->name,
             'manager' => $shiftSwap->manager?->name,
-        ];
+        ]);
     }
 }

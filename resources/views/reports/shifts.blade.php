@@ -71,7 +71,7 @@
         <tbody>
             @forelse ($report['swaps'] as $swap)
                 <tr>
-                    <td>{{ $swap->shift->date->format('d/m/Y') }} · {{ substr((string) $swap->shift->start_time, 0, 5) }}–{{ substr((string) $swap->shift->end_time, 0, 5) }} · {{ $swap->shift->sector->name }}</td>
+                    <td>{{ $swap->shift->date->format('d/m/Y') }} · {{ $swap->shift->time_label }} · {{ $swap->shift->sector->name }}</td>
                     <td>{{ $swap->requester->name }} → {{ $swap->substitute->name }}</td>
                     <td>{{ $swap->status->label() }}</td>
                 </tr>

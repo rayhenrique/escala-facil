@@ -29,6 +29,7 @@
 * `date` (date)
 * `start_time` (time)
 * `end_time` (time)
+* `end_date` (date, nullable): data explícita de término. NULL conserva a regra histórica, sem regravar registros antigos.
 * `sector_id` (foreignId -> sectors.id, constrained)
 * `category_id` (foreignId -> categories.id, constrained)
 * `user_id` (foreignId -> users.id, nullable, constrained) - Profissional atualmente alocado

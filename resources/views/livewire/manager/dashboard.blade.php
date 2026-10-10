@@ -72,7 +72,7 @@
                             <x-status-badge :status="$oldestPendingSwap->status" label="Pendência mais antiga" />
                             <span class="font-mono text-xs text-muted">Pedido #{{ $oldestPendingSwap->id }} · {{ $oldestPendingSwap->created_at->diffForHumans() }}</span>
                         </div>
-                        <h3 class="mt-4 text-lg font-semibold">{{ $oldestPendingSwap->shift->date->format('d/m/Y') }} · {{ substr($oldestPendingSwap->shift->start_time, 0, 5) }}–{{ substr($oldestPendingSwap->shift->end_time, 0, 5) }}</h3>
+                        <h3 class="mt-4 text-lg font-semibold">{{ $oldestPendingSwap->shift->date->format('d/m/Y') }} · {{ $oldestPendingSwap->shift->time_label }}</h3>
                         <p class="mt-1 text-sm text-muted">{{ $oldestPendingSwap->shift->sector->name }} · {{ $oldestPendingSwap->shift->category->name }}</p>
                         <div class="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
                             <strong>{{ $oldestPendingSwap->requester->name }}</strong>
@@ -143,7 +143,7 @@
                             <x-status-badge :status="$swap->status" label="Aguardando decisão" />
                             <span class="font-mono text-xs text-muted">Pedido #{{ $swap->id }}</span>
                         </div>
-                        <h3 class="mt-4 text-lg font-semibold">{{ $swap->shift->date->format('d/m/Y') }} · {{ substr($swap->shift->start_time, 0, 5) }}–{{ substr($swap->shift->end_time, 0, 5) }}</h3>
+                        <h3 class="mt-4 text-lg font-semibold">{{ $swap->shift->date->format('d/m/Y') }} · {{ $swap->shift->time_label }}</h3>
                         <p class="mt-1 text-sm text-muted">{{ $swap->shift->sector->name }} · {{ $swap->shift->category->name }}</p>
                         <div class="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
                             <strong>{{ $swap->requester->name }}</strong>

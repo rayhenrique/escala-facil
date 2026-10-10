@@ -1,6 +1,7 @@
 @props(['receipt'])
 
 @php
+    $receipt = \App\Support\ShiftSwapReceipt::withTimeLabels($receipt);
     $recordedAt = \Carbon\CarbonImmutable::parse($receipt['recorded_at']);
     $shiftDate = \Carbon\CarbonImmutable::parse($receipt['shift_date']);
     $hasCounterpart = ! empty($receipt['has_counterpart']) && ! empty($receipt['counterpart_shift_date']);
@@ -52,7 +53,7 @@
     <div class="swap-receipt-grid">
         <div class="swap-receipt-primary">
             <span class="meta-label">Plantão original (substituído)</span>
-            <p>{{ $shiftDate->format('d/m/Y') }} · {{ $receipt['start_time'] }}–{{ $receipt['end_time'] }}</p>
+            <p>{{ $shiftDate->format('d/m/Y') }} · {{ $receipt['start_time'] }}–{{ $receipt['end_time_label'] }}</p>
             <small>{{ $receipt['sector'] }} · {{ $receipt['category'] }}</small>
             <p class="mt-2 text-xs font-semibold text-primary">Cedido por: {{ $receipt['requester'] }}</p>
         </div>
@@ -60,7 +61,7 @@
         @if ($hasCounterpart && $counterpartDate)
             <div class="swap-receipt-primary bg-primary-soft/30">
                 <span class="meta-label">Plantão de contrapartida</span>
-                <p>{{ $counterpartDate->format('d/m/Y') }} · {{ $receipt['counterpart_start_time'] }}–{{ $receipt['counterpart_end_time'] }}</p>
+                <p>{{ $counterpartDate->format('d/m/Y') }} · {{ $receipt['counterpart_start_time'] }}–{{ $receipt['counterpart_end_time_label'] }}</p>
                 <small>{{ $receipt['counterpart_sector'] }} · {{ $receipt['counterpart_category'] }}</small>
                 <p class="mt-2 text-xs font-semibold text-primary">Cedido por: {{ $receipt['substitute'] }}</p>
             </div>
@@ -112,20 +113,20 @@
                 <div class="flex items-start gap-2.5 rounded-lg border border-line bg-canvas p-3">
                     <span class="font-bold text-coverage">⇄</span>
                     <div>
-                        <strong>{{ $receipt['requester'] }}</strong> foi para o plantão do dia <strong>{{ $counterpartDate->format('d/m/Y') }}</strong>, das <strong>{{ $receipt['counterpart_start_time'] }} às {{ $receipt['counterpart_end_time'] }}</strong> ({{ $receipt['counterpart_sector'] }} · {{ $receipt['counterpart_category'] }}).
+                        <strong>{{ $receipt['requester'] }}</strong> foi para o plantão do dia <strong>{{ $counterpartDate->format('d/m/Y') }}</strong>, das <strong>{{ $receipt['counterpart_start_time'] }} às {{ $receipt['counterpart_end_time_label'] }}</strong> ({{ $receipt['counterpart_sector'] }} · {{ $receipt['counterpart_category'] }}).
                     </div>
                 </div>
                 <div class="flex items-start gap-2.5 rounded-lg border border-line bg-canvas p-3">
                     <span class="font-bold text-coverage">⇄</span>
                     <div>
-                        <strong>{{ $receipt['substitute'] }}</strong> foi para o plantão do dia <strong>{{ $shiftDate->format('d/m/Y') }}</strong>, das <strong>{{ $receipt['start_time'] }} às {{ $receipt['end_time'] }}</strong> ({{ $receipt['sector'] }} · {{ $receipt['category'] }}).
+                        <strong>{{ $receipt['substitute'] }}</strong> foi para o plantão do dia <strong>{{ $shiftDate->format('d/m/Y') }}</strong>, das <strong>{{ $receipt['start_time'] }} às {{ $receipt['end_time_label'] }}</strong> ({{ $receipt['sector'] }} · {{ $receipt['category'] }}).
                     </div>
                 </div>
             @else
                 <div class="flex items-start gap-2.5 rounded-lg border border-line bg-canvas p-3">
                     <span class="font-bold text-primary">→</span>
                     <div>
-                        <strong>{{ $receipt['substitute'] }}</strong> vai substituir <strong>{{ $receipt['requester'] }}</strong> no plantão do dia <strong>{{ $shiftDate->format('d/m/Y') }}</strong>, das <strong>{{ $receipt['start_time'] }} às {{ $receipt['end_time'] }}</strong> ({{ $receipt['sector'] }} · {{ $receipt['category'] }}).
+                        <strong>{{ $receipt['substitute'] }}</strong> vai substituir <strong>{{ $receipt['requester'] }}</strong> no plantão do dia <strong>{{ $shiftDate->format('d/m/Y') }}</strong>, das <strong>{{ $receipt['start_time'] }} às {{ $receipt['end_time_label'] }}</strong> ({{ $receipt['sector'] }} · {{ $receipt['category'] }}).
                     </div>
                 </div>
             @endif

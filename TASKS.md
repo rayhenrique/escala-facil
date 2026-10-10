@@ -1,5 +1,11 @@
 # TASKS - Plano de Execução Sequencial
 
+- [x] **Horários e duração dos plantões (1.22.0)**
+  - [x] Auditar cadastro, XLSX, calendário, dashboard, relatórios, trocas, cobertura e PDFs.
+  - [x] Acrescentar término explícito para 24h, preservando dados antigos e documentando ambiguidades institucionais.
+  - [x] Centralizar períodos, rótulos e duração; corrigir conflitos e dobras entre datas e meses.
+  - [x] Cobrir as fronteiras por testes, incluindo migration sem reescrita e ida/volta do XLSX.
+
 - [x] **Fase 1: Setup e Banco de Dados**
   - [x] Inicializar projeto Laravel e configurar `.env` para MySQL.
   - [x] Instalar Livewire e Tailwind CSS.

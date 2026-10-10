@@ -317,7 +317,7 @@ class MySchedule extends Component
                 '%s, das %s às %s',
                 $shift->date->format('d/m/Y'),
                 substr((string) $shift->start_time, 0, 5),
-                substr((string) $shift->end_time, 0, 5),
+                $shift->period()->endLabel().' · '.$shift->period()->durationLabel(),
             ),
             'location' => $shift->sector->name.' · '.$shift->category->name,
         ];

@@ -393,7 +393,7 @@ class MonthlyCalendar extends Component
             $professionals = [];
             if ($hasSectorFilter && $inMonth && $dayShifts->isNotEmpty()) {
                 foreach ($dayShifts as $shift) {
-                    $time = substr((string) $shift->start_time, 0, 5).'–'.substr((string) $shift->end_time, 0, 5);
+                    $time = $shift->time_label;
                     if ($shift->user) {
                         $professionals[] = [
                             'shift_id' => $shift->id,

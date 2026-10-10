@@ -47,6 +47,8 @@ class ShiftManager extends Component
 
     public string $endTime = '19:00';
 
+    public string $endDate = '';
+
     public string $sectorId = '';
 
     public string $categoryId = '';
@@ -160,6 +162,7 @@ class ShiftManager extends Component
         $this->date = $shift->date->format('Y-m-d');
         $this->startTime = substr((string) $shift->start_time, 0, 5);
         $this->endTime = substr((string) $shift->end_time, 0, 5);
+        $this->endDate = $shift->period()->end->format('Y-m-d');
         $this->sectorId = (string) $shift->sector_id;
         $this->categoryId = (string) $shift->category_id;
         $this->userId = $shift->user_id ? (string) $shift->user_id : '';
@@ -182,7 +185,7 @@ class ShiftManager extends Component
             '%s, das %s às %s · %s · %s',
             $shift->date->format('d/m/Y'),
             substr((string) $shift->start_time, 0, 5),
-            substr((string) $shift->end_time, 0, 5),
+            $shift->period()->endLabel().' · '.$shift->period()->durationLabel(),
             $shift->sector->name,
             $shift->category->name,
         );
@@ -327,6 +330,7 @@ class ShiftManager extends Component
         $this->date = today()->addDay()->format('Y-m-d');
         $this->startTime = '07:00';
         $this->endTime = '19:00';
+        $this->endDate = '';
         $this->status = ShiftStatus::Scheduled->value;
         $this->resetValidation();
         unset($this->professionals);
@@ -339,6 +343,7 @@ class ShiftManager extends Component
             'date' => $this->date,
             'start_time' => $this->startTime,
             'end_time' => $this->endTime,
+            'end_date' => $this->endDate !== '' ? $this->endDate : null,
             'sector_id' => $this->sectorId,
             'category_id' => $this->categoryId,
             'user_id' => $this->userId !== '' ? $this->userId : null,

@@ -26,21 +26,7 @@ class ShiftCoverage
      */
     public static function intervalsOnDate(Shift $shift, string $date): array
     {
-        $shiftDate = $shift->date->format('Y-m-d');
-        $start = self::toMinutes((string) $shift->start_time);
-        $end = self::toMinutes((string) $shift->end_time);
-
-        if ($shiftDate === $date) {
-            return $end > $start ? [[$start, $end]] : [[$start, self::DAY_MINUTES]];
-        }
-
-        $previous = CarbonImmutable::parse($date)->subDay()->format('Y-m-d');
-
-        if ($shiftDate === $previous && $end <= $start && $end > 0) {
-            return [[0, $end]];
-        }
-
-        return [];
+        return $shift->period()->intervalsOnDate($date);
     }
 
     /**
@@ -97,11 +83,12 @@ class ShiftCoverage
     {
         $date = $candidate->date->format('Y-m-d');
         $previous = CarbonImmutable::parse($date)->subDay()->format('Y-m-d');
+        $next = CarbonImmutable::parse($date)->addDay()->format('Y-m-d');
 
         $existing = Shift::query()
             ->where('user_id', $substitute->getKey())
             ->where('status', ShiftStatus::Scheduled)
-            ->where(fn ($query) => $query->whereDate('date', $date)->orWhereDate('date', $previous))
+            ->whereBetween('date', [$previous, $next.' 23:59:59'])
             ->where('id', '!=', $candidate->getKey())
             ->orderBy('date')
             ->orderBy('start_time')
@@ -115,8 +102,7 @@ class ShiftCoverage
      */
     public static function findDoubleShiftIn(Collection $shifts, int $substituteId, Shift $candidate): ?Shift
     {
-        $date = $candidate->date->format('Y-m-d');
-        $candidateIntervals = self::intervalsOnDate($candidate, $date);
+        $candidatePeriod = $candidate->period();
 
         foreach ($shifts as $shift) {
             if ($shift->user_id !== $substituteId
@@ -125,12 +111,8 @@ class ShiftCoverage
                 continue;
             }
 
-            foreach (self::intervalsOnDate($shift, $date) as [$start, $end]) {
-                foreach ($candidateIntervals as [$candidateStart, $candidateEnd]) {
-                    if ($start <= $candidateEnd && $candidateStart <= $end) {
-                        return $shift;
-                    }
-                }
+            if ($candidatePeriod->overlaps($shift->period(), includeAdjacent: true)) {
+                return $shift;
             }
         }
 
@@ -139,11 +121,6 @@ class ShiftCoverage
 
     public static function doubleShiftLabel(Shift $shift): string
     {
-        return sprintf(
-            '%s, das %s às %s',
-            $shift->date->format('d/m/Y'),
-            substr((string) $shift->start_time, 0, 5),
-            substr((string) $shift->end_time, 0, 5),
-        );
+        return $shift->period()->datedLabel();
     }
 }

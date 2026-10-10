@@ -1,9 +1,21 @@
 <?php
 
 return [
-    'current' => env('APP_VERSION', '1.21.1'),
+    'current' => env('APP_VERSION', '1.22.0'),
 
     'releases' => [
+        [
+            'version' => '1.22.0',
+            'date' => '2026-10-10',
+            'title' => 'Plantões de 24h e horários mais claros',
+            'summary' => 'Agora é possível informar a data de término dos plantões de 24h. As telas, planilhas e comprovantes mostram quando o plantão termina no dia seguinte e sua duração.',
+            'highlights' => [
+                'Plantões de 24h podem ser cadastrados com o mesmo horário de início e fim e término no dia seguinte.',
+                'Calendário, painel, relatórios, trocas e PDFs mostram a data de término e a duração do plantão.',
+                'Planilhas antigas continuam aceitas e os dados já cadastrados são preservados; 07:00 a 07:01 continua representando 1 minuto.',
+                'Verificação de conflitos e avisos de dobra corrigidos para plantões entre dias e meses.',
+            ],
+        ],
         [
             'version' => '1.21.1',
             'date' => '2026-10-10',

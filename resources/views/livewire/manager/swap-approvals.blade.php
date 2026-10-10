@@ -21,24 +21,24 @@
                             @endif
                             <span class="font-mono text-xs text-muted">Pedido #{{ $swap->id }}</span>
                         </div>
-                        <h2 class="mt-4 text-xl font-semibold">{{ $swap->shift->date->format('d/m/Y') }} · {{ substr($swap->shift->start_time, 0, 5) }}–{{ substr($swap->shift->end_time, 0, 5) }}</h2>
+                        <h2 class="mt-4 text-xl font-semibold">{{ $swap->shift->date->format('d/m/Y') }} · {{ $swap->shift->time_label }}</h2>
                         <p class="mt-2 text-sm text-muted">{{ $swap->shift->sector->name }} · {{ $swap->shift->category->name }}</p>
 
                         @if ($swap->substituteShift)
                             <div class="mt-3 rounded-lg border border-line bg-canvas p-3 text-xs leading-5">
                                 <p class="font-semibold text-primary">Troca mútua (permuta de plantões):</p>
                                 <p class="mt-1">
-                                    • <strong>{{ $swap->requester->name }}</strong> vai para o dia <strong>{{ $swap->substituteShift->date->format('d/m/Y') }}</strong>, das {{ substr($swap->substituteShift->start_time, 0, 5) }} às {{ substr($swap->substituteShift->end_time, 0, 5) }} ({{ $swap->substituteShift->sector->name }}).
+                                    • <strong>{{ $swap->requester->name }}</strong> vai para o dia <strong>{{ $swap->substituteShift->date->format('d/m/Y') }}</strong>, das {{ substr($swap->substituteShift->start_time, 0, 5) }} às {{ $swap->substituteShift->period()->endLabel() }} · {{ $swap->substituteShift->period()->durationLabel() }} ({{ $swap->substituteShift->sector->name }}).
                                 </p>
                                 <p>
-                                    • <strong>{{ $swap->substitute->name }}</strong> vai para o dia <strong>{{ $swap->shift->date->format('d/m/Y') }}</strong>, das {{ substr($swap->shift->start_time, 0, 5) }} às {{ substr($swap->shift->end_time, 0, 5) }} ({{ $swap->shift->sector->name }}).
+                                    • <strong>{{ $swap->substitute->name }}</strong> vai para o dia <strong>{{ $swap->shift->date->format('d/m/Y') }}</strong>, das {{ substr($swap->shift->start_time, 0, 5) }} às {{ $swap->shift->period()->endLabel() }} · {{ $swap->shift->period()->durationLabel() }} ({{ $swap->shift->sector->name }}).
                                 </p>
                             </div>
                         @else
                             <div class="mt-3 rounded-lg border border-line bg-canvas p-3 text-xs leading-5">
                                 <p class="font-semibold text-primary">Cobertura de plantão:</p>
                                 <p class="mt-1">
-                                    • <strong>{{ $swap->substitute->name }}</strong> vai substituir <strong>{{ $swap->requester->name }}</strong> no dia <strong>{{ $swap->shift->date->format('d/m/Y') }}</strong>, das {{ substr($swap->shift->start_time, 0, 5) }} às {{ substr($swap->shift->end_time, 0, 5) }}.
+                                    • <strong>{{ $swap->substitute->name }}</strong> vai substituir <strong>{{ $swap->requester->name }}</strong> no dia <strong>{{ $swap->shift->date->format('d/m/Y') }}</strong>, das {{ substr($swap->shift->start_time, 0, 5) }} às {{ $swap->shift->period()->endLabel() }} · {{ $swap->shift->period()->durationLabel() }}.
                                 </p>
                             </div>
                         @endif
@@ -80,9 +80,9 @@
                         <span class="font-mono text-xs text-muted">Pedido #{{ $swap->id }}</span>
                     </div>
                     <h3 class="mt-2 font-semibold">
-                        {{ $swap->shift->date->format('d/m/Y') }} · {{ substr($swap->shift->start_time, 0, 5) }}–{{ substr($swap->shift->end_time, 0, 5) }}
+                        {{ $swap->shift->date->format('d/m/Y') }} · {{ $swap->shift->time_label }}
                         @if ($swap->substituteShift)
-                            ⇄ {{ $swap->substituteShift->date->format('d/m/Y') }} · {{ substr($swap->substituteShift->start_time, 0, 5) }}–{{ substr($swap->substituteShift->end_time, 0, 5) }}
+                            ⇄ {{ $swap->substituteShift->date->format('d/m/Y') }} · {{ $swap->substituteShift->time_label }}
                         @endif
                     </h3>
                     <p class="mt-1 text-sm text-muted">

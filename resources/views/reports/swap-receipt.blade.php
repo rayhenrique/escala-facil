@@ -1,3 +1,6 @@
+@php
+    $receipt = \App\Support\ShiftSwapReceipt::withTimeLabels($receipt);
+@endphp
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -188,7 +191,7 @@
         <tr>
             <th>Plantão Original (Cedido)</th>
             <td>
-                <strong>{{ \Carbon\CarbonImmutable::parse($receipt['shift_date'])->format('d/m/Y') }}</strong>, das {{ $receipt['start_time'] }} às {{ $receipt['end_time'] }}<br>
+                <strong>{{ \Carbon\CarbonImmutable::parse($receipt['shift_date'])->format('d/m/Y') }}</strong>, das {{ $receipt['start_time'] }} às {{ $receipt['end_time_label'] }}<br>
                 <span>{{ $receipt['sector'] }} · {{ $receipt['category'] }}</span><br>
                 <small style="color: #005f56; font-weight: bold;">Plantonista solicitante: {{ $receipt['requester'] }}</small>
             </td>
@@ -197,7 +200,7 @@
             <tr>
                 <th>Plantão de Contrapartida</th>
                 <td>
-                    <strong>{{ \Carbon\CarbonImmutable::parse($receipt['counterpart_shift_date'])->format('d/m/Y') }}</strong>, das {{ $receipt['counterpart_start_time'] }} às {{ $receipt['counterpart_end_time'] }}<br>
+                    <strong>{{ \Carbon\CarbonImmutable::parse($receipt['counterpart_shift_date'])->format('d/m/Y') }}</strong>, das {{ $receipt['counterpart_start_time'] }} às {{ $receipt['counterpart_end_time_label'] }}<br>
                     <span>{{ $receipt['counterpart_sector'] }} · {{ $receipt['counterpart_category'] }}</span><br>
                     <small style="color: #005f56; font-weight: bold;">Plantonista substituto: {{ $receipt['substitute'] }}</small>
                 </td>
@@ -221,14 +224,14 @@
     <div class="movement-box">
         @if (! empty($receipt['has_counterpart']) && ! empty($receipt['counterpart_shift_date']))
             <div class="movement-item">
-                ⇄ <strong>{{ $receipt['requester'] }}</strong> assume o plantão do dia <strong>{{ \Carbon\CarbonImmutable::parse($receipt['counterpart_shift_date'])->format('d/m/Y') }}</strong>, das {{ $receipt['counterpart_start_time'] }} às {{ $receipt['counterpart_end_time'] }} ({{ $receipt['counterpart_sector'] }} · {{ $receipt['counterpart_category'] }}).
+                ⇄ <strong>{{ $receipt['requester'] }}</strong> assume o plantão do dia <strong>{{ \Carbon\CarbonImmutable::parse($receipt['counterpart_shift_date'])->format('d/m/Y') }}</strong>, das {{ $receipt['counterpart_start_time'] }} às {{ $receipt['counterpart_end_time_label'] }} ({{ $receipt['counterpart_sector'] }} · {{ $receipt['counterpart_category'] }}).
             </div>
             <div class="movement-item" style="margin-top: 6px;">
-                ⇄ <strong>{{ $receipt['substitute'] }}</strong> assume o plantão do dia <strong>{{ \Carbon\CarbonImmutable::parse($receipt['shift_date'])->format('d/m/Y') }}</strong>, das {{ $receipt['start_time'] }} às {{ $receipt['end_time'] }} ({{ $receipt['sector'] }} · {{ $receipt['category'] }}).
+                ⇄ <strong>{{ $receipt['substitute'] }}</strong> assume o plantão do dia <strong>{{ \Carbon\CarbonImmutable::parse($receipt['shift_date'])->format('d/m/Y') }}</strong>, das {{ $receipt['start_time'] }} às {{ $receipt['end_time_label'] }} ({{ $receipt['sector'] }} · {{ $receipt['category'] }}).
             </div>
         @else
             <div class="movement-item">
-                → <strong>{{ $receipt['substitute'] }}</strong> assume o plantão cedido por <strong>{{ $receipt['requester'] }}</strong> no dia <strong>{{ \Carbon\CarbonImmutable::parse($receipt['shift_date'])->format('d/m/Y') }}</strong>, das {{ $receipt['start_time'] }} às {{ $receipt['end_time'] }} ({{ $receipt['sector'] }} · {{ $receipt['category'] }}).
+                → <strong>{{ $receipt['substitute'] }}</strong> assume o plantão cedido por <strong>{{ $receipt['requester'] }}</strong> no dia <strong>{{ \Carbon\CarbonImmutable::parse($receipt['shift_date'])->format('d/m/Y') }}</strong>, das {{ $receipt['start_time'] }} às {{ $receipt['end_time_label'] }} ({{ $receipt['sector'] }} · {{ $receipt['category'] }}).
             </div>
         @endif
     </div>

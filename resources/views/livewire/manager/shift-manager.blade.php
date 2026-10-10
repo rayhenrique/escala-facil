@@ -49,9 +49,15 @@
                         @error('start_time') <p id="start-time-error" class="field-error">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label for="end-time" class="field-label">Fim</label>
+                        <label for="end-time" class="field-label">Horário de término</label>
                         <input wire:model="endTime" id="end-time" type="time" class="field-input" @error('end_time') aria-invalid="true" aria-describedby="end-time-error" @enderror>
                         @error('end_time') <p id="end-time-error" class="field-error">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label for="end-date" class="field-label">Data de término (opcional)</label>
+                        <input wire:model="endDate" id="end-date" type="date" class="field-input" aria-describedby="end-date-help{{ $errors->has('end_date') ? ' end-date-error' : '' }}" @error('end_date') aria-invalid="true" @enderror>
+                        <p id="end-date-help" class="mt-2 text-xs leading-5 text-muted">Para 24h, use o mesmo horário e a data do dia seguinte. Sem data, um horário final menor termina no dia seguinte; um horário maior termina no mesmo dia.</p>
+                        @error('end_date') <p id="end-date-error" class="field-error">{{ $message }}</p> @enderror
                     </div>
                     <div>
                         <label for="sector" class="field-label">Setor</label>
@@ -121,7 +127,7 @@
                 <tbody>
                     @forelse ($shifts as $shift)
                         <tr wire:key="shift-{{ $shift->id }}">
-                            <td><strong>{{ $shift->date->format('d/m/Y') }}</strong><span>{{ substr($shift->start_time, 0, 5) }}–{{ substr($shift->end_time, 0, 5) }}</span></td>
+                            <td><strong>{{ $shift->date->format('d/m/Y') }}</strong><span>{{ $shift->time_label }}</span></td>
                             <td><strong>{{ $shift->sector->name }}</strong><span>{{ $shift->category->name }}</span></td>
                             <td>{{ $shift->user?->name ?? 'Não alocado' }}</td>
                             <td><x-status-badge :status="$shift->status" /></td>
@@ -234,7 +240,7 @@
                                 >
                                 <span class="min-w-0 flex-1">
                                     <span class="flex flex-wrap items-center gap-2">
-                                        <strong class="text-sm">{{ $item['date_label'] }} · {{ $item['start_time'] }}–{{ $item['end_time'] }}</strong>
+                                        <strong class="text-sm">{{ $item['date_label'] }} · {{ $item['time_label'] }}</strong>
                                         @if ($item['status'] === 'valid')
                                             <span class="status-badge status-scheduled">Pronto</span>
                                         @elseif ($item['status'] === 'adjusted')

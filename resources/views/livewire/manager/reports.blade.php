@@ -377,7 +377,7 @@
                             <tr>
                                 <td>
                                     <strong>{{ $swap->shift->date->format('d/m/Y') }}</strong>
-                                    <span>{{ substr((string) $swap->shift->start_time, 0, 5) }}–{{ substr((string) $swap->shift->end_time, 0, 5) }} · {{ $swap->shift->sector->name }}</span>
+                                    <span>{{ $swap->shift->time_label }} · {{ $swap->shift->sector->name }}</span>
                                 </td>
                                 <td>
                                     <div class="font-medium text-ink">{{ $swap->requester->name }} → {{ $swap->substitute->name }}</div>
@@ -436,7 +436,7 @@
                             <tr>
                                 <td>
                                     <strong>{{ $absence->shift->date->format('d/m/Y') }}</strong>
-                                    <span>{{ substr((string) $absence->shift->start_time, 0, 5) }}–{{ substr((string) $absence->shift->end_time, 0, 5) }}</span>
+                                    <span>{{ $absence->shift->time_label }}</span>
                                 </td>
                                 <td><strong>{{ $absence->user->name }}</strong></td>
                                 <td>{{ $absence->shift->sector->name }} · {{ $absence->shift->category->name }}</td>
@@ -514,7 +514,7 @@
                                 @foreach ($dayShifts as $shift)
                                     <div class="rounded bg-white p-2 border border-line/80">
                                         <div class="flex items-center justify-between text-muted text-[0.6875rem]">
-                                            <span>{{ substr((string) $shift->start_time, 0, 5) }}–{{ substr((string) $shift->end_time, 0, 5) }}</span>
+                                            <span>{{ $shift->time_label }}</span>
                                             <span>{{ $shift->sector->name }}</span>
                                         </div>
                                         <div class="mt-1 font-semibold text-ink">

@@ -24,6 +24,8 @@ class ShiftSpreadsheetService
         'Setor',
         'Categoria',
         'E-mail do profissional (opcional)',
+        'Data de término (DD/MM/AAAA, opcional)',
+        'Duração (minutos, calculada)',
     ];
 
     public function templatePath(): string
@@ -84,6 +86,8 @@ class ShiftSpreadsheetService
                 $shift->sector->name,
                 $shift->category->name,
                 $shift->user?->email ?? '',
+                $shift->period()->end->format('d/m/Y'),
+                $shift->period()->durationMinutes,
             ]));
         }
 
@@ -104,16 +108,18 @@ class ShiftSpreadsheetService
         return $path;
     }
 
-    /** @return list<list<string>> */
+    /** @return list<list<string|int>> */
     private function exampleRows(): array
     {
         $date = today()->addMonth()->startOfMonth()->format('d/m/Y');
+        $nextDate = today()->addMonth()->startOfMonth()->addDay()->format('d/m/Y');
         $sector = Sector::query()->orderBy('name')->value('name') ?? 'Emergência';
         $category = Category::query()->orderBy('name')->value('name') ?? 'Médico Clínico';
 
         return [
-            [$date, '07:00', '19:00', $sector, $category, ''],
-            [$date, '19:00', '07:00', $sector, $category, 'profissional@exemplo.com'],
+            [$date, '07:00', '19:00', $sector, $category, '', $date, 720],
+            [$date, '19:00', '07:00', $sector, $category, 'profissional@exemplo.com', $nextDate, 720],
+            [$date, '07:00', '07:00', $sector, $category, '', $nextDate, 1440],
         ];
     }
 

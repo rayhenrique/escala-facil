@@ -31,10 +31,10 @@
                 @foreach ($incomingSwaps as $swap)
                     <article class="panel" wire:key="incoming-swap-{{ $swap->id }}">
                         <x-status-badge :status="$swap->status" label="Aguardando você" />
-                        <h3 class="mt-4 text-lg font-semibold">{{ $swap->shift->date->format('d/m/Y') }} · {{ substr($swap->shift->start_time, 0, 5) }}–{{ substr($swap->shift->end_time, 0, 5) }}</h3>
+                        <h3 class="mt-4 text-lg font-semibold">{{ $swap->shift->date->format('d/m/Y') }} · {{ $swap->shift->time_label }}</h3>
                         <p class="mt-2 text-sm text-muted">{{ $swap->shift->sector->name }} · {{ $swap->shift->category->name }}</p>
                         @if ($swap->substituteShift)
-                            <p class="mt-2 text-xs font-semibold text-coverage">Contrapartida: você cederá seu plantão de {{ $swap->substituteShift->date->format('d/m/Y') }} ({{ substr($swap->substituteShift->start_time, 0, 5) }}–{{ substr($swap->substituteShift->end_time, 0, 5) }}).</p>
+                            <p class="mt-2 text-xs font-semibold text-coverage">Contrapartida: você cederá seu plantão de {{ $swap->substituteShift->date->format('d/m/Y') }} ({{ $swap->substituteShift->time_label }}).</p>
                         @endif
                         <p class="mt-4 text-sm"><span class="text-muted">Solicitado por</span> <strong>{{ $swap->requester->name }}</strong></p>
                         <button type="button" wire:click="requestAcceptSwap({{ $swap->id }})" wire:loading.attr="disabled" class="button-primary mt-5 inline-flex w-full sm:w-auto" @disabled($swapLimitReached)>{{ $swapLimitReached ? 'Cota mensal atingida' : 'Aceitar e enviar à gerência' }}</button>
@@ -62,7 +62,7 @@
                         <select wire:model="substituteShiftId" id="substitute-shift" class="field-input" @error('substitute_shift_id') aria-invalid="true" aria-describedby="substitute-shift-error" @enderror>
                             <option value="">Apenas cobertura (sem plantão de volta)</option>
                             @foreach ($this->eligibleSubstituteShifts as $s)
-                                <option value="{{ $s->id }}">{{ $s->date->format('d/m/Y') }} · {{ substr($s->start_time, 0, 5) }}–{{ substr($s->end_time, 0, 5) }} ({{ $s->sector->name }})</option>
+                                <option value="{{ $s->id }}">{{ $s->date->format('d/m/Y') }} · {{ $s->time_label }} ({{ $s->sector->name }})</option>
                             @endforeach
                         </select>
                         <p class="mt-1 text-xs text-muted">Selecione para realizar uma troca mútua de dias com o colega.</p>
@@ -152,7 +152,7 @@
                                 <x-status-badge status="pending_professional" label="Troca em andamento" />
                             @endif
                         </div>
-                        <h3 class="mt-3 text-lg font-semibold">{{ substr($shift->start_time, 0, 5) }}–{{ substr($shift->end_time, 0, 5) }}</h3>
+                        <h3 class="mt-3 text-lg font-semibold">{{ $shift->time_label }}</h3>
                         <p class="mt-1 text-sm text-muted">{{ $shift->sector->name }} · {{ $shift->category->name }}</p>
                         @if ($shift->date->isAfter(today()) && $shift->status === \App\Enums\ShiftStatus::Scheduled)
                             <div class="mt-5 flex flex-wrap gap-2">

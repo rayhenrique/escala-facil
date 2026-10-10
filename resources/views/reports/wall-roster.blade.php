@@ -30,7 +30,7 @@
             <tbody>
                 @foreach ($shifts as $shift)
                     <tr>
-                        <td>{{ substr((string) $shift->start_time, 0, 5) }}–{{ substr((string) $shift->end_time, 0, 5) }}</td>
+                        <td>{{ $shift->time_label }}</td>
                         <td>{{ $shift->user?->name ?? 'Sem profissional' }}</td>
                         <td>{{ $shift->sector->name }}</td>
                         <td>{{ $shift->category->name }}</td>

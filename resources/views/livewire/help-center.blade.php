@@ -147,7 +147,8 @@
                     <ol>
                         <li>Abra <strong>Escalas</strong>, escolha o mês e selecione <strong>Adicionar plantão</strong>.</li>
                         <li>Informe uma data atual ou futura.</li>
-                        <li>Defina o horário inicial e o final; o encerramento deve ser posterior ao início.</li>
+                        <li>Defina o horário inicial e o final. Para 24h, use horários iguais e informe a data de término no dia seguinte.</li>
+                        <li>Sem data de término, um horário final menor que o inicial termina no dia seguinte. 07:00–07:01 no mesmo dia representa 1 minuto.</li>
                         <li>Selecione setor e categoria.</li>
                         <li>Escolha um profissional elegível ou deixe sem profissional para registrar um plantão descoberto.</li>
                         <li>Salve e confira a mensagem de sucesso.</li>
@@ -162,6 +163,7 @@
                     <ol>
                         <li>Baixe o <strong>Modelo XLSX</strong> em Escalas: ele já traz os setores e categorias cadastrados para referência.</li>
                         <li>Preencha data (DD/MM/AAAA), início e fim (HH:MM), setor e categoria com os nomes exatos do modelo, e o e-mail do profissional quando houver alocação.</li>
+                        <li>O modelo inclui data de término e duração em minutos. Para 24h, informe a data do dia seguinte e os mesmos horários. Se alterar datas ou horários, atualize a duração calculada ou deixe essa coluna vazia. Arquivos antigos de seis colunas continuam aceitos.</li>
                         <li>Use <strong>Exportar</strong> para baixar os plantões do mês exibido e aproveitá-los como base de edição.</li>
                         <li>Envie o arquivo em <strong>Importar</strong>: linhas duplicadas são ignoradas, e qualquer erro em uma linha cancela toda a importação com o motivo indicado.</li>
                     </ol>

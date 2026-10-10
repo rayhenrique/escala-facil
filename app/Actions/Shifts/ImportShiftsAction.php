@@ -10,6 +10,7 @@ use App\Models\Sector;
 use App\Models\Shift;
 use App\Models\User;
 use App\Services\ShiftSpreadsheetService;
+use App\Support\ShiftPeriod;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Illuminate\Support\Collection;
@@ -134,7 +135,7 @@ class ImportShiftsAction
         $normalized = array_map(fn ($cell): string => $this->normalizeText($this->cellToString($cell)), $header);
         $expected = array_map(fn ($cell): string => $this->normalizeText($cell), ShiftSpreadsheetService::HEADERS);
 
-        if ($normalized !== $expected) {
+        if (! in_array($normalized, [$expected, array_slice($expected, 0, 7), array_slice($expected, 0, 6)], true)) {
             throw ValidationException::withMessages([
                 'arquivo' => ['O cabeçalho não segue o modelo padrão. Baixe o modelo em Gestão de escalas e tente novamente.'],
             ]);
@@ -170,6 +171,19 @@ class ImportShiftsAction
             return "Linha {$line}: informe o fim no formato HH:MM (24 horas).";
         }
 
+        $endDate = null;
+        if (trim($this->cellToString($row[6] ?? null)) !== '') {
+            $endDate = $this->parseDate($row[6]);
+            if ($endDate === null) {
+                return "Linha {$line}: informe a data de término no formato DD/MM/AAAA.";
+            }
+        }
+        $period = new ShiftPeriod($date, $start, $end, $endDate);
+        $duration = trim($this->cellToString($row[7] ?? null));
+        if ($duration !== '' && (! ctype_digit($duration) || (int) $duration !== $period->durationMinutes)) {
+            return "Linha {$line}: a duração deve corresponder às datas e aos horários informados ({$period->durationMinutes} minutos).";
+        }
+
         $sectorId = $sectors[$this->normalizeText($sectorRaw)] ?? null;
 
         if ($sectorId === null) {
@@ -201,13 +215,14 @@ class ImportShiftsAction
             'date' => $date,
             'start_time' => $start,
             'end_time' => $end,
+            'end_date' => $endDate,
             'sector_id' => $sectorId,
             'category_id' => $categoryId,
             'user_id' => $userId,
             'status' => ShiftStatus::Scheduled->value,
         ];
 
-        $signature = implode('|', [$date, $start, $end, $sectorId, $categoryId, $userId ?? '']);
+        $signature = implode('|', [$date, $start, $period->end->format('Y-m-d H:i'), $sectorId, $categoryId, $userId ?? '']);
 
         return [$payload, $signature];
     }
@@ -215,16 +230,18 @@ class ImportShiftsAction
     /** @param array<string, mixed> $payload */
     private function duplicateExists(array $payload): bool
     {
+        $period = new ShiftPeriod($payload['date'], $payload['start_time'], $payload['end_time'], $payload['end_date']);
+
         return Shift::query()
             ->whereDate('date', $payload['date'])
-            ->where('start_time', $payload['start_time'])
-            ->where('end_time', $payload['end_time'])
             ->where('sector_id', $payload['sector_id'])
             ->where('category_id', $payload['category_id'])
             ->when($payload['user_id'] === null,
                 fn ($query) => $query->whereNull('user_id'),
                 fn ($query) => $query->where('user_id', $payload['user_id']))
-            ->exists();
+            ->get()
+            ->contains(fn (Shift $shift): bool => $shift->period()->start->equalTo($period->start)
+                && $shift->period()->end->equalTo($period->end));
     }
 
     /**

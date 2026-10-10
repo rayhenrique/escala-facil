@@ -156,7 +156,7 @@ Crie um banco MySQL chamado `escala_facil` e ajuste o `.env`:
 APP_NAME="Escala Fácil"
 APP_URL=http://127.0.0.1:8000
 APP_TIMEZONE=America/Maceio
-APP_VERSION=1.21.1
+APP_VERSION=1.22.0
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR
 APP_FAKER_LOCALE=pt_BR
@@ -413,6 +413,7 @@ movimento reduzido e falhas/desativação de JavaScript, sem alterar dados.
 - [`PRD.md`](PRD.md): visão do produto, perfis e regras de negócio;
 - [`MVP-SCOPE.md`](MVP-SCOPE.md): escopo do MVP e funcionalidades futuras;
 - [`DATABASE-SCHEMA.md`](DATABASE-SCHEMA.md): tabelas, tipos e relacionamentos;
+- [`docs/shift-timing.md`](docs/shift-timing.md): horários, plantões de 24h, compatibilidade e resultado da auditoria;
 - [`TASKS.md`](TASKS.md): roteiro sequencial de implementação;
 - [`DESIGN.md`](DESIGN.md): identidade visual e regras da interface;
 - [`UX-CONTRACT.md`](UX-CONTRACT.md): navegação, estados, feedback e responsividade;

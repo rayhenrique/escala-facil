@@ -5,11 +5,21 @@ namespace App\Http\Requests;
 use App\Enums\ShiftStatus;
 use App\Enums\UserRole;
 use App\Models\User;
+use App\Support\ShiftPeriod;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
 class SaveShiftRequest extends DataFormRequest
 {
+    public function validatePayload(array $payload, ?User $user = null): array
+    {
+        $validated = parent::validatePayload($payload, $user);
+        $period = new ShiftPeriod($validated['date'], $validated['start_time'], $validated['end_time'], $validated['end_date'] ?? null);
+        $validated['end_date'] = $period->end->format('Y-m-d');
+
+        return $validated;
+    }
+
     public function authorize(): bool
     {
         return true;
@@ -21,7 +31,8 @@ class SaveShiftRequest extends DataFormRequest
         return [
             'date' => ['required', 'date_format:Y-m-d', 'after_or_equal:today'],
             'start_time' => ['required', 'date_format:H:i'],
-            'end_time' => ['required', 'date_format:H:i', 'different:start_time'],
+            'end_time' => ['required', 'date_format:H:i'],
+            'end_date' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:date'],
             'sector_id' => ['required', 'integer', 'exists:sectors,id'],
             'category_id' => ['required', 'integer', 'exists:categories,id'],
             'user_id' => ['nullable', 'integer', 'exists:users,id'],
@@ -33,6 +44,22 @@ class SaveShiftRequest extends DataFormRequest
     public function after(): array
     {
         return [
+            function (Validator $validator): void {
+                if ($validator->errors()->hasAny(['date', 'start_time', 'end_time', 'end_date'])) {
+                    return;
+                }
+
+                if (! $this->filled('end_date') && $this->input('start_time') === $this->input('end_time')) {
+                    $validator->errors()->add('end_time', 'Para um plantão de 24h, informe a data de término no dia seguinte.');
+
+                    return;
+                }
+
+                $period = new ShiftPeriod($this->input('date'), $this->input('start_time'), $this->input('end_time'), $this->filled('end_date') ? $this->input('end_date') : null);
+                if ($period->durationMinutes < 1 || $period->durationMinutes > 1440) {
+                    $validator->errors()->add('end_date', 'Informe um término após o início. Este cadastro representa plantões de 1 minuto até 24h.');
+                }
+            },
             function (Validator $validator): void {
                 if (! $this->filled('user_id')) {
                     return;
@@ -61,7 +88,6 @@ class SaveShiftRequest extends DataFormRequest
     {
         return [
             'date.after_or_equal' => 'A data do plantão não pode estar no passado.',
-            'end_time.different' => 'O horário final deve ser diferente do horário inicial.',
         ];
     }
 
@@ -72,6 +98,7 @@ class SaveShiftRequest extends DataFormRequest
             'date' => 'data',
             'start_time' => 'horário inicial',
             'end_time' => 'horário final',
+            'end_date' => 'data de término',
             'sector_id' => 'setor',
             'category_id' => 'categoria',
             'user_id' => 'profissional',

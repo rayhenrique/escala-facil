@@ -6,6 +6,15 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.22.0 — 10/10/2026
+
+### Plantões de 24h e horários mais claros
+
+- Plantões de 24h podem ser cadastrados com o mesmo horário de início e fim e término no dia seguinte.
+- Calendário, painel, relatórios, trocas e PDFs mostram a data de término e a duração do plantão.
+- Planilhas antigas continuam aceitas e os dados já cadastrados são preservados; 07:00 a 07:01 continua representando 1 minuto.
+- Verificação de conflitos e avisos de dobra corrigidos para plantões entre dias e meses.
+
 ## 1.21.1 — 10/10/2026
 
 ### Seções da página aparecem corretamente

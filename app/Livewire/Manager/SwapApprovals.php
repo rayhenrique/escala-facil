@@ -73,7 +73,7 @@ class SwapApprovals extends Component
                 '%s, das %s às %s',
                 $shiftSwap->shift->date->format('d/m/Y'),
                 substr((string) $shiftSwap->shift->start_time, 0, 5),
-                substr((string) $shiftSwap->shift->end_time, 0, 5),
+                $shiftSwap->shift->period()->endLabel().' · '.$shiftSwap->shift->period()->durationLabel(),
             ),
             'location' => $shiftSwap->shift->sector->name.' · '.$shiftSwap->shift->category->name,
             'requester' => $shiftSwap->requester->name,
@@ -82,7 +82,7 @@ class SwapApprovals extends Component
                 '%s, das %s às %s',
                 $shiftSwap->substituteShift->date->format('d/m/Y'),
                 substr((string) $shiftSwap->substituteShift->start_time, 0, 5),
-                substr((string) $shiftSwap->substituteShift->end_time, 0, 5),
+                $shiftSwap->substituteShift->period()->endLabel().' · '.$shiftSwap->substituteShift->period()->durationLabel(),
             ) : null,
             'counterpart_location' => $shiftSwap->substituteShift ? $shiftSwap->substituteShift->sector->name.' · '.$shiftSwap->substituteShift->category->name : null,
         ];
@@ -145,7 +145,7 @@ class SwapApprovals extends Component
                 '%s, das %s às %s',
                 $shiftSwap->shift->date->format('d/m/Y'),
                 substr((string) $shiftSwap->shift->start_time, 0, 5),
-                substr((string) $shiftSwap->shift->end_time, 0, 5),
+                $shiftSwap->shift->period()->endLabel().' · '.$shiftSwap->shift->period()->durationLabel(),
             ),
             'location' => $shiftSwap->shift->sector->name.' · '.$shiftSwap->shift->category->name,
             'requester' => $shiftSwap->requester->name,
@@ -154,7 +154,7 @@ class SwapApprovals extends Component
                 '%s, das %s às %s',
                 $shiftSwap->substituteShift->date->format('d/m/Y'),
                 substr((string) $shiftSwap->substituteShift->start_time, 0, 5),
-                substr((string) $shiftSwap->substituteShift->end_time, 0, 5),
+                $shiftSwap->substituteShift->period()->endLabel().' · '.$shiftSwap->substituteShift->period()->durationLabel(),
             ) : null,
         ];
     }
@@ -229,6 +229,7 @@ class SwapApprovals extends Component
             ->map(fn (ShiftSwap $swap): array => [
                 $swap->shift->date->format('Y-m-d'),
                 $swap->shift->date->subDay()->format('Y-m-d'),
+                $swap->shift->date->addDay()->format('Y-m-d'),
             ])
             ->flatten()
             ->unique()

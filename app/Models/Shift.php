@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ShiftStatus;
+use App\Support\ShiftPeriod;
 use Database\Factories\ShiftFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -18,6 +19,7 @@ class Shift extends Model
         'date',
         'start_time',
         'end_time',
+        'end_date',
         'sector_id',
         'category_id',
         'user_id',
@@ -29,11 +31,22 @@ class Shift extends Model
         return [
             'id' => 'integer',
             'date' => 'immutable_date',
+            'end_date' => 'immutable_date',
             'sector_id' => 'integer',
             'category_id' => 'integer',
             'user_id' => 'integer',
             'status' => ShiftStatus::class,
         ];
+    }
+
+    public function period(): ShiftPeriod
+    {
+        return new ShiftPeriod($this->date->format('Y-m-d'), (string) $this->start_time, (string) $this->end_time, $this->end_date?->format('Y-m-d'));
+    }
+
+    public function getTimeLabelAttribute(): string
+    {
+        return $this->period()->timeLabel();
     }
 
     public function sector(): BelongsTo

@@ -6,6 +6,7 @@ use App\Enums\ShiftStatus;
 use App\Enums\UserRole;
 use App\Models\Shift;
 use App\Models\User;
+use App\Support\ShiftPeriod;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -49,8 +50,7 @@ class DuplicateMonthAction
 
         $existing = Shift::query()
             ->with('user')
-            ->whereYear('date', $targetYear)
-            ->whereMonth('date', $targetMonthNumber)
+            ->whereBetween('date', $this->destinationWindow($targetYear, $targetMonthNumber))
             ->get();
 
         $items = $this->buildItems($sourceShifts, $existing, $targetYear, $targetMonthNumber, $mode);
@@ -85,8 +85,7 @@ class DuplicateMonthAction
 
             $existing = Shift::query()
                 ->with('user')
-                ->whereYear('date', $targetYear)
-                ->whereMonth('date', $targetMonthNumber)
+                ->whereBetween('date', $this->destinationWindow($targetYear, $targetMonthNumber))
                 ->lockForUpdate()
                 ->get();
 
@@ -114,6 +113,7 @@ class DuplicateMonthAction
                     'date' => $item['date'],
                     'start_time' => $item['start_time'],
                     'end_time' => $item['end_time'],
+                    'end_date' => $item['end_date'],
                     'sector_id' => $item['sector_id'],
                     'category_id' => $item['category_id'],
                     'user_id' => $item['user_id'],
@@ -161,6 +161,10 @@ class DuplicateMonthAction
             $targetDate = $this->mapDate($shift->date->format('Y-m-d'), $targetYear, $targetMonth, $mode);
             $start = substr((string) $shift->start_time, 0, 5);
             $end = substr((string) $shift->end_time, 0, 5);
+            $endDate = $targetDate && $shift->end_date
+                ? CarbonImmutable::parse($targetDate)->addDays((int) $shift->date->diffInDays($shift->end_date))->format('Y-m-d')
+                : null;
+            $period = new ShiftPeriod($targetDate ?? $shift->date->format('Y-m-d'), $start, $end, $endDate);
 
             $item = [
                 'source_id' => $shift->id,
@@ -168,6 +172,8 @@ class DuplicateMonthAction
                 'date_label' => $targetDate ? CarbonImmutable::parse($targetDate)->format('d/m/Y') : '—',
                 'start_time' => $start,
                 'end_time' => $end,
+                'end_date' => $endDate,
+                'time_label' => $period->timeLabel(),
                 'sector_id' => $shift->sector_id,
                 'category_id' => $shift->category_id,
                 'user_id' => $shift->user_id,
@@ -187,7 +193,7 @@ class DuplicateMonthAction
             }
 
             if ($item['status'] !== 'blocked') {
-                $signature = implode('|', [$targetDate, $start, $end, $shift->sector_id, $shift->category_id, $shift->user_id ?? '']);
+                $signature = implode('|', [$targetDate, $start, $period->end->format('Y-m-d H:i'), $shift->sector_id, $shift->category_id, $shift->user_id ?? '']);
 
                 if ($this->signatureExists($existing, $signature) || isset($acceptedSignatures[$signature])) {
                     $item = $this->block($item, 'Plantão idêntico já existe no destino; nada será sobrescrito.');
@@ -203,7 +209,7 @@ class DuplicateMonthAction
                     $item = $this->block($item, 'O responsável original não possui mais perfil profissional.');
                 } elseif ($professional->category_id !== $shift->category_id || $professional->sector_id !== $shift->sector_id) {
                     $item = $this->block($item, 'Profissional incompatível com o setor ou a categoria atuais.');
-                } elseif ($this->hasTimeConflict($existing, $acceptedSlots, $shift->user_id, $targetDate, $start, $end)) {
+                } elseif ($this->hasTimeConflict($existing, $acceptedSlots, $shift->user_id, $targetDate, $start, $end, $endDate)) {
                     $item = $this->block($item, 'Conflito de horário com outro plantão do profissional nesta data.');
                 }
             }
@@ -216,8 +222,8 @@ class DuplicateMonthAction
             }
 
             if ($item['status'] !== 'blocked') {
-                $acceptedSignatures[implode('|', [$targetDate, $start, $end, $shift->sector_id, $shift->category_id, $shift->user_id ?? ''])] = true;
-                $acceptedSlots[] = ['user_id' => $shift->user_id, 'date' => $targetDate, 'start' => $start, 'end' => $end];
+                $acceptedSignatures[implode('|', [$targetDate, $start, $period->end->format('Y-m-d H:i'), $shift->sector_id, $shift->category_id, $shift->user_id ?? ''])] = true;
+                $acceptedSlots[] = ['user_id' => $shift->user_id, 'date' => $targetDate, 'start' => $start, 'end' => $end, 'end_date' => $endDate];
             }
 
             $items[] = $item;
@@ -243,7 +249,7 @@ class DuplicateMonthAction
             $candidate = implode('|', [
                 $shift->date instanceof \DateTimeInterface ? $shift->date->format('Y-m-d') : (string) $shift->date,
                 substr((string) $shift->start_time, 0, 5),
-                substr((string) $shift->end_time, 0, 5),
+                $shift->period()->end->format('Y-m-d H:i'),
                 $shift->sector_id,
                 $shift->category_id,
                 $shift->user_id ?? '',
@@ -259,45 +265,28 @@ class DuplicateMonthAction
 
     /**
      * @param  Collection<int, Shift>  $shifts
-     * @param  list<array{user_id: int|null, date: string|null, start: string, end: string}>  $batchSlots
+     * @param  list<array{user_id: int|null, date: string|null, start: string, end: string, end_date: string|null}>  $batchSlots
      */
-    private function hasTimeConflict(Collection $shifts, array $batchSlots, int $userId, ?string $date, string $start, string $end): bool
+    private function hasTimeConflict(Collection $shifts, array $batchSlots, int $userId, ?string $date, string $start, string $end, ?string $endDate): bool
     {
         if ($date === null) {
             return false;
         }
 
-        [$candidateStart, $candidateEnd] = $this->interval($start, $end);
+        $candidate = new ShiftPeriod($date, $start, $end, $endDate);
 
         foreach ($shifts as $shift) {
-            if ($shift->user_id !== $userId) {
-                continue;
-            }
-
-            $shiftDate = $shift->date instanceof \DateTimeInterface ? $shift->date->format('Y-m-d') : (string) $shift->date;
-
-            if ($shiftDate !== $date) {
-                continue;
-            }
-
-            [$otherStart, $otherEnd] = $this->interval(
-                substr((string) $shift->start_time, 0, 5),
-                substr((string) $shift->end_time, 0, 5)
-            );
-
-            if ($candidateStart < $otherEnd && $otherStart < $candidateEnd) {
+            if ($shift->user_id === $userId && $candidate->overlaps($shift->period())) {
                 return true;
             }
         }
 
         foreach ($batchSlots as $slot) {
-            if ($slot['user_id'] !== $userId || $slot['date'] !== $date) {
+            if ($slot['user_id'] !== $userId) {
                 continue;
             }
-
-            [$otherStart, $otherEnd] = $this->interval($slot['start'], $slot['end']);
-
-            if ($candidateStart < $otherEnd && $otherStart < $candidateEnd) {
+            $other = new ShiftPeriod($slot['date'], $slot['start'], $slot['end'], $slot['end_date']);
+            if ($candidate->overlaps($other)) {
                 return true;
             }
         }
@@ -305,20 +294,12 @@ class DuplicateMonthAction
         return false;
     }
 
-    /** @return array{int, int} */
-    private function interval(string $start, string $end): array
+    /** Dias vizinhos podem conter o início ou término de um plantão noturno. */
+    private function destinationWindow(int $year, int $month): array
     {
-        [$startHour, $startMinute] = array_map('intval', explode(':', $start));
-        [$endHour, $endMinute] = array_map('intval', explode(':', $end));
+        $start = CarbonImmutable::createFromFormat('!Y-m-d', sprintf('%04d-%02d-01', $year, $month));
 
-        $from = $startHour * 60 + $startMinute;
-        $to = $endHour * 60 + $endMinute;
-
-        if ($to <= $from) {
-            $to += 24 * 60;
-        }
-
-        return [$from, $to];
+        return [$start->subDay()->format('Y-m-d'), $start->endOfMonth()->addDay()->format('Y-m-d').' 23:59:59'];
     }
 
     private function mapDate(string $sourceDate, int $targetYear, int $targetMonth, string $mode): ?string

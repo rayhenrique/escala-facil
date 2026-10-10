@@ -199,7 +199,7 @@
                                 </div>
                             @endif
                         </div>
-                        <p class="mt-2 text-sm font-semibold text-primary">{{ substr($shift->start_time, 0, 5) }}–{{ substr($shift->end_time, 0, 5) }}</p>
+                        <p class="mt-2 text-sm font-semibold text-primary">{{ $shift->time_label }}</p>
                         <p class="mt-1 text-sm text-muted">{{ $shift->sector->name }} · {{ $shift->category->name }}</p>
                     </div>
                     @if ($canManageShifts)
