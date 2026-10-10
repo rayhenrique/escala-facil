@@ -6,6 +6,15 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.17.0 — 10/10/2026
+
+### Integração contínua no GitHub Actions
+
+- Novo workflow .github/workflows/ci.yml executado em push e pull request, sem deploy automático.
+- Validações encadeadas: composer validate --strict, composer audit --locked, php artisan test, vendor/bin/pint --test, npm ci e npm run build.
+- Matriz de banco SQLite + MySQL 8.0 com PHP 8.5 e Node 24, cache seguro de dependências e .env.testing sem credenciais reais.
+- Documentação da proteção da branch main exigindo CI aprovado.
+
 ## 1.16.4 — 10/10/2026
 
 ### Versionamento centralizado com release:prepare

@@ -156,7 +156,7 @@ Crie um banco MySQL chamado `escala_facil` e ajuste o `.env`:
 APP_NAME="Escala Fácil"
 APP_URL=http://127.0.0.1:8000
 APP_TIMEZONE=America/Maceio
-APP_VERSION=1.16.4
+APP_VERSION=1.17.0
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR
 APP_FAKER_LOCALE=pt_BR
@@ -263,7 +263,7 @@ Antes de iniciar uma alteração, sincronize a branch principal:
 git pull --rebase origin main
 ```
 
-Mudanças significativas devem atualizar `config/version.php`, `.env.example`, `versoes.md` e as notas exibidas no sistema. Depois das validações:
+Mudanças significativas devem ser versionadas com `php artisan release:prepare` (que atualiza `config/version.php`, `.env.example`, `versoes.md` e as notas exibidas no sistema). Depois das validações:
 
 ```powershell
 git add .
@@ -280,6 +280,31 @@ bash scripts/deploy-production.sh
 ```
 
 O script valida a situação do Git antes de colocar o sistema em manutenção, aceita somente atualização por fast-forward e testa a página de login após a publicação.
+
+## Integração contínua (CI)
+
+O workflow [`ci.yml`](.github/workflows/ci.yml) executa em todo `push` e `pull request`, sem nenhuma etapa de deploy:
+
+- `composer validate --strict` e `composer audit --locked`;
+- `php artisan test` na matriz `sqlite` + `mysql` (serviço `mysql:8.0`, banco `escala_facil_testing`, InnoDB);
+- `vendor/bin/pint --test`;
+- `npm ci` e `npm run build`.
+
+Versões fixadas: PHP `8.5` (mesma do deploy e do ambiente validado), Node.js `24` e MySQL `8.0`. Dependências usam cache do `setup-php` (Composer) e do `setup-node` (npm). Os testes usam exclusivamente o [`.env.testing`](.env.testing) e a configuração do [`phpunit.xml`](phpunit.xml) — sem credenciais reais; o job MySQL sobrescreve apenas variáveis de ambiente do passo, com senha fictícia local ao serviço.
+
+### Proteção da branch `main`
+
+Para exigir o CI aprovado antes de qualquer merge na `main`:
+
+1. abra o repositório no GitHub em **Settings → Branches → Add classic branch protection rule**;
+2. em **Branch name pattern**, informe `main`;
+3. marque **Require a pull request before merging** (recomendado: exigir ao menos 1 aprovação);
+4. marque **Require status checks before merging** e selecione o check do workflow **CI** (aguarde a primeira execução para o nome aparecer na lista);
+5. marque **Require branches to be up to date before merging**;
+6. opcional, marque **Do not allow bypassing the above settings** para administradores;
+7. clique em **Create** (ou **Save changes**).
+
+A partir disso, pushes diretos e merges com CI vermelho ou pendente são bloqueados; o deploy continua manual via `scripts/deploy-production.sh`.
 
 ## Licença e propriedade intelectual
 

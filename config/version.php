@@ -1,9 +1,21 @@
 <?php
 
 return [
-    'current' => env('APP_VERSION', '1.16.4'),
+    'current' => env('APP_VERSION', '1.17.0'),
 
     'releases' => [
+        [
+            'version' => '1.17.0',
+            'date' => '2026-10-10',
+            'title' => 'Integração contínua no GitHub Actions',
+            'summary' => 'Workflow de CI com validações PHP e JS, suíte de testes em SQLite e MySQL, verificação de estilo e build, além de proteção documentada da branch main.',
+            'highlights' => [
+                'Novo workflow .github/workflows/ci.yml executado em push e pull request, sem deploy automático.',
+                'Validações encadeadas: composer validate --strict, composer audit --locked, php artisan test, vendor/bin/pint --test, npm ci e npm run build.',
+                'Matriz de banco SQLite + MySQL 8.0 com PHP 8.5 e Node 24, cache seguro de dependências e .env.testing sem credenciais reais.',
+                'Documentação da proteção da branch main exigindo CI aprovado.',
+            ],
+        ],
         [
             'version' => '1.16.4',
             'date' => '2026-10-10',
