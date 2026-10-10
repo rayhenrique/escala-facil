@@ -77,7 +77,7 @@ const showDeviceNotification = async (unreadCount) => {
         icon: '/icons/pwa-192x192.png',
         badge: '/icons/pwa-192x192.png',
         tag: 'escala-facil-notif',
-        data: { url: '/notificacoes' },
+        data: { url: '/notifications' },
     };
 
     try {

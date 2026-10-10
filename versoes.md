@@ -6,6 +6,15 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.16.2 — 10/10/2026
+
+### Correção dos links de notificações PWA
+
+- **Destino das notificações do dispositivo corrigido:** O aviso criado em `resources/js/app.js` agora aponta para `/notifications` em vez da rota inexistente `/notificacoes`.
+- **Clique na notificação abre a página correta:** O `public/sw.js` normaliza o destino para URL absoluta, reaproveita a janela aberta ou abre uma nova, funcionando inclusive com o PWA instalado.
+- **Atualização garantida em instalações existentes:** Cache do service worker atualizado para `escala-facil-static-v1.16.2`.
+- **Regressão coberta por testes:** Nova suíte valida rota, Central de Notificações, `target_url` dos payloads, bundle JS, service worker e atalho do manifesto, preservando badge e notificações.
+
 ## 1.16.1 — 03/10/2026
 
 ### Sincronização em tempo real de notificações de troca e comprovantes

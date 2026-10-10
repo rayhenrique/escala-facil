@@ -1,9 +1,21 @@
 <?php
 
 return [
-    'current' => env('APP_VERSION', '1.16.1'),
+    'current' => env('APP_VERSION', '1.16.2'),
 
     'releases' => [
+        [
+            'version' => '1.16.2',
+            'date' => '2026-10-10',
+            'title' => 'Correção dos links de notificações PWA',
+            'summary' => 'Correção dos destinos de notificações do dispositivo e do service worker para a Central de Notificações, garantindo abertura correta inclusive com o PWA instalado.',
+            'highlights' => [
+                'Destino das notificações do dispositivo corrigido de `/notificacoes` para `/notifications`.',
+                'Clique na notificação normalizado para URL absoluta, reaproveitando a janela aberta ou abrindo uma nova no PWA instalado.',
+                'Cache do service worker atualizado para aplicar a correção em instalações existentes.',
+                'Testes de regressão para URLs de notificação na rota, Central, payloads, bundle JS, service worker e manifesto.',
+            ],
+        ],
         [
             'version' => '1.16.1',
             'date' => '2026-10-03',

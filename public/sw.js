@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'escala-facil-static-v1.15.0';
+const CACHE_VERSION = 'escala-facil-static-v1.16.2';
 const OFFLINE_URL = '/offline.html';
 const STATIC_FILES = [
     OFFLINE_URL,
@@ -32,14 +32,14 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
 
-    const targetUrl = event.notification.data?.url || '/notificacoes';
+    const rawTargetUrl = event.notification.data?.url || '/notifications';
+    const targetUrl = new URL(rawTargetUrl, self.location.origin).href;
 
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
             for (const client of clientList) {
-                if (client.url && 'focus' in client) {
-                    client.navigate(targetUrl);
-                    return client.focus();
+                if (client.url && 'focus' in client && 'navigate' in client) {
+                    return client.navigate(targetUrl).then(() => client.focus());
                 }
             }
 
