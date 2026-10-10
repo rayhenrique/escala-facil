@@ -6,6 +6,15 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.19.1 — 10/10/2026
+
+### Correção de vulnerabilidades npm
+
+- concurrently 9.2.4 para 9.2.5 com shell-quote 1.12.0, corrigindo injeção de comando crítica.
+- postcss 8.5.28 para 8.5.29 com source-map-js 1.2.2, corrigindo negação de serviço de alta severidade.
+- Correções obtidas por atualização semver compatível, sem overrides e sem npm audit fix --force.
+- npm audit sem vulnerabilidades em todos os níveis; build, suíte de testes e Pint validados.
+
 ## 1.19.0 — 10/10/2026
 
 ### Landing unificada ao design system

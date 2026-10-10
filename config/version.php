@@ -1,9 +1,21 @@
 <?php
 
 return [
-    'current' => env('APP_VERSION', '1.19.0'),
+    'current' => env('APP_VERSION', '1.19.1'),
 
     'releases' => [
+        [
+            'version' => '1.19.1',
+            'date' => '2026-10-10',
+            'title' => 'Correção de vulnerabilidades npm',
+            'summary' => 'Atualização de dependências transitivas com falhas críticas e alta corrigidas, sem mudanças funcionais e com auditoria limpa.',
+            'highlights' => [
+                'concurrently 9.2.4 para 9.2.5 com shell-quote 1.12.0, corrigindo injeção de comando crítica.',
+                'postcss 8.5.28 para 8.5.29 com source-map-js 1.2.2, corrigindo negação de serviço de alta severidade.',
+                'Correções obtidas por atualização semver compatível, sem overrides e sem npm audit fix --force.',
+                'npm audit sem vulnerabilidades em todos os níveis; build, suíte de testes e Pint validados.',
+            ],
+        ],
         [
             'version' => '1.19.0',
             'date' => '2026-10-10',
