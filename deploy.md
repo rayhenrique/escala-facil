@@ -135,7 +135,7 @@ APP_KEY=
 APP_DEBUG=false
 APP_URL=https://escalafacil.kltecnologia.com
 APP_TIMEZONE=America/Maceio
-APP_VERSION=1.17.0
+APP_VERSION=1.17.1
 
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR
@@ -363,16 +363,22 @@ Os logs do Nginx e PHP também ficam disponíveis na aba **Logs** do site no Clo
 
 ## 17. Atualizar o sistema depois de novas versões
 
-Antes de cada atualização, faça backup do banco pelo CloudPanel. O fluxo recomendado usa o script versionado, que interrompe o deploy antes da manutenção se houver alterações locais ou divergência entre a VPS e o GitHub:
+Só execute o deploy com o CI verde na `main` (proteção de branch documentada no `README`). O fluxo recomendado usa o script versionado em três fases — pré-voo sem manutenção, manutenção e verificações de fumaça:
 
 ```bash
 cd ~/htdocs/escalafacil.kltecnologia.com
 bash scripts/deploy-production.sh
 ```
 
-O script atualiza a branch somente por fast-forward, instala dependências, compila o frontend, executa migrations e caches, reabre o sistema e confirma o bundle do Livewire, o manifesto e o service worker da PWA.
+Na **fase de pré-voo** (antes de qualquer alteração ou manutenção), o script valida: execução como usuário do site (nunca `root`), comandos exigidos (`git`, `php8.5`, `node`, `npm`, `curl`, `mysqldump` ou `clpctl`), PHP 8.3+ e Node.js 20+, espaço livre mínimo de 1 GiB (`DEPLOY_MIN_DISK_KB`), chaves obrigatórias do `.env`, `APP_VERSION` no `.env.example`, árvore Git limpa, fast-forward possível para `origin/main` e `composer validate --strict`. Qualquer falha aqui interrompe o processo sem tocar no sistema.
 
-Para executar as mesmas etapas manualmente, como usuário do site:
+Na **fase de manutenção**, o script registra o commit atual para rollback, entra em manutenção, atualiza a branch somente por fast-forward, instala dependências, compila o frontend (com verificação de `public/build/manifest.json`), sincroniza o `APP_VERSION` no `.env` (com `chmod 600`), gera **backup automático do banco antes das migrations** (ver seção 18), executa `migrate --force`, otimiza caches, recarrega workers e reabre o sistema.
+
+Na **fase de fumaça** (sistema já no ar), o script confirma `/up`, `/login`, o bundle do Livewire (sem `livewire.min.js`, com `window.livewireScriptConfig`), o manifesto e o service worker da PWA.
+
+Em caso de falha em etapa crítica, o script interrompe com diagnóstico (`merged`, `migrated`, caminho do backup) e reabre o sistema. Falhas antes das migrations revertem código e assets automaticamente; **migrations nunca são revertidas automaticamente** (`migrate:rollback` não existe no script). O procedimento de recuperação está na seção 18.
+
+Para executar as mesmas etapas manualmente, como usuário do site (incluindo o backup obrigatório antes de migrar):
 
 ```bash
 set -Eeuo pipefail
@@ -380,14 +386,20 @@ cd ~/htdocs/escalafacil.kltecnologia.com
 test -z "$(git status --porcelain)"
 git fetch origin main
 git merge-base --is-ancestor HEAD origin/main
+php8.5 /usr/local/bin/composer validate --strict
+df -k . | awk 'NR==2 {exit ($4 < 1048576)}'
 git merge --ff-only origin/main
 php8.5 artisan down --retry=60
 trap 'php8.5 artisan up >/dev/null 2>&1 || true' EXIT
 php8.5 /usr/local/bin/composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
 npm ci
 npm run build
+test -f public/build/manifest.json
 release_version=$(grep '^APP_VERSION=' .env.example | cut -d= -f2-)
 sed -i "s/^APP_VERSION=.*/APP_VERSION=$release_version/" .env
+chmod 600 .env
+MYSQL_PWD="$(grep '^DB_PASSWORD=' .env | cut -d= -f2- | tr -d '"')" mysqldump -h 127.0.0.1 -P 3306 -u escala_facil escala_facil | gzip > ~/escala-facil-backups/escala_facil-$(date +%F-%H%M)-pre-${release_version}.sql.gz
+chmod 600 ~/escala-facil-backups/escala_facil-$(date +%F-%H%M)-pre-${release_version}.sql.gz
 php8.5 artisan migrate --force
 php8.5 artisan optimize:clear
 php8.5 artisan optimize
@@ -408,21 +420,57 @@ curl -I https://escalafacil.kltecnologia.com/sw.js
 
 O comando `artisan reload` encerra de forma controlada workers que usam código antigo; o Supervisor os inicia novamente.
 
-## 18. Backup e restauração
+## 18. Backup, rollback e recuperação
 
-No CloudPanel, use a área de backup do servidor e mantenha cópias externas do banco e dos arquivos persistentes. Antes de uma atualização importante, o usuário `root` também pode exportar o banco:
+A cada deploy, o script gera automaticamente um backup do banco **antes** das migrations em `~/escala-facil-backups/` (fora do repositório, para nunca sujar a árvore Git), com o nome `escala_facil-AAAA-MM-DD-HHMM-pre-X.Y.Z.sql.gz`. O diretório usa `chmod 700` e cada arquivo `chmod 600`. A retenção mantém os 10 backups mais recentes e remove os antigos automaticamente. Ajustes via ambiente:
+
+```bash
+DEPLOY_BACKUP_DIR=~/meus-backups DEPLOY_BACKUP_KEEP=20 DEPLOY_MIN_DISK_KB=2097152 bash scripts/deploy-production.sh
+```
+
+No CloudPanel, use também a área de backup do servidor e mantenha cópias externas do banco e dos arquivos persistentes. Antes de uma atualização importante, o usuário `root` também pode exportar o banco:
 
 ```bash
 clpctl db:export --databaseName=escala_facil --file=/root/escala_facil-$(date +%F-%H%M).sql.gz
 ```
 
-Para restaurar um arquivo confirmado:
+Para restaurar um backup com `mysqldump` (substitua o arquivo pelo backup confirmado do deploy):
+
+```bash
+gunzip -c ~/escala-facil-backups/NOME-DO-BACKUP.sql.gz | mysql -h 127.0.0.1 -P 3306 -u escala_facil -p escala_facil
+```
+
+Ou com o CloudPanel:
 
 ```bash
 clpctl db:import --databaseName=escala_facil --file=/root/NOME-DO-BACKUP.sql.gz
 ```
 
 A restauração substitui dados e deve ser usada somente após confirmar o arquivo, o banco de destino e a necessidade de rollback.
+
+**Rollback de código e assets (sem tocar no banco):** se o deploy falhar antes das migrations, o próprio script já reverte o commit (`git reset --hard`), reinstala as dependências do `composer.lock` anterior, restaura `public/build` e devolve o `APP_VERSION`. Manualmente:
+
+```bash
+cd ~/htdocs/escalafacil.kltecnologia.com
+git log -1 --oneline
+git reset --hard COMMIT-ANTERIOR
+php8.5 /usr/local/bin/composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
+npm ci && npm run build
+sed -i "s/^APP_VERSION=.*/APP_VERSION=VERSAO-ANTERIOR/" .env
+php8.5 artisan optimize:clear && php8.5 artisan optimize
+php8.5 artisan up
+```
+
+**Migrations nunca são revertidas automaticamente.** O script não contém `migrate:rollback`, `migrate:fresh`, `migrate:refresh` nem `db:wipe`: reversões destrutivas apagariam dados de produção. Se uma migration falhar após o backup, o caminho é restaurar o backup confirmado acima e investigar a causa antes de nova tentativa.
+
+**Checklist de recuperação após falha crítica:**
+
+1. anote o diagnóstico impresso pelo script (`merged`, `migrated`, caminho do backup);
+2. confirme que o sistema saiu da manutenção: `php8.5 artisan about --only=environment` e `curl -I https://escalafacil.kltecnologia.com/up`;
+3. se `migrated=0`, o código já foi revertido; confira `git log -1 --oneline` e a versão exibida no rodapé;
+4. se `migrated=1`, não tente `migrate:rollback`; restaure o backup confirmado e valide `php8.5 artisan migrate:status`;
+5. confira os logs: `tail -n 100 storage/logs/laravel.log` e a aba **Logs** do CloudPanel;
+6. só inicie um novo deploy após causa corrigida e CI verde na `main`.
 
 ## 19. Recomendações de segurança
 

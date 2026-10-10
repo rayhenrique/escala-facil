@@ -6,6 +6,16 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.17.1 — 10/10/2026
+
+### Deploy de produção reforçado com backup e rollback seguro
+
+- Fase de pré-voo sem alterações: pré-requisitos, espaço em disco, .env, fast-forward e composer validate --strict antes da manutenção.
+- Backup automático do banco antes das migrations, fora do repositório, com retenção dos 10 mais recentes e permissões 700/600.
+- Rollback seguro de código e assets em falhas antes das migrations; migrations nunca revertidas automaticamente.
+- Verificações de fumaça após reabrir o sistema e diagnóstico com procedimento de recuperação em deploy.md.
+- Cobertura automatizada do script em tests/Feature/DeployScriptTest.php.
+
 ## 1.17.0 — 10/10/2026
 
 ### Integração contínua no GitHub Actions

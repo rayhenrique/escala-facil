@@ -1,9 +1,22 @@
 <?php
 
 return [
-    'current' => env('APP_VERSION', '1.17.0'),
+    'current' => env('APP_VERSION', '1.17.1'),
 
     'releases' => [
+        [
+            'version' => '1.17.1',
+            'date' => '2026-10-10',
+            'title' => 'Deploy de produção reforçado com backup e rollback seguro',
+            'summary' => 'Script de deploy em fases com pré-voo sem manutenção, backup automático do banco com retenção, rollback de código e assets, verificações de fumaça e recuperação documentada.',
+            'highlights' => [
+                'Fase de pré-voo sem alterações: pré-requisitos, espaço em disco, .env, fast-forward e composer validate --strict antes da manutenção.',
+                'Backup automático do banco antes das migrations, fora do repositório, com retenção dos 10 mais recentes e permissões 700/600.',
+                'Rollback seguro de código e assets em falhas antes das migrations; migrations nunca revertidas automaticamente.',
+                'Verificações de fumaça após reabrir o sistema e diagnóstico com procedimento de recuperação em deploy.md.',
+                'Cobertura automatizada do script em tests/Feature/DeployScriptTest.php.',
+            ],
+        ],
         [
             'version' => '1.17.0',
             'date' => '2026-10-10',
