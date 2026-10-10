@@ -33,6 +33,7 @@ Este documento registra o comportamento compartilhado das telas autenticadas. As
 | Feedback | `resources/views/components/flash-notifications.blade.php` | sucesso e erro | aviso flutuante, dispensável, sem alterar a geometria e com semântica de status ou alerta |
 | Exclusão | modal de confirmação compartilhado | plantões, usuários, setores e categorias | registro identificado, consequência descrita, cancelamento e teste do fluxo |
 | Importação e exportação | `ShiftManager` + `ShiftSpreadsheetController` + modal de importação | modelo XLSX, importação e exportação mensal de plantões | referência de setores/categorias, validação por linha com cancelamento total, duplicatas ignoradas e teste do fluxo |
+| Duplicação de escala | `ShiftManager` + `DuplicateMonthAction` + modal de cópia | origem, destino e mapeamento por dia ou dia da semana | prévia com conflitos, revisão com exclusão de itens, criação transacional sem sobrescrita e relatório de criados e ignorados |
 | Relatórios | `Manager\Reports` + `ReportPdfController` + `WallRosterPdfController` | consulta compartilhada entre gerente e profissional: resumo de cobertura, distribuições, desempenho e trocas | filtros de mês, setor e categoria, limpeza, exportação em PDF e teste do fluxo |
 | Scrollbar | regra global de `resources/css/app.css` | rolagem de página e painéis | inspeção no navegador |
 

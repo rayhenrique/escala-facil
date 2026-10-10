@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Manager;
 
+use App\Actions\Shifts\DuplicateMonthAction;
 use App\Actions\Shifts\ImportShiftsAction;
 use App\Enums\ShiftStatus;
 use App\Enums\UserRole;
@@ -60,6 +61,22 @@ class ShiftManager extends Component
 
     /** @var list<string> */
     public array $importErrors = [];
+
+    public bool $showCopyModal = false;
+
+    public string $copySourceMonth = '';
+
+    public string $copyTargetMonth = '';
+
+    public string $copyMode = DuplicateMonthAction::MODE_DAY;
+
+    /** @var array<string, mixed>|null */
+    public ?array $copyPreview = null;
+
+    /** @var list<int> */
+    public array $copySelected = [];
+
+    public string $copyError = '';
 
     public function mount(): void
     {
@@ -228,6 +245,79 @@ class ShiftManager extends Component
             'Importação concluída: %d plantão(ões) criado(s)%s.',
             $result['created'],
             $result['skipped'] > 0 ? " e {$result['skipped']} duplicata(s) ignorada(s)" : '',
+        ));
+    }
+
+    public function openCopyModal(): void
+    {
+        $this->authorize('create', Shift::class);
+        $this->reset(['copyTargetMonth', 'copyPreview', 'copySelected', 'copyError']);
+        $this->copySourceMonth = $this->month;
+        $this->copyMode = DuplicateMonthAction::MODE_DAY;
+        $this->showCopyModal = true;
+    }
+
+    public function closeCopyModal(): void
+    {
+        $this->reset(['showCopyModal', 'copySourceMonth', 'copyTargetMonth', 'copyPreview', 'copySelected', 'copyError']);
+        $this->copyMode = DuplicateMonthAction::MODE_DAY;
+    }
+
+    public function generateCopyPreview(DuplicateMonthAction $duplicate): void
+    {
+        $this->authorize('create', Shift::class);
+        $this->reset(['copyPreview', 'copySelected', 'copyError']);
+
+        $this->validate([
+            'copySourceMonth' => ['required', 'regex:/^\d{4}-(0[1-9]|1[0-2])$/'],
+            'copyTargetMonth' => ['required', 'regex:/^\d{4}-(0[1-9]|1[0-2])$/'],
+            'copyMode' => ['required', 'in:day,weekday'],
+        ], [], [
+            'copySourceMonth' => 'mês de origem',
+            'copyTargetMonth' => 'mês de destino',
+            'copyMode' => 'mapeamento',
+        ]);
+
+        try {
+            $preview = $duplicate->preview(auth()->user(), $this->copySourceMonth, $this->copyTargetMonth, $this->copyMode);
+        } catch (ValidationException $exception) {
+            $this->copyError = collect($exception->errors())->flatten()->first() ?? 'Não foi possível gerar a prévia.';
+
+            return;
+        }
+
+        $this->copyPreview = $preview;
+        $this->copySelected = collect($preview['items'])
+            ->whereIn('status', ['valid', 'adjusted'])
+            ->pluck('source_id')
+            ->map(fn ($id) => (int) $id)
+            ->values()
+            ->all();
+    }
+
+    public function confirmCopy(DuplicateMonthAction $duplicate): void
+    {
+        $this->authorize('create', Shift::class);
+
+        $selected = collect($this->copySelected)->map(fn ($id) => (int) $id)->unique()->values()->all();
+
+        try {
+            $result = $duplicate->execute(auth()->user(), $this->copySourceMonth, $this->copyTargetMonth, $this->copyMode, $selected);
+        } catch (ValidationException $exception) {
+            $this->copyError = collect($exception->errors())->flatten()->first() ?? 'Não foi possível concluir a cópia.';
+
+            return;
+        }
+
+        $targetMonth = $this->copyTargetMonth;
+        $this->closeCopyModal();
+        $this->month = $this->normalizeMonth($targetMonth);
+        $this->resetPage();
+
+        session()->flash('status', sprintf(
+            'Cópia concluída: %d plantão(ões) criado(s) e %d ignorado(s).',
+            $result['created'],
+            $result['ignored'],
         ));
     }
 

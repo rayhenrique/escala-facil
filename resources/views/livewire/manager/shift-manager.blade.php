@@ -14,6 +14,7 @@
                 <a href="{{ route('manager.shifts.template') }}" class="button-secondary w-full text-center sm:w-auto">Modelo XLSX</a>
                 <a href="{{ route('manager.shifts.export', ['month' => $month]) }}" class="button-secondary w-full text-center sm:w-auto">Exportar</a>
                 <button type="button" wire:click="openImportModal" class="button-secondary w-full sm:w-auto">Importar</button>
+                <button type="button" wire:click="openCopyModal" class="button-secondary w-full sm:w-auto">Copiar escala</button>
                 <button type="button" wire:click="openCreateModal" class="button-primary w-full sm:w-auto">Adicionar plantão</button>
             </div>
         </div>
@@ -145,6 +146,128 @@
             </button>
         </x-slot:actions>
     </x-confirmation-modal>
+
+    @if ($showCopyModal)
+        <div class="modal-overlay" x-data x-init="$nextTick(() => $refs.copySource?.focus())" @keydown.escape.window="$wire.closeCopyModal()">
+            <button type="button" wire:click="closeCopyModal" class="modal-backdrop" aria-label="Fechar cópia de escala"></button>
+            <div class="modal-dialog max-w-4xl" role="dialog" aria-modal="true" aria-labelledby="shift-copy-title">
+                <header class="modal-header">
+                    <div>
+                        <p class="eyebrow">Duplicação assistida</p>
+                        <h2 id="shift-copy-title">Copiar escala de outro mês</h2>
+                    </div>
+                    <button type="button" wire:click="closeCopyModal" class="modal-close-button" aria-label="Fechar cópia">
+                        <x-nav-icon name="close" class="size-5" />
+                    </button>
+                </header>
+
+                <div class="modal-body grid gap-5">
+                    <div class="grid gap-5 sm:grid-cols-2">
+                        <div>
+                            <label for="copy-source-month" class="field-label">Mês de origem</label>
+                            <input wire:model="copySourceMonth" id="copy-source-month" x-ref="copySource" type="month" class="field-input" @error('copySourceMonth') aria-invalid="true" aria-describedby="copy-source-error" @enderror>
+                            @error('copySourceMonth') <p id="copy-source-error" class="field-error">{{ $message }}</p> @enderror
+                        </div>
+                        <div>
+                            <label for="copy-target-month" class="field-label">Mês de destino</label>
+                            <input wire:model="copyTargetMonth" id="copy-target-month" type="month" class="field-input" @error('copyTargetMonth') aria-invalid="true" aria-describedby="copy-target-error" @enderror>
+                            @error('copyTargetMonth') <p id="copy-target-error" class="field-error">{{ $message }}</p> @enderror
+                        </div>
+                    </div>
+
+                    <fieldset>
+                        <legend class="field-label">Mapeamento das datas</legend>
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <label class="record-card flex cursor-pointer gap-3">
+                                <input type="radio" wire:model.live="copyMode" value="day" class="mt-1">
+                                <span>
+                                    <strong class="block text-sm">Mesmo dia do mês</strong>
+                                    <span class="mt-1 block text-xs text-muted">Dia 05 origina dia 05. Dias inexistentes no destino (ex.: 31/02) ficam de fora.</span>
+                                </span>
+                            </label>
+                            <label class="record-card flex cursor-pointer gap-3">
+                                <input type="radio" wire:model.live="copyMode" value="weekday" class="mt-1">
+                                <span>
+                                    <strong class="block text-sm">Mesmo dia da semana</strong>
+                                    <span class="mt-1 block text-xs text-muted">2ª terça-feira origina a 2ª terça-feira. Ocorrências inexistentes ficam de fora.</span>
+                                </span>
+                            </label>
+                        </div>
+                        @error('copyMode') <p class="field-error">{{ $message }}</p> @enderror
+                    </fieldset>
+
+                    <p class="text-sm text-muted">Trocas, ausências, notificações e comprovantes nunca são copiados. Plantões idênticos já existentes no destino não são sobrescritos.</p>
+
+                    <div>
+                        <button type="button" wire:click="generateCopyPreview" wire:loading.attr="disabled" wire:target="generateCopyPreview" class="button-secondary w-full sm:w-auto">
+                            <span wire:loading.remove wire:target="generateCopyPreview">Gerar prévia</span>
+                            <span wire:loading wire:target="generateCopyPreview">Gerando prévia…</span>
+                        </button>
+                    </div>
+
+                    @if ($copyError !== '')
+                        <div class="rounded-lg border border-danger/30 bg-danger-soft p-4" role="alert">
+                            <p class="font-semibold text-danger">{{ $copyError }}</p>
+                        </div>
+                    @endif
+
+                    @if ($copyPreview)
+                        <div class="rounded-xl border border-line bg-canvas p-5" aria-live="polite">
+                            <p class="text-sm font-semibold text-ink">
+                                Prévia: {{ $copyPreview['totals']['total'] }} plantão(ões) ·
+                                {{ $copyPreview['totals']['valid'] }} pronto(s) ·
+                                {{ $copyPreview['totals']['adjusted'] }} ajustado(s) ·
+                                {{ $copyPreview['totals']['blocked'] }} bloqueado(s)
+                            </p>
+                            <p class="mt-1 text-xs text-muted">{{ count($copySelected) }} selecionado(s) para copiar. Desmarque itens para excluí-los da cópia.</p>
+                        </div>
+
+                        @forelse ($copyPreview['items'] as $item)
+                            <label class="record-card flex gap-3 {{ $item['status'] === 'blocked' ? 'opacity-75' : 'cursor-pointer' }}" wire:key="copy-preview-{{ $item['source_id'] }}">
+                                <input
+                                    type="checkbox"
+                                    wire:model="copySelected"
+                                    value="{{ $item['source_id'] }}"
+                                    @disabled($item['status'] === 'blocked')
+                                    class="mt-1"
+                                    aria-label="Incluir plantão de {{ $item['date_label'] }}"
+                                >
+                                <span class="min-w-0 flex-1">
+                                    <span class="flex flex-wrap items-center gap-2">
+                                        <strong class="text-sm">{{ $item['date_label'] }} · {{ $item['start_time'] }}–{{ $item['end_time'] }}</strong>
+                                        @if ($item['status'] === 'valid')
+                                            <span class="status-badge status-scheduled">Pronto</span>
+                                        @elseif ($item['status'] === 'adjusted')
+                                            <span class="status-badge status-pending_manager">Ajustado</span>
+                                        @else
+                                            <span class="status-badge status-rejected">Bloqueado</span>
+                                        @endif
+                                    </span>
+                                    <span class="mt-1 block text-xs text-muted">{{ $item['sector'] }} · {{ $item['category'] }} · {{ $item['professional'] }}</span>
+                                    @foreach ($item['reasons'] as $reason)
+                                        <span class="mt-1 block text-xs {{ $item['status'] === 'blocked' ? 'text-danger' : 'text-muted' }}">{{ $reason }}</span>
+                                    @endforeach
+                                </span>
+                            </label>
+                        @empty
+                            <div class="empty-state compact-empty">
+                                <p class="font-semibold text-ink">O mês de origem não possui plantões.</p>
+                                <p class="mt-2 text-sm">Escolha outro mês de origem.</p>
+                            </div>
+                        @endforelse
+                    @endif
+                </div>
+
+                <footer class="modal-footer">
+                    <button type="button" wire:click="closeCopyModal" class="button-secondary w-full sm:w-auto">Cancelar</button>
+                    <button type="button" wire:click="confirmCopy" wire:loading.attr="disabled" wire:target="confirmCopy" class="button-primary w-full sm:w-auto" @disabled($copyPreview === null || $copySelected === [])>
+                        <span wire:loading.remove wire:target="confirmCopy">Confirmar cópia ({{ count($copySelected) }})</span>
+                        <span wire:loading wire:target="confirmCopy">Copiando…</span>
+                    </button>
+                </footer>
+            </div>
+        </div>
+    @endif
 
     @if ($showImportModal)
         <div class="modal-overlay" x-data x-init="$nextTick(() => $refs.importField?.focus())" @keydown.escape.window="$wire.closeImportModal()">

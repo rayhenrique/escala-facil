@@ -6,6 +6,15 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.21.0 — 10/10/2026
+
+### Duplicação assistida de escalas mensais
+
+- Ação Copiar escala em Escalas com mês de origem, destino e mapeamento por dia ou dia da semana.
+- Prévia com quantidades, datas, profissionais e conflitos: datas inexistentes, duplicatas, choques de horário e incompatibilidades.
+- Revisão com exclusão de itens, criação transacional sem sobrescrita e relatório de criados e ignorados.
+- Trocas, ausências, notificações e comprovantes nunca copiados; cobertura crítica por testes.
+
 ## 1.20.0 — 10/10/2026
 
 ### Dashboard com foco em 72h e calendário com ações contextuais

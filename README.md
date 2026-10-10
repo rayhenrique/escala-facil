@@ -15,7 +15,7 @@ O MVP está funcional e inclui:
 - autenticação, recuperação de senha e redirecionamento por perfil;
 - painel gerencial com indicadores reais de cobertura e pendências;
 - cadastro completo de usuários, setores e categorias;
-- criação, edição, consulta e exclusão de plantões, com modelo XLSX, importação validada e exportação mensal;
+- criação, edição, consulta e exclusão de plantões, com modelo XLSX, importação validada, exportação mensal e cópia assistida entre meses com prévia de conflitos;
 - calendário mensal compartilhado com todos os plantões e profissionais de cada dia, com filtros por setor e categoria e marcador de dias com 24h cobertas;
 - agenda mensal do profissional;
 - solicitação, aceite e aprovação gerencial de trocas, com alerta de dobras e desfazer troca aprovada;
@@ -156,7 +156,7 @@ Crie um banco MySQL chamado `escala_facil` e ajuste o `.env`:
 APP_NAME="Escala Fácil"
 APP_URL=http://127.0.0.1:8000
 APP_TIMEZONE=America/Maceio
-APP_VERSION=1.20.0
+APP_VERSION=1.21.0
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR
 APP_FAKER_LOCALE=pt_BR

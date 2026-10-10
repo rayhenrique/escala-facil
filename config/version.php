@@ -1,9 +1,21 @@
 <?php
 
 return [
-    'current' => env('APP_VERSION', '1.20.0'),
+    'current' => env('APP_VERSION', '1.21.0'),
 
     'releases' => [
+        [
+            'version' => '1.21.0',
+            'date' => '2026-10-10',
+            'title' => 'Duplicação assistida de escalas mensais',
+            'summary' => 'Gerentes copiam plantões entre meses com prévia de conflitos, revisão de itens e relatório, sem tocar no histórico.',
+            'highlights' => [
+                'Ação Copiar escala em Escalas com mês de origem, destino e mapeamento por dia ou dia da semana.',
+                'Prévia com quantidades, datas, profissionais e conflitos: datas inexistentes, duplicatas, choques de horário e incompatibilidades.',
+                'Revisão com exclusão de itens, criação transacional sem sobrescrita e relatório de criados e ignorados.',
+                'Trocas, ausências, notificações e comprovantes nunca copiados; cobertura crítica por testes.',
+            ],
+        ],
         [
             'version' => '1.20.0',
             'date' => '2026-10-10',

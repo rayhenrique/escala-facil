@@ -165,6 +165,13 @@
                         <li>Use <strong>Exportar</strong> para baixar os plantões do mês exibido e aproveitá-los como base de edição.</li>
                         <li>Envie o arquivo em <strong>Importar</strong>: linhas duplicadas são ignoradas, e qualquer erro em uma linha cancela toda a importação com o motivo indicado.</li>
                     </ol>
+                    <h4>Copiar escala de outro mês</h4>
+                    <ol>
+                        <li>Use <strong>Copiar escala</strong> em Escalas e escolha o mês de origem, o mês de destino e o mapeamento: mesmo dia do mês ou mesmo dia da semana.</li>
+                        <li>Confira a <strong>prévia</strong>: quantidades, datas, setores, categorias, profissionais e conflitos. Dias inexistentes, duplicatas, choques de horário e profissionais incompatíveis ficam bloqueados com o motivo.</li>
+                        <li>Desmarque itens para excluí-los da cópia e confirme. Trocas, ausências, notificações e comprovantes nunca são copiados, e plantões idênticos existentes nunca são sobrescritos.</li>
+                        <li>Ao final, o relatório informa quantos plantões foram criados e quantos foram ignorados.</li>
+                    </ol>
                 </div>
             </details>
             <details id="consultar-calendario">

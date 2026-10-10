@@ -10,6 +10,7 @@ use App\Models\Sector;
 use App\Models\Shift;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -301,7 +302,7 @@ class PhaseEightCalendarTest extends TestCase
         $ana = User::query()->where('name', 'Ana da Emergência')->firstOrFail();
         $bruno = User::query()->where('name', 'Bruno da UTI')->firstOrFail();
 
-        Livewire::actingAs($ana)
+        $anaCalendar = Livewire::actingAs($ana)
             ->test(MonthlyCalendar::class)
             ->set('month', '2026-11')
             ->call('selectDate', '2026-11-12')
@@ -310,8 +311,14 @@ class PhaseEightCalendarTest extends TestCase
             ->assertDontSee('Bruno da UTI')
             ->assertSeeHtml('value="Emergência"')
             ->assertSeeHtml('disabled')
-            ->assertSee('AE')
-            ->assertDontSee('BU')
+            ->assertSee('AE');
+
+        // Iniciais verificadas nos dados estruturados: o HTML carrega
+        // identificadores aleatórios do Livewire que podem conter "BU".
+        $this->assertSame(['AE'], $this->initialsOnDay($anaCalendar, '2026-11-12'));
+        $this->assertNotContains('BU', $this->initialsOnDay($anaCalendar, '2026-11-12'));
+
+        $anaCalendar
             ->set('sectorId', (string) $icu->id)
             ->assertSet('sectorId', (string) $emergency->id)
             ->assertSee('Ana da Emergência')
@@ -321,7 +328,7 @@ class PhaseEightCalendarTest extends TestCase
             ->assertSee('Ana da Emergência')
             ->assertDontSee('Bruno da UTI');
 
-        Livewire::actingAs($bruno)
+        $brunoCalendar = Livewire::actingAs($bruno)
             ->test(MonthlyCalendar::class)
             ->set('month', '2026-11')
             ->call('selectDate', '2026-11-12')
@@ -330,7 +337,17 @@ class PhaseEightCalendarTest extends TestCase
             ->assertDontSee('Ana da Emergência')
             ->assertSeeHtml('value="UTI"')
             ->assertSeeHtml('disabled')
-            ->assertSee('BU')
-            ->assertDontSee('AE');
+            ->assertSee('BU');
+
+        $this->assertSame(['BU'], $this->initialsOnDay($brunoCalendar, '2026-11-12'));
+        $this->assertNotContains('AE', $this->initialsOnDay($brunoCalendar, '2026-11-12'));
+    }
+
+    /** @return list<string> */
+    private function initialsOnDay(Testable $component, string $date): array
+    {
+        $days = $component->viewData('calendarDays')->keyBy('date');
+
+        return collect($days[$date]['professionals'])->pluck('initials')->all();
     }
 }
