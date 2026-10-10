@@ -6,6 +6,16 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.16.3 — 10/10/2026
+
+### Comprovantes históricos imutáveis e status em tempo de execução
+
+- **Sem escritas no `render()` da Central:** A Central de Notificações resolve o estado atual apenas para leitura em tela, sem atualizar o banco durante a renderização.
+- **Histórico preservado:** Solicitação, aceite, aprovação, rejeição e reversão mantêm seus eventos e comprovantes originais; decisões não reescrevem notificações anteriores.
+- **Situação atual visível sem alterar o histórico:** Cards com status divergente exibem o aviso `Situação atual da troca` com responsável e justificativa, mantendo o comprovante original abaixo.
+- **Registros existentes intactos:** Nenhuma migração destrutiva foi necessária; o comando `php artisan app:sync-swap-notifications` apenas verifica e preserva os registros sem reescrever comprovantes.
+- **Consistência entre superfícies:** Notificações, calendário, relatórios e PDFs passam a ler a mesma fonte autoritativa (`ShiftSwap`), com cobertura de testes para os cinco eventos.
+
 ## 1.16.2 — 10/10/2026
 
 ### Correção dos links de notificações PWA

@@ -80,21 +80,24 @@ class NotificationLinksTest extends TestCase
         app(AcceptShiftSwapAction::class)->execute($substitute, $shiftSwap->id);
         app(DecideShiftSwapAction::class)->reject($manager, $shiftSwap->id, 'Sem cobertura suficiente.');
 
-        foreach ([$requester, $substitute, $manager] as $user) {
-            $rejection = $user->refresh()->notifications()
+        // Participantes recebem o evento histórico de rejeição apontando para a Central.
+        foreach ([$requester, $substitute] as $participant) {
+            $rejection = $participant->refresh()->notifications()
                 ->where('data->event', 'rejected')
-                ->first();
+                ->firstOrFail();
 
-            // A notificação da gerência é sincronizada no lugar; as dos participantes são criadas.
-            if ($user->is($manager)) {
-                $rejection = $user->refresh()->notifications()->sole();
-                $this->assertSame('Troca rejeitada', $rejection->data['title']);
-            }
-
-            $this->assertNotNull($rejection);
             $this->assertSame('/notifications', $rejection->data['target_url']);
             $this->assertStringNotContainsString('/notificacoes', json_encode($rejection->data));
         }
+
+        // O histórico da gerência permanece imutável como "aguardando aprovação";
+        // o estado atual (Rejeitada) é exibido em tempo de execução na Central.
+        $managerNotification = $manager->refresh()->notifications()->sole();
+        $this->assertSame('accepted', $managerNotification->data['event']);
+        $this->assertSame('Troca aguardando aprovação', $managerNotification->data['title']);
+        $this->assertSame('/manager/swaps', $managerNotification->data['target_url']);
+        $this->assertSame('Aguardando gerência', $managerNotification->data['receipt']['status_label']);
+        $this->assertStringNotContainsString('/notificacoes', json_encode($managerNotification->data));
     }
 
     public function test_pwa_notification_assets_point_to_notifications_center(): void

@@ -1,9 +1,22 @@
 <?php
 
 return [
-    'current' => env('APP_VERSION', '1.16.2'),
+    'current' => env('APP_VERSION', '1.16.3'),
 
     'releases' => [
+        [
+            'version' => '1.16.3',
+            'date' => '2026-10-10',
+            'title' => 'Comprovantes históricos imutáveis e status em tempo de execução',
+            'summary' => 'Separação entre eventos históricos imutáveis e estado atual das trocas, sem escritas no render da Central e com consistência entre notificações, calendário, relatórios e PDFs.',
+            'highlights' => [
+                'Central de Notificações sem escritas no banco durante o render, com estado atual resolvido apenas para leitura em tela.',
+                'Comprovantes históricos preservados: aprovação, rejeição e reversão não reescrevem eventos anteriores.',
+                'Aviso de Situação atual da troca na Central, mantendo o comprovante original de cada evento.',
+                'Comando app:sync-swap-notifications preserva registros existentes sem reescrever comprovantes.',
+                'Cobertura de solicitação, aceite, aprovação, rejeição e reversão com consistência entre notificações, calendário, relatórios e PDFs.',
+            ],
+        ],
         [
             'version' => '1.16.2',
             'date' => '2026-10-10',

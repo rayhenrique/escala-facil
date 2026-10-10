@@ -219,7 +219,7 @@ class ShiftSwapNotificationTest extends TestCase
         $this->assertDatabaseCount('notifications', 0);
     }
 
-    public function test_manager_rejection_synchronizes_existing_notifications_and_receipt_matches_pdf(): void
+    public function test_manager_rejection_preserves_history_and_shows_current_status_at_runtime(): void
     {
         [$manager, $requester, $substitute, $shift] = $this->team();
 
@@ -232,28 +232,44 @@ class ShiftSwapNotificationTest extends TestCase
         $managerNotification = $manager->notifications()->sole();
         $this->assertSame('Troca aguardando aprovação', $managerNotification->data['title']);
         $this->assertSame('Aguardando gerência', $managerNotification->data['receipt']['status_label']);
+        $snapshotBeforeDecision = $managerNotification->data;
 
         // Manager rejects with justification
         $justification = 'Colocar o horário do turno correto. Está ficando 20/10 MT por 20/10 mt';
         app(DecideShiftSwapAction::class)->reject($manager, $shiftSwap->id, $justification);
 
-        // Manager's notification was updated in place
-        $updatedNotification = $manager->refresh()->notifications()->sole();
-        $this->assertSame('Troca rejeitada', $updatedNotification->data['title']);
-        $this->assertSame('Rejeitada', $updatedNotification->data['receipt']['status_label']);
-        $this->assertSame($manager->name, $updatedNotification->data['receipt']['manager']);
-        $this->assertSame($justification, $updatedNotification->data['receipt']['rejection_reason']);
-        $this->assertStringContainsString($justification, $updatedNotification->data['message']);
+        // Histórico da gerência permanece imutável; participantes recebem o evento de rejeição.
+        $preservedNotification = $manager->refresh()->notifications()->sole();
+        $this->assertSame('accepted', $preservedNotification->data['event']);
+        $this->assertSame('Troca aguardando aprovação', $preservedNotification->data['title']);
+        $this->assertSame('Aguardando gerência', $preservedNotification->data['receipt']['status_label']);
+        $this->assertSame($snapshotBeforeDecision, $preservedNotification->data);
 
-        // Notifications center renders matching rejection status and reason
+        foreach ([$requester, $substitute] as $participant) {
+            $rejection = $participant->refresh()->notifications()
+                ->where('data->event', 'rejected')
+                ->firstOrFail();
+            $this->assertSame($justification, $rejection->data['receipt']['rejection_reason']);
+            $this->assertStringContainsString($justification, $rejection->data['message']);
+        }
+
+        // A Central não reescreve o banco e exibe o estado atual em tempo de execução.
+        $dataBeforeRender = $preservedNotification->refresh()->data;
+        $updatedAtBeforeRender = $preservedNotification->refresh()->updated_at?->toIso8601String();
+
         Livewire::actingAs($manager)
             ->test(NotificationsCenter::class)
-            ->assertSee('Troca rejeitada')
+            ->assertSee('Troca aguardando aprovação')
+            ->assertSee('Situação atual da troca: Rejeitada')
             ->assertSee('Rejeitada')
             ->assertSee($justification)
-            ->assertSee($manager->name);
+            ->assertSee($manager->name)
+            ->assertSee('Este comprovante preserva o evento original.');
 
-        // PDF download also matches
+        $this->assertSame($dataBeforeRender, $preservedNotification->refresh()->data);
+        $this->assertSame($updatedAtBeforeRender, $preservedNotification->refresh()->updated_at?->toIso8601String());
+
+        // PDF reflete o estado atual, enquanto o histórico preserva o evento original.
         $response = $this->actingAs($manager)->get(route('swaps.receipt.pdf', $shiftSwap->id));
         $response->assertOk();
     }

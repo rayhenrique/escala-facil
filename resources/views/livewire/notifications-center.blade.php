@@ -44,6 +44,17 @@
 
     <section class="mt-8 space-y-4" aria-label="Histórico de notificações">
         @forelse ($notifications as $notification)
+            @php
+                $receipt = $notification->data['receipt'] ?? null;
+                $swapId = is_array($receipt) ? ($receipt['shift_swap_id'] ?? null) : null;
+                if (! is_numeric($swapId) && is_array($receipt) && ! empty($receipt['reference']) && preg_match('/(\d+)/', (string) $receipt['reference'], $swapMatches)) {
+                    $swapId = (int) $swapMatches[1];
+                }
+                $swapId = is_numeric($swapId) ? (int) $swapId : null;
+                $currentSwap = $swapId ? (($swapStatuses ?? [])[$swapId] ?? null) : null;
+                $recordedStatus = is_array($receipt) ? ($receipt['status'] ?? null) : null;
+                $showsCurrentStatus = $currentSwap && $recordedStatus && $currentSwap['status'] !== $recordedStatus;
+            @endphp
             <article class="notification-card {{ $notification->read_at ? '' : 'notification-card-unread' }}" wire:key="notification-{{ $notification->id }}">
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div class="min-w-0">
@@ -62,7 +73,22 @@
                     </div>
                 </div>
 
-                <x-swap-receipt :receipt="$notification->data['receipt']" class="mt-5" />
+                @if ($showsCurrentStatus)
+                    <div class="mt-4 rounded-xl border border-primary/20 bg-primary-soft/40 p-4" role="status" aria-live="polite">
+                        <p class="text-sm font-semibold text-ink">Situação atual da troca: {{ $currentSwap['status_label'] }}</p>
+                        @if (! empty($currentSwap['manager']))
+                            <p class="mt-1 text-xs text-muted">Responsável pela decisão: {{ $currentSwap['manager'] }}</p>
+                        @endif
+                        @if (! empty($currentSwap['rejection_reason']))
+                            <p class="mt-1 text-xs text-muted">Justificativa: {{ $currentSwap['rejection_reason'] }}</p>
+                        @endif
+                        <p class="mt-2 text-xs text-muted">Este comprovante preserva o evento original.</p>
+                    </div>
+                @endif
+
+                @if (is_array($receipt))
+                    <x-swap-receipt :receipt="$receipt" class="mt-5" />
+                @endif
             </article>
         @empty
             <div class="empty-state">
