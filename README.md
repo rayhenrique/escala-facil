@@ -156,7 +156,7 @@ Crie um banco MySQL chamado `escala_facil` e ajuste o `.env`:
 APP_NAME="Escala Fácil"
 APP_URL=http://127.0.0.1:8000
 APP_TIMEZONE=America/Maceio
-APP_VERSION=1.16.3
+APP_VERSION=1.16.4
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR
 APP_FAKER_LOCALE=pt_BR
@@ -242,13 +242,16 @@ O comando usa `demo_data_batches` como manifesto dos IDs criados e preserva os r
 
 O Escala Fácil usa versionamento semântico `MAIOR.MENOR.CORREÇÃO`. A versão executada fica em `APP_VERSION`, com valor padrão em [`config/version.php`](config/version.php). O mesmo arquivo fornece ao sistema os títulos e destaques mostrados no módulo Ajuda e no modal de novidades.
 
-Para preparar uma nova versão:
+Para preparar uma nova versão, use o comando centralizado (não edite os arquivos de versão manualmente):
 
-1. escolha o próximo número conforme o impacto da mudança;
-2. atualize `APP_VERSION` no `.env.example` e o valor padrão em `config/version.php`;
-3. adicione o novo lançamento no início de `config/version.php` e de [`versoes.md`](versoes.md);
-4. descreva as mudanças que afetam o usuário;
-5. execute migrations, testes, Pint, build e inspeção visual.
+```powershell
+php artisan release:prepare X.Y.Z --title="Título da versão" --summary="Resumo das mudanças" --highlight="Destaque 1" --highlight="Destaque 2"
+```
+
+O comando valida o SemVer, impede regressão e duplicação e sincroniza `config/version.php`, `.env.example`, `README.md`, `deploy.md`, [`versoes.md`](versoes.md) e `public/sw.js` (cache do PWA). O arquivo `.env` nunca é alterado. Depois:
+
+1. revise o histórico gerado;
+2. execute migrations, testes, Pint, build e inspeção visual.
 
 Cada usuário possui `last_seen_version`. Quando esse valor difere da versão atual, o sistema apresenta o modal de novidades no primeiro acesso e só grava a confirmação quando o usuário escolhe continuar ou abrir o manual.
 

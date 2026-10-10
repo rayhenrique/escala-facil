@@ -6,6 +6,16 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.16.4 — 10/10/2026
+
+### Versionamento centralizado com release:prepare
+
+- Novo comando php artisan release:prepare X.Y.Z com validação SemVer e proteção contra regressão e duplicação.
+- Sincronização automática de config/version.php, .env.example, README.md, deploy.md, versoes.md e public/sw.js.
+- Cache do service worker versionado automaticamente para invalidação correta após cada atualização, sem manutenção manual.
+- Estratégia segura de cache autenticado preservada, com cobertura de testes para o comando e consistência entre arquivos.
+- Arquivo .env nunca alterado durante a preparação local.
+
 ## 1.16.3 — 10/10/2026
 
 ### Comprovantes históricos imutáveis e status em tempo de execução
@@ -282,8 +292,7 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 ## Processo para uma nova versão
 
 1. Escolha o próximo número conforme o versionamento semântico.
-2. Atualize `APP_VERSION` no `.env.example` e o valor padrão em `config/version.php`.
-3. Adicione o lançamento no início de `config/version.php` e deste arquivo.
-4. Descreva mudanças concretas, impactos para o usuário e eventuais instruções de migração.
-5. Execute migrations, testes, Pint, build e validação visual.
-6. Ao entrar, cada usuário verá automaticamente o modal da nova versão até confirmar a leitura.
+2. Execute `php artisan release:prepare X.Y.Z --title="Título" --summary="Resumo" --highlight="Destaque"` para sincronizar `config/version.php`, `.env.example`, `README.md`, `deploy.md`, este arquivo e `public/sw.js` (o `.env` nunca é alterado).
+3. Descreva mudanças concretas, impactos para o usuário e eventuais instruções de migração.
+4. Execute migrations, testes, Pint, build e validação visual.
+5. Ao entrar, cada usuário verá automaticamente o modal da nova versão até confirmar a leitura.

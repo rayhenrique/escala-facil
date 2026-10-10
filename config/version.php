@@ -1,9 +1,22 @@
 <?php
 
 return [
-    'current' => env('APP_VERSION', '1.16.3'),
+    'current' => env('APP_VERSION', '1.16.4'),
 
     'releases' => [
+        [
+            'version' => '1.16.4',
+            'date' => '2026-10-10',
+            'title' => 'Versionamento centralizado com release:prepare',
+            'summary' => 'Comando artisan que centraliza o versionamento e sincroniza sistema, documentação e PWA, eliminando a manutenção manual do cache do service worker.',
+            'highlights' => [
+                'Novo comando php artisan release:prepare X.Y.Z com validação SemVer e proteção contra regressão e duplicação.',
+                'Sincronização automática de config/version.php, .env.example, README.md, deploy.md, versoes.md e public/sw.js.',
+                'Cache do service worker versionado automaticamente para invalidação correta após cada atualização, sem manutenção manual.',
+                'Estratégia segura de cache autenticado preservada, com cobertura de testes para o comando e consistência entre arquivos.',
+                'Arquivo .env nunca alterado durante a preparação local.',
+            ],
+        ],
         [
             'version' => '1.16.3',
             'date' => '2026-10-10',
