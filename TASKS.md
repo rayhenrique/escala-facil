@@ -1,5 +1,11 @@
 # TASKS - Plano de Execução Sequencial
 
+- [x] **Análise contextual de trocas (1.26.0)**
+  - [x] Compartilhar análise e confirmação entre dashboard e Trocas, com contrapartida e alertas para ambos os profissionais.
+  - [x] Reutilizar Action, Policies, comprovantes e notificações; exigir justificativa no servidor e confirmação explícita.
+  - [x] Revalidar atribuições, status, permissão, alertas e cota; bloquear informação desatualizada e decisões concorrentes.
+  - [x] Verificar aprovação, rejeição, transação, processos concorrentes, teclado, celular, acessibilidade, Pint e build.
+
 - [x] **Navegação contextual (1.25.0)**
   - [x] Validar e autorizar IDs, abrir registros exatos e destacar o destino com foco acessível.
   - [x] Preservar origem, filtros e seleção entre painel, calendário, escala, trocas e relatórios.

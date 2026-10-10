@@ -1,4 +1,6 @@
 <div class="manager-dashboard">
+    <x-flash-notifications />
+    @if ($swapReceipt)<x-swap-receipt :receipt="$swapReceipt" class="mb-6" />@endif
     <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
             <p class="eyebrow">Visão da gerência</p>
@@ -34,7 +36,7 @@
         <div class="section-heading flex-wrap gap-4">
             <div>
                 <p class="eyebrow">Foco operacional</p>
-                <h2 id="attention-title">Fila de pendências</h2>
+                <h2 id="attention-title" tabindex="-1">Fila de pendências</h2>
             </div>
             <div class="flex gap-2" role="group" aria-label="Período da fila">
                 @foreach (['1' => 'Hoje', '3' => '3 dias', '7' => '7 dias'] as $value => $label)
@@ -77,7 +79,12 @@
                             @endif
                             <p class="mt-2 text-xs text-muted">{{ $isUncovered ? ($shift->latestAbsence ? 'Ausência informada em' : 'Plantão registrado em') : 'Solicitada em' }} {{ ($isUncovered ? ($shift->latestAbsence?->created_at ?? $shift->created_at) : $record->created_at)->format('d/m/Y H:i') }}</p>
                         </div>
-                        <a href="{{ $isUncovered ? \App\Support\OperationalNavigation::url('shifts', ['focus' => $shift->id], 'dashboard', $this->navigationContext()) : \App\Support\OperationalNavigation::url('swaps', ['request' => $record->id], 'dashboard', $this->navigationContext()) }}" wire:navigate class="button-secondary w-full sm:w-auto" aria-label="{{ $isUncovered ? 'Realocar profissional do plantão #'.$shift->id : 'Analisar solicitação #'.$record->id }}">{{ $isUncovered ? 'Realocar profissional' : 'Analisar solicitação' }}</a>
+                        <div class="attention-actions flex flex-col gap-2">
+                            @if (! $isUncovered)
+                                <button type="button" wire:click="openSwapAnalysis({{ $record->id }})" wire:loading.attr="disabled" wire:target="openSwapAnalysis" class="button-primary w-full sm:w-auto" aria-label="Analisar pedido #{{ $record->id }} no painel">Analisar no painel</button>
+                            @endif
+                            <a href="{{ $isUncovered ? \App\Support\OperationalNavigation::url('shifts', ['focus' => $shift->id], 'dashboard', $this->navigationContext()) : \App\Support\OperationalNavigation::url('swaps', ['request' => $record->id], 'dashboard', $this->navigationContext()) }}" wire:navigate class="button-secondary w-full sm:w-auto" aria-label="{{ $isUncovered ? 'Realocar profissional do plantão #'.$shift->id : 'Abrir pedido #'.$record->id.' em Trocas' }}">{{ $isUncovered ? 'Realocar profissional' : 'Abrir em Trocas' }}</a>
+                        </div>
                     </li>
                 @empty
                     <li class="empty-state compact-empty">
@@ -93,4 +100,5 @@
         <a href="{{ route('manager.calendar') }}" wire:navigate class="text-link inline-flex min-h-10 items-center">Abrir calendário</a>
         <a href="{{ route('manager.shifts') }}" wire:navigate class="text-link inline-flex min-h-10 items-center">Gerenciar escala</a>
     </nav>
+    @include('livewire.manager.partials.swap-analysis')
 </div>

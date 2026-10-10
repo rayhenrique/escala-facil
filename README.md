@@ -4,7 +4,7 @@
 
 Sistema interno para gestão de escalas médicas, plantões, trocas e ausências em unidades de saúde. A aplicação centraliza a operação da gerência, permite que profissionais acompanhem a própria agenda e aplica as regras de compatibilidade e limite mensal em todas as decisões de troca.
 
-**Versão atual:** `1.25.0` — consulte o histórico completo em [`versoes.md`](versoes.md).
+**Versão atual:** `1.26.0` — consulte o histórico completo em [`versoes.md`](versoes.md).
 
 Desenvolvido por [KL Tecnologia](https://kltecnologia.com).
 
@@ -157,7 +157,7 @@ Crie um banco MySQL chamado `escala_facil` e ajuste o `.env`:
 APP_NAME="Escala Fácil"
 APP_URL=http://127.0.0.1:8000
 APP_TIMEZONE=America/Maceio
-APP_VERSION=1.25.0
+APP_VERSION=1.26.0
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR
 APP_FAKER_LOCALE=pt_BR
@@ -413,6 +413,12 @@ Para validar no navegador, disponibilize Playwright e um servidor local em
 externa do Playwright e `PLAYWRIGHT_CHANNEL=msedge` permite usar o Edge instalado.
 O teste cobre desktop, mobile, rolagem rápida, recarregamento no meio da página,
 movimento reduzido e falhas/desativação de JavaScript, sem alterar dados.
+
+### Analisar trocas pelo painel
+
+Na fila de pendências, selecione **Analisar no painel**, confira participantes, plantões, contrapartida, alertas e limite mensal. Escolha Aprovar ou Rejeitar e confirme a decisão; a rejeição exige justificativa. Alterações ocorridas durante a análise exigem abrir o pedido novamente. **Abrir em Trocas** continua disponível para consultar o registro e retornar com os filtros preservados. Comprovantes e notificações são gerados pelo fluxo existente.
+
+Regressão visual: `npm run test:swaps:browser`, com servidor local, base descartável e `DASHBOARD_QA_EMAIL`, `DASHBOARD_QA_PASSWORD`, `PLAYWRIGHT_MODULE`/`PLAYWRIGHT_CHANNEL` conforme o ambiente; `AXE_MODULE` ativa a auditoria AA. A execução altera somente pedidos sintéticos dessa base. Testes unitários de apresentação: `npm run test:swaps`. A suíte PHP inclui concorrência em processos separados com SQLite temporário; os locks específicos do MySQL devem ser verificados também no ambiente de homologação.
 
 ## Documentação
 

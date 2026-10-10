@@ -99,7 +99,7 @@ try {
             await page.screenshot({ path: `${out}/dashboard-${width}.png`, fullPage: true });
         }
 
-        // Every queue action navigates to a selected record, never approves it.
+        // Queue links navigate to the selected record; analysis buttons are tested separately.
         const rowAction = page.locator('[data-attention] a').first();
         if (await rowAction.count()) {
             const target = new URL(await rowAction.getAttribute('href'));
@@ -116,7 +116,10 @@ try {
         assert.equal(await page.locator('#shift-filter').inputValue(), 'uncovered');
         assert.equal(await page.locator('#month').isDisabled(), true);
         await audit(page);
-        await page.getByRole('link', { name: 'Limpar filtros', exact: true }).click();
+        const clear = page.getByRole('link', { name: 'Limpar filtros', exact: true });
+        const clearedUrl = await clear.getAttribute('href');
+        await clear.click();
+        await page.waitForURL(clearedUrl);
         await page.locator('#shift-filter').waitFor();
         await page.waitForFunction(() => document.querySelector('#shift-filter')?.value === '');
         assert.equal(await page.locator('#month').isDisabled(), false);

@@ -6,6 +6,12 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.26.0 — 10/10/2026
+
+### Análise de trocas no painel
+
+- Gerentes agora podem analisar e decidir pedidos de troca diretamente pelo painel.
+
 ## 1.25.0 — 10/10/2026
 
 ### Acesso direto aos registros

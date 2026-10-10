@@ -2,9 +2,18 @@
 
 return [
     // Versão do código instalado. APP_VERSION não pode sobrepor este registro.
-    'current' => '1.25.0',
+    'current' => '1.26.0',
 
     'releases' => [
+        [
+            'version' => '1.26.0',
+            'date' => '2026-10-10',
+            'title' => 'Análise de trocas no painel',
+            'summary' => 'Gerentes agora podem analisar e decidir pedidos de troca diretamente pelo painel.',
+            'highlights' => [
+                'Gerentes agora podem analisar e decidir pedidos de troca diretamente pelo painel.',
+            ],
+        ],
         [
             'version' => '1.25.0',
             'date' => '2026-10-10',

@@ -1,0 +1,81 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Enums\ShiftSwapStatus;
+use Symfony\Component\Process\Process;
+use Tests\TestCase;
+
+class ConcurrentSwapDecisionTest extends TestCase
+{
+    public function test_separate_processes_cannot_both_decide_the_same_swap(): void
+    {
+        $database = tempnam(sys_get_temp_dir(), 'swap-concurrency-');
+        $barrier = $database.'.ready';
+        $environment = ['APP_ENV' => 'testing', 'DB_CONNECTION' => 'sqlite', 'DB_DATABASE' => $database,
+            'CACHE_STORE' => 'array', 'SESSION_DRIVER' => 'array', 'MAIL_MAILER' => 'array'];
+        $boot = 'require "vendor/autoload.php"; $app=require "bootstrap/app.php"; $app->make(Illuminate\\Contracts\\Console\\Kernel::class)->bootstrap();';
+        try {
+            $migrate = new Process([PHP_BINARY, 'artisan', 'migrate', '--force'], base_path(), $environment);
+            $migrate->mustRun();
+            $seed = new Process([PHP_BINARY, '-r', $boot.'
+                $manager=App\\Models\\User::factory()->create(["role"=>"manager"]);
+                $shift=App\\Models\\Shift::factory()->create(["status"=>"scheduled"]);
+                $sub=App\\Models\\User::factory()->create();
+                $swap=App\\Models\\ShiftSwap::factory()->create(["shift_id"=>$shift->id,"requester_id"=>$shift->user_id,"substitute_id"=>$sub->id,"status"=>"pending_manager"]);
+                echo json_encode([$manager->id,$swap->id]);'], base_path(), $environment);
+            $seed->mustRun();
+            [$managerId, $swapId] = json_decode($seed->getOutput(), true, flags: JSON_THROW_ON_ERROR);
+            $worker = $boot.'
+                $manager=App\\Models\\User::findOrFail((int)$argv[1]);
+                file_put_contents($argv[3].".".$argv[4], "ready");
+                while (!file_exists($argv[3])) { usleep(1000); }
+                try {
+                    $action=app(App\\Actions\\ShiftSwaps\\DecideShiftSwapAction::class);
+                    if ($argv[4]==="approve") $action->approve($manager,(int)$argv[2]);
+                    else $action->reject($manager,(int)$argv[2],"Manter cobertura original.");
+                    echo "decided";
+                } catch (Illuminate\\Auth\\Access\\AuthorizationException|Illuminate\\Validation\\ValidationException $e) { echo "refused"; }
+            ';
+            $first = new Process([PHP_BINARY, '-r', $worker, (string) $managerId, (string) $swapId, $barrier, 'approve'], base_path(), $environment);
+            $second = new Process([PHP_BINARY, '-r', $worker, (string) $managerId, (string) $swapId, $barrier, 'reject'], base_path(), $environment);
+            $first->start();
+            $second->start();
+            $deadline = microtime(true) + 10;
+            while ((! file_exists($barrier.'.approve') || ! file_exists($barrier.'.reject')) && microtime(true) < $deadline) {
+                usleep(1000);
+            }
+            $this->assertFileExists($barrier.'.approve');
+            $this->assertFileExists($barrier.'.reject');
+            file_put_contents($barrier, 'go');
+            $first->wait();
+            $second->wait();
+            $this->assertTrue($first->isSuccessful(), $first->getOutput().$first->getErrorOutput());
+            $this->assertTrue($second->isSuccessful(), $second->getOutput().$second->getErrorOutput());
+            $outcomes = [$first->getOutput(), $second->getOutput()];
+            sort($outcomes);
+            $this->assertSame(['decided', 'refused'], $outcomes);
+            $pdo = new \PDO('sqlite:'.$database);
+            $this->assertSame(2, (int) $pdo->query('SELECT COUNT(*) FROM notifications')->fetchColumn());
+            $statement = $pdo->prepare('SELECT swaps.status, shifts.user_id, swaps.requester_id, swaps.substitute_id FROM shift_swaps swaps JOIN shifts ON shifts.id = swaps.shift_id WHERE swaps.id = ?');
+            $statement->execute([$swapId]);
+            $record = $statement->fetch(\PDO::FETCH_ASSOC);
+            $status = $record['status'];
+            $this->assertContains($status, [ShiftSwapStatus::Approved->value, ShiftSwapStatus::Rejected->value]);
+            $this->assertSame((int) ($status === ShiftSwapStatus::Approved->value ? $record['substitute_id'] : $record['requester_id']), (int) $record['user_id']);
+            $statement = null;
+            $pdo = null;
+        } finally {
+            foreach ([$first ?? null, $second ?? null] as $process) {
+                if ($process?->isRunning()) {
+                    $process->stop();
+                }
+            }
+            foreach ([$database, $database.'-journal', $database.'-wal', $database.'-shm', $barrier, $barrier.'.approve', $barrier.'.reject'] as $file) {
+                if (is_file($file)) {
+                    unlink($file);
+                }
+            }
+        }
+    }
+}

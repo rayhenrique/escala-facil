@@ -5,8 +5,10 @@ import { initLandingPage } from './landing';
 import { registerAuthUi } from './auth';
 import { initPwaInstall } from './pwa-install';
 import { initOperationalNavigation } from './operational-navigation';
+import { registerSwapAnalysis } from './swap-analysis';
 
 registerAuthUi(Livewire);
+registerSwapAnalysis(Livewire);
 initPwaInstall();
 document.addEventListener('livewire:navigated', initOperationalNavigation);
 if (document.readyState === 'loading') {

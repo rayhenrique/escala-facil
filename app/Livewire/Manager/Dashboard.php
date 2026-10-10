@@ -4,6 +4,7 @@ namespace App\Livewire\Manager;
 
 use App\Enums\ShiftStatus;
 use App\Enums\ShiftSwapStatus;
+use App\Livewire\Concerns\AnalyzesShiftSwaps;
 use App\Livewire\Concerns\HasOperationalContext;
 use App\Models\Shift;
 use App\Models\ShiftSwap;
@@ -17,6 +18,7 @@ use Livewire\WithPagination;
 #[Layout('layouts.app', ['title' => 'Painel da gerência'])]
 class Dashboard extends Component
 {
+    use AnalyzesShiftSwaps;
     use HasOperationalContext;
     use WithPagination;
 
@@ -45,6 +47,7 @@ class Dashboard extends Component
 
     public function render(): View
     {
+        $this->authorize('viewAny', ShiftSwap::class);
         $this->normalizePeriod();
         $now = now()->toImmutable();
         $rollingEnd = $now->addHours(72);

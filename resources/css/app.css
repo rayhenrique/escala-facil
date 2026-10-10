@@ -148,7 +148,7 @@
     .context-navigation { @apply my-5 flex flex-wrap items-center gap-x-6 gap-y-2 border-y border-line py-3; }
     .context-record { @apply scroll-mt-20 border-primary bg-primary-soft outline-2 outline-offset-2 outline-primary lg:scroll-mt-5; }
     .attention-row > div:nth-child(2) { @apply sm:col-start-1 xl:col-auto; }
-    .attention-row > a { @apply sm:col-start-2 sm:row-start-1 sm:row-span-2 xl:col-auto xl:row-auto; }
+    .attention-row > a, .attention-actions { @apply sm:col-start-2 sm:row-start-1 sm:row-span-2 xl:col-auto xl:row-auto; }
     .alert-row { @apply rounded-xl border border-line bg-white p-5 shadow-soft sm:p-6; }
     .record-card { @apply rounded-xl border border-line bg-white p-4 shadow-soft; }
     .modal-overlay { @apply fixed inset-0 z-[70] flex items-end justify-center p-0 sm:items-center sm:p-5; }

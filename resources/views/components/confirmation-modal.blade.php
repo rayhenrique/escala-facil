@@ -5,14 +5,21 @@
     'eyebrow' => 'Confirmação necessária',
     'closeAction',
     'tone' => 'danger',
+    'busyAction' => null,
+    'trapFocus' => false,
 ])
 
 @if ($show)
     <div
         class="modal-overlay"
-        x-data
+        x-data="{ busy: false }"
+        @if ($trapFocus) x-trap.inert.noscroll.noreturn="true" @endif
+        @if ($busyAction)
+            x-on:swap-decision-busy.window="busy = $event.detail"
+        @endif
         x-init="$nextTick(() => $el.querySelector('[data-confirm-cancel]')?.focus())"
-        @keydown.escape.window="$wire.{{ $closeAction }}()"
+        @keydown.escape.window="if (!busy) $wire.{{ $closeAction }}()"
+        @if ($busyAction) data-decision-component="{{ $this->getId() }}" @endif
     >
         <div class="modal-backdrop" aria-hidden="true"></div>
         <section

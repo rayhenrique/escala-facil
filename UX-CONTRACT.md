@@ -109,3 +109,16 @@ Os formulários de acesso não abrem o teclado automaticamente. E-mail usa tecla
 - `npm run build`
 - `npx -p @google/design.md designmd lint DESIGN.md`
 - Inspeção no navegador em 320×568, 390×844 e 1440×1000, incluindo console, navegação, formulários, alertas e cartões.
+
+
+## Análise e decisão no painel gerencial
+
+- Responsáveis canônicos: `ShiftSwapAnalysis`, `AnalyzesShiftSwaps`, parcial `manager/partials/swap-analysis` e `DecideShiftSwapAction`, compartilhados com Trocas.
+- Abrir a análise não modifica o pedido. Aprovar ou Rejeitar abre a etapa de confirmação com consequências explícitas. Rejeição exige justificativa de 3 a 1000 caracteres no servidor, inclusive fora do componente.
+- São exibidos data, início, término, duração, setor, categoria, participantes e contrapartida. Alertas consideram o cronograma resultante dos dois profissionais, excluindo os plantões que serão transferidos. Encostar é dobra; sobrepor é conflito. Ambos permanecem alertas gerenciais conforme a regra vigente; não foi criada proibição institucional adicional.
+- Cota: quatro participações aprovadas, pelo mês de criação da solicitação. Limite atingido impede aprovação, mas permite análise e rejeição.
+- A confirmação usa estado bloqueado do Livewire e uma assinatura da análise. A Action relê e bloqueia participantes, gerente, plantões em ordem estável e pedido, revalida permissão atual, atribuição da contrapartida, status e cota na transação. Mudanças desde a análise exigem fechá-la e abri-la novamente.
+- Clique repetido ou duas decisões concorrentes não criam duas decisões/comprovantes. Deadlocks recebem até três tentativas; conflito persistente retorna mensagem para consultar novamente, sem sucesso antecipado. Falhas de rede mantêm a análise e orientam conferir o estado antes de repetir.
+- Após sucesso, fila e indicadores são recalculados, filtros mantidos, comprovante exibido e contador de notificações atualizado. Notificações históricas permanecem imutáveis na mesma transação da decisão.
+- Modal: foco inicial em Fechar, Tab restrito ao diálogo, fundo inerte, Escape e cancelamento bloqueados durante a confirmação, foco de retorno e campos com erros associados. Movimento reduzido preservado.
+- Verificação: PHPUnit/Livewire, processos PHP concorrentes com SQLite descartável, navegador 320/390/1440 px, teclado, axe AA, clique repetido, análise desatualizada e PWA. O teste SQLite não certifica o mecanismo de locks do MySQL de produção.

@@ -64,7 +64,7 @@ class ShiftSwapPolicy
             return false;
         }
 
-        $shiftSwap->loadMissing(['requester', 'substitute', 'shift']);
+        $shiftSwap->loadMissing(['requester', 'substitute', 'shift', 'substituteShift']);
         $referenceDate = $shiftSwap->created_at ?? now();
 
         return $shiftSwap->requester !== null
@@ -72,6 +72,9 @@ class ShiftSwapPolicy
             && $shiftSwap->shift !== null
             && $shiftSwap->shift->user_id === $shiftSwap->requester_id
             && $shiftSwap->shift->status === ShiftStatus::Scheduled
+            && (! $shiftSwap->substitute_shift_id || ($shiftSwap->substituteShift !== null
+                && $shiftSwap->substituteShift->user_id === $shiftSwap->substitute_id
+                && $shiftSwap->substituteShift->status === ShiftStatus::Scheduled))
             && ! $shiftSwap->requester->hasReachedSwapLimit($referenceDate->month, $referenceDate->year)
             && ! $shiftSwap->substitute->hasReachedSwapLimit($referenceDate->month, $referenceDate->year);
     }

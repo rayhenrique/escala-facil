@@ -115,7 +115,7 @@ class ShiftSwapNotificationTest extends TestCase
         ]);
         app(AcceptShiftSwapAction::class)->execute($substitute, $shiftSwap->id);
 
-        app(DecideShiftSwapAction::class)->reject($manager, $shiftSwap->id);
+        app(DecideShiftSwapAction::class)->reject($manager, $shiftSwap->id, 'Manter a cobertura original.');
 
         $this->assertNotNull($requester->notifications->first(
             fn ($notification): bool => $notification->data['event'] === 'rejected',
