@@ -189,7 +189,7 @@ class ShiftSwapEnhancementsTest extends TestCase
             ->assertSeeHtml('daily-shift-card-swapped')
             ->assertSee($requester->name)
             ->assertSee($substitute->name)
-            ->assertSeeHtml('title="Troca realizada: '.$requester->name.' trocou com '.$substitute->name.' (Solicitante: '.$requester->name.' → Substituto: '.$substitute->name.')"');
+            ->assertSeeHtml('title="'.e('Troca realizada: '.$requester->name.' trocou com '.$substitute->name.' (Solicitante: '.$requester->name.' → Substituto: '.$substitute->name.')').'"');
 
         Livewire::actingAs($substitute)
             ->test(MySchedule::class)

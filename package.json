@@ -6,6 +6,7 @@
         "test:pwa": "node --test tests/js/service-worker.test.mjs tests/js/pwa-install.test.mjs",
         "test:auth": "node --test tests/js/auth.test.mjs",
         "test:auth:browser": "node tests/browser/auth.mjs",
+        "test:dashboard:browser": "node tests/browser/dashboard.mjs",
         "test:landing": "node --test tests/js/landing.test.mjs",
         "test:landing:browser": "node tests/browser/landing.mjs",
         "build": "vite build",

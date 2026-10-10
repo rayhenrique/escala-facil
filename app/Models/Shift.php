@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Shift extends Model
 {
@@ -72,5 +73,10 @@ class Shift extends Model
     public function absences(): HasMany
     {
         return $this->hasMany(Absence::class);
+    }
+
+    public function latestAbsence(): HasOne
+    {
+        return $this->hasOne(Absence::class)->ofMany(['created_at' => 'max', 'id' => 'max']);
     }
 }

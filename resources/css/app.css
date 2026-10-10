@@ -140,6 +140,13 @@
     .coverage-metrics dt { @apply text-xs font-semibold uppercase tracking-wider text-white/65; }
     .coverage-metrics dd { @apply mt-2 text-4xl font-semibold tabular-nums; }
     .coverage-metrics span { @apply mt-1 text-xs text-white/65; }
+    .coverage-metric-link { @apply block rounded-sm underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white; }
+    .coverage-metric-link span { @apply block leading-5; }
+    .manager-dashboard .coverage-metrics > div { @apply min-h-0 py-4 lg:py-5; }
+    #attention-title { @apply scroll-mt-20 lg:scroll-mt-5; }
+    .attention-row { @apply grid items-start gap-4 rounded-xl border border-line bg-white p-5 sm:grid-cols-[1fr_auto] xl:grid-cols-[12rem_1fr_auto]; }
+    .attention-row > div:nth-child(2) { @apply sm:col-start-1 xl:col-auto; }
+    .attention-row > a { @apply sm:col-start-2 sm:row-start-1 sm:row-span-2 xl:col-auto xl:row-auto; }
     .alert-row { @apply rounded-xl border border-line bg-white p-5 shadow-soft sm:p-6; }
     .record-card { @apply rounded-xl border border-line bg-white p-4 shadow-soft; }
     .modal-overlay { @apply fixed inset-0 z-[70] flex items-end justify-center p-0 sm:items-center sm:p-5; }

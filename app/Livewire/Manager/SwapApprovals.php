@@ -14,6 +14,7 @@ use App\Support\ShiftSwapReceipt;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -21,6 +22,9 @@ use Livewire\WithPagination;
 class SwapApprovals extends Component
 {
     use WithPagination;
+
+    #[Url]
+    public ?int $request = null;
 
     /** @var array<string, mixed>|null */
     public ?array $swapReceipt = null;
@@ -190,6 +194,7 @@ class SwapApprovals extends Component
                 'substitute',
             ])
             ->where('status', ShiftSwapStatus::PendingManager)
+            ->when($this->request !== null, fn ($query) => $query->whereKey($this->request))
             ->oldest()
             ->paginate(10);
 

@@ -6,6 +6,12 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.24.0 — 10/10/2026
+
+### Pendências organizadas por prioridade
+
+- As tarefas que precisam da sua atenção agora aparecem organizadas por prioridade, sem informações repetidas.
+
 ## 1.23.1 — 10/10/2026
 
 ### Acesso mais fácil pelo celular

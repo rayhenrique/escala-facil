@@ -21,44 +21,34 @@ class ManagerProductivityTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_dashboard_prioritizes_next_72_hours_and_oldest_pending_swap(): void
+    public function test_dashboard_has_one_queue_with_operational_risk_before_proximity_and_age(): void
     {
+        $this->travelTo(now()->startOfDay()->setHour(6));
         [$manager, $requester, $substitute, $category, $sector] = $this->team();
+        $uncovered = $this->shift($category, $sector, null, ShiftStatus::Uncovered, 2);
+        $nearSwap = $this->pendingSwap($requester, $substitute, $this->shift($category, $sector, $requester, ShiftStatus::Scheduled, 0));
+        $laterShift = $this->shift($category, $sector, $requester, ShiftStatus::Scheduled, 1);
+        $oldSwap = $this->pendingSwap($requester, $substitute, $laterShift);
+        $oldSwap->update(['created_at' => now()->subDays(3)]);
+        $newSwap = $this->pendingSwap($requester, $substitute, $laterShift);
 
-        $imminent = $this->shift($category, $sector, null, ShiftStatus::Uncovered, 1);
-        $this->shift($category, $sector, null, ShiftStatus::Uncovered, 10);
-
-        $oldestSwap = $this->pendingSwap($requester, $substitute, $this->shift($category, $sector, $requester, ShiftStatus::Scheduled, 4));
-        $oldestSwap->update(['created_at' => now()->subDays(3), 'updated_at' => now()->subDays(3)]);
-        $recentSwap = $this->pendingSwap($requester, $substitute, $this->shift($category, $sector, $requester, ShiftStatus::Scheduled, 5));
-
-        Livewire::actingAs($manager)
-            ->test(Dashboard::class)
-            ->assertSee('Próximas 72 horas')
-            ->assertSee('1 descoberto(s) em 72h')
-            ->assertSee($imminent->date->format('d/m/Y'))
-            ->assertSee('Realocar profissional')
-            ->assertSee('Pendência mais antiga')
-            ->assertSee('Pedido #'.$oldestSwap->id)
-            ->assertSee($requester->name)
-            ->assertSee($substitute->name)
-            ->assertSee('Analisar solicitação')
-            // Listas completas preservadas abaixo do foco.
-            ->assertSee('Plantões futuros descobertos')
-            ->assertSee('Trocas aguardando aprovação')
-            ->assertSee('Pedido #'.$recentSwap->id);
+        $component = Livewire::actingAs($manager)->test(Dashboard::class)
+            ->assertSee('Fila de pendências')->assertDontSee('Pendência mais antiga')
+            ->assertDontSee('Trocas aguardando aprovação')
+            ->assertSeeInOrder(['Plantão #'.$uncovered->id, 'Pedido #'.$nearSwap->id, 'Pedido #'.$oldSwap->id, 'Pedido #'.$newSwap->id]);
+        $this->assertSame(1, substr_count($component->html(), 'data-attention="swap-'.$oldSwap->id.'"'));
+        $component->assertViewHas('pendingSwapCount', 3)->assertViewHas('uncoveredCount', 1);
     }
 
-    public function test_dashboard_shows_empty_focus_state_while_lists_stay_complete(): void
+    public function test_dashboard_keeps_global_counts_when_period_is_empty(): void
     {
-        [$manager, $requester, $substitute, $category, $sector] = $this->team();
-
+        [$manager, , , $category, $sector] = $this->team();
         $farShift = $this->shift($category, $sector, null, ShiftStatus::Uncovered, 10);
-
-        Livewire::actingAs($manager)
-            ->test(Dashboard::class)
-            ->assertSee('Nenhuma pendência nas próximas 72 horas.')
-            ->assertSee($farShift->date->format('d/m/Y'));
+        Livewire::actingAs($manager)->test(Dashboard::class)
+            ->assertSee('Nenhuma pendência neste período.')
+            ->assertViewHas('uncoveredCount', 1)
+            ->assertDontSee('data-attention="uncovered-'.$farShift->id.'"', false)
+            ->assertSee(route('manager.shifts', ['filter' => 'uncovered']), false);
     }
 
     public function test_dashboard_calculation_queries_stay_bounded(): void

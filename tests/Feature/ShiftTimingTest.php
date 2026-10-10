@@ -20,6 +20,7 @@ use App\Services\ShiftSpreadsheetService;
 use App\Support\ShiftCoverage;
 use App\Support\ShiftPeriod;
 use App\Support\ShiftSwapReceipt;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -181,6 +182,7 @@ class ShiftTimingTest extends TestCase
 
     public function test_calendar_dashboard_and_wall_roster_show_end_date_and_duration(): void
     {
+        $this->travelTo(CarbonImmutable::parse('2027-01-31 06:00:00'));
         [$manager, $user, $sector, $category] = $this->team();
         $shift = $this->shift($user, $sector, $category, '2027-01-31', '07:00', '07:00', '2027-02-01');
         Livewire::actingAs($manager)->test(MonthlyCalendar::class)

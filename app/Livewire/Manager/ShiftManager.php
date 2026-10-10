@@ -12,6 +12,7 @@ use App\Models\Category;
 use App\Models\Sector;
 use App\Models\Shift;
 use App\Models\User;
+use App\Support\ManagerAttention;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
@@ -32,6 +33,12 @@ class ShiftManager extends Component
 
     #[Url]
     public string $month = '';
+
+    #[Url]
+    public string $filter = '';
+
+    #[Url]
+    public ?int $focus = null;
 
     public ?int $editingShiftId = null;
 
@@ -113,6 +120,13 @@ class ShiftManager extends Component
     public function updatedMonth(): void
     {
         $this->month = $this->normalizeMonth($this->month);
+        $this->focus = null;
+        $this->resetPage();
+    }
+
+    public function updatedFilter(): void
+    {
+        $this->focus = null;
         $this->resetPage();
     }
 
@@ -368,9 +382,12 @@ class ShiftManager extends Component
     {
         [$year, $month] = array_pad(explode('-', $this->month), 2, null);
 
-        $shifts = Shift::query()
+        $this->filter = in_array($this->filter, ['scheduled', 'uncovered'], true) ? $this->filter : '';
+        $shifts = ($this->filter === 'uncovered' ? ManagerAttention::uncovered(now()) : Shift::query())
             ->with(['category', 'sector', 'user'])
-            ->when($year && $month, fn ($query) => $query->whereYear('date', $year)->whereMonth('date', $month))
+            ->when($this->filter !== 'uncovered' && $year && $month, fn ($query) => $query->whereYear('date', $year)->whereMonth('date', $month))
+            ->when($this->filter === 'scheduled', fn ($query) => $query->where('status', ShiftStatus::Scheduled))
+            ->when($this->focus !== null, fn ($query) => $query->whereKey($this->focus))
             ->orderBy('date')
             ->orderBy('start_time')
             ->paginate(10);

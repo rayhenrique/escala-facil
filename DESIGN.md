@@ -168,7 +168,9 @@ A navegação autenticada usa uma sidebar escura com marca, identidade do usuár
 
 O calendário compartilhado por gerentes e profissionais apresenta sete colunas mesmo no celular, com números, contagens e marcadores compactos. A lista textual abaixo do mês concentra nome do profissional, horário, setor, categoria e status do plantão selecionado; atalhos de gestão aparecem somente para quem possui a permissão correspondente.
 
-O painel gerencial usa o quadro `coverage-board` como ponto focal único: a faixa escura reúne apenas métricas operacionais reais, com trilhos verdes, vermelhos e âmbar para cobertura, descoberta e decisão. Alertas aparecem abaixo em cartões com contexto e uma ação textual clara. Em telas estreitas, todas as tabelas operacionais cedem lugar a cartões, preservando os mesmos dados e ações. Cada destino da sidebar mantém área de toque adequada.
+Os rótulos Menu, Suporte e versão da sidebar usam branco com 65% de opacidade para manter contraste sobre `primary-strong`. A paginação da fila usa Anterior e Próxima como botões nativos, com limites desativados e página atual textual; a navegação retorna ao título da fila, respeitando a barra móvel.
+
+O painel gerencial usa o quadro `coverage-board` como ponto focal único: a faixa escura reúne métricas operacionais reais e acionáveis, com trilhos verdes, vermelhos e âmbar para cobertura, descoberta e decisão. Abaixo, uma fila única de linhas `attention-row` apresenta prioridade textual, tipo, data e duração, setor, participantes, antiguidade e ação contextual. Falta de cobertura vem antes de trocas; dentro de cada grupo, início do plantão e antiguidade ordenam os registros. Os filtros Hoje, 3 dias e 7 dias usam botões com estado pressionado, mantendo a seleção na URL. As 72 horas corridas têm um resumo separado e limites explícitos. No celular, cada linha se empilha, preservando todos os dados e a ação. Atalhos se limitam a dois links compactos da escala; cadastros permanecem na sidebar.
 
 ### Forms and overlays
 

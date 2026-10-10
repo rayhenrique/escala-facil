@@ -62,7 +62,7 @@
                 </div>
 
                 <nav class="flex-1 overflow-y-auto px-3 py-5" aria-label="Navegação principal">
-                    <p class="sidebar-label px-3 font-mono text-[0.6875rem] font-medium uppercase tracking-[0.16em] text-white/45">Menu</p>
+                    <p class="sidebar-label px-3 font-mono text-[0.6875rem] font-medium uppercase tracking-[0.16em] text-white/65">Menu</p>
                     <div class="mt-3 space-y-1">
                         @if (auth()->user()->role === \App\Enums\UserRole::Manager)
                             <a href="{{ route('manager.dashboard') }}" wire:navigate title="Visão geral" class="sidebar-nav-link {{ request()->routeIs('manager.dashboard') ? 'sidebar-nav-link-active' : '' }}" @if(request()->routeIs('manager.dashboard')) aria-current="page" @endif>
@@ -126,7 +126,7 @@
                     </div>
 
                     <div class="mt-6 border-t border-white/10 pt-5">
-                        <p class="sidebar-label px-3 font-mono text-[0.6875rem] font-medium uppercase tracking-[0.16em] text-white/45">Suporte</p>
+                        <p class="sidebar-label px-3 font-mono text-[0.6875rem] font-medium uppercase tracking-[0.16em] text-white/65">Suporte</p>
                         <div class="mt-3 space-y-1">
                             <livewire:notification-nav-item />
                             <a href="{{ route('help') }}" wire:navigate title="Ajuda e versões" class="sidebar-nav-link {{ request()->routeIs('help') ? 'sidebar-nav-link-active' : '' }}" @if(request()->routeIs('help')) aria-current="page" @endif>
@@ -136,7 +136,7 @@
                                 <x-nav-icon name="install" class="sidebar-nav-icon" /><span class="sidebar-label">Instalar aplicativo</span>
                             </button>
                         </div>
-                        <p class="sidebar-label mt-4 px-3 text-xs text-white/40">Versão {{ config('version.current') }}</p>
+                        <p class="sidebar-label mt-4 px-3 text-xs text-white/65">Versão {{ config('version.current') }}</p>
                     </div>
                 </nav>
 

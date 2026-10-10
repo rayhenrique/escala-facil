@@ -8,7 +8,7 @@
         <div class="grid w-full gap-3 sm:w-auto sm:items-end">
             <div>
                 <label for="month" class="field-label">Mês exibido</label>
-                <input wire:model.live="month" id="month" type="month" class="field-input">
+                <input wire:model.live="month" id="month" type="month" class="field-input" @disabled($filter === 'uncovered')>
             </div>
             <div class="flex flex-col gap-2 sm:flex-row">
                 <a href="{{ route('manager.shifts.template') }}" class="button-secondary w-full text-center sm:w-auto">Modelo XLSX</a>
@@ -21,6 +21,20 @@
     </div>
 
     <x-flash-notifications />
+
+    <div class="mt-5 flex flex-wrap items-end gap-3">
+        <div>
+            <label for="shift-filter" class="field-label">Plantões exibidos</label>
+            <select wire:model.live="filter" id="shift-filter" class="field-input">
+                <option value="">Todos no mês</option>
+                <option value="scheduled">Agendados no mês</option>
+                <option value="uncovered">Descobertos ativos ou futuros (todos os meses)</option>
+            </select>
+        </div>
+        @if ($filter !== '' || $focus !== null)
+            <a href="{{ route('manager.shifts', ['month' => $month]) }}" wire:navigate class="text-link inline-flex min-h-10 items-center">Limpar filtros{{ $focus !== null ? ' · Plantão #'.$focus.' selecionado' : '' }}</a>
+        @endif
+    </div>
 
     @if ($showFormModal)
         <div class="modal-overlay" x-data x-init="$nextTick(() => $refs.firstField?.focus())" @keydown.escape.window="$wire.closeFormModal()">

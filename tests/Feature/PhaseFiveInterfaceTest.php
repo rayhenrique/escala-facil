@@ -33,7 +33,7 @@ class PhaseFiveInterfaceTest extends TestCase
             'status' => AbsenceStatus::Pending,
         ]);
 
-        $swapShift = $this->shift($category, $sector, $requester, ShiftStatus::Scheduled, 3);
+        $swapShift = $this->shift($category, $sector, $requester, ShiftStatus::Scheduled, 2);
         ShiftSwap::query()->create([
             'shift_id' => $swapShift->id,
             'requester_id' => $requester->id,
@@ -44,7 +44,7 @@ class PhaseFiveInterfaceTest extends TestCase
         Livewire::actingAs($manager)
             ->test(Dashboard::class)
             ->assertSee('Cobertura em tempo real')
-            ->assertSee('Plantões futuros descobertos')
+            ->assertSee('Prioridade de cobertura')
             ->assertSee('Atendimento médico comprovado.')
             ->assertSee($requester->name)
             ->assertSee($substitute->name)
@@ -65,8 +65,8 @@ class PhaseFiveInterfaceTest extends TestCase
 
         Livewire::actingAs($manager)
             ->test(Dashboard::class)
-            ->assertSee('Todos os plantões futuros têm cobertura.')
-            ->assertSee('Nenhuma troca aguarda aprovação.')
+            ->assertSee('Nenhum alerta operacional neste momento.')
+            ->assertSee('Não há plantões descobertos ativos ou futuros nem trocas aguardando a gerência.')
             ->assertDontSee('Aguardando decisão');
     }
 

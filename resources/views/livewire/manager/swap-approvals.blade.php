@@ -5,6 +5,10 @@
 
     <x-flash-notifications />
 
+    @if ($request !== null)
+        <p class="mt-4 text-sm">Pedido #{{ $request }} selecionado. <a href="{{ route('manager.swaps') }}" wire:navigate class="text-link inline-flex min-h-10 items-center">Ver todas as trocas pendentes</a></p>
+    @endif
+
     @if ($swapReceipt)
         <x-swap-receipt :receipt="$swapReceipt" class="mt-6" />
     @endif

@@ -1,5 +1,11 @@
 # TASKS - Plano de Execução Sequencial
 
+- [x] **Prioridades da gerência (1.24.0)**
+  - [x] Reunir cobertura e trocas em fila única, sem repetir o pedido mais antigo.
+  - [x] Ordenar risco, início e antiguidade; paginar com relacionamentos carregados em lote.
+  - [x] Distinguir dias de calendário das 72 horas corridas; tornar indicadores e ações contextuais filtrados.
+  - [x] Validar filtros, fronteiras, contagens, autorização, responsividade, acessibilidade, Pint e build.
+
 - [x] **Acesso pelo celular e instalação (1.23.1)**
   - [x] Preservar duas colunas institucionais e simplificar composição móvel sem decoração.
   - [x] Compartilhar campos de senha, carregamento e erros; corrigir autofill e foco de validação.

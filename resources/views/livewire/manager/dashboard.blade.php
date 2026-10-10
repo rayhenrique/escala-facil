@@ -1,191 +1,96 @@
-<div>
+<div class="manager-dashboard">
     <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
             <p class="eyebrow">Visão da gerência</p>
             <h1 class="page-title">Olá, {{ auth()->user()->name }}.</h1>
-            <p class="page-description">Acompanhe a cobertura dos setores e resolva as pendências que exigem decisão.</p>
+            <p class="page-description">Acompanhe a cobertura dos setores e as tarefas que precisam da sua atenção.</p>
         </div>
-        <p class="font-mono text-xs uppercase tracking-wider text-muted">{{ now()->translatedFormat('l, d \d\e F') }}</p>
+        <p class="font-mono text-xs text-muted">{{ $now->translatedFormat('l, d \d\e F') }}</p>
     </div>
 
     <section class="coverage-board mt-8" aria-labelledby="coverage-summary-title">
         <div class="coverage-board-heading">
             <p class="eyebrow text-white/75">Pulso da escala</p>
             <h2 id="coverage-summary-title">Cobertura em tempo real</h2>
-            <p>Os números abaixo refletem o estado atual dos plantões e pedidos.</p>
+            <p>Visão geral. Selecione um indicador para abrir os registros correspondentes.</p>
         </div>
         <dl class="coverage-metrics">
             <div>
                 <dt>Agendados no mês</dt>
-                <dd>{{ $scheduledThisMonth }}</dd>
-                <span>Plantões programados</span>
+                <dd><a href="{{ route('manager.shifts', ['month' => $now->format('Y-m'), 'filter' => 'scheduled']) }}" wire:navigate class="coverage-metric-link" aria-label="Ver {{ $scheduledThisMonth }} plantões agendados em {{ $now->format('m/Y') }}">{{ $scheduledThisMonth }}<span>Ver plantões de {{ $now->format('m/Y') }} →</span></a></dd>
             </div>
             <div class="coverage-metric-danger">
-                <dt>Descobertos futuros</dt>
-                <dd>{{ $uncoveredCount }}</dd>
-                <span>{{ $uncoveredCount === 1 ? 'Exige realocação' : 'Exigem realocação' }}</span>
+                <dt>Descobertos ativos ou futuros</dt>
+                <dd><a href="{{ route('manager.shifts', ['filter' => 'uncovered']) }}" wire:navigate class="coverage-metric-link" aria-label="Ver {{ $uncoveredCount }} plantões descobertos ativos ou futuros">{{ $uncoveredCount }}<span>Ver plantões para realocar →</span></a></dd>
             </div>
             <div class="coverage-metric-pending">
                 <dt>Trocas pendentes</dt>
-                <dd>{{ $pendingSwapCount }}</dd>
-                <span>{{ $pendingSwapCount === 1 ? 'Aguarda decisão' : 'Aguardam decisão' }}</span>
+                <dd><a href="{{ route('manager.swaps') }}" wire:navigate class="coverage-metric-link" aria-label="Ver {{ $pendingSwapCount }} trocas aguardando decisão">{{ $pendingSwapCount }}<span>Ver pedidos aguardando decisão →</span></a></dd>
             </div>
         </dl>
     </section>
 
-    @if ($uncoveredCount === 0 && $pendingSwapCount === 0)
-        <div class="status-success mt-6" role="status">
-            Nenhum alerta operacional neste momento. A escala está sem plantões descobertos ou trocas aguardando a gerência.
-        </div>
-    @endif
-
-    <section class="mt-10" aria-labelledby="action-focus-title">
-        <div class="section-heading">
+    <section class="mt-8" aria-labelledby="attention-title">
+        <div class="section-heading flex-wrap gap-4">
             <div>
                 <p class="eyebrow">Foco operacional</p>
-                <h2 id="action-focus-title">Próximas 72 horas</h2>
+                <h2 id="attention-title">Fila de pendências</h2>
             </div>
-            <x-status-badge status="pending_manager" :label="$uncovered72Count.' descoberto(s) em 72h'" />
+            <div class="flex gap-2" role="group" aria-label="Período da fila">
+                @foreach (['1' => 'Hoje', '3' => '3 dias', '7' => '7 dias'] as $value => $label)
+                    <button type="button" wire:click="$set('period', '{{ $value }}')" class="{{ $period === (string) $value ? 'button-primary' : 'button-secondary' }}" aria-pressed="{{ $period === (string) $value ? 'true' : 'false' }}" aria-controls="attention-list" wire:loading.attr="disabled" wire:target="period">{{ $label }}</button>
+                @endforeach
+            </div>
         </div>
+        <p class="mt-3 text-sm text-muted" id="attention-period">{{ $period === '1' ? 'Hoje' : $period.' dias de calendário, incluindo hoje' }}: {{ $now->format('d/m/Y') }} a {{ $calendarEnd->format('d/m/Y') }}. Trocas com plantão já iniciado continuam na fila.</p>
+        <p class="mt-2 text-sm text-muted">Primeiro falta de cobertura, depois trocas. Em cada grupo: início do plantão e antiguidade do pedido.</p>
+        <p class="mt-3 border-l-2 border-primary pl-3 text-sm"><strong>{{ $uncovered72Count }} {{ $uncovered72Count === 1 ? 'descoberto inicia' : 'descobertos iniciam' }} nas próximas 72 horas corridas</strong><span class="block text-xs text-muted">De {{ $now->format('d/m H:i') }} até {{ $rollingEnd->format('d/m H:i') }} (término do intervalo não incluído).</span></p>
 
-        @php($urgentUncovered = $nextUncovered && $nextUncovered->date->format('Y-m-d') <= $attentionWindowEnd ? $nextUncovered : null)
-
-        @if ($urgentUncovered || $oldestPendingSwap)
-            <div class="mt-4 grid gap-4 xl:grid-cols-2">
-                @if ($urgentUncovered)
-                    @php($urgentAbsence = $urgentUncovered->absences->first())
-                    <x-shift-card :shift="$urgentUncovered" wire:key="dashboard-next-uncovered-{{ $urgentUncovered->id }}">
-                        <p class="text-sm leading-6 text-muted">
-                            Próximo plantão descoberto em
-                            <strong class="text-ink">{{ $urgentUncovered->date->format('d/m/Y') }}</strong>.
-                            @if ($urgentAbsence)
-                                Ausência informada por <strong class="text-ink">{{ $urgentAbsence->user->name }}</strong>.
+        <div class="mt-4 text-sm text-muted" wire:loading wire:target="period, gotoPage, nextPage, previousPage" role="status">Atualizando pendências…</div>
+        <div id="attention-list" aria-describedby="attention-period" class="mt-5">
+            <p class="mb-3 text-sm font-semibold" role="status">{{ $queue->total() }} {{ $queue->total() === 1 ? 'pendência no período' : 'pendências no período' }}{{ $queue->total() > 8 ? ' · '.$queue->firstItem().'–'.$queue->lastItem().' nesta página' : '' }}</p>
+            <ol class="space-y-3">
+                @forelse ($queue as $item)
+                    @php
+                        $isUncovered = $item->kind === 'uncovered';
+                        $record = $item->record;
+                        $shift = $isUncovered ? $record : ($record->substituteShift && $record->substituteShift->period()->start->lt($record->shift->period()->start) ? $record->substituteShift : $record->shift);
+                        $started = $shift->period()->start->lte($now);
+                    @endphp
+                    <li class="attention-row" wire:key="attention-{{ $item->kind }}-{{ $item->id }}" data-attention="{{ $item->kind }}-{{ $item->id }}">
+                        <div>
+                            <x-status-badge :status="$isUncovered ? 'uncovered' : 'pending_manager'" :label="$isUncovered ? 'Prioridade de cobertura' : 'Aguardando decisão'" />
+                            <p class="mt-2 text-xs font-semibold {{ $started ? 'text-danger' : 'text-muted' }}">{{ $started ? 'Plantão já iniciado' : 'Plantão a iniciar' }}</p>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="meta-label">{{ $isUncovered ? 'Falta de cobertura · Plantão #'.$shift->id : ($record->substituteShift ? 'Troca mútua' : 'Troca de cobertura').' · Pedido #'.$record->id }}</p>
+                            <h3 class="mt-1 text-base font-semibold">{{ $shift->date->format('d/m/Y') }} · {{ $shift->time_label }}</h3>
+                            <p class="mt-1 text-sm text-muted">{{ $shift->sector->name }} · {{ $shift->category->name }}</p>
+                            @if ($isUncovered && $shift->latestAbsence)
+                                <p class="mt-2 text-sm">Ausência informada por <strong>{{ $shift->latestAbsence->user->name }}</strong>. {{ \Illuminate\Support\Str::limit($shift->latestAbsence->reason, 90) }}</p>
+                            @elseif (! $isUncovered)
+                                <p class="mt-2 text-sm"><strong>{{ $record->requester->name }}</strong> <span aria-hidden="true">→</span><span class="sr-only">solicita troca com</span> <strong>{{ $record->substitute->name }}</strong></p>
+                                @if ($record->substituteShift)
+                                    @php($other = $shift->is($record->shift) ? $record->substituteShift : $record->shift)
+                                    <p class="mt-1 text-xs text-muted">Outro plantão: {{ $other->date->format('d/m/Y') }} · {{ $other->time_label }} · {{ $other->sector->name }}</p>
+                                @endif
                             @endif
-                        </p>
-                        <a href="{{ route('manager.shifts', ['month' => $urgentUncovered->date->format('Y-m')]) }}" wire:navigate class="text-link mt-3 inline-flex">Realocar profissional</a>
-                    </x-shift-card>
-                @endif
-
-                @if ($oldestPendingSwap)
-                    <article class="alert-row" wire:key="dashboard-oldest-pending-{{ $oldestPendingSwap->id }}">
-                        <div class="flex flex-wrap items-center justify-between gap-3">
-                            <x-status-badge :status="$oldestPendingSwap->status" label="Pendência mais antiga" />
-                            <span class="font-mono text-xs text-muted">Pedido #{{ $oldestPendingSwap->id }} · {{ $oldestPendingSwap->created_at->diffForHumans() }}</span>
+                            <p class="mt-2 text-xs text-muted">{{ $isUncovered ? ($shift->latestAbsence ? 'Ausência informada em' : 'Plantão registrado em') : 'Solicitada em' }} {{ ($isUncovered ? ($shift->latestAbsence?->created_at ?? $shift->created_at) : $record->created_at)->format('d/m/Y H:i') }}</p>
                         </div>
-                        <h3 class="mt-4 text-lg font-semibold">{{ $oldestPendingSwap->shift->date->format('d/m/Y') }} · {{ $oldestPendingSwap->shift->time_label }}</h3>
-                        <p class="mt-1 text-sm text-muted">{{ $oldestPendingSwap->shift->sector->name }} · {{ $oldestPendingSwap->shift->category->name }}</p>
-                        <div class="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
-                            <strong>{{ $oldestPendingSwap->requester->name }}</strong>
-                            <span class="text-muted" aria-hidden="true">→</span>
-                            <span class="sr-only">será substituído por</span>
-                            <strong>{{ $oldestPendingSwap->substitute->name }}</strong>
-                        </div>
-                        <a href="{{ route('manager.swaps') }}" wire:navigate class="text-link mt-4 inline-flex">Analisar solicitação</a>
-                    </article>
-                @endif
-            </div>
-        @else
-            <div class="empty-state compact-empty mt-4">
-                <p class="font-semibold text-ink">Nenhuma pendência nas próximas 72 horas.</p>
-                <p class="mt-2 text-sm">Novos plantões descobertos e pedidos antigos aparecerão aqui primeiro.</p>
-            </div>
-        @endif
-    </section>
-
-    <div class="mt-10 grid gap-8 xl:grid-cols-2">
-        <section aria-labelledby="uncovered-title">
-            <div class="section-heading">
-                <div>
-                    <p class="eyebrow">Prioridade de cobertura</p>
-                    <h2 id="uncovered-title">Plantões futuros descobertos</h2>
-                </div>
-                <x-status-badge status="uncovered" :label="$uncoveredCount.' aberto(s)'" />
-            </div>
-
-            <div class="mt-4 space-y-4">
-                @forelse ($uncoveredShifts as $shift)
-                    @php($absence = $shift->absences->first())
-                    <x-shift-card :shift="$shift" wire:key="dashboard-uncovered-{{ $shift->id }}">
-                        @if ($absence)
-                            <p class="text-sm leading-6 text-muted">
-                                Ausência informada por <strong class="text-ink">{{ $absence->user->name }}</strong>.
-                                {{ \Illuminate\Support\Str::limit($absence->reason, 90) }}
-                            </p>
-                        @endif
-                        <a href="{{ route('manager.shifts', ['month' => $shift->date->format('Y-m')]) }}" wire:navigate class="text-link mt-3 inline-flex">Realocar profissional</a>
-                    </x-shift-card>
+                        <a href="{{ $isUncovered ? route('manager.shifts', ['month' => $shift->date->format('Y-m'), 'focus' => $shift->id]) : route('manager.swaps', ['request' => $record->id]) }}" wire:navigate class="button-secondary w-full sm:w-auto" aria-label="{{ $isUncovered ? 'Realocar profissional do plantão #'.$shift->id : 'Analisar solicitação #'.$record->id }}">{{ $isUncovered ? 'Realocar profissional' : 'Analisar solicitação' }}</a>
+                    </li>
                 @empty
-                    <div class="empty-state compact-empty">
-                        <p class="font-semibold text-ink">Todos os plantões futuros têm cobertura.</p>
-                        <p class="mt-2 text-sm">Ausências informadas aparecerão aqui imediatamente.</p>
-                    </div>
+                    <li class="empty-state compact-empty">
+                        <p class="font-semibold text-ink">{{ $uncoveredCount === 0 && $pendingSwapCount === 0 ? 'Nenhum alerta operacional neste momento.' : 'Nenhuma pendência neste período.' }}</p>
+                        <p class="mt-2 text-sm">{{ $uncoveredCount === 0 && $pendingSwapCount === 0 ? 'Não há plantões descobertos ativos ou futuros nem trocas aguardando a gerência.' : 'Escolha outro período ou abra os indicadores acima para consultar todas as pendências.' }}</p>
+                    </li>
                 @endforelse
-            </div>
-
-            @if ($uncoveredCount > $uncoveredShifts->count())
-                <a href="{{ route('manager.shifts') }}" wire:navigate class="button-secondary mt-4 w-full">Ver todos os plantões</a>
-            @endif
-        </section>
-
-        <section aria-labelledby="pending-swaps-title">
-            <div class="section-heading">
-                <div>
-                    <p class="eyebrow">Decisão gerencial</p>
-                    <h2 id="pending-swaps-title">Trocas aguardando aprovação</h2>
-                </div>
-                <x-status-badge status="pending_manager" :label="$pendingSwapCount.' pendente(s)'" />
-            </div>
-
-            <div class="mt-4 space-y-4">
-                @forelse ($pendingSwaps as $swap)
-                    <article class="alert-row" wire:key="dashboard-swap-{{ $swap->id }}">
-                        <div class="flex flex-wrap items-center justify-between gap-3">
-                            <x-status-badge :status="$swap->status" label="Aguardando decisão" />
-                            <span class="font-mono text-xs text-muted">Pedido #{{ $swap->id }}</span>
-                        </div>
-                        <h3 class="mt-4 text-lg font-semibold">{{ $swap->shift->date->format('d/m/Y') }} · {{ $swap->shift->time_label }}</h3>
-                        <p class="mt-1 text-sm text-muted">{{ $swap->shift->sector->name }} · {{ $swap->shift->category->name }}</p>
-                        <div class="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
-                            <strong>{{ $swap->requester->name }}</strong>
-                            <span class="text-muted" aria-hidden="true">→</span>
-                            <span class="sr-only">será substituído por</span>
-                            <strong>{{ $swap->substitute->name }}</strong>
-                        </div>
-                        <a href="{{ route('manager.swaps') }}" wire:navigate class="text-link mt-4 inline-flex">Analisar solicitação</a>
-                    </article>
-                @empty
-                    <div class="empty-state compact-empty">
-                        <p class="font-semibold text-ink">Nenhuma troca aguarda aprovação.</p>
-                        <p class="mt-2 text-sm">Pedidos aceitos pelos substitutos aparecerão aqui.</p>
-                    </div>
-                @endforelse
-            </div>
-
-            @if ($pendingSwapCount > $pendingSwaps->count())
-                <a href="{{ route('manager.swaps') }}" wire:navigate class="button-secondary mt-4 w-full">Ver todas as trocas</a>
-            @endif
-        </section>
-    </div>
-
-    <section class="mt-12 border-t border-line pt-8" aria-labelledby="management-modules-title">
-        <p class="eyebrow">Atalhos operacionais</p>
-        <h2 id="management-modules-title" class="mt-2 text-xl font-semibold">Gerenciar escala</h2>
-        <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <a href="{{ route('manager.shifts') }}" wire:navigate class="module-card block transition-colors hover:border-primary">
-                <span class="module-index">01 / ESCALA</span><h3>Gestão de plantões</h3><p>Crie, edite, aloque e acompanhe os plantões.</p>
-            </a>
-            <a href="{{ route('manager.swaps') }}" wire:navigate class="module-card block transition-colors hover:border-primary">
-                <span class="module-index">02 / TROCAS</span><h3>Aprovação de trocas</h3><p>Analise pedidos já aceitos pelos substitutos.</p>
-            </a>
-            <a href="{{ route('manager.users') }}" wire:navigate class="module-card block transition-colors hover:border-primary">
-                <span class="module-index">03 / USUÁRIOS</span><h3>Gestão de usuários</h3><p>Cadastre gerentes e profissionais com seus vínculos.</p>
-            </a>
-            <a href="{{ route('manager.sectors') }}" wire:navigate class="module-card block transition-colors hover:border-primary">
-                <span class="module-index">04 / SETORES</span><h3>Setores da unidade</h3><p>Organize os locais atendidos pela escala.</p>
-            </a>
-            <a href="{{ route('manager.categories') }}" wire:navigate class="module-card block transition-colors hover:border-primary">
-                <span class="module-index">05 / CATEGORIAS</span><h3>Categorias profissionais</h3><p>Mantenha as especialidades exigidas nos plantões.</p>
-            </a>
+            </ol>
+            @if ($queue->hasPages())<div class="mt-5"><x-operational-pagination :paginator="$queue" /></div>@endif
         </div>
     </section>
+    <nav class="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-line pt-5" aria-label="Atalhos da escala">
+        <a href="{{ route('manager.calendar') }}" wire:navigate class="text-link inline-flex min-h-10 items-center">Abrir calendário</a>
+        <a href="{{ route('manager.shifts') }}" wire:navigate class="text-link inline-flex min-h-10 items-center">Gerenciar escala</a>
+    </nav>
 </div>

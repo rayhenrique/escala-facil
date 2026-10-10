@@ -2,9 +2,18 @@
 
 return [
     // Versão do código instalado. APP_VERSION não pode sobrepor este registro.
-    'current' => '1.23.1',
+    'current' => '1.24.0',
 
     'releases' => [
+        [
+            'version' => '1.24.0',
+            'date' => '2026-10-10',
+            'title' => 'Pendências organizadas por prioridade',
+            'summary' => 'As tarefas que precisam da sua atenção agora aparecem organizadas por prioridade, sem informações repetidas.',
+            'highlights' => [
+                'As tarefas que precisam da sua atenção agora aparecem organizadas por prioridade, sem informações repetidas.',
+            ],
+        ],
         [
             'version' => '1.23.1',
             'date' => '2026-10-10',
