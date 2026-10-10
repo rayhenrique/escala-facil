@@ -49,5 +49,6 @@
 
         <!-- Rodapé Institucional -->
         <x-landing.footer />
+        @livewireScriptConfig
     </body>
 </html>

@@ -88,3 +88,6 @@ jobs:
 
       - name: Build assets
         run: npm run build
+
+      - name: Test landing animation lifecycle
+        run: npm run test:landing

@@ -3,6 +3,8 @@
     "private": true,
     "type": "module",
     "scripts": {
+        "test:landing": "node --test tests/js/landing.test.mjs",
+        "test:landing:browser": "node tests/browser/landing.mjs",
         "build": "vite build",
         "dev": "vite"
     },

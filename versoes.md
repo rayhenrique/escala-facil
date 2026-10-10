@@ -6,6 +6,13 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.21.1 — 10/10/2026
+
+### Seções da página aparecem corretamente
+
+- Conteúdo visível mesmo quando as animações não carregam ou o JavaScript está desativado.
+- Rolagem e recarregamento da página corrigidos no computador e no celular, respeitando movimento reduzido.
+
 ## 1.21.0 — 10/10/2026
 
 ### Duplicação assistida de escalas mensais

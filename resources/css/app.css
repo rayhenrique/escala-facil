@@ -244,7 +244,19 @@
     .app-sidebar-collapsed .sidebar-brand-row { padding-inline: 0.5rem; gap: 0.25rem; }
 }
 
+/* Conteúdo público nunca depende de GSAP ou de um trigger para aparecer. */
+#landing-page :is(.gsap-blur-reveal, .gsap-hero-badge, .gsap-hero-ctas,
+    .gsap-friction-chaos, .gsap-friction-flow, .gsap-bento-card, .gsap-cta-box) {
+    opacity: 1 !important;
+    visibility: visible !important;
+    filter: none !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
+    #landing-page :is(.gsap-blur-reveal, .gsap-hero-badge, .gsap-hero-ctas,
+        .gsap-friction-chaos, .gsap-friction-flow, .gsap-bento-card, .gsap-cta-box) {
+        transform: none !important;
+    }
     *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
 }
 

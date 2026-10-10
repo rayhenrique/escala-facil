@@ -156,7 +156,7 @@ Crie um banco MySQL chamado `escala_facil` e ajuste o `.env`:
 APP_NAME="Escala Fácil"
 APP_URL=http://127.0.0.1:8000
 APP_TIMEZONE=America/Maceio
-APP_VERSION=1.21.0
+APP_VERSION=1.21.1
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR
 APP_FAKER_LOCALE=pt_BR
@@ -395,7 +395,18 @@ Valide o contrato visual:
 npx -p @google/design.md designmd lint DESIGN.md
 ```
 
-Na validação mais recente, a suíte possui **58 testes e 372 asserções**, todos aprovados.
+Regressões de visibilidade e ciclo de vida das animações da landing:
+
+```powershell
+npm run test:landing
+```
+
+Para validar no navegador, disponibilize Playwright e um servidor local em
+`http://127.0.0.1:8765`, depois execute `npm run test:landing:browser`.
+`LANDING_URL` permite outro endereço; `PLAYWRIGHT_MODULE` permite usar uma instalação
+externa do Playwright e `PLAYWRIGHT_CHANNEL=msedge` permite usar o Edge instalado.
+O teste cobre desktop, mobile, rolagem rápida, recarregamento no meio da página,
+movimento reduzido e falhas/desativação de JavaScript, sem alterar dados.
 
 ## Documentação
 

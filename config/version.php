@@ -1,9 +1,19 @@
 <?php
 
 return [
-    'current' => env('APP_VERSION', '1.21.0'),
+    'current' => env('APP_VERSION', '1.21.1'),
 
     'releases' => [
+        [
+            'version' => '1.21.1',
+            'date' => '2026-10-10',
+            'title' => 'Seções da página aparecem corretamente',
+            'summary' => 'Comparação, funcionalidades e acesso à plataforma agora aparecem corretamente, sem espaços vazios causados pelas animações.',
+            'highlights' => [
+                'Conteúdo visível mesmo quando as animações não carregam ou o JavaScript está desativado.',
+                'Rolagem e recarregamento da página corrigidos no computador e no celular, respeitando movimento reduzido.',
+            ],
+        ],
         [
             'version' => '1.21.0',
             'date' => '2026-10-10',

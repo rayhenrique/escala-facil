@@ -40,6 +40,26 @@ class LandingAccessibilityTest extends TestCase
         );
     }
 
+    public function test_public_content_has_a_visibility_fallback_without_javascript(): void
+    {
+        $css = file_get_contents(resource_path('css/app.css'));
+        $this->assertStringContainsString('opacity: 1 !important', $css);
+        $this->assertStringContainsString('visibility: visible !important', $css);
+
+        foreach (['friction-vs-flow', 'bento-grid', 'cta', 'hero'] as $component) {
+            $markup = file_get_contents(resource_path("views/components/landing/{$component}.blade.php"));
+            $this->assertDoesNotMatchRegularExpression('/(?:opacity-0|invisible|visibility:\\s*hidden|x-cloak)/', $markup);
+        }
+    }
+
+    public function test_landing_uses_the_bundled_livewire_without_a_second_runtime(): void
+    {
+        $this->get('/landing')
+            ->assertOk()
+            ->assertSee('window.livewireScriptConfig', false)
+            ->assertDontSee('data-csrf=', false);
+    }
+
     public function test_landing_avoids_fixed_narrow_widths_and_low_contrast_microcopy(): void
     {
         $this->get('/')
