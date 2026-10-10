@@ -116,6 +116,12 @@ class MonthlyCalendar extends Component
         $this->moveMonth(1);
     }
 
+    public function goToToday(): void
+    {
+        $this->month = now()->format('Y-m');
+        $this->selectedDate = today()->format('Y-m-d');
+    }
+
     public function selectDate(string $date): void
     {
         if (! preg_match('/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/', $date)) {
@@ -181,6 +187,15 @@ class MonthlyCalendar extends Component
         $hasSectorFilter = $effectiveSectorId !== '';
         $calendarDays = $this->calendarDays($monthStart, $monthEnd, $shiftsByDate, $allShifts, $swappedShiftsDetails, $hasSectorFilter);
         $selectedShifts = $shiftsByDate->get($this->selectedDate, collect());
+        $canManageShifts = $user?->can('create', Shift::class) ?? false;
+
+        $pendingSwapShiftIds = $canManageShifts && $selectedShifts->isNotEmpty()
+            ? ShiftSwap::query()
+                ->whereIn('shift_id', $selectedShifts->pluck('id')->all())
+                ->where('status', ShiftSwapStatus::PendingManager)
+                ->pluck('shift_id')
+                ->all()
+            : [];
 
         return view('livewire.monthly-calendar', [
             'calendarDays' => $calendarDays,
@@ -190,7 +205,8 @@ class MonthlyCalendar extends Component
             'swappedShiftIds' => $swappedShiftIds,
             'swappedShiftsDetails' => $swappedShiftsDetails,
             'assignedProfessionalsCount' => $selectedShifts->pluck('user_id')->filter()->unique()->count(),
-            'canManageShifts' => $user?->can('create', Shift::class) ?? false,
+            'canManageShifts' => $canManageShifts,
+            'pendingSwapShiftIds' => $pendingSwapShiftIds,
             'hasActiveFilters' => $isProfessional ? ($this->categoryId !== '') : ($this->sectorId !== '' || $this->categoryId !== ''),
             'hasSectorFilter' => $hasSectorFilter,
             'isProfessional' => $isProfessional,

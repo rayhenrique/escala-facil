@@ -47,6 +47,10 @@ class Dashboard extends Component
 
         $monthStart = today()->startOfMonth();
         $monthEnd = today()->endOfMonth();
+        $attentionWindowEnd = today()->addDays(3);
+
+        $nextUncovered = $uncoveredShifts->first();
+        $oldestPendingSwap = $pendingSwaps->first();
 
         return view('livewire.manager.dashboard', [
             'uncoveredShifts' => $uncoveredShifts,
@@ -57,6 +61,12 @@ class Dashboard extends Component
                 ->whereBetween('date', [$monthStart, $monthEnd])
                 ->where('status', ShiftStatus::Scheduled)
                 ->count(),
+            'uncovered72Count' => (clone $uncoveredQuery)
+                ->whereDate('date', '<=', $attentionWindowEnd)
+                ->count(),
+            'attentionWindowEnd' => $attentionWindowEnd->format('Y-m-d'),
+            'nextUncovered' => $nextUncovered,
+            'oldestPendingSwap' => $oldestPendingSwap,
         ]);
     }
 }

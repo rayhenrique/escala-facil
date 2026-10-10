@@ -6,17 +6,18 @@
             <p class="page-description">Selecione um dia para consultar todos os plantões e profissionais escalados.</p>
         </div>
 
-        <div class="grid w-full grid-cols-[3rem_minmax(0,1fr)_3rem] items-end gap-2 sm:w-auto">
-            <button type="button" wire:click="previousMonth" class="button-secondary size-12 p-0" aria-label="Mês anterior">
+        <div class="flex w-full flex-wrap items-end gap-2 sm:w-auto">
+            <button type="button" wire:click="previousMonth" wire:loading.attr="disabled" class="button-secondary size-12 p-0" aria-label="Mês anterior">
                 <span aria-hidden="true">‹</span>
             </button>
-            <div class="min-w-0 sm:w-48">
+            <div class="min-w-0 flex-1 sm:w-48 sm:flex-none">
                 <label for="calendar-month" class="field-label">Mês exibido</label>
                 <input wire:model.live="month" id="calendar-month" type="month" class="field-input">
             </div>
-            <button type="button" wire:click="nextMonth" class="button-secondary size-12 p-0" aria-label="Próximo mês">
+            <button type="button" wire:click="nextMonth" wire:loading.attr="disabled" class="button-secondary size-12 p-0" aria-label="Próximo mês">
                 <span aria-hidden="true">›</span>
             </button>
+            <button type="button" wire:click="goToToday" wire:loading.attr="disabled" class="button-secondary min-h-12 px-4">Hoje</button>
         </div>
     </div>
 
@@ -68,6 +69,8 @@
                 <button type="button" wire:click="clearFilters" class="table-action">Limpar filtros</button>
             </div>
         @endif
+
+        <p wire:loading.delay class="mt-4 text-sm text-muted" role="status">Atualizando calendário…</p>
 
         <div class="calendar-grid mt-6" role="grid" aria-label="Calendário de {{ $monthLabel }}">
             @foreach (['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'] as $weekday)
@@ -200,7 +203,13 @@
                         <p class="mt-1 text-sm text-muted">{{ $shift->sector->name }} · {{ $shift->category->name }}</p>
                     </div>
                     @if ($canManageShifts)
-                        <a href="{{ route('manager.shifts', ['month' => $month]) }}" wire:navigate class="table-action self-start">Abrir escala</a>
+                        @if (in_array($shift->id, $pendingSwapShiftIds, true))
+                            <a href="{{ route('manager.swaps') }}" wire:navigate class="table-action self-start">Analisar troca</a>
+                        @elseif (! $shift->user_id)
+                            <a href="{{ route('manager.shifts', ['month' => $month]) }}" wire:navigate class="table-action self-start">Alocar profissional</a>
+                        @else
+                            <a href="{{ route('manager.shifts', ['month' => $month]) }}" wire:navigate class="table-action self-start">Abrir escala</a>
+                        @endif
                     @endif
                 </article>
             @empty

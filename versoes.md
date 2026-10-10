@@ -6,6 +6,15 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.20.0 — 10/10/2026
+
+### Dashboard com foco em 72h e calendário com ações contextuais
+
+- Nova seção Próximas 72 horas no painel com próximo descoberto, pendência mais antiga e atalhos, sem remover indicadores e listas existentes.
+- Ações contextuais no dia selecionado: alocar profissional, analisar troca ou abrir escala, somente para gerentes.
+- Botão Hoje, indicador de carregamento e filtros preservados no calendário mobile e desktop.
+- Índices em plantões e trocas para as leituras quentes e limite de consultas coberto por teste.
+
 ## 1.19.1 — 10/10/2026
 
 ### Correção de vulnerabilidades npm

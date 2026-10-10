@@ -1,9 +1,21 @@
 <?php
 
 return [
-    'current' => env('APP_VERSION', '1.19.1'),
+    'current' => env('APP_VERSION', '1.20.0'),
 
     'releases' => [
+        [
+            'version' => '1.20.0',
+            'date' => '2026-10-10',
+            'title' => 'Dashboard com foco em 72h e calendário com ações contextuais',
+            'summary' => 'Painel gerencial prioriza pendências acionáveis das próximas 72 horas e o calendário ganha atalhos de gestão por plantão, com consultas otimizadas e isolamento preservado.',
+            'highlights' => [
+                'Nova seção Próximas 72 horas no painel com próximo descoberto, pendência mais antiga e atalhos, sem remover indicadores e listas existentes.',
+                'Ações contextuais no dia selecionado: alocar profissional, analisar troca ou abrir escala, somente para gerentes.',
+                'Botão Hoje, indicador de carregamento e filtros preservados no calendário mobile e desktop.',
+                'Índices em plantões e trocas para as leituras quentes e limite de consultas coberto por teste.',
+            ],
+        ],
         [
             'version' => '1.19.1',
             'date' => '2026-10-10',

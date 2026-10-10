@@ -39,6 +39,59 @@
         </div>
     @endif
 
+    <section class="mt-10" aria-labelledby="action-focus-title">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">Foco operacional</p>
+                <h2 id="action-focus-title">Próximas 72 horas</h2>
+            </div>
+            <x-status-badge status="pending_manager" :label="$uncovered72Count.' descoberto(s) em 72h'" />
+        </div>
+
+        @php($urgentUncovered = $nextUncovered && $nextUncovered->date->format('Y-m-d') <= $attentionWindowEnd ? $nextUncovered : null)
+
+        @if ($urgentUncovered || $oldestPendingSwap)
+            <div class="mt-4 grid gap-4 xl:grid-cols-2">
+                @if ($urgentUncovered)
+                    @php($urgentAbsence = $urgentUncovered->absences->first())
+                    <x-shift-card :shift="$urgentUncovered" wire:key="dashboard-next-uncovered-{{ $urgentUncovered->id }}">
+                        <p class="text-sm leading-6 text-muted">
+                            Próximo plantão descoberto em
+                            <strong class="text-ink">{{ $urgentUncovered->date->format('d/m/Y') }}</strong>.
+                            @if ($urgentAbsence)
+                                Ausência informada por <strong class="text-ink">{{ $urgentAbsence->user->name }}</strong>.
+                            @endif
+                        </p>
+                        <a href="{{ route('manager.shifts', ['month' => $urgentUncovered->date->format('Y-m')]) }}" wire:navigate class="text-link mt-3 inline-flex">Realocar profissional</a>
+                    </x-shift-card>
+                @endif
+
+                @if ($oldestPendingSwap)
+                    <article class="alert-row" wire:key="dashboard-oldest-pending-{{ $oldestPendingSwap->id }}">
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <x-status-badge :status="$oldestPendingSwap->status" label="Pendência mais antiga" />
+                            <span class="font-mono text-xs text-muted">Pedido #{{ $oldestPendingSwap->id }} · {{ $oldestPendingSwap->created_at->diffForHumans() }}</span>
+                        </div>
+                        <h3 class="mt-4 text-lg font-semibold">{{ $oldestPendingSwap->shift->date->format('d/m/Y') }} · {{ substr($oldestPendingSwap->shift->start_time, 0, 5) }}–{{ substr($oldestPendingSwap->shift->end_time, 0, 5) }}</h3>
+                        <p class="mt-1 text-sm text-muted">{{ $oldestPendingSwap->shift->sector->name }} · {{ $oldestPendingSwap->shift->category->name }}</p>
+                        <div class="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+                            <strong>{{ $oldestPendingSwap->requester->name }}</strong>
+                            <span class="text-muted" aria-hidden="true">→</span>
+                            <span class="sr-only">será substituído por</span>
+                            <strong>{{ $oldestPendingSwap->substitute->name }}</strong>
+                        </div>
+                        <a href="{{ route('manager.swaps') }}" wire:navigate class="text-link mt-4 inline-flex">Analisar solicitação</a>
+                    </article>
+                @endif
+            </div>
+        @else
+            <div class="empty-state compact-empty mt-4">
+                <p class="font-semibold text-ink">Nenhuma pendência nas próximas 72 horas.</p>
+                <p class="mt-2 text-sm">Novos plantões descobertos e pedidos antigos aparecerão aqui primeiro.</p>
+            </div>
+        @endif
+    </section>
+
     <div class="mt-10 grid gap-8 xl:grid-cols-2">
         <section aria-labelledby="uncovered-title">
             <div class="section-heading">
