@@ -1,4 +1,8 @@
 <div>
+    <x-context-navigation :back="$isProfessional && $from === '' ? null : $this->backNavigation()" :links="array_filter([
+        'Abrir escala deste mês' => $canManageShifts ? \App\Support\OperationalNavigation::url('shifts', ['month' => $month], 'calendar', $this->navigationContext()) : null,
+        'Ver relatório' => \App\Support\OperationalNavigation::url('reports', ['month' => $month, 'sectorId' => $sectorId, 'categoryId' => $categoryId], 'calendar', $this->navigationContext()),
+    ])" />
     <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div>
             <p class="eyebrow">Visão mensal</p>
@@ -204,11 +208,11 @@
                     </div>
                     @if ($canManageShifts)
                         @if (in_array($shift->id, $pendingSwapShiftIds, true))
-                            <a href="{{ route('manager.swaps') }}" wire:navigate class="table-action self-start">Analisar troca</a>
+                            <a href="{{ \App\Support\OperationalNavigation::url('swaps', ['request' => $pendingSwapsByShift[$shift->id]], 'calendar', $this->navigationContext()) }}" wire:navigate class="table-action self-start">Analisar troca</a>
                         @elseif (! $shift->user_id)
-                            <a href="{{ route('manager.shifts', ['month' => $month]) }}" wire:navigate class="table-action self-start">Alocar profissional</a>
+                            <a href="{{ \App\Support\OperationalNavigation::url('shifts', ['focus' => $shift->id], 'calendar', $this->navigationContext()) }}" wire:navigate class="table-action self-start">Alocar profissional</a>
                         @else
-                            <a href="{{ route('manager.shifts', ['month' => $month]) }}" wire:navigate class="table-action self-start">Abrir escala</a>
+                            <a href="{{ \App\Support\OperationalNavigation::url('shifts', ['focus' => $shift->id], 'calendar', $this->navigationContext()) }}" wire:navigate class="table-action self-start">Abrir escala</a>
                         @endif
                     @endif
                 </article>

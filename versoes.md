@@ -6,6 +6,12 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.25.0 — 10/10/2026
+
+### Acesso direto aos registros
+
+- Agora você pode abrir diretamente um plantão ou pedido de troca, sem precisar procurá-lo novamente.
+
 ## 1.24.0 — 10/10/2026
 
 ### Pendências organizadas por prioridade

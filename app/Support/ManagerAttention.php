@@ -9,6 +9,7 @@ use App\Models\ShiftSwap;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\DB;
 
 /** Read-only ordering of operational work; approval rules remain in the Actions. */
@@ -50,9 +51,12 @@ class ManagerAttention
             ->whereRaw("($date) < ?", [$until])
             ->selectRaw("shift_swaps.id, 'swap' as kind, 1 as risk, ($date) as shift_date, ($time) as shift_time, shift_swaps.created_at");
 
-        $queue = DB::query()->fromSub($uncovered->toBase()->unionAll($swaps->toBase()), 'attention')
-            ->orderBy('risk')->orderBy('shift_date')->orderBy('shift_time')->orderBy('created_at')->orderBy('id')
-            ->paginate(8);
+        $query = DB::query()->fromSub($uncovered->toBase()->unionAll($swaps->toBase()), 'attention')
+            ->orderBy('risk')->orderBy('shift_date')->orderBy('shift_time')->orderBy('created_at')->orderBy('id');
+        $total = (clone $query)->count();
+        // Work can be resolved while the manager is away from the queue.
+        $page = min(max(1, (int) Paginator::resolveCurrentPage()), max(1, (int) ceil($total / 8)));
+        $queue = $query->paginate(8, ['*'], 'page', $page, $total);
 
         $rows = $queue->getCollection();
         $shifts = Shift::query()->with(['sector', 'category', 'latestAbsence.user'])

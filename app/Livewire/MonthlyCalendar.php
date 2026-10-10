@@ -4,10 +4,12 @@ namespace App\Livewire;
 
 use App\Enums\ShiftSwapStatus;
 use App\Enums\UserRole;
+use App\Livewire\Concerns\HasOperationalContext;
 use App\Models\Category;
 use App\Models\Sector;
 use App\Models\Shift;
 use App\Models\ShiftSwap;
+use App\Support\OperationalNavigation;
 use App\Support\ShiftCoverage;
 use Carbon\CarbonImmutable;
 use Carbon\WeekDay;
@@ -22,13 +24,18 @@ use Livewire\Component;
 #[Layout('layouts.app', ['title' => 'Calendário de plantões'])]
 class MonthlyCalendar extends Component
 {
+    use HasOperationalContext;
+
     #[Url]
     public string $month = '';
 
+    #[Url]
     public string $selectedDate = '';
 
+    #[Url]
     public string $sectorId = '';
 
+    #[Url]
     public string $categoryId = '';
 
     public function mount(): void
@@ -41,9 +48,10 @@ class MonthlyCalendar extends Component
         }
 
         $this->month = $this->validMonth($this->month) ? $this->month : now()->format('Y-m');
-        $this->selectedDate = $this->month === now()->format('Y-m')
-            ? today()->format('Y-m-d')
-            : $this->month.'-01';
+        $selected = OperationalNavigation::clean('calendar', ['selectedDate' => $this->selectedDate])['selectedDate'] ?? '';
+        $this->selectedDate = str_starts_with($selected, $this->month.'-') ? $selected : ($this->month === now()->format('Y-m') ? today()->format('Y-m-d') : $this->month.'-01');
+        $this->updatedSectorId($this->sectorId);
+        $this->updatedCategoryId($this->categoryId);
     }
 
     public function updatedMonth(string $month): void
@@ -55,6 +63,14 @@ class MonthlyCalendar extends Component
         $this->selectedDate = $this->month === now()->format('Y-m')
             ? today()->format('Y-m-d')
             : $this->month.'-01';
+    }
+
+    public function updatedSelectedDate(): void
+    {
+        $date = OperationalNavigation::clean('calendar', ['selectedDate' => $this->selectedDate])['selectedDate'] ?? '';
+        if (! str_starts_with($date, $this->month.'-')) {
+            $this->selectedDate = $this->month === now()->format('Y-m') ? today()->format('Y-m-d') : $this->month.'-01';
+        }
     }
 
     public function updatedSectorId(string $sectorId): void
@@ -170,6 +186,8 @@ class MonthlyCalendar extends Component
 
     public function render(): View
     {
+        $this->authorize('viewCalendar', Shift::class);
+        $this->updatedSelectedDate();
         $user = auth()->user();
         $isProfessional = $user?->role === UserRole::Professional;
         $effectiveSectorId = $isProfessional
@@ -189,13 +207,20 @@ class MonthlyCalendar extends Component
         $selectedShifts = $shiftsByDate->get($this->selectedDate, collect());
         $canManageShifts = $user?->can('create', Shift::class) ?? false;
 
-        $pendingSwapShiftIds = $canManageShifts && $selectedShifts->isNotEmpty()
+        $pendingSwapIds = $canManageShifts && $selectedShifts->isNotEmpty()
             ? ShiftSwap::query()
-                ->whereIn('shift_id', $selectedShifts->pluck('id')->all())
+                ->where(fn ($query) => $query->whereIn('shift_id', $selectedShifts->pluck('id')->all())->orWhereIn('substitute_shift_id', $selectedShifts->pluck('id')->all()))
                 ->where('status', ShiftSwapStatus::PendingManager)
-                ->pluck('shift_id')
-                ->all()
-            : [];
+                ->oldest()->get(['id', 'shift_id', 'substitute_shift_id'])
+            : collect();
+        $pendingSwapsByShift = [];
+        foreach ($pendingSwapIds as $swap) {
+            $pendingSwapsByShift[$swap->shift_id] ??= $swap->id;
+            if ($swap->substitute_shift_id) {
+                $pendingSwapsByShift[$swap->substitute_shift_id] ??= $swap->id;
+            }
+        }
+        $pendingSwapShiftIds = array_keys($pendingSwapsByShift);
 
         return view('livewire.monthly-calendar', [
             'calendarDays' => $calendarDays,
@@ -207,6 +232,7 @@ class MonthlyCalendar extends Component
             'assignedProfessionalsCount' => $selectedShifts->pluck('user_id')->filter()->unique()->count(),
             'canManageShifts' => $canManageShifts,
             'pendingSwapShiftIds' => $pendingSwapShiftIds,
+            'pendingSwapsByShift' => $pendingSwapsByShift,
             'hasActiveFilters' => $isProfessional ? ($this->categoryId !== '') : ($this->sectorId !== '' || $this->categoryId !== ''),
             'hasSectorFilter' => $hasSectorFilter,
             'isProfessional' => $isProfessional,

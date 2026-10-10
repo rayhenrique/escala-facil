@@ -3,6 +3,7 @@
 namespace App\Livewire\Manager;
 
 use App\Enums\UserRole;
+use App\Livewire\Concerns\HasOperationalContext;
 use App\Models\Category;
 use App\Models\Sector;
 use App\Models\Shift;
@@ -18,18 +19,24 @@ use Livewire\Component;
 #[Layout('layouts.app', ['title' => 'Relatórios'])]
 class Reports extends Component
 {
+    use HasOperationalContext;
+
     #[Url]
     public string $month = '';
 
     #[Url]
     public string $tab = 'all';
 
+    #[Url]
     public string $sectorId = '';
 
+    #[Url]
     public string $categoryId = '';
 
+    #[Url]
     public string $searchProfessional = '';
 
+    #[Url]
     public string $swapStatusFilter = '';
 
     public function mount(): void
@@ -43,6 +50,8 @@ class Reports extends Component
 
         $this->month = $this->normalizeMonth($this->month);
         $this->tab = $this->normalizeTab($this->tab);
+        $this->updatedSectorId($this->sectorId);
+        $this->updatedCategoryId($this->categoryId);
     }
 
     public function updatedMonth(): void
@@ -183,10 +192,11 @@ class Reports extends Component
 
     public function render(): View
     {
+        $this->authorize('viewCalendar', Shift::class);
         $user = auth()->user();
 
         return view('livewire.manager.reports', [
-            'routePrefix' => request()->routeIs('professional.*') ? 'professional.' : 'manager.',
+            'routePrefix' => $user?->role === UserRole::Professional ? 'professional.' : 'manager.',
             'isProfessional' => $user?->role === UserRole::Professional,
         ]);
     }

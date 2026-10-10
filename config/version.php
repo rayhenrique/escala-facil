@@ -2,9 +2,18 @@
 
 return [
     // Versão do código instalado. APP_VERSION não pode sobrepor este registro.
-    'current' => '1.24.0',
+    'current' => '1.25.0',
 
     'releases' => [
+        [
+            'version' => '1.25.0',
+            'date' => '2026-10-10',
+            'title' => 'Acesso direto aos registros',
+            'summary' => 'Agora você pode abrir diretamente um plantão ou pedido de troca, sem precisar procurá-lo novamente.',
+            'highlights' => [
+                'Agora você pode abrir diretamente um plantão ou pedido de troca, sem precisar procurá-lo novamente.',
+            ],
+        ],
         [
             'version' => '1.24.0',
             'date' => '2026-10-10',

@@ -8,7 +8,7 @@
         <div class="grid w-full gap-3 sm:w-auto sm:items-end">
             <div>
                 <label for="month" class="field-label">Mês exibido</label>
-                <input wire:model.live="month" id="month" type="month" class="field-input" @disabled($filter === 'uncovered')>
+                <input wire:model.live="month" id="month" type="month" class="field-input" @disabled($filter === 'uncovered' || $focus !== null)>
             </div>
             <div class="flex flex-col gap-2 sm:flex-row">
                 <a href="{{ route('manager.shifts.template') }}" class="button-secondary w-full text-center sm:w-auto">Modelo XLSX</a>
@@ -22,19 +22,32 @@
 
     <x-flash-notifications />
 
+    @php
+        $navigationMonth = $focusedShift?->date->format('Y-m') ?? $month;
+        $calendarParameters = ['month' => $navigationMonth];
+        if ($focusedShift) $calendarParameters += ['selectedDate' => $focusedShift->date->format('Y-m-d'), 'sectorId' => $focusedShift->sector_id, 'categoryId' => $focusedShift->category_id];
+        $reportParameters = ['month' => $navigationMonth, 'sectorId' => $focusedShift?->sector_id ?? '', 'categoryId' => $focusedShift?->category_id ?? ''];
+    @endphp
+    <x-context-navigation :back="$this->backNavigation()" :label="$focusedShift ? 'Plantão #'.$focusedShift->id.' selecionado' : null" :links="[
+        'Ver no calendário' => \App\Support\OperationalNavigation::url('calendar', $calendarParameters, 'shifts', $this->navigationContext()),
+        'Ver relatório' => \App\Support\OperationalNavigation::url('reports', $reportParameters, 'shifts', $this->navigationContext()),
+    ]" />
+
     <div class="mt-5 flex flex-wrap items-end gap-3">
         <div>
             <label for="shift-filter" class="field-label">Plantões exibidos</label>
-            <select wire:model.live="filter" id="shift-filter" class="field-input">
+            <select wire:model.live="filter" id="shift-filter" class="field-input" @disabled($focus !== null)>
                 <option value="">Todos no mês</option>
                 <option value="scheduled">Agendados no mês</option>
                 <option value="uncovered">Descobertos ativos ou futuros (todos os meses)</option>
             </select>
         </div>
         @if ($filter !== '' || $focus !== null)
-            <a href="{{ route('manager.shifts', ['month' => $month]) }}" wire:navigate class="text-link inline-flex min-h-10 items-center">Limpar filtros{{ $focus !== null ? ' · Plantão #'.$focus.' selecionado' : '' }}</a>
+            <a href="{{ route('manager.shifts', array_filter(['month' => $month, 'filter' => $focus !== null ? $filter : ''])) }}" wire:navigate class="text-link inline-flex min-h-10 items-center">{{ $focus !== null ? 'Ver lista de plantões' : 'Limpar filtros' }}</a>
         @endif
     </div>
+
+    @if ($focus !== null)<p class="mt-2 text-sm text-muted">A seleção mostra este registro, independentemente dos filtros da lista.</p>@endif
 
     @if ($showFormModal)
         <div class="modal-overlay" x-data x-init="$nextTick(() => $refs.firstField?.focus())" @keydown.escape.window="$wire.closeFormModal()">
@@ -124,7 +137,7 @@
 
         <div class="mt-6 space-y-4 md:hidden" aria-label="Plantões cadastrados">
             @forelse ($shifts as $shift)
-                <x-shift-card :shift="$shift" :show-professional="true" wire:key="mobile-shift-{{ $shift->id }}">
+                <x-shift-card :shift="$shift" :show-professional="true" wire:key="mobile-shift-{{ $shift->id }}" class="{{ $focus === $shift->id ? 'context-record' : '' }}" data-context-record="{{ $focus === $shift->id ? 'shift-'.$shift->id : '' }}">
                     <div class="flex flex-wrap gap-2">
                         <button type="button" wire:click="edit({{ $shift->id }})" class="button-secondary">Editar</button>
                         <button type="button" wire:click="requestDelete({{ $shift->id }})" class="table-action min-h-10 text-danger">Excluir</button>
@@ -140,7 +153,7 @@
                 <thead><tr><th>Data e horário</th><th>Setor / categoria</th><th>Profissional</th><th>Status</th><th class="text-right">Ações</th></tr></thead>
                 <tbody>
                     @forelse ($shifts as $shift)
-                        <tr wire:key="shift-{{ $shift->id }}">
+                        <tr wire:key="shift-{{ $shift->id }}" class="{{ $focus === $shift->id ? 'context-record' : '' }}" data-context-record="{{ $focus === $shift->id ? 'shift-'.$shift->id : '' }}">
                             <td><strong>{{ $shift->date->format('d/m/Y') }}</strong><span>{{ $shift->time_label }}</span></td>
                             <td><strong>{{ $shift->sector->name }}</strong><span>{{ $shift->category->name }}</span></td>
                             <td>{{ $shift->user?->name ?? 'Não alocado' }}</td>

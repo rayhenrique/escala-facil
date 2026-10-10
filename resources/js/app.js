@@ -4,9 +4,16 @@ import { Livewire } from '../../vendor/livewire/livewire/dist/livewire.esm';
 import { initLandingPage } from './landing';
 import { registerAuthUi } from './auth';
 import { initPwaInstall } from './pwa-install';
+import { initOperationalNavigation } from './operational-navigation';
 
 registerAuthUi(Livewire);
 initPwaInstall();
+document.addEventListener('livewire:navigated', initOperationalNavigation);
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initOperationalNavigation);
+} else {
+    initOperationalNavigation();
+}
 Livewire.start();
 
 if (document.readyState === 'loading') {

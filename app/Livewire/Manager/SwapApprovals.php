@@ -7,11 +7,14 @@ use App\Actions\ShiftSwaps\RevertShiftSwapAction;
 use App\Enums\ShiftStatus;
 use App\Enums\ShiftSwapEvent;
 use App\Enums\ShiftSwapStatus;
+use App\Livewire\Concerns\HasOperationalContext;
 use App\Models\Shift;
 use App\Models\ShiftSwap;
+use App\Support\OperationalNavigation;
 use App\Support\ShiftCoverage;
 use App\Support\ShiftSwapReceipt;
 use Illuminate\Contracts\View\View;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
@@ -21,10 +24,11 @@ use Livewire\WithPagination;
 #[Layout('layouts.app', ['title' => 'Aprovação de trocas'])]
 class SwapApprovals extends Component
 {
+    use HasOperationalContext;
     use WithPagination;
 
     #[Url]
-    public ?int $request = null;
+    public $request = null;
 
     /** @var array<string, mixed>|null */
     public ?array $swapReceipt = null;
@@ -184,6 +188,8 @@ class SwapApprovals extends Component
 
     public function render(): View
     {
+        $this->authorize('viewAny', ShiftSwap::class);
+        $this->request = OperationalNavigation::id($this->request);
         $swaps = ShiftSwap::query()
             ->with([
                 'shift.category',
@@ -193,15 +199,26 @@ class SwapApprovals extends Component
                 'requester',
                 'substitute',
             ])
-            ->where('status', ShiftSwapStatus::PendingManager)
+            ->when($this->request === null, fn ($query) => $query->where('status', ShiftSwapStatus::PendingManager))
             ->when($this->request !== null, fn ($query) => $query->whereKey($this->request))
-            ->oldest()
-            ->paginate(10);
+            ->oldest();
+
+        if ($this->request !== null) {
+            $records = $swaps->get();
+            $focusedSwap = $records->first();
+            abort_unless($focusedSwap, 404);
+            $this->authorize('view', $focusedSwap);
+            $swaps = new LengthAwarePaginator($records, 1, 10);
+        } else {
+            $focusedSwap = null;
+            $swaps = $swaps->paginate(10);
+        }
 
         return view('livewire.manager.swap-approvals', [
             'swaps' => $swaps,
-            'doubleShifts' => $this->doubleShiftLabels($swaps->getCollection()),
-            'approvedSwaps' => ShiftSwap::query()
+            'focusedSwap' => $focusedSwap,
+            'doubleShifts' => $this->doubleShiftLabels($swaps->getCollection()->where('status', ShiftSwapStatus::PendingManager)),
+            'approvedSwaps' => $this->request !== null ? collect() : ShiftSwap::query()
                 ->with([
                     'shift.category',
                     'shift.sector',

@@ -8,14 +8,17 @@ use App\Enums\ShiftStatus;
 use App\Enums\UserRole;
 use App\Http\Requests\ImportShiftsRequest;
 use App\Http\Requests\SaveShiftRequest;
+use App\Livewire\Concerns\HasOperationalContext;
 use App\Models\Category;
 use App\Models\Sector;
 use App\Models\Shift;
 use App\Models\User;
 use App\Support\ManagerAttention;
+use App\Support\OperationalNavigation;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
@@ -28,6 +31,7 @@ use Livewire\WithPagination;
 #[Layout('layouts.app', ['title' => 'Gestão de escalas'])]
 class ShiftManager extends Component
 {
+    use HasOperationalContext;
     use WithFileUploads;
     use WithPagination;
 
@@ -38,7 +42,7 @@ class ShiftManager extends Component
     public string $filter = '';
 
     #[Url]
-    public ?int $focus = null;
+    public $focus = null;
 
     public ?int $editingShiftId = null;
 
@@ -130,6 +134,11 @@ class ShiftManager extends Component
         $this->resetPage();
     }
 
+    public function updatedFocus(): void
+    {
+        $this->resetPage();
+    }
+
     public function updatedCategoryId(): void
     {
         $this->userId = '';
@@ -215,6 +224,7 @@ class ShiftManager extends Component
         $shift = Shift::query()->findOrFail($this->pendingDeleteId);
         $this->authorize('delete', $shift);
         $shift->delete();
+        $this->focus = null;
 
         $this->cancelDelete();
         session()->flash('status', 'Plantão excluído.');
@@ -380,18 +390,30 @@ class ShiftManager extends Component
 
     public function render(): View
     {
+        $this->authorize('viewAny', Shift::class);
+        $this->focus = OperationalNavigation::id($this->focus);
         [$year, $month] = array_pad(explode('-', $this->month), 2, null);
 
         $this->filter = in_array($this->filter, ['scheduled', 'uncovered'], true) ? $this->filter : '';
-        $shifts = ($this->filter === 'uncovered' ? ManagerAttention::uncovered(now()) : Shift::query())
+        $shifts = ($this->focus === null && $this->filter === 'uncovered' ? ManagerAttention::uncovered(now()) : Shift::query())
             ->with(['category', 'sector', 'user'])
-            ->when($this->filter !== 'uncovered' && $year && $month, fn ($query) => $query->whereYear('date', $year)->whereMonth('date', $month))
-            ->when($this->filter === 'scheduled', fn ($query) => $query->where('status', ShiftStatus::Scheduled))
+            ->when($this->focus === null && $this->filter !== 'uncovered' && $year && $month, fn ($query) => $query->whereYear('date', $year)->whereMonth('date', $month))
+            ->when($this->focus === null && $this->filter === 'scheduled', fn ($query) => $query->where('status', ShiftStatus::Scheduled))
             ->when($this->focus !== null, fn ($query) => $query->whereKey($this->focus))
             ->orderBy('date')
-            ->orderBy('start_time')
-            ->paginate(10);
+            ->orderBy('start_time');
 
-        return view('livewire.manager.shift-manager', compact('shifts'));
+        if ($this->focus !== null) {
+            $records = $shifts->get();
+            $focusedShift = $records->first();
+            abort_unless($focusedShift, 404);
+            $this->authorize('view', $focusedShift);
+            $shifts = new LengthAwarePaginator($records, 1, 10);
+        } else {
+            $focusedShift = null;
+            $shifts = $shifts->paginate(10);
+        }
+
+        return view('livewire.manager.shift-manager', compact('shifts', 'focusedShift'));
     }
 }

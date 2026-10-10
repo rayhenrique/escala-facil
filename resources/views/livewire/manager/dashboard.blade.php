@@ -77,7 +77,7 @@
                             @endif
                             <p class="mt-2 text-xs text-muted">{{ $isUncovered ? ($shift->latestAbsence ? 'Ausência informada em' : 'Plantão registrado em') : 'Solicitada em' }} {{ ($isUncovered ? ($shift->latestAbsence?->created_at ?? $shift->created_at) : $record->created_at)->format('d/m/Y H:i') }}</p>
                         </div>
-                        <a href="{{ $isUncovered ? route('manager.shifts', ['month' => $shift->date->format('Y-m'), 'focus' => $shift->id]) : route('manager.swaps', ['request' => $record->id]) }}" wire:navigate class="button-secondary w-full sm:w-auto" aria-label="{{ $isUncovered ? 'Realocar profissional do plantão #'.$shift->id : 'Analisar solicitação #'.$record->id }}">{{ $isUncovered ? 'Realocar profissional' : 'Analisar solicitação' }}</a>
+                        <a href="{{ $isUncovered ? \App\Support\OperationalNavigation::url('shifts', ['focus' => $shift->id], 'dashboard', $this->navigationContext()) : \App\Support\OperationalNavigation::url('swaps', ['request' => $record->id], 'dashboard', $this->navigationContext()) }}" wire:navigate class="button-secondary w-full sm:w-auto" aria-label="{{ $isUncovered ? 'Realocar profissional do plantão #'.$shift->id : 'Analisar solicitação #'.$record->id }}">{{ $isUncovered ? 'Realocar profissional' : 'Analisar solicitação' }}</a>
                     </li>
                 @empty
                     <li class="empty-state compact-empty">

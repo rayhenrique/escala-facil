@@ -145,6 +145,8 @@
     .manager-dashboard .coverage-metrics > div { @apply min-h-0 py-4 lg:py-5; }
     #attention-title { @apply scroll-mt-20 lg:scroll-mt-5; }
     .attention-row { @apply grid items-start gap-4 rounded-xl border border-line bg-white p-5 sm:grid-cols-[1fr_auto] xl:grid-cols-[12rem_1fr_auto]; }
+    .context-navigation { @apply my-5 flex flex-wrap items-center gap-x-6 gap-y-2 border-y border-line py-3; }
+    .context-record { @apply scroll-mt-20 border-primary bg-primary-soft outline-2 outline-offset-2 outline-primary lg:scroll-mt-5; }
     .attention-row > div:nth-child(2) { @apply sm:col-start-1 xl:col-auto; }
     .attention-row > a { @apply sm:col-start-2 sm:row-start-1 sm:row-span-2 xl:col-auto xl:row-auto; }
     .alert-row { @apply rounded-xl border border-line bg-white p-5 shadow-soft sm:p-6; }
@@ -339,4 +341,8 @@
         border: 1px solid #cbd5e1 !important;
         break-inside: avoid;
     }
+}
+
+@layer utilities {
+    .context-record .text-muted, .context-record .meta-label, .context-record td > span:not(.status-badge) { @apply text-primary-strong; }
 }

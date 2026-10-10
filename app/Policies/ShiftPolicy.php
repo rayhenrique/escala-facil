@@ -18,6 +18,11 @@ class ShiftPolicy
         return $user->role === UserRole::Manager;
     }
 
+    public function view(User $user, Shift $shift): bool
+    {
+        return $user->role === UserRole::Manager;
+    }
+
     public function create(User $user): bool
     {
         return $user->role === UserRole::Manager;

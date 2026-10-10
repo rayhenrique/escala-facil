@@ -15,6 +15,11 @@
         </div>
     </div>
 
+    <x-context-navigation :back="$this->backNavigation()" :links="array_filter([
+        'Ver no calendário' => \App\Support\OperationalNavigation::url('calendar', ['month' => $month, 'sectorId' => $sectorId, 'categoryId' => $categoryId], 'reports', $this->navigationContext()),
+        'Abrir escala deste mês' => ! $isProfessional ? \App\Support\OperationalNavigation::url('shifts', ['month' => $month], 'reports', $this->navigationContext()) : null,
+    ])" />
+
     {{-- Navegação de Submódulos de Relatório --}}
     <div class="mt-8 border-b border-line pb-4">
         <div class="flex items-center justify-between gap-3 mb-2.5">
@@ -388,6 +393,7 @@
                                     <a href="{{ route('swaps.receipt.pdf', $swap->id) }}" class="table-action text-xs" title="Baixar comprovante oficial em PDF">
                                         Salvar PDF
                                     </a>
+                                    @if (! $isProfessional)<a href="{{ \App\Support\OperationalNavigation::url('swaps', ['request' => $swap->id], 'reports', $this->navigationContext()) }}" wire:navigate class="table-action">Abrir pedido #{{ $swap->id }}</a>@endif
                                 </td>
                             </tr>
                         @empty
@@ -404,6 +410,7 @@
                             <x-status-badge :status="$swap->status" />
                         </div>
                         <p class="mt-1 text-sm text-muted">{{ $swap->requester->name }} → {{ $swap->substitute->name }} · {{ $swap->shift->sector->name }}</p>
+                        @if (! $isProfessional)<a href="{{ \App\Support\OperationalNavigation::url('swaps', ['request' => $swap->id], 'reports', $this->navigationContext()) }}" wire:navigate class="text-link inline-flex min-h-10 items-center">Abrir pedido #{{ $swap->id }}</a>@endif
                         <div class="mt-3 flex items-center justify-between border-t border-line/60 pt-2 text-xs">
                             <span class="text-muted">{{ $swap->substitute_shift_id ? 'Troca mútua' : 'Cedência simples' }}</span>
                             <a href="{{ route('swaps.receipt.pdf', $swap->id) }}" class="text-link font-semibold">Salvar PDF</a>

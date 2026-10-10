@@ -7,6 +7,7 @@ use App\Http\Controllers\Manager\ReportPdfController;
 use App\Http\Controllers\Manager\ShiftSpreadsheetController;
 use App\Http\Controllers\Manager\WallRosterPdfController;
 use App\Http\Controllers\SwapReceiptPdfController;
+use App\Http\Middleware\ValidateOperationalQuery;
 use App\Livewire\HelpCenter;
 use App\Livewire\Manager\CategoryManager;
 use App\Livewire\Manager\Dashboard;
@@ -47,7 +48,7 @@ Route::post('support/client-error', ClientErrorController::class)
     ->middleware(['auth', 'throttle:10,1'])
     ->name('support.client-error');
 
-Route::middleware(['auth', 'professional'])
+Route::middleware(['auth', 'professional', ValidateOperationalQuery::class])
     ->prefix('professional')
     ->name('professional.')
     ->group(function () {
@@ -58,7 +59,7 @@ Route::middleware(['auth', 'professional'])
         Route::get('reports/wall', WallRosterPdfController::class)->name('reports.wall');
     });
 
-Route::middleware(['auth', 'manager'])
+Route::middleware(['auth', 'manager', ValidateOperationalQuery::class])
     ->prefix('manager')
     ->name('manager.')
     ->group(function () {

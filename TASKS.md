@@ -1,5 +1,11 @@
 # TASKS - Plano de Execução Sequencial
 
+- [x] **Navegação contextual (1.25.0)**
+  - [x] Validar e autorizar IDs, abrir registros exatos e destacar o destino com foco acessível.
+  - [x] Preservar origem, filtros e seleção entre painel, calendário, escala, trocas e relatórios.
+  - [x] Implementar Voltar interno, com retorno em refresh e links compartilhados, sem mudar aprovação.
+  - [x] Validar regressões, permissões, navegador, PWA, Pint e build.
+
 - [x] **Prioridades da gerência (1.24.0)**
   - [x] Reunir cobertura e trocas em fila única, sem repetir o pedido mais antigo.
   - [x] Ordenar risco, início e antiguidade; paginar com relacionamentos carregados em lote.

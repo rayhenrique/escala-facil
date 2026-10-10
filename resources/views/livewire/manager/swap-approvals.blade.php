@@ -5,8 +5,21 @@
 
     <x-flash-notifications />
 
+    @php
+        $contextLinks = [];
+        if ($focusedSwap) {
+            $contextLinks = [
+                'Abrir plantão' => \App\Support\OperationalNavigation::url('shifts', ['focus' => $focusedSwap->shift_id], 'swaps', $this->navigationContext()),
+                'Ver no calendário' => \App\Support\OperationalNavigation::url('calendar', ['month' => $focusedSwap->shift->date->format('Y-m'), 'selectedDate' => $focusedSwap->shift->date->format('Y-m-d'), 'sectorId' => $focusedSwap->shift->sector_id], 'swaps', $this->navigationContext()),
+                'Ver relatório' => \App\Support\OperationalNavigation::url('reports', ['month' => $focusedSwap->created_at->format('Y-m'), 'tab' => 'swaps', 'sectorId' => $focusedSwap->shift->sector_id], 'swaps', $this->navigationContext()),
+            ];
+            if ($focusedSwap->substitute_shift_id) $contextLinks['Abrir contrapartida'] = \App\Support\OperationalNavigation::url('shifts', ['focus' => $focusedSwap->substitute_shift_id], 'swaps', $this->navigationContext());
+        }
+    @endphp
+    <x-context-navigation :back="$this->backNavigation()" :label="$focusedSwap ? 'Pedido #'.$focusedSwap->id.' selecionado' : null" :links="$contextLinks" />
+
     @if ($request !== null)
-        <p class="mt-4 text-sm">Pedido #{{ $request }} selecionado. <a href="{{ route('manager.swaps') }}" wire:navigate class="text-link inline-flex min-h-10 items-center">Ver todas as trocas pendentes</a></p>
+        <a href="{{ route('manager.swaps') }}" wire:navigate class="text-link mt-4 inline-flex min-h-10 items-center">Ver lista de trocas</a>
     @endif
 
     @if ($swapReceipt)
@@ -15,11 +28,11 @@
 
     <section class="mt-8 space-y-4" aria-label="Trocas aguardando decisão">
         @forelse ($swaps as $swap)
-            <article class="panel" wire:key="swap-approval-{{ $swap->id }}">
+            <article class="panel {{ $request === $swap->id ? 'context-record' : '' }}" data-context-record="{{ $request === $swap->id ? 'swap-'.$swap->id : '' }}" wire:key="swap-approval-{{ $swap->id }}">
                 <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                     <div class="min-w-0">
                         <div class="flex flex-wrap items-center gap-3">
-                            <x-status-badge :status="$swap->status" label="Aguardando decisão" />
+                            <x-status-badge :status="$swap->status" :label="$swap->status === \App\Enums\ShiftSwapStatus::PendingManager ? 'Aguardando decisão' : $swap->status->label()" />
                             @if (! empty($doubleShifts[$swap->id]))
                                 <x-status-badge status="double_shift" label="Dobra" />
                             @endif
@@ -55,10 +68,14 @@
                             <div><span class="meta-label">Substituto (assume)</span><p class="mt-1 font-semibold">{{ $swap->substitute->name }}</p></div>
                         </div>
                     </div>
+                    @if ($swap->status === \App\Enums\ShiftSwapStatus::PendingManager)
                     <div class="flex shrink-0 flex-col gap-2 sm:flex-row">
                         <button type="button" wire:click="requestDecision({{ $swap->id }}, 'reject')" wire:loading.attr="disabled" class="button-secondary">Rejeitar</button>
                         <button type="button" wire:click="requestDecision({{ $swap->id }}, 'approve')" wire:loading.attr="disabled" class="button-primary inline-flex">Aprovar e transferir</button>
                     </div>
+                    @else
+                        <p class="text-sm text-muted">Este pedido está {{ mb_strtolower($swap->status->label()) }}. A consulta não altera sua situação.</p>
+                    @endif
                 </div>
             </article>
         @empty
@@ -68,6 +85,7 @@
 
     <div class="mt-6">{{ $swaps->links() }}</div>
 
+    @if ($request === null)
     <section class="mt-10" aria-labelledby="approved-swaps-title">
         <div class="section-heading">
             <div>
@@ -101,6 +119,7 @@
             @endforelse
         </div>
     </section>
+    @endif
 
     <x-confirmation-modal
         :show="$pendingDecisionSwapId !== null"

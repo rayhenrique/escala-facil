@@ -4,6 +4,7 @@ namespace App\Livewire\Manager;
 
 use App\Enums\ShiftStatus;
 use App\Enums\ShiftSwapStatus;
+use App\Livewire\Concerns\HasOperationalContext;
 use App\Models\Shift;
 use App\Models\ShiftSwap;
 use App\Support\ManagerAttention;
@@ -16,6 +17,7 @@ use Livewire\WithPagination;
 #[Layout('layouts.app', ['title' => 'Painel da gerência'])]
 class Dashboard extends Component
 {
+    use HasOperationalContext;
     use WithPagination;
 
     #[Url]
@@ -55,8 +57,11 @@ class Dashboard extends Component
             $rollingEnd->toDateString(), $rollingEnd->toDateString(), $rollingEnd->format('H:i:s'),
         ])->first();
 
+        $queue = app(ManagerAttention::class)->queue($now, (int) $this->period);
+        $this->paginators['page'] = $queue->currentPage();
+
         return view('livewire.manager.dashboard', [
-            'queue' => app(ManagerAttention::class)->queue($now, (int) $this->period),
+            'queue' => $queue,
             'uncoveredCount' => (int) $coverage->total,
             'pendingSwapCount' => ShiftSwap::query()->where('status', ShiftSwapStatus::PendingManager)->count(),
             'scheduledThisMonth' => Shift::query()->whereBetween('date', [$now->startOfMonth(), $now->endOfMonth()])->where('status', ShiftStatus::Scheduled)->count(),
