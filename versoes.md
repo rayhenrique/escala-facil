@@ -6,6 +6,16 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.18.1 — 10/10/2026
+
+### Acessibilidade e navegação da landing page
+
+- Lenis, parallax e animações desativados com prefers-reduced-motion, mantendo todo o conteúdo visível.
+- Links públicos de ajuda removidos da navegação e redirecionados para seções públicas da página.
+- Menu mobile com rótulo dinâmico, controle de expansão e fechamento por Escape.
+- Microtextos com contraste reforçado e mockup com largura fluida sem overflow no celular.
+- Testes de regressão para navegação pública e acessibilidade.
+
 ## 1.18.0 — 10/10/2026
 
 ### Observabilidade e relato de problemas

@@ -1,6 +1,7 @@
 <header
     x-data="{ mobileOpen: false, scrolled: false }"
     x-init="window.addEventListener('scroll', () => { scrolled = window.scrollY > 20 })"
+    @keydown.escape.window="mobileOpen = false"
     :class="scrolled ? 'bg-white/85 shadow-[0_4px_25px_rgba(0,0,0,0.03)] border-slate-200/70' : 'bg-white/70 border-slate-200/40'"
     class="fixed top-0 inset-x-0 z-50 backdrop-blur-md border-b transition-all duration-300"
 >
@@ -31,9 +32,6 @@
                 </a>
                 <a href="#simulacao" class="px-3.5 py-2 rounded-full hover:text-slate-900 hover:bg-slate-100/80 transition-colors">
                     Fluxo em Tempo Real
-                </a>
-                <a href="{{ route('help') }}" class="px-3.5 py-2 rounded-full hover:text-slate-900 hover:bg-slate-100/80 transition-colors">
-                    Manual & Ajuda
                 </a>
             </nav>
 
@@ -66,10 +64,13 @@
 
                 <button
                     type="button"
+                    x-ref="menuButton"
                     @click="mobileOpen = ! mobileOpen"
                     class="p-2.5 rounded-xl text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    :aria-label="mobileOpen ? 'Fechar menu de navegação' : 'Abrir menu de navegação'"
+                    :aria-expanded="mobileOpen.toString()"
+                    aria-controls="landing-mobile-menu"
                     aria-label="Abrir menu de navegação"
-                    :aria-expanded="mobileOpen"
                 >
                     <svg x-show="! mobileOpen" class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
@@ -84,6 +85,7 @@
 
     <!-- Mobile Slide-Down Menu -->
     <div
+        id="landing-mobile-menu"
         x-show="mobileOpen"
         x-cloak
         x-transition:enter="transition ease-out duration-200"
@@ -107,9 +109,6 @@
             </a>
             <a href="#simulacao" @click="mobileOpen = false" class="px-4 py-2.5 rounded-xl hover:bg-slate-100 hover:text-slate-900 transition-colors">
                 Fluxo em Tempo Real
-            </a>
-            <a href="{{ route('help') }}" class="px-4 py-2.5 rounded-xl hover:bg-slate-100 hover:text-slate-900 transition-colors">
-                Manual Completo
             </a>
         </div>
 

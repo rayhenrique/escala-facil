@@ -1,4 +1,4 @@
-<section id="hero" class="relative pt-32 pb-20 sm:pt-40 sm:pb-28 lg:pt-44 lg:pb-36 overflow-hidden">
+<section id="hero" class="relative scroll-mt-20 pt-32 pb-20 sm:pt-40 sm:pb-28 lg:pt-44 lg:pb-36 overflow-hidden">
     <!-- Efeitos de Profundidade & Glows de Fundo -->
     <div class="absolute top-16 left-1/2 -translate-x-1/2 w-[34rem] sm:w-[50rem] h-[26rem] sm:h-[32rem] bg-emerald-200/25 blur-3xl rounded-full pointer-events-none -z-10" aria-hidden="true"></div>
     <div class="absolute top-72 right-10 w-[20rem] h-[20rem] bg-teal-200/20 blur-3xl rounded-full pointer-events-none -z-10" aria-hidden="true"></div>
@@ -46,7 +46,7 @@
                     class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white/90 hover:bg-white text-slate-700 hover:text-slate-900 font-semibold text-base sm:text-lg px-7 py-4 rounded-full border border-slate-200/90 shadow-sm hover:shadow-md transition-all duration-200"
                 >
                     <span>Ver como funciona</span>
-                    <svg class="size-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                    <svg class="size-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                     </svg>
                 </a>
@@ -80,7 +80,7 @@
             <!-- Glow Suave Atrás do Celular -->
             <div class="absolute inset-0 max-w-sm mx-auto bg-gradient-to-t from-emerald-300/30 to-teal-400/20 blur-3xl rounded-[3rem] -z-10 transform scale-95" aria-hidden="true"></div>
 
-            <div class="gsap-floating-mockup w-[310px] xs:w-[340px] sm:w-[380px] rounded-[3.2rem] p-3 bg-slate-950 border-[7px] border-slate-900 shadow-[0_30px_70px_-15px_rgba(15,23,42,0.35)] relative transition-transform">
+            <div class="gsap-floating-mockup w-full max-w-[310px] sm:w-[380px] sm:max-w-[380px] rounded-[3.2rem] p-3 bg-slate-950 border-[7px] border-slate-900 shadow-[0_30px_70px_-15px_rgba(15,23,42,0.35)] relative transition-transform">
                 <!-- Botões laterais simulados no chassi -->
                 <div class="absolute -left-[10px] top-24 w-[3px] h-10 bg-slate-800 rounded-l-md"></div>
                 <div class="absolute -left-[10px] top-38 w-[3px] h-12 bg-slate-800 rounded-l-md"></div>
@@ -136,7 +136,7 @@
                                 <h3 class="text-base font-extrabold text-slate-900">Amanhã, 14 Nov</h3>
                                 <p class="text-xs text-slate-600 font-medium mt-0.5">07:00 às 19:00 (12h Diurno)</p>
                             </div>
-                            <span class="text-xs font-mono font-bold text-slate-400">Box 04</span>
+                            <span class="text-xs font-mono font-bold text-slate-500">Box 04</span>
                         </div>
 
                         <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
@@ -152,7 +152,7 @@
                                 <span class="size-2 rounded-full bg-amber-500 animate-pulse"></span>
                                 <span class="text-[0.6875rem] font-bold text-amber-900">Troca Mútua em Análise</span>
                             </div>
-                            <span class="text-[0.625rem] font-mono text-slate-400">Hoje · 08:30</span>
+                            <span class="text-[0.625rem] font-mono text-slate-500">Hoje · 08:30</span>
                         </div>
 
                         <div class="mt-2 text-xs text-slate-700 space-y-1">

@@ -26,8 +26,8 @@
                 <a href="{{ route('login') }}" class="hover:text-emerald-700 transition-colors">
                     Login
                 </a>
-                <a href="{{ route('help') }}" class="hover:text-emerald-700 transition-colors">
-                    Manual do Usuário
+                <a href="#superpoderes" class="hover:text-emerald-700 transition-colors">
+                    Superpoderes
                 </a>
                 <a href="#hero" class="hover:text-emerald-700 transition-colors">
                     Voltar ao topo ↑
@@ -36,7 +36,7 @@
         </div>
 
         <!-- Copyright, Credits & Version -->
-        <div class="mt-8 pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400 text-center sm:text-left">
+        <div class="mt-8 pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 text-center sm:text-left">
             <p>© {{ date('Y') }} Escala Fácil. Todos os direitos reservados.</p>
             <div class="flex flex-wrap items-center justify-center sm:justify-end gap-3">
                 <p>

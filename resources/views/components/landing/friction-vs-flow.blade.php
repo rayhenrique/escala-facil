@@ -1,4 +1,4 @@
-<section id="friccao-vs-fluidez" class="gsap-friction-section py-20 sm:py-28 lg:py-36 relative overflow-hidden bg-slate-50/70 border-t border-slate-200/60">
+<section id="friccao-vs-fluidez" class="gsap-friction-section scroll-mt-20 py-20 sm:py-28 lg:py-36 relative overflow-hidden bg-slate-50/70 border-t border-slate-200/60">
     <!-- Glows sutis de fundo -->
     <div class="absolute -top-32 -left-32 w-96 h-96 bg-emerald-100/40 rounded-full blur-3xl pointer-events-none -z-10" aria-hidden="true"></div>
     <div class="absolute -bottom-32 -right-32 w-96 h-96 bg-teal-100/30 rounded-full blur-3xl pointer-events-none -z-10" aria-hidden="true"></div>
@@ -116,12 +116,12 @@
                         <!-- Participantes da Troca -->
                         <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                             <div class="bg-white p-3 rounded-xl border border-emerald-100">
-                                <span class="text-slate-400 block font-medium text-[0.6875rem]">CEDENTE ORIGINAL:</span>
+                                <span class="text-slate-500 block font-medium text-[0.6875rem]">CEDENTE ORIGINAL:</span>
                                 <strong class="text-slate-900 block text-sm mt-0.5">Dra. Fernanda Lima</strong>
                                 <span class="text-slate-500 block text-[0.6875rem]">Sexta, 14 Nov · 07h às 19h</span>
                             </div>
                             <div class="bg-white p-3 rounded-xl border border-emerald-100">
-                                <span class="text-slate-400 block font-medium text-[0.6875rem]">SUBSTITUTO APROVADO:</span>
+                                <span class="text-slate-500 block font-medium text-[0.6875rem]">SUBSTITUTO APROVADO:</span>
                                 <strong class="text-slate-900 block text-sm mt-0.5">Dr. Renato Albuquerque</strong>
                                 <span class="text-slate-500 block text-[0.6875rem]">Sexta, 14 Nov · 07h às 19h</span>
                             </div>

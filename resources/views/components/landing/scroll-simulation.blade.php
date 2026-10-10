@@ -1,4 +1,4 @@
-<section id="simulacao" class="gsap-simulation-section py-20 sm:py-28 lg:py-36 relative overflow-hidden bg-slate-50/80 border-t border-slate-200/60">
+<section id="simulacao" class="gsap-simulation-section scroll-mt-20 py-20 sm:py-28 lg:py-36 relative overflow-hidden bg-slate-50/80 border-t border-slate-200/60">
     <!-- Glow de Fundo -->
     <div class="absolute -top-24 right-1/4 w-[36rem] h-[24rem] bg-emerald-100/40 blur-3xl rounded-full pointer-events-none -z-10" aria-hidden="true"></div>
 
@@ -33,7 +33,7 @@
                             </svg>
                         </div>
                         <div>
-                            <span class="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider block">ID: #TR-2026-9042</span>
+                            <span class="text-xs font-mono font-bold text-slate-500 uppercase tracking-wider block">ID: #TR-2026-9042</span>
                             <h3 class="text-base sm:text-lg font-bold text-slate-900 leading-tight">Plantão de Domingo · Emergência Geral</h3>
                         </div>
                     </div>
@@ -54,12 +54,12 @@
                 <!-- Detalhes do Turno -->
                 <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm">
                     <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                        <span class="text-slate-400 text-xs font-medium block">Horário do Turno</span>
+                        <span class="text-slate-500 text-xs font-medium block">Horário do Turno</span>
                         <strong class="text-slate-800 text-sm sm:text-base mt-0.5 block">07:00 às 19:00 (12 Horas)</strong>
                         <span class="text-slate-500 text-xs mt-1 block">Domingo, 22 de Novembro</span>
                     </div>
                     <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                        <span class="text-slate-400 text-xs font-medium block">Profissionais Envolvidos</span>
+                        <span class="text-slate-500 text-xs font-medium block">Profissionais Envolvidos</span>
                         <strong class="text-slate-800 text-sm sm:text-base mt-0.5 block">Dr. Tiago → Dra. Camila</strong>
                         <span class="text-emerald-700 font-semibold text-xs mt-1 block">Substituição voluntária aceita</span>
                     </div>
@@ -99,7 +99,7 @@
                 </div>
 
                 <!-- Rodapé de Apoio ao Scroll -->
-                <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+                <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
                     <span class="inline-flex items-center gap-1.5">
                         <span class="size-2 rounded-full bg-emerald-500"></span>
                         Simulação baseada no fluxo real do Escala Fácil

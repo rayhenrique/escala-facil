@@ -10,6 +10,15 @@ export function initLandingPage() {
         return;
     }
 
+    // Movimento reduzido: sem scroll suave, parallax ou animações complexas.
+    // Todo o conteúdo permanece visível no estado natural do DOM.
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (prefersReducedMotion) {
+        showSimulationFinalState();
+        return;
+    }
+
     // 1. Lenis Smooth Scroll sincronizado com o GSAP Ticker
     const lenis = new Lenis({
         duration: 1.2,
@@ -256,4 +265,28 @@ export function initLandingPage() {
             });
         }
     });
+}
+
+// Estado final estático da simulação para movimento reduzido: sem animação,
+// o card exibe diretamente a conclusão, mantendo todo o conteúdo visível.
+function showSimulationFinalState() {
+    const simProgress = document.querySelector('.gsap-sim-progress');
+    const simPending = document.querySelector('.gsap-sim-pending');
+    const simApproved = document.querySelector('.gsap-sim-approved');
+    const simBadgePending = document.querySelector('.gsap-sim-badge-pending');
+    const simBadgeApproved = document.querySelector('.gsap-sim-badge-approved');
+    const simCard = document.querySelector('.gsap-simulation-card');
+
+    if (simProgress) simProgress.style.width = '100%';
+    if (simBadgePending) simBadgePending.style.display = 'none';
+    if (simBadgeApproved) {
+        simBadgeApproved.style.opacity = '1';
+        simBadgeApproved.style.transform = 'none';
+    }
+    if (simPending && simApproved) {
+        simPending.style.display = 'none';
+        simApproved.style.opacity = '1';
+        simApproved.style.transform = 'none';
+    }
+    if (simCard) simCard.style.borderColor = 'rgba(5, 150, 105, 0.4)';
 }

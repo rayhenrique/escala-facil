@@ -1,4 +1,4 @@
-<section id="superpoderes" class="py-20 sm:py-28 lg:py-36 relative overflow-hidden bg-slate-50">
+<section id="superpoderes" class="scroll-mt-20 py-20 sm:py-28 lg:py-36 relative overflow-hidden bg-slate-50">
     <!-- Glow de Fundo -->
     <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[46rem] h-[30rem] bg-emerald-200/20 blur-3xl rounded-full pointer-events-none -z-10" aria-hidden="true"></div>
 

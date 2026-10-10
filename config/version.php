@@ -1,9 +1,22 @@
 <?php
 
 return [
-    'current' => env('APP_VERSION', '1.18.0'),
+    'current' => env('APP_VERSION', '1.18.1'),
 
     'releases' => [
+        [
+            'version' => '1.18.1',
+            'date' => '2026-10-10',
+            'title' => 'Acessibilidade e navegação da landing page',
+            'summary' => 'Respeito a movimento reduzido, links públicos sem redirecionar ao login, menu mobile por teclado, contraste e largura fluida no mobile.',
+            'highlights' => [
+                'Lenis, parallax e animações desativados com prefers-reduced-motion, mantendo todo o conteúdo visível.',
+                'Links públicos de ajuda removidos da navegação e redirecionados para seções públicas da página.',
+                'Menu mobile com rótulo dinâmico, controle de expansão e fechamento por Escape.',
+                'Microtextos com contraste reforçado e mockup com largura fluida sem overflow no celular.',
+                'Testes de regressão para navegação pública e acessibilidade.',
+            ],
+        ],
         [
             'version' => '1.18.0',
             'date' => '2026-10-10',
