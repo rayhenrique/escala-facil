@@ -1,4 +1,5 @@
 <div>
+    <x-flash-notifications />
     <x-context-navigation :back="$isProfessional && $from === '' ? null : $this->backNavigation()" :links="array_filter([
         'Abrir escala deste mês' => $canManageShifts ? \App\Support\OperationalNavigation::url('shifts', ['month' => $month], 'calendar', $this->navigationContext()) : null,
         'Ver relatório' => \App\Support\OperationalNavigation::url('reports', ['month' => $month, 'sectorId' => $sectorId, 'categoryId' => $categoryId], 'calendar', $this->navigationContext()),
@@ -6,7 +7,7 @@
     <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div>
             <p class="eyebrow">Visão mensal</p>
-            <h1 class="page-title">Calendário de plantões</h1>
+            <h1 class="page-title" tabindex="-1" data-decision-return>Calendário de plantões</h1>
             <p class="page-description">Selecione um dia para consultar todos os plantões e profissionais escalados.</p>
         </div>
 
@@ -77,11 +78,15 @@
         <p wire:loading.delay class="mt-4 text-sm text-muted" role="status">Atualizando calendário…</p>
 
         <div class="calendar-grid mt-6" role="grid" aria-label="Calendário de {{ $monthLabel }}">
+            <div class="contents" role="row">
             @foreach (['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'] as $weekday)
                 <div class="calendar-weekday" role="columnheader">{{ $weekday }}</div>
             @endforeach
+            </div>
 
-            @foreach ($calendarDays as $day)
+            @foreach ($calendarDays->chunk(7) as $week)
+            <div class="contents" role="row">
+            @foreach ($week as $day)
                 <button
                     type="button"
                     wire:click="selectDate('{{ $day['date'] }}')"
@@ -131,6 +136,8 @@
                         <span class="calendar-day-swap" title="{{ $day['swap_tooltip'] ?? 'Dia com troca de plantão aprovada' }}" aria-label="{{ $day['swap_tooltip'] ?? 'Dia com troca de plantão' }}">⇄</span>
                     @endif
                 </button>
+            @endforeach
+            </div>
             @endforeach
         </div>
     </section>
@@ -207,6 +214,9 @@
                         <p class="mt-1 text-sm text-muted">{{ $shift->sector->name }} · {{ $shift->category->name }}</p>
                     </div>
                     @if ($canManageShifts)
+                        @can('reallocate', $shift)
+                            <button type="button" wire:click="openReallocation({{ $shift->id }})" wire:loading.attr="disabled" wire:target="openReallocation" class="button-primary self-start" aria-label="Preencher plantão #{{ $shift->id }}">Preencher plantão</button>
+                        @endcan
                         @if (in_array($shift->id, $pendingSwapShiftIds, true))
                             <a href="{{ \App\Support\OperationalNavigation::url('swaps', ['request' => $pendingSwapsByShift[$shift->id]], 'calendar', $this->navigationContext()) }}" wire:navigate class="table-action self-start">Analisar troca</a>
                         @elseif (! $shift->user_id)
@@ -229,4 +239,5 @@
             @endforelse
         </div>
     </section>
+    @include('livewire.manager.partials.shift-reallocation')
 </div>

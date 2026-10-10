@@ -80,6 +80,9 @@
                             <p class="mt-2 text-xs text-muted">{{ $isUncovered ? ($shift->latestAbsence ? 'Ausência informada em' : 'Plantão registrado em') : 'Solicitada em' }} {{ ($isUncovered ? ($shift->latestAbsence?->created_at ?? $shift->created_at) : $record->created_at)->format('d/m/Y H:i') }}</p>
                         </div>
                         <div class="attention-actions flex flex-col gap-2">
+                            @if ($isUncovered)
+                                <button type="button" wire:click="openReallocation({{ $shift->id }})" wire:loading.attr="disabled" wire:target="openReallocation" class="button-primary w-full sm:w-auto" aria-label="Preencher plantão #{{ $shift->id }}">Preencher plantão</button>
+                            @endif
                             @if (! $isUncovered)
                                 <button type="button" wire:click="openSwapAnalysis({{ $record->id }})" wire:loading.attr="disabled" wire:target="openSwapAnalysis" class="button-primary w-full sm:w-auto" aria-label="Analisar pedido #{{ $record->id }} no painel">Analisar no painel</button>
                             @endif
@@ -101,4 +104,5 @@
         <a href="{{ route('manager.shifts') }}" wire:navigate class="text-link inline-flex min-h-10 items-center">Gerenciar escala</a>
     </nav>
     @include('livewire.manager.partials.swap-analysis')
+    @include('livewire.manager.partials.shift-reallocation')
 </div>

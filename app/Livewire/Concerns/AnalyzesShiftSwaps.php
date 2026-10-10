@@ -33,6 +33,9 @@ trait AnalyzesShiftSwaps
         $this->authorize('viewAny', ShiftSwap::class);
         $swap = ShiftSwap::query()->findOrFail($id);
         $this->authorize('reject', $swap);
+        if (method_exists($this, 'closeReallocation')) {
+            $this->closeReallocation();
+        }
         $this->cancelDecision();
         $this->pendingDecisionSummary = app(ShiftSwapAnalysis::class)->make($swap, auth()->user());
         $this->decisionSnapshot = $this->pendingDecisionSummary['fingerprint'];

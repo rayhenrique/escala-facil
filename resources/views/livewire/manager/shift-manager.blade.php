@@ -2,7 +2,7 @@
     <div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
             <p class="eyebrow">Gerência</p>
-            <h1 class="page-title">Gestão de escalas</h1>
+            <h1 class="page-title" tabindex="-1" data-decision-return>Gestão de escalas</h1>
             <p class="page-description">Crie plantões e mantenha setor, categoria e profissional compatíveis.</p>
         </div>
         <div class="grid w-full gap-3 sm:w-auto sm:items-end">
@@ -65,6 +65,7 @@
                 </header>
 
                 <div class="modal-body grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                    @error('shift')<p class="field-error col-span-full" role="alert">{{ $message }}</p>@enderror
                     <div>
                         <label for="date" class="field-label">Data</label>
                         <input x-ref="firstField" wire:model="date" id="date" type="date" class="field-input" @error('date') aria-invalid="true" aria-describedby="date-error" @enderror>
@@ -139,6 +140,7 @@
             @forelse ($shifts as $shift)
                 <x-shift-card :shift="$shift" :show-professional="true" wire:key="mobile-shift-{{ $shift->id }}" class="{{ $focus === $shift->id ? 'context-record' : '' }}" data-context-record="{{ $focus === $shift->id ? 'shift-'.$shift->id : '' }}">
                     <div class="flex flex-wrap gap-2">
+                        @can('reallocate', $shift)<button type="button" wire:click="openReallocation({{ $shift->id }})" wire:loading.attr="disabled" wire:target="openReallocation" class="button-primary">Preencher plantão</button>@endcan
                         <button type="button" wire:click="edit({{ $shift->id }})" class="button-secondary">Editar</button>
                         <button type="button" wire:click="requestDelete({{ $shift->id }})" class="table-action min-h-10 text-danger">Excluir</button>
                     </div>
@@ -158,7 +160,7 @@
                             <td><strong>{{ $shift->sector->name }}</strong><span>{{ $shift->category->name }}</span></td>
                             <td>{{ $shift->user?->name ?? 'Não alocado' }}</td>
                             <td><x-status-badge :status="$shift->status" /></td>
-                            <td><div class="flex justify-end gap-2"><button type="button" wire:click="edit({{ $shift->id }})" class="table-action">Editar</button><button type="button" wire:click="requestDelete({{ $shift->id }})" class="table-action text-danger">Excluir</button></div></td>
+                            <td><div class="flex flex-wrap justify-end gap-2">@can('reallocate', $shift)<button type="button" wire:click="openReallocation({{ $shift->id }})" wire:loading.attr="disabled" wire:target="openReallocation" class="table-action">Preencher plantão</button>@endcan<button type="button" wire:click="edit({{ $shift->id }})" class="table-action">Editar</button><button type="button" wire:click="requestDelete({{ $shift->id }})" class="table-action text-danger">Excluir</button></div></td>
                         </tr>
                     @empty
                         <tr><td colspan="5" class="py-12 text-center text-muted">Nenhum plantão encontrado para este mês.</td></tr>
@@ -168,6 +170,18 @@
         </div>
         <div class="mt-6">{{ $shifts->links() }}</div>
     </section>
+
+    @if ($reallocations->isNotEmpty())
+        <section class="panel mt-6" aria-labelledby="reallocation-history-title">
+            <h2 id="reallocation-history-title" class="text-lg font-semibold">Histórico de realocação deste plantão</h2>
+            <p class="mt-1 text-xs text-muted">Até 10 registros mais recentes. As ausências e trocas anteriores são preservadas.</p>
+            <ol class="mt-4 space-y-3">
+                @foreach ($reallocations as $allocation)
+                    <li class="border-t border-line pt-3 text-sm"><strong>{{ $allocation->performed_at->format('d/m/Y H:i') }}</strong> · {{ $allocation->manager_name }}<p class="mt-1">{{ $allocation->before['professional'] ?? 'Sem profissional' }} → {{ $allocation->after['professional'] }} · Descoberto → Agendado</p></li>
+                @endforeach
+            </ol>
+        </section>
+    @endif
 
     <x-confirmation-modal :show="$pendingDeleteId !== null" id="delete-shift" title="Excluir plantão?" close-action="cancelDelete">
         <p><strong>{{ $pendingDeleteLabel }}</strong></p>
@@ -350,4 +364,5 @@
             </form>
         </div>
     @endif
+    @include('livewire.manager.partials.shift-reallocation')
 </div>

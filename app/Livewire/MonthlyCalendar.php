@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Enums\ShiftSwapStatus;
 use App\Enums\UserRole;
 use App\Livewire\Concerns\HasOperationalContext;
+use App\Livewire\Concerns\ReallocatesShifts;
 use App\Models\Category;
 use App\Models\Sector;
 use App\Models\Shift;
@@ -25,6 +26,7 @@ use Livewire\Component;
 class MonthlyCalendar extends Component
 {
     use HasOperationalContext;
+    use ReallocatesShifts;
 
     #[Url]
     public string $month = '';

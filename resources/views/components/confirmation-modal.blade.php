@@ -41,7 +41,7 @@
                 </div>
             </header>
 
-            <div id="{{ $id }}-description" class="modal-body confirmation-copy">
+            <div id="{{ $id }}-description" class="modal-body confirmation-copy" @if ($trapFocus) tabindex="0" @endif>
                 {{ $slot }}
             </div>
 

@@ -6,6 +6,7 @@ use App\Enums\ShiftStatus;
 use App\Enums\ShiftSwapStatus;
 use App\Livewire\Concerns\AnalyzesShiftSwaps;
 use App\Livewire\Concerns\HasOperationalContext;
+use App\Livewire\Concerns\ReallocatesShifts;
 use App\Models\Shift;
 use App\Models\ShiftSwap;
 use App\Support\ManagerAttention;
@@ -20,6 +21,7 @@ class Dashboard extends Component
 {
     use AnalyzesShiftSwaps;
     use HasOperationalContext;
+    use ReallocatesShifts;
     use WithPagination;
 
     #[Url]

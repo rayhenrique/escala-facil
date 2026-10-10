@@ -4,14 +4,17 @@ namespace App\Livewire\Manager;
 
 use App\Actions\Shifts\DuplicateMonthAction;
 use App\Actions\Shifts\ImportShiftsAction;
+use App\Actions\Shifts\UpdateShiftAction;
 use App\Enums\ShiftStatus;
 use App\Enums\UserRole;
 use App\Http\Requests\ImportShiftsRequest;
 use App\Http\Requests\SaveShiftRequest;
 use App\Livewire\Concerns\HasOperationalContext;
+use App\Livewire\Concerns\ReallocatesShifts;
 use App\Models\Category;
 use App\Models\Sector;
 use App\Models\Shift;
+use App\Models\ShiftReallocation;
 use App\Models\User;
 use App\Support\ManagerAttention;
 use App\Support\OperationalNavigation;
@@ -23,6 +26,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\WithFileUploads;
@@ -32,6 +36,7 @@ use Livewire\WithPagination;
 class ShiftManager extends Component
 {
     use HasOperationalContext;
+    use ReallocatesShifts;
     use WithFileUploads;
     use WithPagination;
 
@@ -44,7 +49,11 @@ class ShiftManager extends Component
     #[Url]
     public $focus = null;
 
+    #[Locked]
     public ?int $editingShiftId = null;
+
+    #[Locked]
+    public ?string $editingShiftSnapshot = null;
 
     public ?int $pendingDeleteId = null;
 
@@ -151,17 +160,17 @@ class ShiftManager extends Component
         unset($this->professionals);
     }
 
-    public function save(): void
+    public function save(UpdateShiftAction $action): void
     {
         $shift = $this->editingShiftId ? Shift::query()->findOrFail($this->editingShiftId) : null;
         $this->authorize($shift ? 'update' : 'create', $shift ?? Shift::class);
 
-        $validated = (new SaveShiftRequest)->validatePayload($this->payload(), auth()->user());
-
         if ($shift) {
-            $shift->update($validated);
+            abort_unless($this->editingShiftSnapshot, 404);
+            $action->execute(auth()->user(), $shift->id, $this->payload(), $this->editingShiftSnapshot);
             session()->flash('status', 'Plantão atualizado com sucesso.');
         } else {
+            $validated = (new SaveShiftRequest)->validatePayload($this->payload(), auth()->user());
             Shift::query()->create($validated);
             session()->flash('status', 'Plantão criado com sucesso.');
         }
@@ -181,6 +190,7 @@ class ShiftManager extends Component
         $this->authorize('update', $shift);
 
         $this->editingShiftId = $shift->id;
+        $this->editingShiftSnapshot = app(\App\Support\ShiftReallocation::class)->shiftSignature($shift);
         $this->pendingDeleteId = null;
         $this->date = $shift->date->format('Y-m-d');
         $this->startTime = substr((string) $shift->start_time, 0, 5);
@@ -350,7 +360,7 @@ class ShiftManager extends Component
 
     public function resetForm(): void
     {
-        $this->reset(['editingShiftId', 'pendingDeleteId', 'pendingDeleteLabel', 'showFormModal', 'sectorId', 'categoryId', 'userId']);
+        $this->reset(['editingShiftId', 'editingShiftSnapshot', 'pendingDeleteId', 'pendingDeleteLabel', 'showFormModal', 'sectorId', 'categoryId', 'userId']);
         $this->date = today()->addDay()->format('Y-m-d');
         $this->startTime = '07:00';
         $this->endTime = '19:00';
@@ -414,6 +424,9 @@ class ShiftManager extends Component
             $shifts = $shifts->paginate(10);
         }
 
-        return view('livewire.manager.shift-manager', compact('shifts', 'focusedShift'));
+        return view('livewire.manager.shift-manager', [
+            'shifts' => $shifts, 'focusedShift' => $focusedShift,
+            'reallocations' => $focusedShift ? ShiftReallocation::query()->where('shift_id', $focusedShift->id)->latest('id')->limit(10)->get() : collect(),
+        ]);
     }
 }

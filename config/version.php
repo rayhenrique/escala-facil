@@ -2,9 +2,18 @@
 
 return [
     // Versão do código instalado. APP_VERSION não pode sobrepor este registro.
-    'current' => '1.26.0',
+    'current' => '1.27.0',
 
     'releases' => [
+        [
+            'version' => '1.27.0',
+            'date' => '2026-10-10',
+            'title' => 'Realocação assistida de plantões',
+            'summary' => 'Ficou mais fácil encontrar profissionais disponíveis e preencher plantões descobertos.',
+            'highlights' => [
+                'Ficou mais fácil encontrar profissionais disponíveis e preencher plantões descobertos.',
+            ],
+        ],
         [
             'version' => '1.26.0',
             'date' => '2026-10-10',

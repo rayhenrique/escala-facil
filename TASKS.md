@@ -1,5 +1,12 @@
 # TASKS - Plano de Execução Sequencial
 
+- [x] **Realocação assistida de plantões (1.27.0)**
+  - [x] Abrir o plantão exato pelo painel, calendário e Escalas, reutilizando modal e navegação contextual.
+  - [x] Listar profissionais compatíveis disponíveis, calcular sobreposição real e alertar dobras inclusive à noite e em 24h.
+  - [x] Exibir prévia, revalidar cadastro/horários/permissão e bloquear decisões concorrentes em transação.
+  - [x] Registrar responsável, data e antes/depois sem reescrever ausências, trocas ou notificações.
+  - [x] Validar testes, processos concorrentes, navegador, acessibilidade, Pint, build e metadados.
+
 - [x] **Análise contextual de trocas (1.26.0)**
   - [x] Compartilhar análise e confirmação entre dashboard e Trocas, com contrapartida e alertas para ambos os profissionais.
   - [x] Reutilizar Action, Policies, comprovantes e notificações; exigir justificativa no servidor e confirmação explícita.

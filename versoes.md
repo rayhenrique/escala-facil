@@ -6,6 +6,12 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.27.0 — 10/10/2026
+
+### Realocação assistida de plantões
+
+- Ficou mais fácil encontrar profissionais disponíveis e preencher plantões descobertos.
+
 ## 1.26.0 — 10/10/2026
 
 ### Análise de trocas no painel

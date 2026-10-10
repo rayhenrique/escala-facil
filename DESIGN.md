@@ -219,3 +219,8 @@ A voz é direta e respeitosa. Estados dizem o que ocorreu e o próximo passo. Da
 ## Análise contextual de trocas
 
 A fila gerencial oferece “Analisar no painel” como ação principal e “Abrir em Trocas” para consulta com navegação contextual. O painel de análise reutiliza o modal de confirmação e os mesmos tokens, campos e comprovantes da tela de Trocas. A análise apresenta atribuições e contrapartida, duração, setor, categoria e contagem mensal; alertas distinguem dobra de sobreposição. A escolha da decisão abre uma confirmação explícita no mesmo modal. No celular, conteúdo rola entre cabeçalho e ações; foco fica no modal e retorna ao acionador ou ao título da fila após a decisão. Não foram introduzidos novos efeitos ou linguagem visual.
+
+
+## Realocação assistida
+
+“Preencher plantão” abre o mesmo fluxo no painel, calendário e Escalas. O modal canônico apresenta primeiro o plantão e a seleção de profissionais, depois a prévia de atribuição e status. A lista usa campos radio nativos e a composição existente de `record-card`, com dobra em texto; profissionais com sobreposição não aparecem como opções. A área de conteúdo recebe foco para rolagem por teclado quando a prévia é longa. O calendário preserva sua grade visual, com cabeçalho e semanas agrupados semanticamente em linhas. As duas análises do painel são mutuamente exclusivas, com foco, fundo inerte e bloqueio durante confirmação compartilhados.
