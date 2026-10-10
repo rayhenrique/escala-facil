@@ -67,8 +67,18 @@ class LandingAccessibilityTest extends TestCase
             ->assertDontSee('gsap-floating-mockup w-[310px]', false)
             ->assertDontSee('xs:w-[340px]', false)
             ->assertDontSee('text-slate-400', false)
-            ->assertSee('max-w-[310px]', false)
-            ->assertSee('scroll-mt-20', false);
+            ->assertSee('landing-preview', false)
+            ->assertSee('scroll-mt-24', false);
+    }
+
+    public function test_all_workflow_steps_and_navigation_fallback_are_present_without_script(): void
+    {
+        $this->get('/landing')->assertOk()
+            ->assertSee('Pular para o conteúdo')
+            ->assertSee('aria-label="Seções da página"', false)
+            ->assertSeeInOrder(['1 · Solicitação', '2 · Aceite', '3 · Decisão']);
+        $markup = file_get_contents(resource_path('views/components/landing/scroll-simulation.blade.php'));
+        $this->assertDoesNotMatchRegularExpression('/opacity-0|absolute inset-0|x-cloak/', $markup);
     }
 
     public function test_confirmation_modal_keeps_dialog_semantics(): void

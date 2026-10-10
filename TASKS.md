@@ -1,5 +1,11 @@
 # TASKS - Plano de Execução Sequencial
 
+- [x] **Clareza da landing (1.23.0)**
+  - [x] Preservar identidade e revisar hierarquia, ritmo, comparação, recursos e acesso institucional.
+  - [x] Usar componentes reais com dados ilustrativos e substituir promessas sem evidência.
+  - [x] Manter visibilidade progressiva, navegação por teclado e movimento reduzido; atualizar contratos.
+  - [x] Validar regressões, navegador desktop/mobile, contraste, Pint e build.
+
 - [x] **Consistência de versão (1.22.1)**
   - [x] Auditar APP_VERSION, registro, documentação, deploy, caches e PWA.
   - [x] Usar o código instalado como fonte canônica e preservar .env e dados de usuários.

@@ -27,7 +27,7 @@ Este documento registra o comportamento compartilhado das telas autenticadas. As
 | Painel gerencial | `Manager\Dashboard` | cobertura das próximas 72h, plantões descobertos e trocas pendentes | foco operacional com próximo descoberto e pendência mais antiga, atalhos contextuais, listas completas preservadas e contagens reais |
 | Central de ajuda | `HelpCenter` | implantação inicial, rotinas por perfil, fluxos críticos, diagnóstico e versões | acesso pelos dois perfis, ordem inicial preservada, âncoras, acordeões e histórico completo |
 | Aplicativo PWA | `manifest.webmanifest` + `sw.js` + ação `data-pwa-install` | Android, iOS/iPadOS e Windows | instalação nativa quando suportada, modo independente, ícones válidos e fallback offline sem cache autenticado |
-| Página pública | `landing.blade.php` + componentes `landing/*` | seções com âncora, simulação e bloco de conversão | mesmos tokens e tipografia do sistema, sem links para rotas autenticadas, menu móvel por teclado e estado final estático com movimento reduzido |
+| Página pública | `landing.blade.php` + componentes `landing/*` | seções com âncora, prévia e exemplo de troca | mesmos tokens e tipografia, cartão de plantão e badges compartilhados, dados ilustrativos, login como único destino autenticado, navegação por teclado e conteúdo legível sem JavaScript |
 | Novidades da versão | `ReleaseAnnouncement` + `last_seen_version` | primeiro acesso após lançamento | modal único por versão, confirmação persistida e acesso ao manual |
 | Notificações | `NotificationsCenter` + notificações em banco | solicitação, aceite, aprovação e rejeição | isolamento por usuário, contador de não lidas e controles de leitura |
 | Comprovante de troca | `resources/views/components/swap-receipt.blade.php` | imediato e histórico | retrato do evento com referência, plantão e participantes |
@@ -52,6 +52,8 @@ Este documento registra o comportamento compartilhado das telas autenticadas. As
 - A ação Instalar aplicativo fica oculta até o navegador emitir a oferta nativa e desaparece quando o sistema já está em modo instalado.
 
 ## Fluxos e retorno
+
+A landing oferece um atalho para o conteúdo e âncoras identificadas. Com Lenis, a navegação atualiza o hash e leva o foco à seção após a rolagem; sem JavaScript ou com movimento reduzido, usa a navegação nativa. O menu público é uma expansão não modal: fecha ao escolher uma seção ou usar `Esc`, que devolve o foco ao botão. Sem JavaScript, há links visíveis para as seções. O exemplo de troca apresenta solicitação, aceite e decisão simultaneamente, informa a possibilidade de rejeição e nunca sugere aprovação automática. A prévia não consulta nem publica registros de usuários. O acesso depende de credenciais da instituição; o CTA orienta quem ainda não as possui.
 
 | Operação | Estado em andamento | Sucesso | Falha e recuperação |
 | --- | --- | --- | --- |

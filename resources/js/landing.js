@@ -76,7 +76,14 @@ export function initLandingPage() {
                     const targetElement = document.getElementById(decodeURIComponent(targetId.slice(1)));
                     if (targetElement) {
                         event.preventDefault();
-                        lenis.scrollTo(targetElement, { offset: -80, duration: 1.2 });
+                        lenis.scrollTo(targetElement, {
+                            offset: -96,
+                            duration: 1.2,
+                            onComplete: () => {
+                                window.history.pushState(null, '', targetId);
+                                targetElement.focus({ preventScroll: true });
+                            },
+                        });
                     }
                 }
             }, { signal: listeners.signal });
@@ -170,42 +177,20 @@ export function initLandingPage() {
                 }));
             }
 
-            // Simulação Visual (Seção 3.5 da especificação):
-            // Conforme o scroll avança, o status transita de 'Em Análise' (Amber) para 'Aprovado' (Emerald)
+            // A linha reforça a sequência; todas as etapas já estão legíveis.
             const simSection = document.querySelector('.gsap-simulation-section');
-            const simCard = document.querySelector('.gsap-simulation-card');
-            const simPending = document.querySelector('.gsap-sim-pending');
-            const simApproved = document.querySelector('.gsap-sim-approved');
             const simProgress = document.querySelector('.gsap-sim-progress');
-            const simBadgePending = document.querySelector('.gsap-sim-badge-pending');
-            const simBadgeApproved = document.querySelector('.gsap-sim-badge-approved');
-
-            if (simSection && simCard && simPending && simApproved) {
-                const simTl = gsap.timeline({
+            if (simSection && simProgress) {
+                gsap.to(simProgress, {
+                    width: '100%',
+                    ease: 'none',
                     scrollTrigger: {
                         trigger: simSection,
-                        start: 'top 65%',
-                        end: 'center 45%',
+                        start: 'top 75%',
+                        end: 'bottom 70%',
                         scrub: 0.8,
                     },
                 });
-
-                if (simProgress) {
-                    simTl.to(simProgress, { width: '100%', ease: 'none' }, 0);
-                }
-
-                if (simBadgePending && simBadgeApproved) {
-                    simTl.to(simBadgePending, { opacity: 0, scale: 0.9, duration: 0.3 }, 0.5);
-                    simTl.to(simBadgeApproved, { opacity: 1, scale: 1, duration: 0.3 }, 0.5);
-                }
-
-                simTl.to(simPending, { opacity: 0, y: -10, duration: 0.35 }, 0.45);
-                simTl.to(simApproved, { opacity: 1, y: 0, duration: 0.45 }, 0.45);
-                simTl.to(simCard, {
-                    borderColor: 'rgba(5, 150, 105, 0.4)',
-                    boxShadow: '0 25px 50px -12px rgba(5, 150, 105, 0.18)',
-                    duration: 0.5,
-                }, 0.45);
             }
 
             // CTA Box: Surgimento suave
@@ -253,19 +238,12 @@ export function initLandingPage() {
                 }));
             }
 
-            // Simulação no Mobile: Acionamento direto por ScrollTrigger
             const simSection = document.querySelector('.gsap-simulation-section');
             const simProgress = document.querySelector('.gsap-sim-progress');
-            const simPending = document.querySelector('.gsap-sim-pending');
-            const simApproved = document.querySelector('.gsap-sim-approved');
-            const simBadgePending = document.querySelector('.gsap-sim-badge-pending');
-            const simBadgeApproved = document.querySelector('.gsap-sim-badge-approved');
-            const simCard = document.querySelector('.gsap-simulation-card');
-
-            if (simSection && simCard && simPending && simApproved) {
+            if (simSection && simProgress) {
                 ScrollTrigger.create({
                     trigger: simSection,
-                    start: 'top 60%',
+                    start: 'top 70%',
                     once: true,
                     onRefresh: (self) => { if (self.progress > 0) showSimulationFinalState(); },
                     onEnter: showSimulationFinalState,
@@ -290,26 +268,8 @@ export function initLandingPage() {
     }
 }
 
-// Estado final estático da simulação para movimento reduzido: sem animação,
-// o card exibe diretamente a conclusão, mantendo todo o conteúdo visível.
+// A sequência permanece visível sem animação ou com movimento reduzido.
 function showSimulationFinalState() {
     const simProgress = document.querySelector('.gsap-sim-progress');
-    const simPending = document.querySelector('.gsap-sim-pending');
-    const simApproved = document.querySelector('.gsap-sim-approved');
-    const simBadgePending = document.querySelector('.gsap-sim-badge-pending');
-    const simBadgeApproved = document.querySelector('.gsap-sim-badge-approved');
-    const simCard = document.querySelector('.gsap-simulation-card');
-
     if (simProgress) simProgress.style.width = '100%';
-    if (simBadgePending) simBadgePending.style.opacity = '0';
-    if (simBadgeApproved) {
-        simBadgeApproved.style.opacity = '1';
-        simBadgeApproved.style.transform = 'none';
-    }
-    if (simPending && simApproved) {
-        simPending.style.opacity = '0';
-        simApproved.style.opacity = '1';
-        simApproved.style.transform = 'none';
-    }
-    if (simCard) simCard.style.borderColor = 'rgba(5, 150, 105, 0.4)';
 }

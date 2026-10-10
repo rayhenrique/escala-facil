@@ -6,6 +6,13 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.23.0 — 10/10/2026
+
+### Apresentação mais clara do aplicativo
+
+- Apresentação mais clara dos recursos, do fluxo de troca e do acesso institucional.
+- Prévia com componentes do aplicativo e navegação mais fácil no computador e no celular.
+
 ## 1.22.1 — 10/10/2026
 
 ### Versão correta em todas as telas

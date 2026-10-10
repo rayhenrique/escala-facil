@@ -192,9 +192,11 @@ A Central de Notificações usa cartões com uma faixa suave para itens não lid
 
 A página pública usa os mesmos tokens do sistema (`ink`, `muted`, `primary`, `primary-strong`, `primary-soft`, `coverage`, `canvas`, `line`) e a mesma tipografia (Instrument Sans para títulos e texto, IBM Plex Mono para rótulos operacionais). Gradientes, vidro (`backdrop-blur`), blobs com blur, sombras customizadas e deslocamentos no hover foram removidos; botões usam raio de 0,5rem e pílulas ficam restritas a status curtos. O bloco de conversão segue o padrão do quadro de cobertura: faixa escura em `primary-strong` com texto claro. A navegação pública contém apenas âncoras da própria página e o acesso à plataforma; o menu móvel usa rótulo dinâmico, controle de expansão e fechamento por `Esc`.
 
+A apresentação inicial divide texto e prévia em duas colunas a partir de `lg`; no celular, a prévia segue as ações. O cartão de plantão e os badges reutilizam os componentes do aplicativo, com dados ilustrativos sem consulta ao banco. O chassi de celular, as conversas fictícias e os selos de confiança decorativos dão lugar à informação operacional. A largura acompanha o limite de 76rem do produto; seções usam 3,5rem, 4rem e 5rem de respiro vertical conforme o breakpoint, sem altura mínima artificial. Títulos de seção são alinhados à esquerda, benefícios formam listas e exemplos aparecem após uma divisória. Comparação, recursos e sequência de troca usam bordas e superfícies, sem sombras adicionais. O CTA distingue quem já tem credenciais de quem precisa consultar a gerência. Textos descrevem capacidades verificadas, sem prometer tempo de aprovação, segurança absoluta ou resultados sem evidência.
+
 ### Motion
 
-Transições de cor duram até 160ms e comunicam resposta. Carregamentos mantêm geometria. `prefers-reduced-motion` reduz animações e transições a duração mínima. Na landing, Lenis, parallax e animações GSAP são ignorados com movimento reduzido e a simulação exibe o estado final estático, mantendo todo o conteúdo visível.
+Transições de cor duram até 160ms e comunicam resposta. Carregamentos mantêm geometria. `prefers-reduced-motion` reduz animações e transições a duração mínima. Na landing, Lenis e animações GSAP são ignorados com movimento reduzido. Todas as etapas do exemplo de troca permanecem visíveis; somente a linha de sequência acompanha a rolagem e fica completa com movimento reduzido. Animações nunca controlam a visibilidade do conteúdo.
 
 ### Content and data visualization
 

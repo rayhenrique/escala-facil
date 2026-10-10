@@ -6,13 +6,13 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>Escala Fácil · O seu plantão, sob o seu controle</title>
-        <meta name="description" content="Plataforma PWA moderna para gestão de plantões na saúde. Trocas em um clique, calendário no bolso e zero confusão de WhatsApp.">
+        <meta name="description" content="Conheça o Escala Fácil: agenda de plantões hospitalares, solicitações de troca, cobertura e comprovantes para gerentes e profissionais.">
         <meta name="theme-color" content="#0A4D59">
 
         <!-- Open Graph / Meta Compartilhamento -->
         <meta property="og:type" content="website">
-        <meta property="og:title" content="Escala Fácil · Gestão Inteligente de Plantões">
-        <meta property="og:description" content="Esqueça grupos lotados de WhatsApp e planilhas impressas. Acesse sua escala oficial em segundos.">
+        <meta property="og:title" content="Escala Fácil · Gestão de plantões hospitalares">
+        <meta property="og:description" content="Organize escalas e acompanhe solicitações de troca com etapas claras para profissionais e gerência.">
         <meta property="og:locale" content="pt_BR">
 
         <!-- PWA Metadata & Favicons -->
@@ -26,21 +26,21 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body id="landing-page" class="bg-canvas text-ink antialiased selection:bg-coverage selection:text-white overflow-x-clip min-h-screen flex flex-col justify-between">
-        <!-- Navegação Flutuante -->
+        <a href="#hero" class="landing-skip-link">Pular para o conteúdo</a>
         <x-landing.navbar />
 
         <!-- Conteúdo Principal Modularizado com Componentes Anônimos Blade -->
         <main class="flex-grow">
-            <!-- Hero Section com Mockup Flutuante e Blur Reveal -->
+            <!-- Apresentação com os componentes do aplicativo -->
             <x-landing.hero />
 
-            <!-- Comparação: Fricção (Caos no WhatsApp) vs Fluidez (Escala Fácil) -->
+            <!-- Comparação da organização da informação -->
             <x-landing.friction-vs-flow />
 
-            <!-- Bento Grid: Tríade de Superpoderes -->
+            <!-- Recursos por tarefa -->
             <x-landing.bento-grid />
 
-            <!-- Simulação Visual Interativa ao Rolar a Tela -->
+            <!-- Exemplo do fluxo de uma troca aprovada -->
             <x-landing.scroll-simulation />
 
             <!-- Bloco de Chamada para Ação (CTA) -->

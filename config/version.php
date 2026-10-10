@@ -2,9 +2,19 @@
 
 return [
     // Versão do código instalado. APP_VERSION não pode sobrepor este registro.
-    'current' => '1.22.1',
+    'current' => '1.23.0',
 
     'releases' => [
+        [
+            'version' => '1.23.0',
+            'date' => '2026-10-10',
+            'title' => 'Apresentação mais clara do aplicativo',
+            'summary' => 'A página inicial apresenta os recursos com mais clareza e facilita conhecer o aplicativo.',
+            'highlights' => [
+                'Apresentação mais clara dos recursos, do fluxo de troca e do acesso institucional.',
+                'Prévia com componentes do aplicativo e navegação mais fácil no computador e no celular.',
+            ],
+        ],
         [
             'version' => '1.22.1',
             'date' => '2026-10-10',

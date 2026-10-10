@@ -7,10 +7,12 @@ const source = readFileSync(new URL('../../resources/js/landing.js', import.meta
     .replace(/^import .*;\r?\n/gm, '')
     .replace('export function', 'function');
 
-function boot({ reduced = false, fail = false } = {}) {
+function boot({ reduced = false, fail = false, anchors = false } = {}) {
     const root = { querySelectorAll: () => [] };
     const events = {};
     const state = { lenis: 0, destroyed: 0, ticker: new Set(), triggers: [], reverted: 0 };
+    const section = { focus: (options) => { state.focus = options; } };
+    const anchor = { getAttribute: () => '#superpoderes', addEventListener: (_, fn) => { events.anchor = fn; } };
     const cards = [{ id: 1 }, { id: 2 }, { id: 3 }];
     const motion = { matches: reduced, addEventListener: (_, fn) => { events.motion = fn; } };
     const gsap = {
@@ -32,19 +34,20 @@ function boot({ reduced = false, fail = false } = {}) {
         ScrollTrigger: { update() {}, refresh() {} },
         Lenis: class {
             constructor() { state.lenis++; if (fail) throw new Error('Lenis unavailable'); }
-            on() {} raf() {} scrollTo() {}
+            on() {} raf() {}
+            scrollTo(target, options) { state.destination = target; options.onComplete(); }
             destroy() { state.destroyed++; }
         },
-        window: { matchMedia: () => motion, addEventListener() {} },
+        window: { matchMedia: () => motion, addEventListener() {}, history: { pushState: (_, __, hash) => { state.hash = hash; } } },
         document: {
-            getElementById: () => root,
+            getElementById: (id) => id === 'landing-page' ? root : section,
             querySelector: (selector) => selector.includes('sim') ? null : {},
-            querySelectorAll: () => [],
+            querySelectorAll: (selector) => anchors && selector === 'a[href^="#"]' ? [anchor] : [],
             addEventListener: (event, fn) => { events[event] = fn; },
         },
     });
     vm.runInContext(source, context);
-    return { state, events, motion, cards, init: () => context.initLandingPage() };
+    return { state, events, motion, cards, section, init: () => context.initLandingPage() };
 }
 
 test('duplicate lifecycle events keep one Lenis and ticker; navigation releases both', () => {
@@ -88,4 +91,18 @@ test('enhancement failure releases resources without throwing', () => {
     assert.doesNotThrow(init);
     assert.equal(state.ticker.size, 0);
     assert.equal(state.reverted, 1);
+});
+
+test('enhanced anchors preserve destination and focus while modified clicks retain native behavior', () => {
+    const { state, events, section, init } = boot({ anchors: true });
+    init();
+    let prevented = false;
+    events.anchor({ ctrlKey: true, preventDefault: () => { prevented = true; } });
+    assert.equal(prevented, false);
+    assert.equal(state.hash, undefined);
+    events.anchor({ preventDefault: () => { prevented = true; } });
+    assert.equal(prevented, true);
+    assert.equal(state.destination, section);
+    assert.equal(state.hash, '#superpoderes');
+    assert.equal(state.focus.preventScroll, true);
 });

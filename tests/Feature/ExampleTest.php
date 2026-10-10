@@ -24,9 +24,9 @@ class ExampleTest extends TestCase
         $response = $this->get(route('landing'));
 
         $response->assertOk();
-        $response->assertSee('Tríade de Superpoderes');
-        $response->assertSee('Troca em 1 Clique');
-        $response->assertSee('Calendário no Bolso');
-        $response->assertSee('Transparência Total');
+        $response->assertSee('Recursos do aplicativo');
+        $response->assertSee('Solicitar e acompanhar');
+        $response->assertSee('Consultar a agenda');
+        $response->assertSee('Conferir e registrar');
     }
 }
