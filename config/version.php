@@ -1,9 +1,21 @@
 <?php
 
 return [
-    'current' => env('APP_VERSION', '1.17.1'),
+    'current' => env('APP_VERSION', '1.18.0'),
 
     'releases' => [
+        [
+            'version' => '1.18.0',
+            'date' => '2026-10-10',
+            'title' => 'Observabilidade e relato de problemas',
+            'summary' => 'Monitoramento opcional com Sentry, captura de erros JavaScript e formulário de relato de problema com protocolo e triagem da gerência.',
+            'highlights' => [
+                'Integração opcional com Sentry via SENTRY_DSN, com expurgo de senhas, tokens e dados sensíveis e contexto de versão, rota, perfil e erro.',
+                'Captura de erros JavaScript não tratados com envio limitado e anexação ao relato local, sem quebrar a aplicação.',
+                'Novo Relatar problema na Ajuda com protocolo, anexo validado e lista restrita à gerência.',
+                'Cobertura de permissões, validação, persistência e privacidade dos relatos.',
+            ],
+        ],
         [
             'version' => '1.17.1',
             'date' => '2026-10-10',

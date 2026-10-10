@@ -135,7 +135,7 @@ APP_KEY=
 APP_DEBUG=false
 APP_URL=https://escalafacil.kltecnologia.com
 APP_TIMEZONE=America/Maceio
-APP_VERSION=1.17.1
+APP_VERSION=1.18.0
 
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR
@@ -161,6 +161,9 @@ FILESYSTEM_DISK=local
 MAIL_MAILER=log
 MAIL_FROM_ADDRESS="nao-responda@escalafacil.kltecnologia.com"
 MAIL_FROM_NAME="${APP_NAME}"
+
+# Observabilidade opcional (Sentry). Vazio = desativado, com tudo em logs locais.
+SENTRY_DSN=
 ```
 
 Enquanto `MAIL_MAILER=log`, mensagens de recuperação de senha são escritas nos logs e não são entregues por e-mail. Configure um serviço SMTP antes de liberar recuperação de senha para usuários reais.
@@ -482,6 +485,7 @@ php8.5 artisan up
 - restrinja as portas `22` e `8443` a IPs confiáveis ou use VPN;
 - atualize o sistema operacional e o CloudPanel regularmente;
 - configure SMTP com TLS para recuperação de senha;
+- configure `SENTRY_DSN` somente se usar monitoramento externo; vazio mantém erros apenas nos logs locais;
 - teste restaurações de backup periodicamente;
 - não instale dados de demonstração no ambiente de produção.
 

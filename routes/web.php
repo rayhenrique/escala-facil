@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\ClientErrorController;
 use App\Http\Controllers\DashboardRedirectController;
+use App\Http\Controllers\Manager\IssueAttachmentController;
 use App\Http\Controllers\Manager\ReportPdfController;
 use App\Http\Controllers\Manager\ShiftSpreadsheetController;
 use App\Http\Controllers\Manager\WallRosterPdfController;
@@ -8,6 +10,7 @@ use App\Http\Controllers\SwapReceiptPdfController;
 use App\Livewire\HelpCenter;
 use App\Livewire\Manager\CategoryManager;
 use App\Livewire\Manager\Dashboard;
+use App\Livewire\Manager\IssueReports;
 use App\Livewire\Manager\Reports;
 use App\Livewire\Manager\SectorManager;
 use App\Livewire\Manager\ShiftManager;
@@ -40,6 +43,10 @@ Route::get('swaps/{swap}/receipt/pdf', SwapReceiptPdfController::class)
     ->middleware('auth')
     ->name('swaps.receipt.pdf');
 
+Route::post('support/client-error', ClientErrorController::class)
+    ->middleware(['auth', 'throttle:10,1'])
+    ->name('support.client-error');
+
 Route::middleware(['auth', 'professional'])
     ->prefix('professional')
     ->name('professional.')
@@ -67,6 +74,8 @@ Route::middleware(['auth', 'manager'])
         Route::get('sectors', SectorManager::class)->name('sectors');
         Route::get('categories', CategoryManager::class)->name('categories');
         Route::get('users', UserManager::class)->name('users');
+        Route::get('issue-reports', IssueReports::class)->name('issue-reports');
+        Route::get('issue-reports/{report}/attachment', IssueAttachmentController::class)->name('issue-reports.attachment');
     });
 
 require __DIR__.'/auth.php';

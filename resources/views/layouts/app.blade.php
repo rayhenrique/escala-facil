@@ -13,6 +13,7 @@
     </head>
     <body
         class="min-h-screen bg-canvas text-ink antialiased"
+        data-error-reporting
         x-data="{ navigationOpen: false, sidebarCollapsed: localStorage.getItem('escala-facil:sidebar-collapsed') === 'true' }"
         x-init="$watch('sidebarCollapsed', value => localStorage.setItem('escala-facil:sidebar-collapsed', value.toString()))"
         @keydown.escape.window="navigationOpen = false"
@@ -97,6 +98,9 @@
                             </a>
                             <a href="{{ route('manager.users') }}" wire:navigate title="Usuários" class="sidebar-nav-link {{ request()->routeIs('manager.users') ? 'sidebar-nav-link-active' : '' }}" @if(request()->routeIs('manager.users')) aria-current="page" @endif>
                                 <x-nav-icon name="users" class="sidebar-nav-icon" /><span class="sidebar-label">Usuários</span>
+                            </a>
+                            <a href="{{ route('manager.issue-reports') }}" wire:navigate title="Relatos de problema" class="sidebar-nav-link {{ request()->routeIs('manager.issue-reports*') ? 'sidebar-nav-link-active' : '' }}" @if(request()->routeIs('manager.issue-reports*')) aria-current="page" @endif>
+                                <x-nav-icon name="flag" class="sidebar-nav-icon" /><span class="sidebar-label">Relatos</span>
                             </a>
                         @else
                             <a href="{{ route('professional.dashboard') }}" wire:navigate title="Minha escala" class="sidebar-nav-link {{ request()->routeIs('professional.dashboard') ? 'sidebar-nav-link-active' : '' }}" @if(request()->routeIs('professional.dashboard')) aria-current="page" @endif>

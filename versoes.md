@@ -6,6 +6,15 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.18.0 — 10/10/2026
+
+### Observabilidade e relato de problemas
+
+- Integração opcional com Sentry via SENTRY_DSN, com expurgo de senhas, tokens e dados sensíveis e contexto de versão, rota, perfil e erro.
+- Captura de erros JavaScript não tratados com envio limitado e anexação ao relato local, sem quebrar a aplicação.
+- Novo Relatar problema na Ajuda com protocolo, anexo validado e lista restrita à gerência.
+- Cobertura de permissões, validação, persistência e privacidade dos relatos.
+
 ## 1.17.1 — 10/10/2026
 
 ### Deploy de produção reforçado com backup e rollback seguro

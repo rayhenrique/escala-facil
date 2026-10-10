@@ -156,7 +156,7 @@ Crie um banco MySQL chamado `escala_facil` e ajuste o `.env`:
 APP_NAME="Escala Fácil"
 APP_URL=http://127.0.0.1:8000
 APP_TIMEZONE=America/Maceio
-APP_VERSION=1.17.1
+APP_VERSION=1.18.0
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR
 APP_FAKER_LOCALE=pt_BR
@@ -305,6 +305,22 @@ Para exigir o CI aprovado antes de qualquer merge na `main`:
 7. clique em **Create** (ou **Save changes**).
 
 A partir disso, pushes diretos e merges com CI vermelho ou pendente são bloqueados; o deploy continua manual via `scripts/deploy-production.sh`.
+
+## Observabilidade e suporte
+
+O monitoramento externo é opcional e configurado só por ambiente. Com `SENTRY_DSN` vazio, nada sai da máquina e o sistema funciona normalmente apenas com logs locais:
+
+```dotenv
+SENTRY_DSN=
+SENTRY_ENVIRONMENT=
+SENTRY_TRACES_SAMPLE_RATE=0
+SENTRY_SEND_DEFAULT_PII=false
+```
+
+- **Backend:** exceções são registradas com versão, rota, perfil, horário e identificador de erro (`error_id`), e enviadas ao Sentry somente com DSN configurado. Senhas, tokens, segredos, cookies, CPF/CNPJ e outros dados sensíveis são removidos antes de qualquer envio (`App\Support\ErrorReporting`), e o `send_default_pii` permanece desativado.
+- **JavaScript:** erros não tratados e promessas rejeitadas são enviados de forma limitada (máximo 5 por carregamento, só da própria origem, só o caminho da página) para `POST /support/client-error` (autenticado, com limite de taxa). A captura nunca quebra a aplicação.
+- **Relatar problema:** na página **Ajuda e versões**, qualquer usuário autenticado descreve o problema (módulo, descrição, comportamento esperado e anexo opcional em PDF/JPG/PNG de até 5 MB) e recebe um número de protocolo (`SUP-AAAAMMDD-XXXX`). Os relatos ficam no banco com anexo privado e acesso restrito à gerência, que os acompanha no item **Relatos** da sidebar.
+- Usuários nunca veem dados técnicos sensíveis: páginas de erro são genéricas e o protocolo é o único código exibido.
 
 ## Licença e propriedade intelectual
 

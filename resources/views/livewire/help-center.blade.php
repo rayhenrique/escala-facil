@@ -18,6 +18,7 @@
         <a href="#manual-profissional"><x-nav-icon name="calendar" class="size-5" /><span>Rotina profissional</span></a>
         <a href="#trocas-ausencias"><x-nav-icon name="swap" class="size-5" /><span>Trocas e ausências</span></a>
         <a href="#problemas-comuns"><x-nav-icon name="help" class="size-5" /><span>Solução de problemas</span></a>
+        <a href="#relatar-problema"><x-nav-icon name="flag" class="size-5" /><span>Relatar problema</span></a>
         <a href="#instalar-aplicativo"><x-nav-icon name="install" class="size-5" /><span>Instalar aplicativo</span></a>
         <a href="#historico-versoes"><x-nav-icon name="sparkles" class="size-5" /><span>Histórico de versões</span></a>
     </nav>
@@ -544,9 +545,18 @@
         </div>
     </section>
 
-    <section id="instalar-aplicativo" class="help-section mt-8 scroll-mt-6" aria-labelledby="install-app-title">
+    <section id="relatar-problema" class="help-section mt-8 scroll-mt-6" aria-labelledby="report-issue-title">
         <div class="help-section-heading">
             <span>07</span>
+            <div><p class="eyebrow">Suporte</p><h2 id="report-issue-title">Relatar problema</h2></div>
+        </div>
+        <p class="manual-section-intro">Encontrou um erro ou comportamento inesperado? Descreva o problema abaixo. A gerência recebe o relato com número de protocolo. Não informe senhas nos campos do formulário.</p>
+        <livewire:support-report-form />
+    </section>
+
+    <section id="instalar-aplicativo" class="help-section mt-8 scroll-mt-6" aria-labelledby="install-app-title">
+        <div class="help-section-heading">
+            <span>08</span>
             <div><p class="eyebrow">Aplicativo instalável</p><h2 id="install-app-title">Como instalar o Escala Fácil</h2></div>
         </div>
 
@@ -614,7 +624,7 @@
 
     <section id="historico-versoes" class="help-section mt-8 scroll-mt-6" aria-labelledby="versions-title">
         <div class="help-section-heading">
-            <span>08</span>
+            <span>09</span>
             <div><p class="eyebrow">Controle de versão</p><h2 id="versions-title">Histórico de versões</h2></div>
         </div>
         <p class="manual-section-intro">A versão mais recente aparece primeiro. Cada lançamento resume as mudanças visíveis para os usuários.</p>

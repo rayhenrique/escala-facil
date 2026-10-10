@@ -68,5 +68,9 @@
             <path d="M5 20V10M12 20V4M19 20v-7" />
             <path d="M3 20h18" />
             @break
+        @case('flag')
+            <path d="M5 21V4" />
+            <path d="M5 4h12l-2.5 4L17 12H5" />
+            @break
     @endswitch
 </svg>

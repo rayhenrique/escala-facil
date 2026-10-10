@@ -140,3 +140,73 @@ export const printSwapReceipt = (triggerElement) => {
 window.syncAppBadge = syncAppBadge;
 window.requestDeviceNotificationPermission = requestDeviceNotificationPermission;
 
+const initErrorReporting = () => {
+    if (! document.body.hasAttribute('data-error-reporting') || window.__escalaFacilErrorReporting) {
+        return;
+    }
+    window.__escalaFacilErrorReporting = true;
+
+    let sentCount = 0;
+    const maxPerLoad = 5;
+
+    const sameOriginPath = (value) => {
+        try {
+            const url = new URL(String(value), window.location.origin);
+            if (url.origin !== window.location.origin) {
+                return '';
+            }
+            return url.pathname.slice(0, 255);
+        } catch {
+            return '';
+        }
+    };
+
+    const sendClientError = (message, source, line, column) => {
+        if (sentCount >= maxPerLoad) {
+            return;
+        }
+        sentCount += 1;
+
+        try {
+            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
+            const payload = new FormData();
+            payload.append('_token', token);
+            payload.append('message', String(message ?? 'Erro JavaScript sem mensagem').slice(0, 500));
+            payload.append('source', String(source ?? '').slice(0, 255));
+            payload.append('page', window.location.pathname.slice(0, 500));
+            if (Number.isInteger(line)) {
+                payload.append('line', String(line));
+            }
+            if (Number.isInteger(column)) {
+                payload.append('column', String(column));
+            }
+
+            if (! navigator.sendBeacon('/support/client-error', payload)) {
+                fetch('/support/client-error', { method: 'POST', body: payload, keepalive: true }).catch(() => {});
+            }
+        } catch {
+            // A captura de erros nunca pode quebrar a aplicação.
+        }
+    };
+
+    window.addEventListener('error', (event) => {
+        if (event.filename && sameOriginPath(event.filename) === '' && event.message === 'Script error.') {
+            return;
+        }
+        sendClientError(event.message, sameOriginPath(event.filename || ''), event.lineno, event.colno);
+    });
+
+    window.addEventListener('unhandledrejection', (event) => {
+        const reason = event.reason instanceof Error ? event.reason.message : event.reason;
+        sendClientError(reason, '', undefined, undefined);
+    });
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initErrorReporting);
+} else {
+    initErrorReporting();
+}
+
+document.addEventListener('livewire:navigated', initErrorReporting);
+
