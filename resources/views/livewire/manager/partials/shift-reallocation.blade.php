@@ -1,4 +1,5 @@
 <x-confirmation-modal :show="$reallocationShiftId !== null" id="reallocate-shift" :title="$reallocationPreview ? 'Confirmar realocação?' : 'Preencher plantão #'.$reallocationShiftId" :eyebrow="$reallocationPreview ? 'Confirmação necessária' : 'Realocação assistida'" close-action="closeReallocation" tone="primary" busy-action="confirmReallocation" trap-focus>
+    <x-step-progress :steps="['Selecionar profissional', 'Revisar e confirmar']" :current="$reallocationPreview ? 2 : 1" class="mb-5" />
     @if ($reallocationSummary)
         <div class="space-y-4 text-left" data-reallocation-analysis>
             <div class="rounded-lg border border-line bg-canvas p-3">

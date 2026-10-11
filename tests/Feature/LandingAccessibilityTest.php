@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use Illuminate\Support\Facades\Blade;
 use Tests\TestCase;
 
 class LandingAccessibilityTest extends TestCase
@@ -83,13 +84,14 @@ class LandingAccessibilityTest extends TestCase
 
     public function test_confirmation_modal_keeps_dialog_semantics(): void
     {
-        $modal = file_get_contents(resource_path('views/components/confirmation-modal.blade.php'));
+        $modal = Blade::render('<x-confirmation-modal :show="true" id="delete-test" title="Excluir registro?" close-action="cancelDelete">Conferir registro.<x-slot:actions><button data-confirm-cancel>Cancelar</button></x-slot:actions></x-confirmation-modal>');
 
         $this->assertStringContainsString('role="alertdialog"', $modal);
         $this->assertStringContainsString('aria-modal="true"', $modal);
         $this->assertStringContainsString('aria-labelledby', $modal);
         $this->assertStringContainsString('aria-describedby', $modal);
         $this->assertStringContainsString('keydown.escape', $modal);
-        $this->assertStringContainsString('focus()', $modal);
+        $this->assertStringContainsString('id="delete-test-title"', $modal);
+        $this->assertStringContainsString('id="delete-test-description"', $modal);
     }
 }

@@ -143,15 +143,16 @@ bootLivewire({
     window,
     asset: import.meta.url,
     load: () => import('../../vendor/livewire/livewire/dist/livewire.esm'),
-    initialize: async ({ Livewire }) => {
-        const [, { registerAuthUi }, { initPwaInstall }, { initOperationalNavigation }, { registerSwapAnalysis }] = await Promise.all([
+    initialize: async ({ Livewire, Alpine }) => {
+        const [, { registerAuthUi }, { initPwaInstall }, { initOperationalNavigation }, { registerSwapAnalysis }, { registerMobileUi }] = await Promise.all([
             import('./bootstrap'), import('./auth'),
-            import('./pwa-install'), import('./operational-navigation'), import('./swap-analysis'),
+            import('./pwa-install'), import('./operational-navigation'), import('./swap-analysis'), import('./mobile-ui'),
         ]);
         window.syncAppBadge = syncAppBadge;
         window.requestDeviceNotificationPermission = requestDeviceNotificationPermission;
         registerAuthUi(Livewire);
         registerSwapAnalysis(Livewire);
+        registerMobileUi(Livewire, Alpine);
         initPwaInstall();
         let landingModule;
         const initializeLanding = () => {

@@ -6,6 +6,12 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.36.0 — 11/10/2026
+
+### Melhorias no uso pelo celular
+
+- Melhoramos as janelas, botões e confirmações para facilitar o uso no celular.
+
 ## 1.35.0 — 11/10/2026
 
 ### Notificações mais organizadas

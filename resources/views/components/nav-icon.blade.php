@@ -6,6 +6,9 @@
             <path d="M3 10.8 12 3l9 7.8" />
             <path d="M5.5 9.5V21h13V9.5M9 21v-7h6v7" />
             @break
+        @case('clock')
+            <circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" />
+            @break
         @case('calendar')
             <rect x="3" y="5" width="18" height="16" rx="2" />
             <path d="M16 3v4M8 3v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01" />

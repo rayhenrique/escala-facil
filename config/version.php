@@ -2,9 +2,18 @@
 
 return [
     // Versão do código instalado. APP_VERSION não pode sobrepor este registro.
-    'current' => '1.35.0',
+    'current' => '1.36.0',
 
     'releases' => [
+        [
+            'version' => '1.36.0',
+            'date' => '2026-10-11',
+            'title' => 'Melhorias no uso pelo celular',
+            'summary' => 'Melhoramos as janelas, botões e confirmações para facilitar o uso no celular.',
+            'highlights' => [
+                'Melhoramos as janelas, botões e confirmações para facilitar o uso no celular.',
+            ],
+        ],
         [
             'version' => '1.35.0',
             'date' => '2026-10-11',

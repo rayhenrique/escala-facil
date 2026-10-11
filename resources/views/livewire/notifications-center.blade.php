@@ -42,7 +42,7 @@
         </button>
     </div>
 
-    <p wire:loading.delay wire:target="gotoPage, nextPage, previousPage" class="mt-4 text-sm text-muted" role="status">Carregando notificações…</p>
+    <x-loading-state wire:loading.flex.delay wire:target="gotoPage, nextPage, previousPage" class="mt-4" label="Carregando notificações…" />
     <section class="mt-6 space-y-3" aria-label="Histórico de notificações">
         @forelse ($notifications as $notification)
             @php

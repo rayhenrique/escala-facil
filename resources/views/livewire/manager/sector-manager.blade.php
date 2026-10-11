@@ -2,7 +2,7 @@
     <div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
             <p class="eyebrow">Cadastros</p>
-            <h1 class="page-title">Setores da unidade</h1>
+            <h1 id="sector-page-title" class="page-title" tabindex="-1">Setores da unidade</h1>
             <p class="page-description">Mantenha os setores usados para organizar cobertura, profissionais e plantões.</p>
         </div>
         <div class="grid w-full gap-3 sm:w-auto sm:grid-cols-[18rem_auto] sm:items-end">
@@ -10,39 +10,22 @@
                 <label for="sector-search" class="field-label">Buscar setor</label>
                 <input wire:model.live.debounce.300ms="search" id="sector-search" type="search" class="field-input" placeholder="Digite o nome">
             </div>
-            <button type="button" wire:click="openCreateModal" class="button-primary w-full sm:w-auto">Adicionar setor</button>
+            <x-action-button variant="primary" wire:click="openCreateModal" class="w-full sm:w-auto">Adicionar setor</x-action-button>
         </div>
     </div>
 
     <x-flash-notifications />
 
-    @if ($showFormModal)
-        <div class="modal-overlay" x-data x-init="$nextTick(() => $refs.firstField?.focus())" @keydown.escape.window="$wire.closeFormModal()">
-            <button type="button" wire:click="closeFormModal" class="modal-backdrop" aria-label="Fechar formulário de setor"></button>
-            <form method="post" wire:submit="save" class="modal-dialog max-w-xl" role="dialog" aria-modal="true" aria-labelledby="sector-form-title" novalidate>
-                @csrf
-                <header class="modal-header">
-                    <div>
-                        <p class="eyebrow">{{ $editingSectorId ? 'Edição' : 'Novo cadastro' }}</p>
-                        <h2 id="sector-form-title">{{ $editingSectorId ? 'Editar setor' : 'Adicionar setor' }}</h2>
-                    </div>
-                    <button type="button" wire:click="closeFormModal" class="modal-close-button" aria-label="Fechar formulário"><x-nav-icon name="close" class="size-5" /></button>
-                </header>
-                <div class="modal-body">
-                    <label for="sector-name" class="field-label">Nome do setor</label>
-                    <input x-ref="firstField" wire:model="name" id="sector-name" type="text" class="field-input" maxlength="255" autocomplete="off" placeholder="Ex.: Unidade de Terapia Intensiva" @error('name') aria-invalid="true" aria-describedby="sector-name-error" @enderror>
-                    @error('name') <p id="sector-name-error" class="field-error">{{ $message }}</p> @enderror
-                </div>
-                <footer class="modal-footer">
-                    <button type="button" wire:click="closeFormModal" class="button-secondary w-full sm:w-auto">Cancelar</button>
-                    <button type="submit" class="button-primary w-full sm:w-auto" wire:loading.attr="disabled" wire:target="save">
-                        <span wire:loading.remove wire:target="save">{{ $editingSectorId ? 'Salvar alterações' : 'Criar setor' }}</span>
-                        <span wire:loading wire:target="save">Salvando…</span>
-                    </button>
-                </footer>
-            </form>
-        </div>
-    @endif
+    <x-bottom-sheet :show="$showFormModal" id="sector-form" :title="$editingSectorId ? 'Editar setor' : 'Adicionar setor'" :eyebrow="$editingSectorId ? 'Edição' : 'Novo cadastro'"
+        close-action="closeFormModal" submit-action="save" max-width="xl" track-changes initial-focus="#sector-name" return-focus="#sector-page-title">
+        <label for="sector-name" class="field-label">Nome do setor</label>
+        <input x-ref="firstField" wire:model="name" id="sector-name" type="text" class="field-input" maxlength="255" autocomplete="off" placeholder="Ex.: Unidade de Terapia Intensiva" @error('name') aria-invalid="true" aria-describedby="sector-name-error" @enderror>
+        @error('name') <p id="sector-name-error" class="field-error">{{ $message }}</p> @enderror
+        <x-slot:actions>
+            <x-action-button @click="requestClose()" x-bind:disabled="busy">Cancelar</x-action-button>
+            <x-action-button type="submit" variant="primary" target="save" busy-label="Salvando…">{{ $editingSectorId ? 'Salvar alterações' : 'Criar setor' }}</x-action-button>
+        </x-slot:actions>
+    </x-bottom-sheet>
 
     <section class="panel mt-8" aria-labelledby="sector-list-title">
         <div class="section-heading">
@@ -67,7 +50,7 @@
                     </div>
                 </article>
             @empty
-                <div class="empty-state compact-empty"><p class="font-semibold text-ink">Nenhum setor encontrado.</p><p class="mt-2 text-sm">Altere a busca ou crie um novo setor.</p></div>
+                <x-empty-state class="compact-empty" title="Nenhum setor encontrado." description="Altere a busca ou crie um novo setor." />
             @endforelse
         </div>
 
