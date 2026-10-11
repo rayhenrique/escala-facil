@@ -2,9 +2,18 @@
 
 return [
     // Versão do código instalado. APP_VERSION não pode sobrepor este registro.
-    'current' => '1.29.0',
+    'current' => '1.30.0',
 
     'releases' => [
+        [
+            'version' => '1.30.0',
+            'date' => '2026-10-10',
+            'title' => 'Alertas preventivos da escala',
+            'summary' => 'O sistema agora avisa quando uma alteração pode causar conflito de horários ou incompatibilidade na escala.',
+            'highlights' => [
+                'O sistema agora avisa quando uma alteração pode causar conflito de horários ou incompatibilidade na escala.',
+            ],
+        ],
         [
             'version' => '1.29.0',
             'date' => '2026-10-10',

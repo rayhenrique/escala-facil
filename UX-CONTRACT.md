@@ -161,3 +161,10 @@ Os formulários de acesso não abrem o teclado automaticamente. E-mail usa tecla
 - Links por plantão, troca, usuário, setor e categoria abrem histórico por tipo/ID, mantendo filtros de origem no retorno. Filtros combinam ação, autor, tipo/ID e dias completos, com debounce de 350ms e paginação de dez eventos. URLs/entradas inválidas são recusadas ou mostram erro sem ampliar a consulta.
 - Há apenas diferenças relevantes; senhas/tokens, texto de justificativas/motivos, anexos e comprovantes não são copiados. E-mail alterado recebe somente uma indicação. Metadados de sessão/versão vista e no-ops não geram evento.
 - A captura começa na instalação; não há reconstrução artificial do passado. Retenção, credenciais administrativas, limites das triggers e plano institucional estão em `docs/operational-audit.md`. Nenhum prazo ou expurgo automático foi aplicado.
+
+## Alertas preventivos de plantões
+
+- SaveShiftRequest e ShiftReallocation reutilizam ShiftAssignmentAnalysis, ShiftPeriod e ShiftCoverage. O próprio ID é excluído da agenda na edição; horários reais incluem término no dia seguinte, virada de mês e 24h.
+- Incompatibilidade bloqueia cadastro/realocação. Sobreposição permanece aviso na criação/edição e bloqueio na realocação; consecutividade permanece aviso de dobra. Nenhum limite de descanso ou horas foi criado. Critérios pendentes e classificação estão em docs/preventive-shift-alerts.md.
+- Salvar com avisos abre revisão sem persistir. Revisar dados conserva valores; Confirmar com os avisos revalida tudo sob locks no backend. Mudanças posteriores pedem nova revisão; a assinatura da edição impede sobrescrever um registro desatualizado.
+- Modais compartilham foco, fundo inerte, carregamento e tratamento de erro de transporte. Durante a requisição, confirmação/cancelamento são desabilitados; a prévia não comunica sucesso antes da persistência. Notificações, comprovantes e histórico transacional permanecem existentes.

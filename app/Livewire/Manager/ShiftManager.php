@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Manager;
 
+use App\Actions\Shifts\CreateShiftAction;
 use App\Actions\Shifts\DuplicateMonthAction;
 use App\Actions\Shifts\ImportShiftsAction;
 use App\Actions\Shifts\UpdateShiftAction;
@@ -20,6 +21,7 @@ use App\Models\User;
 use App\Support\ManagerAttention;
 use App\Support\OperationalFilters;
 use App\Support\OperationalNavigation;
+use App\Support\ShiftAssignmentAnalysis;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
@@ -63,6 +65,9 @@ class ShiftManager extends Component
     public string $pendingDeleteLabel = '';
 
     public bool $showFormModal = false;
+
+    #[Locked]
+    public ?array $shiftPreview = null;
 
     public string $date = '';
 
@@ -175,13 +180,31 @@ class ShiftManager extends Component
         $shift = $this->editingShiftId ? Shift::query()->findOrFail($this->editingShiftId) : null;
         $this->authorize($shift ? 'update' : 'create', $shift ?? Shift::class);
 
+        if ($shift && (! $this->editingShiftSnapshot || ! hash_equals($this->editingShiftSnapshot, app(\App\Support\ShiftReallocation::class)->shiftSignature($shift)))) {
+            throw ValidationException::withMessages(['shift' => 'Este plantão foi alterado por outra operação. Feche o formulário e abra o registro novamente antes de salvar.']);
+        }
+
+        $validated = (new SaveShiftRequest)->validatePayload($this->payload(), auth()->user());
+        $candidate = new Shift($validated);
+        if ($shift) {
+            $candidate->id = $shift->id;
+        }
+        $analysis = app(ShiftAssignmentAnalysis::class)->preview($candidate);
+        $expected = $this->shiftPreview['fingerprint'] ?? null;
+        if (($analysis['warnings'] !== [] && $expected === null) || ($expected !== null && ! hash_equals($expected, $analysis['fingerprint']))) {
+            $this->shiftPreview = $analysis;
+            $this->resetValidation();
+            $this->dispatch('shift-alerts-ready');
+
+            return;
+        }
+
         if ($shift) {
             abort_unless($this->editingShiftSnapshot, 404);
-            $action->execute(auth()->user(), $shift->id, $this->payload(), $this->editingShiftSnapshot);
+            $action->execute(auth()->user(), $shift->id, $this->payload(), $this->editingShiftSnapshot, $expected);
             session()->flash('status', 'Plantão atualizado com sucesso.');
         } else {
-            $validated = (new SaveShiftRequest)->validatePayload($this->payload(), auth()->user());
-            Shift::query()->create($validated);
+            app(CreateShiftAction::class)->execute(auth()->user(), $this->payload(), $expected);
             session()->flash('status', 'Plantão criado com sucesso.');
         }
 
@@ -192,6 +215,12 @@ class ShiftManager extends Component
     {
         $this->resetForm();
         $this->showFormModal = true;
+    }
+
+    public function returnToShiftForm(): void
+    {
+        $this->shiftPreview = null;
+        $this->resetValidation();
     }
 
     public function edit(int $shiftId): void
@@ -211,6 +240,7 @@ class ShiftManager extends Component
         $this->userId = $shift->user_id ? (string) $shift->user_id : '';
         $this->status = $shift->status->value;
         $this->showFormModal = true;
+        $this->shiftPreview = null;
         $this->resetValidation();
     }
 
@@ -370,7 +400,7 @@ class ShiftManager extends Component
 
     public function resetForm(): void
     {
-        $this->reset(['editingShiftId', 'editingShiftSnapshot', 'pendingDeleteId', 'pendingDeleteLabel', 'showFormModal', 'sectorId', 'categoryId', 'userId']);
+        $this->reset(['editingShiftId', 'editingShiftSnapshot', 'shiftPreview', 'pendingDeleteId', 'pendingDeleteLabel', 'showFormModal', 'sectorId', 'categoryId', 'userId']);
         $this->date = today()->addDay()->format('Y-m-d');
         $this->startTime = '07:00';
         $this->endTime = '19:00';

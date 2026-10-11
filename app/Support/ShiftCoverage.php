@@ -12,6 +12,11 @@ class ShiftCoverage
 {
     public const DAY_MINUTES = 1440;
 
+    public static function isAssignedScheduled(Shift $shift): bool
+    {
+        return $shift->status === ShiftStatus::Scheduled && $shift->user_id !== null;
+    }
+
     public static function toMinutes(string $time): int
     {
         [$hour, $minute] = array_map('intval', explode(':', substr($time, 0, 5)));
@@ -37,7 +42,7 @@ class ShiftCoverage
         $intervals = [];
 
         foreach ($shifts as $shift) {
-            if ($shift->status !== ShiftStatus::Scheduled || $shift->user_id === null) {
+            if (! self::isAssignedScheduled($shift)) {
                 continue;
             }
 

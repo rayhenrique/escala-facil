@@ -80,7 +80,12 @@ class DuplicateMonthAction
             return ['created' => 0, 'ignored' => 0, 'adjusted' => 0];
         }
 
-        return app(OperationalAuditContext::class)->transaction($manager, function () use ($targetMonth, $mode, $selectedIds): array {
+        return app(OperationalAuditContext::class)->transaction($manager, function () use ($manager, $targetMonth, $mode, $selectedIds): array {
+            $professionalIds = Shift::query()->whereKey($selectedIds)->pluck('user_id')->push($manager->id)->filter()->unique()->all();
+            $users = User::query()->whereKey($professionalIds)->orderBy('id')->lockForUpdate()->get()->keyBy('id');
+            $manager = $users->get($manager->id);
+            abort_unless($manager, 403);
+            Gate::forUser($manager)->authorize('create', Shift::class);
             [$targetYear, $targetMonthNumber] = $this->parseMonth($targetMonth, 'target_month');
 
             $existing = Shift::query()

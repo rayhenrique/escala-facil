@@ -1,5 +1,11 @@
 # TASKS - Plano de Execução Sequencial
 
+- [x] **Alertas preventivos de plantões (1.30.0)**
+  - [x] Auditar políticas, intervalos, cobertura, compatibilidade e limites configurados.
+  - [x] Compartilhar análise e apresentar revisão de avisos antes da confirmação.
+  - [x] Revalidar no backend sob locks, preservando bloqueios e avisos institucionais existentes.
+  - [x] Validar fronteiras, edição, concorrência, navegador, acessibilidade, Pint, build e versão.
+
 - [x] **Auditoria operacional (1.29.0)**
   - [x] Auditar operações efetivas, transações, mutações em lote e dados pessoais.
   - [x] Registrar diferenças mínimas de plantões, cadastros e trocas em histórico append-only.

@@ -2,13 +2,13 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { registerSwapAnalysis } from '../../resources/js/swap-analysis.js';
 
-function harness(triggerAction = 'openSwapAnalysis(1)') {
+function harness(triggerAction = 'openSwapAnalysis(1)', shiftFlow = ['openCreateModal', 'edit'].includes(triggerAction)) {
     const events = [];
     const alert = { hidden: true, textContent: '', focused: false, focus() { this.focused = true; } };
     const trigger = { isConnected: true, focused: false, getAttribute: () => triggerAction, focus() { this.focused = true; } };
     let visible = false;
     const overlay = { querySelector: () => alert, dispatchEvent: (event) => events.push(event.detail) };
-    const component = { el: { querySelector: () => visible ? overlay : null, querySelectorAll: () => [trigger] } };
+    const component = { el: { hasAttribute: () => shiftFlow, querySelector: () => visible ? overlay : null, querySelectorAll: () => [trigger] } };
     globalThis.document = { activeElement: trigger };
     globalThis.requestAnimationFrame = (callback) => callback();
     let intercept;
@@ -16,7 +16,7 @@ function harness(triggerAction = 'openSwapAnalysis(1)') {
     function message(name) {
         const hooks = {};
         intercept({ message: { component, actions: [{ name }] },
-            onSend: (cb) => hooks.send = cb, onFinish: (cb) => hooks.finish = cb,
+            onSend: (cb) => hooks.send = cb, onFinish: (cb) => hooks.finish = cb, onSuccess: (cb) => hooks.success = cb,
             onFailure: (cb) => hooks.failure = cb, onError: (cb) => hooks.error = cb });
         return hooks;
     }
@@ -60,4 +60,29 @@ test('reallocation shares busy feedback and returns focus to the original contro
     assert.equal(h.events.at(-1), true);
     h.show(false); request.finish();
     assert.equal(h.trigger.focused, true);
+});
+
+test('shift creation and editing share busy feedback, failure recovery and focus restoration', () => {
+    for (const action of ['openCreateModal', 'edit']) {
+        const h = harness(action);
+        const opening = h.message(action);
+        opening.send(); h.show(true); opening.finish();
+        const saving = h.message('save');
+        saving.send();
+        assert.equal(h.events.at(-1), true);
+        saving.failure(); saving.finish();
+        assert.equal(h.alert.hidden, false);
+        assert.equal(h.events.at(-1), false);
+        const closing = h.message('closeFormModal');
+        h.show(false); closing.finish();
+        assert.equal(h.trigger.focused, true);
+    }
+});
+
+test('ordinary admin forms retain their existing lifecycle', () => {
+    for (const action of ['openCreateModal', 'edit']) {
+        const h = harness(action, false);
+        assert.equal(h.message(action).send, undefined);
+        assert.equal(h.trigger.focused, false);
+    }
 });

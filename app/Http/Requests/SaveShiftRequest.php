@@ -3,8 +3,9 @@
 namespace App\Http\Requests;
 
 use App\Enums\ShiftStatus;
-use App\Enums\UserRole;
+use App\Models\Shift;
 use App\Models\User;
+use App\Support\ShiftAssignmentAnalysis;
 use App\Support\ShiftPeriod;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -71,13 +72,9 @@ class SaveShiftRequest extends DataFormRequest
                     return;
                 }
 
-                if ($professional->role !== UserRole::Professional) {
-                    $validator->errors()->add('user_id', 'Selecione um profissional para o plantão.');
-                }
-
-                if ($professional->category_id !== $this->integer('category_id')
-                    || $professional->sector_id !== $this->integer('sector_id')) {
-                    $validator->errors()->add('user_id', 'O profissional deve pertencer à categoria e ao setor do plantão.');
+                $candidate = new Shift(['sector_id' => $this->integer('sector_id'), 'category_id' => $this->integer('category_id')]);
+                foreach (app(ShiftAssignmentAnalysis::class)->compatibility($professional, $candidate) as $block) {
+                    $validator->errors()->add('user_id', $block);
                 }
             },
         ];

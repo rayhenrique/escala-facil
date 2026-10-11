@@ -1,4 +1,4 @@
-<div>
+<div data-shift-assignment-flow>
     <div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
             <p class="eyebrow">Gerência</p>
@@ -41,22 +41,33 @@
     @if ($focus !== null)<p class="mt-2 text-sm text-muted">A seleção mostra este registro, independentemente dos filtros da lista.</p>@endif
 
     @if ($showFormModal)
-        <div class="modal-overlay" x-data x-init="$nextTick(() => $refs.firstField?.focus())" @keydown.escape.window="$wire.closeFormModal()">
-            <button type="button" wire:click="closeFormModal" class="modal-backdrop" aria-label="Fechar formulário de plantão"></button>
-            <form method="post" wire:submit="save" class="modal-dialog max-w-4xl" role="dialog" aria-modal="true" aria-labelledby="shift-form-title" novalidate>
+        <div class="modal-overlay" x-data="{ busy: false }" x-trap.inert.noscroll.noreturn="true" data-decision-component="{{ $this->getId() }}" x-on:swap-decision-busy.window="busy = $event.detail" x-init="$nextTick(() => $refs.firstField?.focus())" @shift-alerts-ready.window="$nextTick(() => $refs.alerts?.focus())" @keydown.escape.window="if (!busy) $wire.closeFormModal()">
+            <button type="button" wire:click="closeFormModal" :disabled="busy" class="modal-backdrop" aria-label="Fechar formulário de plantão"></button>
+            <section class="relative z-10 w-full max-w-4xl" role="dialog" aria-modal="true" aria-labelledby="shift-form-title">
+            <form method="post" wire:submit="save" class="modal-dialog" novalidate>
                 @csrf
                 <header class="modal-header">
                     <div>
                         <p class="eyebrow">{{ $editingShiftId ? 'Edição' : 'Novo registro' }}</p>
                         <h2 id="shift-form-title">{{ $editingShiftId ? 'Editar plantão' : 'Adicionar plantão' }}</h2>
                     </div>
-                    <button type="button" wire:click="closeFormModal" class="modal-close-button" aria-label="Fechar formulário">
+                    <button type="button" wire:click="closeFormModal" :disabled="busy" class="modal-close-button" aria-label="Fechar formulário">
                         <x-nav-icon name="close" class="size-5" />
                     </button>
                 </header>
 
                 <div class="modal-body grid gap-5 md:grid-cols-2 xl:grid-cols-3">
                     @error('shift')<p class="field-error col-span-full" role="alert">{{ $message }}</p>@enderror
+                    <p hidden data-decision-request-error tabindex="-1" role="alert" class="field-error col-span-full"></p>
+                    @if ($shiftPreview)
+                        <div class="col-span-full space-y-4" tabindex="-1" x-ref="alerts">
+                            <h3 class="text-lg font-semibold">Revise antes de confirmar</h3>
+                            <p class="text-sm">{{ $shiftPreview['period'] }} · {{ $shiftPreview['professional'] }}</p>
+                            <x-shift-assignment-alerts :blocks="$shiftPreview['blocks']" :warnings="$shiftPreview['warnings']" />
+                            <p class="text-sm text-muted">Os avisos não criam novos limites institucionais. A disponibilidade será conferida novamente ao confirmar.</p>
+                            <button type="button" wire:click="returnToShiftForm" :disabled="busy" class="button-secondary">Revisar dados</button>
+                        </div>
+                    @else
                     <div>
                         <label for="date" class="field-label">Data</label>
                         <input x-ref="firstField" wire:model="date" id="date" type="date" class="field-input" @error('date') aria-invalid="true" aria-describedby="date-error" @enderror>
@@ -100,7 +111,7 @@
                             <option value="">Sem profissional alocado</option>
                             @foreach ($this->professionals as $professional)<option value="{{ $professional->id }}">{{ $professional->name }}</option>@endforeach
                         </select>
-                        @error('user_id') <p id="professional-error" class="field-error">{{ $message }}</p> @enderror
+                        @error('user_id') <p id="professional-error" class="field-error">Bloqueio obrigatório: {{ $message }}</p> @enderror
                     </div>
                     <div>
                         <label for="status" class="field-label">Status</label>
@@ -108,16 +119,19 @@
                             @foreach (\App\Enums\ShiftStatus::cases() as $option)<option value="{{ $option->value }}">{{ $option->label() }}</option>@endforeach
                         </select>
                     </div>
+                    <p class="col-span-full text-sm text-muted">Ao salvar, o sistema verifica compatibilidade, horários e cobertura. Se houver avisos, você poderá revisar os dados antes de confirmar.</p>
+                    @endif
                 </div>
 
                 <footer class="modal-footer">
-                    <button type="button" wire:click="closeFormModal" class="button-secondary w-full sm:w-auto">Cancelar</button>
-                    <button type="submit" class="button-primary w-full sm:w-auto" wire:loading.attr="disabled" wire:target="save">
-                        <span wire:loading.remove wire:target="save">{{ $editingShiftId ? 'Salvar alterações' : 'Criar plantão' }}</span>
+                    <button type="button" wire:click="closeFormModal" :disabled="busy" class="button-secondary w-full sm:w-auto">Cancelar</button>
+                    <button type="submit" :disabled="busy" class="button-primary w-full sm:w-auto" wire:loading.attr="disabled" wire:target="save">
+                        <span wire:loading.remove wire:target="save">{{ $shiftPreview ? 'Confirmar com os avisos' : ($editingShiftId ? 'Salvar alterações' : 'Criar plantão') }}</span>
                         <span wire:loading wire:target="save">Salvando…</span>
                     </button>
                 </footer>
             </form>
+            </section>
         </div>
     @endif
 

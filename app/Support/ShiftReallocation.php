@@ -3,7 +3,6 @@
 namespace App\Support;
 
 use App\Enums\ShiftStatus;
-use App\Enums\UserRole;
 use App\Models\Shift;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
@@ -22,33 +21,17 @@ class ShiftReallocation
 
     public function compatibleProfessionals(Shift $shift): Builder
     {
-        return User::query()->where('role', UserRole::Professional)
-            ->where('sector_id', $shift->sector_id)->where('category_id', $shift->category_id);
+        return app(ShiftAssignmentAnalysis::class)->compatibleProfessionals($shift);
     }
 
     public function schedule(Shift $shift, array $ids, bool $lockForUpdate = false): Collection
     {
-        return Shift::query()->whereIn('user_id', $ids)->where('status', ShiftStatus::Scheduled)
-            ->whereKeyNot($shift->id)
-            ->whereDate('date', '<=', $shift->period()->end->addDay()->toDateString())
-            ->where(fn ($query) => $query->whereDate('end_date', '>=', $shift->period()->start->subDay()->toDateString())
-                ->orWhere(fn ($legacy) => $legacy->whereNull('end_date')->whereDate('date', '>=', $shift->period()->start->subDay()->toDateString())))
-            ->orderBy('id')->when($lockForUpdate, fn ($query) => $query->lockForUpdate())->get();
+        return app(ShiftAssignmentAnalysis::class)->schedule($shift, $ids, $lockForUpdate);
     }
 
     public function availability(Shift $shift, User $user, Collection $schedule): array
     {
-        $conflicts = [];
-        $doubles = [];
-        foreach ($schedule->where('user_id', $user->id) as $other) {
-            if ($shift->period()->overlaps($other->period())) {
-                $conflicts[] = 'Conflito com o plantão #'.$other->id.': '.$other->period()->datedLabel();
-            } elseif ($shift->period()->overlaps($other->period(), includeAdjacent: true)) {
-                $doubles[] = 'Dobra com o plantão #'.$other->id.': '.$other->period()->datedLabel().'. Confira se a dobra é autorizada.';
-            }
-        }
-
-        return ['conflicts' => $conflicts, 'doubles' => $doubles];
+        return app(ShiftAssignmentAnalysis::class)->availability($shift, $user, $schedule);
     }
 
     public function candidates(Shift $shift): array
@@ -72,18 +55,23 @@ class ShiftReallocation
 
     public function preview(Shift $shift, User $user, bool $lockForUpdate = false): array
     {
-        if (! $this->compatibleProfessionals($shift)->whereKey($user->id)->exists()) {
+        if (app(ShiftAssignmentAnalysis::class)->compatibility($user, $shift) !== []) {
             throw ValidationException::withMessages(['reallocationUserId' => 'O profissional não pertence mais ao setor e à categoria deste plantão ou não possui perfil Profissional.']);
         }
         $schedule = $this->schedule($shift, [$user->id], $lockForUpdate);
-        $availability = $this->availability($shift, $user, $schedule);
-        if ($availability['conflicts'] !== []) {
-            throw ValidationException::withMessages(['reallocationUserId' => $availability['conflicts']]);
+        $assignment = clone $shift;
+        $assignment->user_id = $user->id;
+        $assignment->status = ShiftStatus::Scheduled;
+        $availability = app(ShiftAssignmentAnalysis::class)->analyze($assignment, $user, $schedule, overlapBlocks: true);
+        if ($availability['blocks'] !== []) {
+            throw ValidationException::withMessages(['reallocationUserId' => $availability['blocks']]);
         }
 
         return [
             'name' => $user->name,
             'doubles' => $availability['doubles'],
+            'blocks' => $availability['blocks'],
+            'warnings' => $availability['warnings'],
             'fingerprint' => hash('sha256', json_encode([
                 $this->shiftSignature($shift), $user->only(['id', 'name', 'role', 'sector_id', 'category_id']),
                 $schedule->map->getAttributes()->all(),

@@ -6,6 +6,12 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.30.0 — 10/10/2026
+
+### Alertas preventivos da escala
+
+- O sistema agora avisa quando uma alteração pode causar conflito de horários ou incompatibilidade na escala.
+
 ## 1.29.0 — 10/10/2026
 
 ### Histórico de alterações operacionais

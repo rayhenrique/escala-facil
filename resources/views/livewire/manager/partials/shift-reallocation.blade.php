@@ -7,7 +7,7 @@
                 <p class="mt-1 text-sm text-muted">{{ $reallocationSummary['location'] }}</p>
             </div>
             @error('reallocation')<p class="field-error" role="alert">{{ $message }}</p>@enderror
-            @error('reallocationUserId')<p id="reallocation-user-error" class="field-error" role="alert">{{ $message }}</p>@enderror
+            @error('reallocationUserId')<p id="reallocation-user-error" class="field-error" role="alert">Bloqueio obrigatório: {{ $message }}</p>@enderror
             <p class="field-error" role="alert" tabindex="-1" hidden data-decision-request-error></p>
             @if ($reallocationPreview)
                 <div class="rounded-lg border border-line p-3 text-sm">
@@ -16,11 +16,12 @@
                     <p class="mt-1">Status: <strong>Descoberto</strong> → <strong>Agendado</strong>.</p>
                     <p class="mt-2 text-muted">Data, horários, setor e categoria permanecem os indicados acima.</p>
                 </div>
-                @foreach ($reallocationPreview['doubles'] as $warning)<p class="border-l-2 border-danger pl-3 text-sm font-semibold text-danger">{{ $warning }}</p>@endforeach
+                <x-shift-assignment-alerts :blocks="$reallocationPreview['blocks']" :warnings="$reallocationPreview['warnings']" />
                 @if (! $reallocationPreview['doubles'])<p class="text-sm text-muted">Nenhum conflito de horário ou dobra identificado na prévia.</p>@endif
                 <p class="text-sm">Ao confirmar, o profissional será atribuído ao plantão. A alteração, o responsável e a data serão registrados no histórico.</p>
             @else
                 <p class="text-sm text-muted">Profissionais cadastrados no mesmo setor e categoria, com perfil Profissional e sem sobreposição de horários. Plantões consecutivos aparecem com alerta de dobra.</p>
+                <p class="text-sm text-muted">Bloqueios obrigatórios: incompatibilidade de cadastro e sobreposição de horários impedem a realocação. Consulte os horários ou escolha outro profissional.</p>
                 @if ($reallocationSummary['unavailable'])<p class="text-sm">{{ $reallocationSummary['unavailable'] }} {{ $reallocationSummary['unavailable'] === 1 ? 'profissional compatível não está disponível' : 'profissionais compatíveis não estão disponíveis' }} por conflito de horários.</p>@endif
                 <fieldset aria-describedby="reallocation-help{{ $errors->has('reallocationUserId') ? ' reallocation-user-error' : '' }}">
                     <legend class="field-label">Profissional para o plantão</legend>

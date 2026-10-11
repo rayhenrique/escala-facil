@@ -85,8 +85,14 @@ class ImportShiftsAction
 
         $created = 0;
 
-        app(OperationalAuditContext::class)->transaction($manager, function () use ($validated, &$created): void {
+        app(OperationalAuditContext::class)->transaction($manager, function () use ($manager, $validated, &$created): void {
+            $users = User::query()->whereKey(collect($validated)->pluck('user_id')->push($manager->id)->filter()->unique()->all())
+                ->orderBy('id')->lockForUpdate()->get()->keyBy('id');
+            $manager = $users->get($manager->id);
+            abort_unless($manager, 403);
+            Gate::forUser($manager)->authorize('create', Shift::class);
             foreach ($validated as $attributes) {
+                (new SaveShiftRequest)->validatePayload($attributes, $manager);
                 Shift::query()->create($attributes);
                 $created++;
             }

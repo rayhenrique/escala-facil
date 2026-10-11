@@ -238,3 +238,7 @@ A paginação Livewire reutiliza a composição e os tokens da paginação exist
 ## Histórico operacional
 
 A gerência consulta o histórico pelos links “Histórico” junto aos registros e pela sidebar. A tela reutiliza o painel de filtros, campos nativos, botões e paginação existentes. Eventos mostram ação/registro, autor, data com fuso e diferenças Anterior/Posterior; UUID e IDs usam a tipografia operacional. Comparações ficam em três colunas no desktop e empilhadas no celular, com quebra de nomes/identificadores longos. Não há ações de edição ou exclusão de eventos. Estado vazio explica filtros e o início da captura, sem inventar eventos antigos.
+
+## Alertas preventivos de plantões
+
+A revisão de criação/edição ocupa o modal de cadastro existente, sem sobrepor outro modal. Mostra período, profissional e avisos, com Revisar dados e confirmação explícita. Bloqueios usam texto e cor danger; avisos usam texto ink com borda primary, sem confundir recomendação com proibição. O componente shift-assignment-alerts é compartilhado com a prévia de realocação. Campos são preservados ao retornar; foco, fundo inerte, estado ocupado e recuperação de falha seguem os modais operacionais existentes.

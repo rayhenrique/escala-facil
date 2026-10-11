@@ -4,7 +4,11 @@ export function registerSwapAnalysis(Livewire) {
     Livewire.interceptMessage(({ message, onSend, onFinish, onFailure, onError, onSuccess }) => {
         const dialog = () => message.component.el.querySelector('[data-decision-component]');
         const hadDialog = !!dialog();
-        const opening = [...message.actions].some((action) => ['openSwapAnalysis', 'requestDecision', 'openReallocation'].includes(action.name ?? action.method));
+        const opening = [...message.actions].some((action) => {
+            const name = action.name ?? action.method;
+            return ['openSwapAnalysis', 'requestDecision', 'openReallocation'].includes(name)
+                || (message.component.el.hasAttribute('data-shift-assignment-flow') && ['openCreateModal', 'edit'].includes(name));
+        });
         if (!dialog() && !opening) return;
         if (!dialog()) {
             const active = document.activeElement;
@@ -21,13 +25,13 @@ export function registerSwapAnalysis(Livewire) {
             alert.focus();
         };
         onSend(() => setBusy(true));
-        if (hadDialog && [...message.actions].some((action) => ['reviewReallocation', 'returnToReallocation', 'requestDecision', 'returnToSwapAnalysis'].includes(action.name ?? action.method))) {
+        if (hadDialog && [...message.actions].some((action) => ['reviewReallocation', 'returnToReallocation', 'requestDecision', 'returnToSwapAnalysis', 'returnToShiftForm'].includes(action.name ?? action.method))) {
             onSuccess(({ onRender }) => onRender(() => {
                 requestAnimationFrame(() => {
                     const body = dialog()?.querySelector('.modal-body');
                     if (!body) return;
                     body.scrollTop = 0;
-                    body.focus({ preventScroll: true });
+                    (body.querySelector('[x-ref="firstField"]') ?? body).focus({ preventScroll: true });
                 });
             }));
         }
