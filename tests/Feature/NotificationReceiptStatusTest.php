@@ -186,6 +186,53 @@ class NotificationReceiptStatusTest extends TestCase
         }
     }
 
+    public function test_compact_overview_preserves_night_and_24_hour_counterpart_without_changing_snapshot(): void
+    {
+        $receipt = ['requester' => 'Maria', 'substitute' => 'Ana', 'has_counterpart' => true,
+            'shift_date' => '2026-10-31', 'start_time' => '19:00', 'end_time' => '07:00', 'sector' => 'UTI',
+            'counterpart_shift_date' => '2026-11-02', 'counterpart_start_time' => '07:00', 'counterpart_end_time' => '07:00',
+            'counterpart_end_date' => '2026-11-03', 'counterpart_sector' => 'Clínica'];
+        $original = $receipt;
+        $summary = ShiftSwapReceipt::compactSummary($receipt);
+        $this->assertCount(3, $summary);
+        $this->assertSame('Solicitante: Maria · Substituto: Ana', $summary[0]);
+        $this->assertStringContainsString('dia seguinte, 01/11/2026', $summary[1]);
+        $this->assertStringContainsString('12h · UTI', $summary[1]);
+        $this->assertStringContainsString('dia seguinte, 03/11/2026', $summary[2]);
+        $this->assertStringContainsString('24h · Clínica', $summary[2]);
+        $this->assertSame($original, $receipt);
+    }
+
+    public function test_compact_notifications_have_distinct_accessible_detail_panels_and_bulk_read_preserves_history(): void
+    {
+        [$manager, , $substitute, $swap] = $this->pending();
+        app(AcceptShiftSwapAction::class)->execute($substitute, $swap->id);
+        $other = User::factory()->create();
+        $payload = $manager->notifications()->sole()->data;
+        $manager->notify(new ShiftSwapEventNotification($payload));
+        $other->notify(new ShiftSwapEventNotification($payload));
+        $before = $manager->notifications()->get()->keyBy('id');
+        $screen = Livewire::actingAs($manager)->test(NotificationsCenter::class);
+        foreach ($before as $row) {
+            $screen->assertSeeHtml('aria-controls="notification-details-'.$row->id.'"')
+                ->assertSeeHtml('id="notification-details-'.$row->id.'"')
+                ->assertSeeHtml('aria-labelledby="notification-toggle-'.$row->id.'"');
+            $this->assertEquals($row->getAttributes(), $row->fresh()->getAttributes());
+        }
+        $screen->assertSee('Ver detalhes')->assertSee('Marcar como lida')->assertSee('Abrir módulo')
+            ->assertSee('PDF oficial atualizado')->assertSee('Comprovante histórico da notificação')
+            ->assertSeeHtml('aria-expanded="false"')->assertSeeHtml('x-cloak');
+        $screen->call('requestMarkAllAsRead')->assertSet('showMarkAllConfirmation', true);
+        $this->assertSame(2, $manager->unreadNotifications()->count());
+        $screen->call('cancelMarkAllAsRead')->assertSet('showMarkAllConfirmation', false);
+        $screen->call('markAllAsRead');
+        $this->assertSame(0, $manager->unreadNotifications()->count());
+        $this->assertSame(1, $other->unreadNotifications()->count());
+        foreach ($before as $row) {
+            $this->assertSame($row->data, $row->fresh()->data);
+        }
+    }
+
     private function assertCurrentPdf(User $viewer, ShiftSwap $swap, ShiftSwapStatus $status): void
     {
         Pdf::shouldReceive('loadView')->once()->with('reports.swap-receipt', \Mockery::on(fn ($data) => $data['receipt']['shift_swap_id'] === $swap->id

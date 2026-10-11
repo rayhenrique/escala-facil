@@ -188,7 +188,7 @@ Mensagens após mutações aparecem em avisos flutuantes no topo. Sucesso fecha 
 
 A ação **Instalar aplicativo** aparece somente quando o navegador disponibiliza o fluxo nativo de instalação e usa o mesmo padrão dos demais itens de suporte. A tela offline preserva a marca e informa claramente que dados operacionais exigem conexão, sem simular conteúdo desatualizado.
 
-A Central de Notificações usa cartões com uma faixa suave para itens não lidos. Cada cartão contém mensagem, ações de leitura e o comprovante em uma grade compacta; no celular, os campos do comprovante formam uma coluna legível. A referência monoespaçada e o badge de situação reforçam a rastreabilidade sem criar uma estética separada do restante do sistema.
+A Central de Notificações usa cartões com uma faixa suave para itens não lidos. Cada cartão começa compacto, com tipo/título do evento, referência, data, participantes, horário e badge da situação atual. Ver detalhes expande individualmente mensagem e comprovante; no celular, os campos do comprovante formam uma coluna legível. Os cartões usam borda e espaçamento contidos, sem sombra adicional. A referência monoespaçada e o badge de situação reforçam a rastreabilidade sem criar uma estética separada do restante do sistema.
 
 ### Iconography
 
@@ -271,4 +271,4 @@ O modal existente apresenta Situação atual → Situação após desfazer para 
 
 ## Situação das trocas nas notificações
 
-Cada cartão da Central apresenta primeiro Situação atual da troca, com estado e badge atuais. O título e a mensagem originais ficam sob Evento histórico desta notificação, em hierarquia secundária. O comprovante incorporado identifica Situação no momento deste registro em texto neutro; sua impressão é explicitamente histórica. PDF oficial atualizado é uma ação distinta, autorizada, que consulta o estado atual. Paleta, tipografia, cartões e paginação existentes permanecem.
+Cada cartão da Central apresenta primeiro Situação atual da troca, com estado e badge atuais. O título original identifica o evento histórico no resumo; a mensagem completa fica sob Evento histórico desta notificação nos detalhes recolhidos inicialmente. Vários cartões podem permanecer abertos, sem marcar leitura automaticamente. O comprovante incorporado identifica Situação no momento deste registro em texto neutro; sua impressão é explicitamente histórica. PDF oficial atualizado é uma ação distinta, autorizada, que consulta o estado atual. Paleta, tipografia, cartões e paginação existentes permanecem.

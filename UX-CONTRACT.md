@@ -33,7 +33,7 @@ Este documento registra o comportamento compartilhado das telas autenticadas. As
 | Aplicativo PWA | `manifest.webmanifest` + `sw.js` + ação `data-pwa-install` | Android, iOS/iPadOS e Windows | instalação nativa quando suportada, modo independente, ícones válidos e fallback offline sem cache autenticado |
 | Página pública | `landing.blade.php` + componentes `landing/*` | seções com âncora, prévia e exemplo de troca | mesmos tokens e tipografia, cartão de plantão e badges compartilhados, dados ilustrativos, login como único destino autenticado, navegação por teclado e conteúdo legível sem JavaScript |
 | Novidades da versão | `ReleaseAnnouncement` + `last_seen_version` | primeiro acesso após lançamento | modal único por versão, confirmação persistida e acesso ao manual |
-| Notificações | `NotificationsCenter` + notificações em banco | solicitação, aceite, aprovação e rejeição | isolamento por usuário, contador de não lidas e controles de leitura |
+| Notificações | `NotificationsCenter` + notificações em banco | solicitação, aceite, aprovação e rejeição | cartões compactos com expansão independente, isolamento por usuário, contador de não lidas e controles de leitura |
 | Comprovante de troca | `resources/views/components/swap-receipt.blade.php` | imediato e histórico | retrato do evento com referência, plantão e participantes |
 | Feedback | `resources/views/components/flash-notifications.blade.php` | sucesso e erro | aviso flutuante, dispensável, sem alterar a geometria e com semântica de status ou alerta |
 | Exclusão | modal de confirmação compartilhado | plantões, usuários, setores e categorias | registro identificado, consequência descrita, cancelamento e teste do fluxo |
@@ -208,3 +208,7 @@ Desfazer está disponível para revisar qualquer pedido aprovado no histórico c
 ## Situação atual e histórico de notificações
 
 A Central consulta os estados atuais em lote para os IDs da página e aplica a Policy de consulta. Situação atual da troca é sempre explícita, mesmo quando coincide com a notificação; ausência ou falta de permissão mostra Indisponível para consulta, sem adotar o estado antigo como atual. Evento histórico e Situação no momento deste registro preservam o snapshot da notificação. A impressão clona apenas esse registro e o identifica como histórico; PDF oficial atualizado usa o controlador autorizado de consulta atual. Renderizar, paginar e imprimir não marcam leitura nem regravam comprovantes. Só ações explícitas de leitura alteram read_at, sem mudar o payload.
+
+### Expansão dos cartões de notificação
+
+Os cartões iniciam recolhidos e mantêm a situação atual visível junto ao evento histórico identificado. Ver detalhes é um botão com aria-expanded e aria-controls ligados a um painel identificado; Alpine conserva o estado local de cada cartão durante atualizações Livewire da mesma página. Abrir um não fecha os demais. Recolher detalhes no fim do comprovante devolve o foco ao botão de origem. Abrir, fechar e imprimir não alteram leitura, notificações ou plantões. A leitura só muda por ação explícita, mantendo os detalhes abertos; paginação e novo carregamento começam com cartões recolhidos. Transição de opacidade discreta respeita prefers-reduced-motion; ações e textos quebram linhas no celular. Carregamento da paginação e marcação de leitura têm indicação textual, preservando o conteúdo existente.

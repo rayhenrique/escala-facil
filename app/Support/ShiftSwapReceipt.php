@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Enums\ShiftSwapEvent;
 use App\Enums\ShiftSwapStatus;
 use App\Models\ShiftSwap;
+use Carbon\CarbonImmutable;
 
 class ShiftSwapReceipt
 {
@@ -60,6 +61,25 @@ class ShiftSwapReceipt
         }
 
         return $receipt;
+    }
+
+    /** Compact historical overview, derived from the same time labels as the full receipt.
+     *
+     * @return list<string>
+     */
+    public static function compactSummary(array $receipt): array
+    {
+        $receipt = self::withTimeLabels($receipt);
+        $lines = [('Solicitante: '.($receipt['requester'] ?? 'Não informado')).' · Substituto: '.($receipt['substitute'] ?? 'Não informado')];
+        foreach (['' => 'Plantão', 'counterpart_' => 'Contrapartida'] as $prefix => $label) {
+            if (empty($receipt[$prefix.'shift_date']) || ($prefix && empty($receipt['has_counterpart']))) {
+                continue;
+            }
+            $date = CarbonImmutable::parse($receipt[$prefix.'shift_date'])->format('d/m/Y');
+            $lines[] = $label.': '.$date.' · '.$receipt[$prefix.'time_label'].' · '.($receipt[$prefix.'sector'] ?? $receipt['sector'] ?? 'Setor não informado');
+        }
+
+        return $lines;
     }
 
     /** @return array<string, mixed> */

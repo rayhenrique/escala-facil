@@ -2,9 +2,18 @@
 
 return [
     // Versão do código instalado. APP_VERSION não pode sobrepor este registro.
-    'current' => '1.34.1',
+    'current' => '1.35.0',
 
     'releases' => [
+        [
+            'version' => '1.35.0',
+            'date' => '2026-10-11',
+            'title' => 'Notificações mais organizadas',
+            'summary' => 'Agora as notificações estão mais fáceis de consultar. Você pode visualizar rapidamente a situação de cada troca e abrir os detalhes e comprovantes quando precisar.',
+            'highlights' => [
+                'Agora as notificações estão mais fáceis de consultar. Você pode visualizar rapidamente a situação de cada troca e abrir os detalhes e comprovantes quando precisar.',
+            ],
+        ],
         [
             'version' => '1.34.1',
             'date' => '2026-10-11',

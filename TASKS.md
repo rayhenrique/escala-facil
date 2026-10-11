@@ -267,3 +267,8 @@
 - [x] 1.34.0: revisão de qualquer troca aprovada, restauração simples/mútua com evidência original, justificativa e locks, análise administrativa de consulta para bloqueios, registro imutável, comprovantes corretos e testes de concorrência.
 
 - [x] 1.34.1: situação atual das trocas em destaque na Central, comprovantes identificados como históricos, impressão distinta do PDF atualizado, consulta em lote autorizada e regressão reproduzida do pedido #106 sem escrita durante renderização.
+
+- [x] **Notificações mais organizadas (1.35.0)**
+  - [x] Cartões compactos com estado atual, resumo e detalhes independentes acessíveis.
+  - [x] Preservar comprovantes históricos, PDF autorizado, leitura explícita e consulta em lote.
+  - [x] Regressões de estados, histórico, leitura, paginação e expansão no navegador.
