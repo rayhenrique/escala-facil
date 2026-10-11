@@ -107,6 +107,9 @@
                     <span class="font-bold text-muted">↺</span>
                     <div>
                         <strong>Troca desfeita pela gerência</strong> — A escala original foi restabelecida.
+                        @if (! empty($receipt['reversal_id']))
+                            <p class="mt-2">{{ $receipt['requester_movement'] ?? '' }}</p><p>{{ $receipt['substitute_movement'] ?? '' }}</p>
+                        @endif
                     </div>
                 </div>
             @elseif ($hasCounterpart && $counterpartDate)
@@ -133,6 +136,9 @@
         </div>
     </div>
 
+    @if (! empty($receipt['reversion_reason']))
+        <div class="border-t border-line p-5"><span class="meta-label">Justificativa administrativa</span><p class="mt-2 text-sm">{{ $receipt['reversion_reason'] }}</p></div>
+    @endif
     @if (! empty($receipt['rejection_reason']))
         <div class="border-t border-red-200 bg-red-50/70 p-5 sm:p-6">
             <span class="meta-label text-danger">Justificativa da gerência</span>

@@ -222,7 +222,14 @@
 
     <div class="section-title">Movimentação da Escala</div>
     <div class="movement-box">
-        @if (! empty($receipt['has_counterpart']) && ! empty($receipt['counterpart_shift_date']))
+        @if ($receipt['status'] === 'reverted')
+            @if (! empty($receipt['reversal_id']))
+                <div class="movement-item">{{ $receipt['requester_movement'] }}</div>
+                <div class="movement-item">{{ $receipt['substitute_movement'] }}</div>
+            @else
+                <div class="movement-item">Troca desfeita pela gerência. A escala original foi restabelecida.</div>
+            @endif
+        @elseif (! empty($receipt['has_counterpart']) && ! empty($receipt['counterpart_shift_date']))
             <div class="movement-item">
                 ⇄ <strong>{{ $receipt['requester'] }}</strong> assume o plantão do dia <strong>{{ \Carbon\CarbonImmutable::parse($receipt['counterpart_shift_date'])->format('d/m/Y') }}</strong>, das {{ $receipt['counterpart_start_time'] }} às {{ $receipt['counterpart_end_time_label'] }} ({{ $receipt['counterpart_sector'] }} · {{ $receipt['counterpart_category'] }}).
             </div>
@@ -236,6 +243,9 @@
         @endif
     </div>
 
+    @if (! empty($receipt['reversion_reason']))
+        <div class="rejection-box"><strong>Justificativa administrativa:</strong><p>{{ $receipt['reversion_reason'] }}</p></div>
+    @endif
     @if (! empty($receipt['rejection_reason']))
         <div class="rejection-box">
             <strong>Justificativa da Gerência:</strong>

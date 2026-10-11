@@ -66,7 +66,7 @@ class AuditHistory extends Component
         foreach ($validator->errors()->messages() as $key => $messages) {
             $this->addError($key, $messages[0]);
         }
-        $query = OperationalAuditEvent::query()->with('author:id,name');
+        $query = OperationalAuditEvent::query()->with(['author:id,name', 'reversal']);
         if ($validator->fails()) {
             $query->whereRaw('1 = 0');
         } else {

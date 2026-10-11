@@ -264,3 +264,7 @@ Os impedimentos aparecem primeiro no corpo do modal, antes dos dados de conferê
 Duas ações nativas com aria-pressed alternam Aguardando decisão e Histórico de trocas. Filtros e paginação reutilizam os controles existentes. Cartões mostram pedido, modalidade e situação, com dois blocos de plantão lado a lado no desktop e empilhados no celular nas trocas mútuas. Profissionais previstos e atuais recebem rótulos distintos; razões para não desfazer usam texto informativo, sem sugerir falha do aplicativo. Detalhes preservam destaque e navegação contextual; comprovante da situação atual fica em disclosure nativo. Paleta, Instrument Sans, tokens e confirmação de operações permanecem existentes.
 
 Rótulos e descrições nos blocos destacados do comprovante usam primary-strong para manter contraste AA sobre o fundo existente.
+
+## Revisão de desfazimento de trocas
+
+O modal existente apresenta Situação atual → Situação após desfazer para cada plantão, com horários e duração. Motivos de bloqueio ficam visíveis; avisos de dobra usam texto ink. Justificativa administrativa tem rótulo, limite e erro associado. Cancelar, Escape, foco preso, feedback de requisição e retorno ao botão de origem seguem os componentes existentes. Casos bloqueados oferecem Analisar correção administrativa em uma etapa de consulta, com links para históricos e sem confirmação destrutiva. Tokens e identidade visual permanecem os mesmos.

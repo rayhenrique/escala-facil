@@ -6,6 +6,12 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.34.0 — 11/10/2026
+
+### Revisão segura para desfazer trocas
+
+- Gerentes agora podem consultar e desfazer trocas com uma revisão prévia. Quando possível, os profissionais voltam aos plantões originais com segurança.
+
 ## 1.33.0 — 11/10/2026
 
 ### Histórico completo de trocas

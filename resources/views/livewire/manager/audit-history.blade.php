@@ -68,6 +68,10 @@
                         </div>
                     @endforeach
                 </dl>
+                @if ($event->entity_type === 'swap' && $event->action === 'reverted' && $event->reversal)
+                    <p class="mt-3 text-sm"><strong>Justificativa administrativa:</strong> {{ $event->reversal->reason }}</p>
+                    <p class="mt-2 text-sm text-muted">Reversão #{{ $event->reversal->id }} · Aprovação original #{{ $event->reversal->approval_event_id }}</p>
+                @endif
                 <p class="mt-3 break-all font-mono text-xs text-muted">Operação {{ $event->operation_id }}</p>
             </article>
         @empty

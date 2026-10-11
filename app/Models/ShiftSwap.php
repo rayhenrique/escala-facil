@@ -8,6 +8,7 @@ use Database\Factories\ShiftSwapFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class ShiftSwap extends Model
 {
@@ -62,5 +63,10 @@ class ShiftSwap extends Model
     public function manager(): BelongsTo
     {
         return $this->belongsTo(User::class, 'manager_id');
+    }
+
+    public function reversal(): HasOne
+    {
+        return $this->hasOne(ShiftSwapReversal::class);
     }
 }

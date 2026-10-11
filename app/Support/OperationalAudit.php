@@ -64,6 +64,9 @@ class OperationalAudit
                 ShiftSwapStatus::Reverted->value => 'reverted', ShiftSwapStatus::PendingManager->value => 'accepted',
                 default => $action,
             };
+            if ($action === 'approved') {
+                $changes['approval_state'] = ['before' => null, 'after' => app(ShiftSwapReversion::class)->approvalState($model)];
+            }
         }
         if ($model instanceof AccountInvitation && $action === 'updated') {
             $action = match (true) {

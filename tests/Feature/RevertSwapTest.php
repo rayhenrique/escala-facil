@@ -15,8 +15,10 @@ use App\Models\Sector;
 use App\Models\Shift;
 use App\Models\ShiftSwap;
 use App\Models\User;
+use App\Support\ShiftSwapReversion;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -41,10 +43,11 @@ class RevertSwapTest extends TestCase
             ->test(SwapApprovals::class)
             ->call('requestRevert', $swap->id)
             ->assertSet('pendingRevertSwapId', $swap->id)
-            ->assertSee('Desfazer esta troca?')
+            ->assertSee('Revisar desfazimento do pedido')
+            ->set('reversionReason', 'Correção administrativa solicitada pelos profissionais.')
             ->call('confirmRevert')
             ->assertHasNoErrors()
-            ->assertSee('Troca desfeita e plantão devolvido ao solicitante.');
+            ->assertSee('Troca desfeita. Os profissionais voltaram aos plantões originais');
 
         $this->assertSame(ShiftSwapStatus::Reverted, $swap->refresh()->status);
         $this->assertSame($manager->id, $swap->manager_id);
@@ -68,7 +71,7 @@ class RevertSwapTest extends TestCase
 
         $this->assertTrue($requester->refresh()->hasReachedSwapLimit(now()->month, now()->year));
 
-        app(RevertShiftSwapAction::class)->execute($manager, $swaps[0]->id);
+        app(RevertShiftSwapAction::class)->execute($manager, $swaps[0]->id, 'Correção administrativa.', app(ShiftSwapReversion::class)->inspect($swaps[0]->fresh())['fingerprint']);
 
         $this->assertFalse($requester->refresh()->hasReachedSwapLimit(now()->month, now()->year));
         $this->assertFalse($substitute->refresh()->hasReachedSwapLimit(now()->month, now()->year));
@@ -100,8 +103,8 @@ class RevertSwapTest extends TestCase
 
         foreach ([$absenceSwap, $pendingSwap] as $swap) {
             $this->assertThrows(
-                fn () => app(RevertShiftSwapAction::class)->execute($manager, $swap->id),
-                AuthorizationException::class,
+                fn () => app(RevertShiftSwapAction::class)->execute($manager, $swap->id, 'Correção administrativa.', app(ShiftSwapReversion::class)->inspect($swap->fresh())['fingerprint']),
+                ValidationException::class,
             );
             $this->assertSame(ShiftSwapStatus::Approved, $swap->refresh()->status);
         }
@@ -120,8 +123,8 @@ class RevertSwapTest extends TestCase
         $pastShift->update(['user_id' => $substitute->id]);
 
         $this->assertThrows(
-            fn () => app(RevertShiftSwapAction::class)->execute($manager, $pastSwap->id),
-            AuthorizationException::class,
+            fn () => app(RevertShiftSwapAction::class)->execute($manager, $pastSwap->id, 'Correção administrativa.', app(ShiftSwapReversion::class)->inspect($pastSwap->fresh())['fingerprint']),
+            ValidationException::class,
         );
 
         $futureShift = $this->shift($requester, $category, $sector, 10);

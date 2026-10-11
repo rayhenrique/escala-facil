@@ -148,18 +148,13 @@ class ManagerSwapHistoryTest extends TestCase
         $pending = $this->fixtureSwap(ShiftSwapStatus::Approved);
         ShiftSwap::factory()->create(['shift_id' => $pending->shift_id, 'status' => ShiftSwapStatus::PendingManager]);
         $unscheduled = $this->fixtureSwap(ShiftSwapStatus::Approved, ['status' => ShiftStatus::AbsenceReported]);
-        $screen = Livewire::test(SwapApprovals::class)->call('showHistory')
-            ->assertSeeHtml('wire:click="requestRevert('.$allowed->id.')"')
-            ->assertSee('A data do plantão já passou')->assertSee('A atribuição do plantão foi alterada')
-            ->assertSee('Existe um registro de ausência')->assertSee('Existe outro pedido pendente')
-            ->assertSee('O plantão não está agendado');
-        foreach ([$past, $changed, $absence, $pending, $unscheduled] as $blocked) {
-            $screen->assertDontSeeHtml('wire:click="requestRevert('.$blocked->id.')"');
-            $this->assertTrue(Gate::inspect('revert', $blocked)->denied());
-            $screen->call('requestRevert', $blocked->id)->assertForbidden();
-            $screen = Livewire::test(SwapApprovals::class)->call('showHistory');
+        $screen = Livewire::test(SwapApprovals::class)->call('showHistory');
+        foreach ([$allowed, $past, $changed, $absence, $pending, $unscheduled] as $record) {
+            $screen->assertSeeHtml('wire:click="requestRevert('.$record->id.')"');
+            $this->assertTrue(Gate::inspect('revert', $record)->denied());
+            $screen->call('requestRevert', $record->id)->assertSee('Não há evidência completa')
+                ->assertDontSee('Confirmar desfazer')->call('cancelRevert');
         }
-        $this->assertTrue(Gate::inspect('revert', $allowed)->allowed());
     }
 
     public function test_page_reads_eager_load_relations_and_revert_exists_without_per_record_queries(): void
@@ -188,7 +183,7 @@ class ManagerSwapHistoryTest extends TestCase
         $swap = $this->fixtureSwap(ShiftSwapStatus::Approved);
         $screen = Livewire::test(SwapApprovals::class)->call('showHistory')->call('requestRevert', $swap->id);
         Absence::factory()->create(['shift_id' => $swap->shift_id]);
-        $screen->call('confirmRevert')->assertForbidden();
+        $screen->set('reversionReason', 'Conferência administrativa.')->call('confirmRevert')->assertHasErrors('reversion');
         $this->assertSame(ShiftSwapStatus::Approved, $swap->fresh()->status);
         $this->assertSame($swap->substitute_id, $swap->shift->fresh()->user_id);
         $this->assertSame(0, DB::table('notifications')->count());

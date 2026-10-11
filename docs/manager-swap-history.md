@@ -12,11 +12,11 @@ Datas, horários e nomes exibidos na listagem vêm dos cadastros atuais relacion
 
 Detalhes oferecem comprovante da situação atual e PDF pelo controlador existente. Comprovantes enviados nas notificações anteriores permanecem imutáveis e não são substituídos por essa consulta. O histórico operacional de alterações continua disponível pelo link Histórico do registro.
 
-## Reversão preservada
+## Revisão de desfazimento
 
-Desfazer aparece somente quando a Policy permite. As mesmas condições existentes agora retornam uma mensagem específica: gerente, pedido aprovado, plantão principal existente, atribuído ao substituto do pedido, agendado, data de início igual ou posterior a hoje, ausência de outra troca pendente e de qualquer registro de ausência nesse plantão. Esta entrega não muda o critério de data, não acrescenta critérios para a contrapartida e não altera a Action de reversão, locks, transação, cotas, notificações ou comprovantes.
+Desfazer permite ao gerente revisar qualquer pedido aprovado. A restauração exige evidência da aprovação original, estado atual seguro dos dois plantões, disponibilidade dos profissionais originais, prévia atual e justificativa administrativa. Motivos específicos impedem a confirmação quando houver mudanças posteriores, ausências, solicitações dependentes, conflitos ou plantões iniciados/passados. Casos bloqueados oferecem análise administrativa separada, somente para consulta. Veja [swap-reversion.md](swap-reversion.md).
 
-As condições de existência são carregadas com `withExists` para os plantões da página, evitando consultas por cartão. A ação sob lock carrega os dados atuais e consulta essas condições novamente; uma permissão exibida anteriormente não concede autorização para uma operação que passou a ser inválida.
+A autorização para abrir a revisão não executa a reversão. A listagem carrega relações em lote e só a revisão faz a análise completa; a confirmação revalida sob locks, sem confiar em uma permissão exibida anteriormente.
 
 ## Acesso e validação
 

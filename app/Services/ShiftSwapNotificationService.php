@@ -109,7 +109,7 @@ class ShiftSwapNotificationService
                 $shiftSwap,
                 ShiftSwapEvent::Reverted,
                 'Troca desfeita',
-                "{$shiftSwap->manager->name} desfez a troca e o plantão voltou para {$shiftSwap->requester->name}.",
+                "{$shiftSwap->manager->name} desfez a troca. Os profissionais voltaram aos respectivos plantões originais; consulte o novo comprovante.",
                 route('notifications', [], false),
             )),
         );

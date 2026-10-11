@@ -18,6 +18,7 @@ use App\Support\OperationalFilters;
 use App\Support\OperationalNavigation;
 use App\Support\ShiftCoverage;
 use App\Support\ShiftSwapReceipt;
+use App\Support\ShiftSwapReversion;
 use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -25,6 +26,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -55,10 +57,20 @@ class SwapApprovals extends Component
     #[Url]
     public string $substituteSearch = '';
 
+    #[Locked]
     public ?int $pendingRevertSwapId = null;
 
-    /** @var array<string, string|null>|null */
+    /** @var array<string, mixed>|null */
+    #[Locked]
     public ?array $pendingRevertSummary = null;
+
+    #[Locked]
+    public ?string $reversionSnapshot = null;
+
+    public string $reversionReason = '';
+
+    #[Locked]
+    public bool $administrativeAnalysis = false;
 
     #[Computed]
     public function sectors()
@@ -173,48 +185,43 @@ class SwapApprovals extends Component
 
     public function requestRevert(int $shiftSwapId): void
     {
-        $shiftSwap = ShiftSwap::query()
-            ->with(['shift.sector', 'shift.category', 'substituteShift.sector', 'substituteShift.category', 'requester', 'substitute'])
-            ->findOrFail($shiftSwapId);
-        $this->authorize('revert', $shiftSwap);
-
+        $shiftSwap = ShiftSwap::query()->findOrFail($shiftSwapId);
+        $this->authorize('reviewReversion', $shiftSwap);
+        $review = app(ShiftSwapReversion::class)->inspect($shiftSwap);
         $this->pendingRevertSwapId = $shiftSwap->id;
-        $this->pendingRevertSummary = [
-            'shift' => sprintf(
-                '%s, das %s às %s',
-                $shiftSwap->shift->date->format('d/m/Y'),
-                substr((string) $shiftSwap->shift->start_time, 0, 5),
-                $shiftSwap->shift->period()->endLabel().' · '.$shiftSwap->shift->period()->durationLabel(),
-            ),
-            'location' => $shiftSwap->shift->sector->name.' · '.$shiftSwap->shift->category->name,
-            'requester' => $shiftSwap->requester->name,
-            'substitute' => $shiftSwap->substitute->name,
-            'counterpart' => $shiftSwap->substituteShift ? sprintf(
-                '%s, das %s às %s',
-                $shiftSwap->substituteShift->date->format('d/m/Y'),
-                substr((string) $shiftSwap->substituteShift->start_time, 0, 5),
-                $shiftSwap->substituteShift->period()->endLabel().' · '.$shiftSwap->substituteShift->period()->durationLabel(),
-            ) : null,
-        ];
+        $this->pendingRevertSummary = array_intersect_key($review, array_flip(['rows', 'blocks', 'warnings', 'can_revert', 'later_events']));
+        $this->reversionSnapshot = $review['fingerprint'];
+        $this->administrativeAnalysis = false;
+        $this->resetValidation(['reversion', 'reversionReason', 'reversionSnapshot']);
+    }
+
+    public function analyzeAdministrativeCorrection(): void
+    {
+        abort_unless($this->pendingRevertSwapId, 404);
+        $this->authorize('reviewReversion', ShiftSwap::query()->findOrFail($this->pendingRevertSwapId));
+        $this->administrativeAnalysis = true;
+    }
+
+    public function refreshReversion(): void
+    {
+        abort_unless($this->pendingRevertSwapId, 404);
+        $this->requestRevert($this->pendingRevertSwapId);
     }
 
     public function cancelRevert(): void
     {
-        $this->reset(['pendingRevertSwapId', 'pendingRevertSummary']);
+        $this->reset(['pendingRevertSwapId', 'pendingRevertSummary', 'reversionSnapshot', 'reversionReason', 'administrativeAnalysis']);
+        $this->resetValidation(['reversion', 'reversionReason', 'reversionSnapshot']);
     }
 
     public function confirmRevert(RevertShiftSwapAction $action, ShiftSwapReceipt $receipts): void
     {
         abort_unless($this->pendingRevertSwapId, 404);
-
-        $shiftSwap = ShiftSwap::query()->findOrFail($this->pendingRevertSwapId);
-        $this->authorize('revert', $shiftSwap);
-        $shiftSwap = $action->execute(auth()->user(), $this->pendingRevertSwapId);
+        $shiftSwap = $action->execute(auth()->user(), $this->pendingRevertSwapId, $this->reversionReason, $this->reversionSnapshot);
         $this->swapReceipt = $receipts->make($shiftSwap, ShiftSwapEvent::Reverted);
-
         $this->cancelRevert();
-
-        session()->flash('status', 'Troca desfeita e plantão devolvido ao solicitante.');
+        $this->dispatch('notifications-updated');
+        session()->flash('status', 'Troca desfeita. Os profissionais voltaram aos plantões originais e receberam um novo comprovante.');
     }
 
     public function render(): View
@@ -270,7 +277,7 @@ class SwapApprovals extends Component
         $revertPermissions = [];
         foreach ($swaps as $swap) {
             if ($swap->status === ShiftSwapStatus::Approved) {
-                $permission = Gate::inspect('revert', $swap);
+                $permission = Gate::inspect('reviewReversion', $swap);
                 $revertPermissions[$swap->id] = ['allowed' => $permission->allowed(), 'reason' => $permission->message()];
             }
         }

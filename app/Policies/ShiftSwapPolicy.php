@@ -8,6 +8,7 @@ use App\Enums\UserRole;
 use App\Models\ShiftSwap;
 use App\Models\User;
 use App\Support\ShiftSwapApproval;
+use App\Support\ShiftSwapReversion;
 use Illuminate\Auth\Access\Response;
 
 class ShiftSwapPolicy
@@ -79,46 +80,24 @@ class ShiftSwapPolicy
         return $reason === null ? Response::allow() : Response::deny($reason);
     }
 
-    public function revert(User $user, ShiftSwap $shiftSwap): Response
+    public function reviewReversion(User $user, ShiftSwap $shiftSwap): Response
     {
         if ($user->role !== UserRole::Manager) {
-            return Response::deny('Somente gerentes podem desfazer trocas.');
-        }
-        if ($shiftSwap->status !== ShiftSwapStatus::Approved) {
-            return Response::deny('Somente trocas aprovadas podem ser desfeitas.');
+            return Response::deny('Somente gerentes podem revisar o desfazimento de trocas.');
         }
 
-        $shiftSwap->loadMissing('shift');
+        return $shiftSwap->status === ShiftSwapStatus::Approved
+            ? Response::allow() : Response::deny('Somente trocas aprovadas podem ser revisadas para desfazimento.');
+    }
 
-        $shift = $shiftSwap->shift;
+    public function revert(User $user, ShiftSwap $shiftSwap): Response
+    {
+        $permission = $this->reviewReversion($user, $shiftSwap);
+        if ($permission->denied()) {
+            return $permission;
+        }
+        $review = app(ShiftSwapReversion::class)->inspect($shiftSwap);
 
-        if (! $shift) {
-            return Response::deny('O plantão deste pedido não está disponível.');
-        }
-        if ($shift->user_id !== $shiftSwap->substitute_id) {
-            return Response::deny('A atribuição do plantão foi alterada; o substituto deste pedido não é o profissional atual.');
-        }
-        if ($shift->status !== ShiftStatus::Scheduled) {
-            return Response::deny('O plantão não está agendado. Confira sua situação em Escalas.');
-        }
-        if ($shift->date->isBefore(today())) {
-            return Response::deny('A data do plantão já passou. A regra atual não permite desfazer esta troca.');
-        }
-        // A listagem carrega os mesmos EXISTS em lote; a ação sob lock consulta
-        // os dados atuais, sem esses atributos, preservando a revalidação.
-        $attributes = $shift->getAttributes();
-        $hasPendingSwap = array_key_exists('pending_swaps_exists', $attributes)
-            ? (bool) $attributes['pending_swaps_exists']
-            : $shift->swaps()->whereIn('status', [ShiftSwapStatus::PendingProfessional, ShiftSwapStatus::PendingManager])->exists();
-        if ($hasPendingSwap) {
-            return Response::deny('Existe outro pedido pendente para este plantão. Resolva o pedido antes de desfazer a troca.');
-        }
-        $hasAbsence = array_key_exists('absences_exists', $attributes)
-            ? (bool) $attributes['absences_exists'] : $shift->absences()->exists();
-        if ($hasAbsence) {
-            return Response::deny('Existe um registro de ausência neste plantão. Confira a ausência antes de desfazer a troca.');
-        }
-
-        return Response::allow();
+        return $review['can_revert'] ? Response::allow() : Response::deny(implode(' ', $review['blocks']));
     }
 }

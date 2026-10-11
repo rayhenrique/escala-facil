@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Concerns\ImmutableAuditBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use LogicException;
 
 class OperationalAuditEvent extends Model
@@ -38,5 +39,10 @@ class OperationalAuditEvent extends Model
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'author_id');
+    }
+
+    public function reversal(): HasOne
+    {
+        return $this->hasOne(ShiftSwapReversal::class, 'operation_id', 'operation_id');
     }
 }

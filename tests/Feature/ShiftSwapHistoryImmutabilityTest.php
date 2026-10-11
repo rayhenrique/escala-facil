@@ -17,6 +17,7 @@ use App\Models\Sector;
 use App\Models\Shift;
 use App\Models\User;
 use App\Support\ShiftSwapReceipt;
+use App\Support\ShiftSwapReversion;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
@@ -139,7 +140,7 @@ class ShiftSwapHistoryImmutabilityTest extends TestCase
         $snapshots = $this->snapshotAll();
         $approvedForRequester = $requester->refresh()->notifications()->where('data->event', 'approved')->firstOrFail()->data;
 
-        app(RevertShiftSwapAction::class)->execute($manager, $shiftSwap->id);
+        app(RevertShiftSwapAction::class)->execute($manager, $shiftSwap->id, 'Correção administrativa.', app(ShiftSwapReversion::class)->inspect($shiftSwap->fresh())['fingerprint']);
 
         $this->assertSnapshotsUnchanged($snapshots);
         $this->assertSame($approvedForRequester, $requester->refresh()->notifications()->where('data->event', 'approved')->firstOrFail()->data);

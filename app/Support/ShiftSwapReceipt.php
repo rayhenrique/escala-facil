@@ -76,6 +76,14 @@ class ShiftSwapReceipt
             $shiftSwap->shift->category->name,
         );
 
+        $reversal = $event === ShiftSwapEvent::Reverted ? $shiftSwap->reversal : null;
+        if ($event === ShiftSwapEvent::Reverted) {
+            $requesterMovement = $shiftSwap->requester->name.' voltou ao plantão #'.$shiftSwap->shift_id.': '.$shiftSwap->shift->period()->datedLabel().'.';
+            $substituteMovement = $hasCounterpart
+                ? $shiftSwap->substitute->name.' voltou ao plantão #'.$shiftSwap->substitute_shift_id.': '.$shiftSwap->substituteShift->period()->datedLabel().'.'
+                : $shiftSwap->substitute->name.' deixou a cobertura do plantão #'.$shiftSwap->shift_id.'.';
+        }
+
         return self::withTimeLabels([
             'reference' => sprintf('TROCA-%06d', $shiftSwap->id),
             'shift_swap_id' => $shiftSwap->id,
@@ -102,6 +110,8 @@ class ShiftSwapReceipt
             'requester_movement' => $requesterMovement,
             'substitute_movement' => $substituteMovement,
             'rejection_reason' => $shiftSwap->rejection_reason,
+            'reversion_reason' => $reversal?->reason,
+            'reversal_id' => $reversal?->id,
             'requester' => $shiftSwap->requester->name,
             'substitute' => $shiftSwap->substitute->name,
             'manager' => $shiftSwap->manager?->name,

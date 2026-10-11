@@ -18,11 +18,11 @@ class CreateShiftSwapAction
     public function execute(User $requester, array $payload): ShiftSwap
     {
         return app(OperationalAuditContext::class)->transaction($requester, function () use ($requester, $payload): ShiftSwap {
-            Shift::query()->lockForUpdate()->findOrFail($payload['shift_id']);
-
-            if (! empty($payload['substitute_shift_id'])) {
-                Shift::query()->lockForUpdate()->findOrFail($payload['substitute_shift_id']);
-            }
+            $users = User::query()->whereKey([$requester->id, $payload['substitute_id'] ?? null])->orderBy('id')->lockForUpdate()->get()->keyBy('id');
+            $requester = $users->get($requester->id);
+            abort_unless($requester, 403);
+            Shift::query()->whereKey(array_filter([$payload['shift_id'] ?? null, $payload['substitute_shift_id'] ?? null]))
+                ->orderBy('id')->lockForUpdate()->get();
 
             $validated = (new StoreShiftSwapRequest)->validatePayload($payload, $requester);
 

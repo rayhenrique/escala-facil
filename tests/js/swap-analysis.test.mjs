@@ -125,3 +125,21 @@ test('invitation forms and revocation share occupied feedback and recoverable er
         assert.equal(h.events.at(-1), false);
     }
 });
+
+test('reversion shares busy protection, validation focus and cancellation return', () => {
+    const h = harness('requestRevert(1)');
+    const open = h.message('requestRevert');
+    open.send(); h.show(true); open.finish();
+    const field = { focused: false, scrollIntoView() {}, focus() { this.focused = true; } };
+    h.invalidField(field);
+    const confirm = h.message('confirmRevert');
+    confirm.send(); assert.equal(h.events.at(-1), true);
+    confirm.success({ onRender(callback) { callback(); } });
+    assert.equal(field.focused, true);
+    confirm.finish(); assert.equal(h.events.at(-1), false);
+    h.invalidField(null);
+    h.message('refreshReversion').success({ onRender(callback) { callback(); } });
+    assert.equal(h.body.focused, true);
+    const cancel = h.message('cancelRevert'); h.show(false); cancel.finish();
+    assert.equal(h.trigger.focused, true);
+});

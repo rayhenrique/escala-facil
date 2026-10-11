@@ -6,7 +6,7 @@ export function registerSwapAnalysis(Livewire) {
         const hadDialog = !!dialog();
         const opening = [...message.actions].some((action) => {
             const name = action.name ?? action.method;
-            return ['openSwapAnalysis', 'requestDecision', 'openReallocation'].includes(name)
+            return ['openSwapAnalysis', 'requestDecision', 'openReallocation', 'requestRevert'].includes(name)
                 || (message.component.el.hasAttribute('data-shift-assignment-flow') && ['openCreateModal', 'edit'].includes(name))
                 || (message.component.el.hasAttribute('data-account-invitation-flow') && ['openInvitationModal', 'requestInvitationRevocation'].includes(name));
         });
@@ -26,7 +26,7 @@ export function registerSwapAnalysis(Livewire) {
             alert.focus();
         };
         onSend(() => setBusy(true));
-        if (hadDialog && [...message.actions].some((action) => ['reviewReallocation', 'returnToReallocation', 'requestDecision', 'returnToSwapAnalysis', 'returnToShiftForm', 'openSwapAnalysis', 'confirmDecision'].includes(action.name ?? action.method))) {
+        if (hadDialog && [...message.actions].some((action) => ['reviewReallocation', 'returnToReallocation', 'requestDecision', 'returnToSwapAnalysis', 'returnToShiftForm', 'openSwapAnalysis', 'confirmDecision', 'confirmRevert', 'refreshReversion', 'analyzeAdministrativeCorrection'].includes(action.name ?? action.method))) {
             onSuccess(({ onRender }) => onRender(() => {
                 requestAnimationFrame(() => {
                     const body = dialog()?.querySelector('.modal-body');

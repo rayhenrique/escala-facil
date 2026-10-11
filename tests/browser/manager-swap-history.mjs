@@ -78,7 +78,8 @@ try {
         await card.waitFor(); assert.match(await card.innerText(), /24h/); assert.match(await card.innerText(), /dia seguinte, 01\/11\/2026/);
         await update(page, () => card.getByRole('button', { name: 'Desfazer troca', exact: true }).click());
         const dialog = page.getByRole('alertdialog'); await dialog.waitFor();
-        assert.match(await dialog.innerText(), /Plantão de contrapartida/);
+        assert.match(await dialog.innerText(), /Situação atual → Situação após desfazer/);
+        assert.equal(await dialog.locator('dl').count(), 2);
         await update(page, () => dialog.getByRole('button', { name: 'Manter troca', exact: true }).click());
         await dialog.waitFor({ state: 'detached' });
         const details = card.getByRole('link', { name: `Detalhes do pedido #${fixture.mutual}`, exact: true });

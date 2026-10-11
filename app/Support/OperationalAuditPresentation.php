@@ -17,6 +17,7 @@ class OperationalAuditPresentation
             'name' => 'Nome', 'role' => 'Perfil', 'email_changed' => 'Endereço de acesso alterado (conteúdo não registrado)',
             'shift_id' => 'Plantão (ID)', 'substitute_shift_id' => 'Contrapartida (ID)', 'requester_id' => 'Solicitante (ID)',
             'substitute_id' => 'Substituto (ID)', 'manager_id' => 'Gerente (ID)',
+            'approval_state' => 'Atribuições e horários da aprovação original',
             'requires_activation' => 'Ativação pendente', 'invited_by' => 'Gerente do convite (ID)', 'generation' => 'Emissão do convite',
             'expires_at' => 'Expiração', 'last_sent_at' => 'Envio solicitado', 'accepted_at' => 'Aceite', 'revoked_at' => 'Revogação',
         ][$field] ?? $field;
@@ -24,6 +25,9 @@ class OperationalAuditPresentation
 
     public static function value(string $field, mixed $value): string
     {
+        if ($field === 'approval_state' && is_array($value)) {
+            return 'Atribuições e horários originais preservados para revisão segura (plantões '.implode(', ', array_keys($value['before'] ?? [])).').';
+        }
         if ($value === null) {
             return 'Sem valor';
         }

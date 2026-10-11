@@ -2,9 +2,18 @@
 
 return [
     // Versão do código instalado. APP_VERSION não pode sobrepor este registro.
-    'current' => '1.33.0',
+    'current' => '1.34.0',
 
     'releases' => [
+        [
+            'version' => '1.34.0',
+            'date' => '2026-10-11',
+            'title' => 'Revisão segura para desfazer trocas',
+            'summary' => 'Gerentes agora podem consultar e desfazer trocas com uma revisão prévia. Quando possível, os profissionais voltam aos plantões originais com segurança.',
+            'highlights' => [
+                'Gerentes agora podem consultar e desfazer trocas com uma revisão prévia. Quando possível, os profissionais voltam aos plantões originais com segurança.',
+            ],
+        ],
         [
             'version' => '1.33.0',
             'date' => '2026-10-11',

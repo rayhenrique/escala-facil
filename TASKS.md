@@ -263,3 +263,5 @@
 - [x] **Correção dos controles operacionais (1.32.2)**: inicialização única antes do import de Livewire/Alpine, recuperação de mudanças do bundle durante navegação, metatag PWA, regressões de modais desktop/mobile e preservação dos fluxos e regras existentes.
 
 - [x] **Histórico completo de trocas (1.33.0)**: fila e consulta separadas, paginação SQL sem limite total, filtros/ordenação por URL, dois plantões nas permutas, detalhes/comprovantes, impedimentos de reversão e regressões sem modificar as regras existentes.
+
+- [x] 1.34.0: revisão de qualquer troca aprovada, restauração simples/mútua com evidência original, justificativa e locks, análise administrativa de consulta para bloqueios, registro imutável, comprovantes corretos e testes de concorrência.
