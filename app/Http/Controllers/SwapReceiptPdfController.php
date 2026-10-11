@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\ShiftSwapEvent;
-use App\Enums\ShiftSwapStatus;
 use App\Models\ShiftSwap;
 use App\Support\ShiftSwapReceipt;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -19,15 +17,7 @@ class SwapReceiptPdfController extends Controller
     {
         $this->authorize('view', $swap);
 
-        $event = match ($swap->status) {
-            ShiftSwapStatus::PendingProfessional => ShiftSwapEvent::Requested,
-            ShiftSwapStatus::PendingManager => ShiftSwapEvent::Accepted,
-            ShiftSwapStatus::Approved => ShiftSwapEvent::Approved,
-            ShiftSwapStatus::Rejected => ShiftSwapEvent::Rejected,
-            default => ShiftSwapEvent::Reverted,
-        };
-
-        $receipt = $receipts->make($swap, $event);
+        $receipt = $receipts->current($swap);
 
         return Pdf::loadView('reports.swap-receipt', [
             'receipt' => $receipt,

@@ -1,4 +1,4 @@
-@props(['selected' => false, 'kind' => 'shifts'])
+@props(['selected' => false, 'kind' => 'shifts', 'advancedSwaps' => false])
 <fieldset class="panel mt-5" @disabled($selected)>
     <legend class="px-2 text-sm font-semibold text-ink">Pesquisar e filtrar</legend>
     <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -53,6 +53,24 @@
             @endif
         </div>
     </div>
+    @if ($advancedSwaps)
+        <div class="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            @foreach (['requesterSearch' => ['list-requester', 'Solicitante'], 'substituteSearch' => ['list-substitute', 'Substituto']] as $field => [$id, $label])
+                <div>
+                    <label for="{{ $id }}" class="field-label">{{ $label }}</label>
+                    <input id="{{ $id }}" type="search" wire:model.live.debounce.350ms="{{ $field }}" maxlength="100" placeholder="Pesquisar por nome" class="field-input" @error($field) aria-invalid="true" aria-describedby="{{ $id }}-error" @enderror>
+                    @error($field)<p id="{{ $id }}-error" class="field-error">{{ $message }}</p>@enderror
+                </div>
+            @endforeach
+            <div>
+                <label for="list-sort" class="field-label">Ordenar por solicitação</label>
+                <select id="list-sort" wire:model.live="sort" class="field-input" @error('sort') aria-invalid="true" aria-describedby="list-sort-error" @enderror>
+                    <option value="oldest">Mais antigas primeiro</option><option value="newest">Mais recentes primeiro</option>
+                </select>
+                @error('sort')<p id="list-sort-error" class="field-error">{{ $message }}</p>@enderror
+            </div>
+        </div>
+    @endif
     <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p class="text-sm text-muted">{{ $kind === 'personal' ? 'A pesquisa por nome filtra as trocas. Categoria e datas filtram suas listas; as datas substituem o mês dos plantões.' : ($kind === 'swaps' ? 'Setor, categoria e período se referem ao plantão solicitado.' : 'Ao informar datas, o período substitui o mês exibido.') }} As duas datas estão incluídas.</p>
         <button type="button" wire:click="clearFilters" class="button-secondary shrink-0">Limpar filtros</button>

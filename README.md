@@ -4,7 +4,7 @@
 
 Sistema interno para gestão de escalas médicas, plantões, trocas e ausências em unidades de saúde. A aplicação centraliza a operação da gerência, permite que profissionais acompanhem a própria agenda e aplica as regras de compatibilidade e limite mensal em todas as decisões de troca.
 
-**Versão atual:** `1.32.2` — consulte o histórico completo em [`versoes.md`](versoes.md).
+**Versão atual:** `1.33.0` — consulte o histórico completo em [`versoes.md`](versoes.md).
 
 Desenvolvido por [KL Tecnologia](https://kltecnologia.com).
 
@@ -47,6 +47,7 @@ O gerente pode:
 - cadastrar e manter usuários, setores e categorias;
 - criar, editar, alocar e excluir plantões;
 - aprovar ou rejeitar trocas aceitas pelo substituto;
+- consultar todo o histórico de trocas, com filtros combinados, pesquisa por participantes, paginação, detalhes e comprovantes; consulte [o guia da listagem](docs/manager-swap-history.md);
 - receber uma notificação quando uma troca aceita aguardar decisão;
 - consultar alertas gerados por ausências.
 
@@ -157,7 +158,7 @@ Crie um banco MySQL chamado `escala_facil` e ajuste o `.env`:
 APP_NAME="Escala Fácil"
 APP_URL=http://127.0.0.1:8000
 APP_TIMEZONE=America/Maceio
-APP_VERSION=1.32.2
+APP_VERSION=1.33.0
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR
 APP_FAKER_LOCALE=pt_BR

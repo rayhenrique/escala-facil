@@ -261,3 +261,5 @@
 - [x] **Correção da análise de trocas (1.32.1)**: razões específicas compartilhadas com a Policy, conferência de ambas as atribuições, cota 3/4 e 4/4, fingerprint operacional, atualização explícita, testes e investigação somente leitura do caso #89 sem pressupor acesso à produção.
 
 - [x] **Correção dos controles operacionais (1.32.2)**: inicialização única antes do import de Livewire/Alpine, recuperação de mudanças do bundle durante navegação, metatag PWA, regressões de modais desktop/mobile e preservação dos fluxos e regras existentes.
+
+- [x] **Histórico completo de trocas (1.33.0)**: fila e consulta separadas, paginação SQL sem limite total, filtros/ordenação por URL, dois plantões nas permutas, detalhes/comprovantes, impedimentos de reversão e regressões sem modificar as regras existentes.

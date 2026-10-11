@@ -17,7 +17,7 @@ class OperationalNavigation
         'dashboard' => ['period', 'page'],
         'calendar' => ['month', 'selectedDate', 'sectorId', 'categoryId'],
         'shifts' => ['month', 'filter', 'focus', 'page', 'search', 'filterSectorId', 'filterCategoryId', 'dateFrom', 'dateTo'],
-        'swaps' => ['request', 'page', 'swapStatusFilter', 'search', 'filterSectorId', 'filterCategoryId', 'dateFrom', 'dateTo'],
+        'swaps' => ['request', 'page', 'listView', 'sort', 'swapStatusFilter', 'search', 'requesterSearch', 'substituteSearch', 'filterSectorId', 'filterCategoryId', 'dateFrom', 'dateTo'],
         'reports' => ['month', 'tab', 'sectorId', 'categoryId', 'searchProfessional', 'swapStatusFilter', 'professionalsPage', 'swapsPage', 'absencesPage', 'sectorsPage'],
     ];
 
@@ -39,6 +39,10 @@ class OperationalNavigation
         $result = [];
         foreach (self::FIELDS[$module] ?? [] as $key) {
             $value = is_array($state) ? ($state[$key] ?? null) : null;
+            // ConvertEmptyStringsToNull também normaliza valores dentro de context.
+            if ($module === 'swaps' && $key === 'swapStatusFilter' && is_array($state) && array_key_exists($key, $state) && $value === null) {
+                $value = '';
+            }
             if (! is_scalar($value) || is_bool($value) || strlen((string) $value) > 250 || ($value === '' && ! ($module === 'swaps' && $key === 'swapStatusFilter'))) {
                 continue;
             }
@@ -54,6 +58,8 @@ class OperationalNavigation
                 'filter' => in_array($value, ['scheduled', 'uncovered', 'absence_reported', 'uncovered_month'], true),
                 'tab' => in_array($value, ['all', 'coverage', 'professionals', 'swaps', 'absences', 'wall'], true),
                 'swapStatusFilter' => $value === '' || in_array($value, array_column(ShiftSwapStatus::cases(), 'value'), true),
+                'listView' => in_array($value, ['pending', 'history'], true),
+                'sort' => in_array($value, ['oldest', 'newest'], true),
                 default => true,
             };
             if ($valid) {

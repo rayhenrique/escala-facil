@@ -6,6 +6,12 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.33.0 — 11/10/2026
+
+### Histórico completo de trocas
+
+- Agora é possível consultar todas as trocas realizadas, pesquisar por profissionais e encontrar pedidos antigos.
+
 ## 1.32.2 — 11/10/2026
 
 ### Correção dos botões de escalas e trocas

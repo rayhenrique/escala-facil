@@ -1,7 +1,7 @@
 <div>
     <p class="eyebrow">Gerência</p>
-    <h1 class="page-title">Aprovação de trocas</h1>
-    <p class="page-description">Confira os participantes e transfira o plantão somente após o aceite do substituto.</p>
+    <h1 class="page-title">Trocas</h1>
+    <p class="page-description">Analise os pedidos pendentes e consulte as trocas de qualquer período.</p>
 
     <x-flash-notifications />
 
@@ -18,114 +18,47 @@
     @endphp
     <x-context-navigation :back="$this->backNavigation()" :label="$focusedSwap ? 'Pedido #'.$focusedSwap->id.' selecionado' : null" :links="$contextLinks" />
 
-    @if ($request !== null)
-        <a href="{{ route('manager.swaps', array_diff_key($this->navigationContext(), ['request' => true])) }}" wire:navigate class="text-link mt-4 inline-flex min-h-10 items-center">Ver lista de trocas</a>
+    @if ($request !== null && $this->from !== 'swaps')
+        <a href="{{ $this->from === 'swaps' ? $this->backNavigation()['url'] : route('manager.swaps', array_diff_key($this->navigationContext(), ['request' => true])) }}" wire:navigate class="text-link mt-4 inline-flex min-h-10 items-center">Ver lista de trocas</a>
     @endif
 
-    <x-operational-filters kind="swaps" :selected="$request !== null" />
-    <p class="mt-4 text-sm text-muted" role="status">{{ $swaps->total() }} pedido(s) encontrado(s).</p>
+    @unless ($focusedSwap)
+        <nav class="mt-5 flex flex-wrap gap-2" aria-label="Consulta de trocas">
+            <button type="button" wire:click="showPending" aria-pressed="{{ $listView === 'pending' ? 'true' : 'false' }}" class="{{ $listView === 'pending' ? 'button-primary' : 'button-secondary' }}">Aguardando decisão</button>
+            <button type="button" wire:click="showHistory" aria-pressed="{{ $listView === 'history' ? 'true' : 'false' }}" class="{{ $listView === 'history' ? 'button-primary' : 'button-secondary' }}">Histórico de trocas</button>
+        </nav>
+        @error('listView')<p class="field-error" role="alert">{{ $message }}</p>@enderror
+    @endunless
+    @unless ($focusedSwap)
+        <x-operational-filters kind="swaps" advanced-swaps />
+        <p class="mt-4 text-sm text-muted" role="status">{{ $swaps->total() }} pedido(s) encontrado(s).</p>
+    @endunless
 
     @if ($swapReceipt)
         <x-swap-receipt :receipt="$swapReceipt" class="mt-6" />
     @endif
 
-    <section class="mt-8 space-y-4" aria-label="{{ $swapStatusFilter === 'pending_manager' ? 'Trocas aguardando decisão' : 'Resultados de trocas' }}">
-        @forelse ($swaps as $swap)
-            <article class="panel {{ $request === $swap->id ? 'context-record' : '' }}" data-context-record="{{ $request === $swap->id ? 'swap-'.$swap->id : '' }}" wire:key="swap-approval-{{ $swap->id }}">
-                <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-                    <div class="min-w-0">
-                        <div class="flex flex-wrap items-center gap-3">
-                            <x-status-badge :status="$swap->status" :label="$swap->status === \App\Enums\ShiftSwapStatus::PendingManager ? 'Aguardando decisão' : $swap->status->label()" />
-                            @if (! empty($doubleShifts[$swap->id]))
-                                <x-status-badge status="double_shift" label="Dobra" />
-                            @endif
-                            <span class="font-mono text-xs text-muted">Pedido #{{ $swap->id }}</span>
-                            <x-operational-audit-link entity="swap" :record="$swap->id" from="swaps" :context="$this->navigationContext()" />
-                        </div>
-                        <h2 class="mt-4 text-xl font-semibold">{{ $swap->shift->date->format('d/m/Y') }} · {{ $swap->shift->time_label }}</h2>
-                        <p class="mt-2 text-sm text-muted">{{ $swap->shift->sector->name }} · {{ $swap->shift->category->name }}</p>
-
-                        @if ($swap->substituteShift)
-                            <div class="mt-3 rounded-lg border border-line bg-canvas p-3 text-xs leading-5">
-                                <p class="font-semibold text-primary">Troca mútua (permuta de plantões):</p>
-                                <p class="mt-1">
-                                    • <strong>{{ $swap->requester->name }}</strong> vai para o dia <strong>{{ $swap->substituteShift->date->format('d/m/Y') }}</strong>, das {{ substr($swap->substituteShift->start_time, 0, 5) }} às {{ $swap->substituteShift->period()->endLabel() }} · {{ $swap->substituteShift->period()->durationLabel() }} ({{ $swap->substituteShift->sector->name }}).
-                                </p>
-                                <p>
-                                    • <strong>{{ $swap->substitute->name }}</strong> vai para o dia <strong>{{ $swap->shift->date->format('d/m/Y') }}</strong>, das {{ substr($swap->shift->start_time, 0, 5) }} às {{ $swap->shift->period()->endLabel() }} · {{ $swap->shift->period()->durationLabel() }} ({{ $swap->shift->sector->name }}).
-                                </p>
-                            </div>
-                        @else
-                            <div class="mt-3 rounded-lg border border-line bg-canvas p-3 text-xs leading-5">
-                                <p class="font-semibold text-primary">Cobertura de plantão:</p>
-                                <p class="mt-1">
-                                    • <strong>{{ $swap->substitute->name }}</strong> vai substituir <strong>{{ $swap->requester->name }}</strong> no dia <strong>{{ $swap->shift->date->format('d/m/Y') }}</strong>, das {{ substr($swap->shift->start_time, 0, 5) }} às {{ $swap->shift->period()->endLabel() }} · {{ $swap->shift->period()->durationLabel() }}.
-                                </p>
-                            </div>
-                        @endif
-
-                        @if (! empty($doubleShifts[$swap->id]))
-                            <p class="mt-2 text-sm font-semibold text-amber-700">Dobra: emenda com o plantão do substituto em {{ $doubleShifts[$swap->id] }}.</p>
-                        @endif
-                        <div class="mt-5 grid gap-4 sm:grid-cols-2">
-                            <div><span class="meta-label">Solicitante (cedente)</span><p class="mt-1 font-semibold">{{ $swap->requester->name }}</p></div>
-                            <div><span class="meta-label">Substituto (assume)</span><p class="mt-1 font-semibold">{{ $swap->substitute->name }}</p></div>
-                        </div>
-                    </div>
-                    @if ($swap->status === \App\Enums\ShiftSwapStatus::PendingManager)
-                    <div class="flex shrink-0 flex-col gap-2 sm:flex-row">
-                        <button type="button" wire:click="requestDecision({{ $swap->id }}, 'reject')" wire:loading.attr="disabled" class="button-secondary">Rejeitar</button>
-                        <button type="button" wire:click="requestDecision({{ $swap->id }}, 'approve')" wire:loading.attr="disabled" class="button-primary inline-flex">Aprovar e transferir</button>
-                    </div>
-                    @else
-                        <p class="text-sm text-muted">Este pedido está {{ mb_strtolower($swap->status->label()) }}. A consulta não altera sua situação.</p>
-                    @endif
-                </div>
-            </article>
-        @empty
-            <div class="empty-state"><p class="font-semibold text-ink">Nenhuma troca corresponde aos filtros.</p><p class="mt-2 text-sm">Ajuste a pesquisa ou limpe os filtros. A lista inicial mostra pedidos que aguardam decisão da gerência.</p></div>
-        @endforelse
-    </section>
-
-    <div class="mt-6">{{ $swaps->links() }}</div>
-
-    @if ($request === null && $swapStatusFilter === 'pending_manager')
-    <section class="mt-10" aria-labelledby="approved-swaps-title">
+    <section class="mt-8 space-y-4" aria-labelledby="swap-list-title">
         <div class="section-heading">
             <div>
-                <p class="eyebrow">Histórico reversível</p>
-                <h2 id="approved-swaps-title">Trocas aprovadas futuras</h2>
+                <h2 id="swap-list-title" class="text-xl font-semibold" tabindex="-1">{{ $focusedSwap ? 'Detalhes do pedido #'.$focusedSwap->id : ($listView === 'pending' ? 'Aguardando decisão' : 'Histórico de trocas') }}</h2>
+                <p class="mt-2 text-sm text-muted">{{ $focusedSwap ? 'Dados do pedido e atribuições atuais dos plantões. Situação: '.$focusedSwap->status->label().'.' : ($listView === 'pending' ? 'Pedidos aceitos pelo substituto que aguardam decisão da gerência.' : 'Consulte pedidos de qualquer data e situação usando os filtros acima.') }}</p>
             </div>
-            <span class="text-sm text-muted">{{ $approvedSwaps->count() }} troca(s) recente(s), até 10</span>
         </div>
-        <div class="mt-4 space-y-4">
-            @forelse ($approvedSwaps as $swap)
-                <article class="record-card" wire:key="swap-approved-{{ $swap->id }}">
-                    <div class="flex flex-wrap items-center gap-3">
-                        <x-status-badge :status="$swap->status" />
-                        <span class="font-mono text-xs text-muted">Pedido #{{ $swap->id }}</span>
-                            <x-operational-audit-link entity="swap" :record="$swap->id" from="swaps" :context="$this->navigationContext()" />
-                    </div>
-                    <h3 class="mt-2 font-semibold">
-                        {{ $swap->shift->date->format('d/m/Y') }} · {{ $swap->shift->time_label }}
-                        @if ($swap->substituteShift)
-                            ⇄ {{ $swap->substituteShift->date->format('d/m/Y') }} · {{ $swap->substituteShift->time_label }}
-                        @endif
-                    </h3>
-                    <p class="mt-1 text-sm text-muted">
-                        {{ $swap->requester->name }} ⇄ {{ $swap->substitute->name }} · {{ $swap->shift->sector->name }}
-                    </p>
-                    <div class="mt-3">
-                        <button type="button" wire:click="requestRevert({{ $swap->id }})" class="table-action text-danger">Desfazer troca</button>
-                    </div>
-                </article>
-            @empty
-                <div class="empty-state compact-empty"><p class="font-semibold text-ink">Nenhuma troca aprovada futura para desfazer.</p></div>
-            @endforelse
-        </div>
+        @forelse ($swaps as $swap)
+            <x-manager-swap-card :swap="$swap" :context="$this->navigationContext()" :selected="$request === $swap->id" :revert-permission="$revertPermissions[$swap->id] ?? null" :double-shift="$doubleShifts[$swap->id] ?? null" />
+        @empty
+            <div class="empty-state"><p class="font-semibold text-ink">Nenhuma troca corresponde aos filtros.</p><p class="mt-2 text-sm">{{ $listView === 'pending' ? 'Não há pedidos aguardando decisão com estes filtros. Consulte o Histórico de trocas para encontrar outros pedidos.' : 'Não há pedidos neste recorte. Ajuste a pesquisa ou limpe os filtros para consultar todo o histórico.' }}</p></div>
+        @endforelse
     </section>
+    @unless ($focusedSwap)<div class="mt-6">{{ $swaps->links() }}</div>@endunless
+    @if ($focusedReceipt)
+        <details class="panel mt-6">
+            <summary class="min-h-10 cursor-pointer font-semibold text-primary">Consultar comprovante da situação atual</summary>
+            <p class="mt-2 text-sm text-muted">Esta consulta usa a situação atual do pedido. Os comprovantes enviados nas notificações anteriores permanecem preservados.</p>
+            <x-swap-receipt :receipt="$focusedReceipt" class="mt-4" />
+        </details>
     @endif
-
     @include('livewire.manager.partials.swap-analysis')
 
     <x-confirmation-modal
@@ -138,6 +71,7 @@
         @if ($pendingRevertSummary)
             <p><strong>{{ $pendingRevertSummary['shift'] }}</strong></p>
             <p>{{ $pendingRevertSummary['location'] }}</p>
+            @if ($pendingRevertSummary['counterpart'])<p>Plantão de contrapartida: <strong>{{ $pendingRevertSummary['counterpart'] }}</strong>. Voltará ao substituto deste pedido.</p>@endif
             <p>Solicitante: <strong>{{ $pendingRevertSummary['requester'] }}</strong><br>Substituto atual: <strong>{{ $pendingRevertSummary['substitute'] }}</strong></p>
             <p>O plantão voltará ao solicitante, a troca contará como desfeita (liberando a cota mensal) e ambos receberão um comprovante.</p>
         @endif

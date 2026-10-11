@@ -99,7 +99,8 @@ class ShiftSwapEnhancementsTest extends TestCase
         // Manager reviews swap approvals
         Livewire::actingAs($manager)
             ->test(SwapApprovals::class)
-            ->assertSee('Troca mútua (permuta de plantões):')
+            ->assertSee('Troca mútua')
+            ->assertSee('Plantão de contrapartida')
             ->assertSee($requester->name)
             ->assertSee($substitute->name)
             ->call('requestDecision', $swap->id, 'approve')

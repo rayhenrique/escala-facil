@@ -4,9 +4,9 @@ namespace App\Livewire\Manager;
 
 use App\Actions\ShiftSwaps\DecideShiftSwapAction;
 use App\Actions\ShiftSwaps\RevertShiftSwapAction;
-use App\Enums\ShiftStatus;
 use App\Enums\ShiftSwapEvent;
 use App\Enums\ShiftSwapStatus;
+use App\Http\Requests\ManagerSwapFiltersRequest;
 use App\Livewire\Concerns\AnalyzesShiftSwaps;
 use App\Livewire\Concerns\FiltersOperationalLists;
 use App\Livewire\Concerns\HasOperationalContext;
@@ -21,13 +21,15 @@ use App\Support\ShiftSwapReceipt;
 use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Validator;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-#[Layout('layouts.app', ['title' => 'Aprovação de trocas'])]
+#[Layout('layouts.app', ['title' => 'Trocas'])]
 class SwapApprovals extends Component
 {
     use AnalyzesShiftSwaps;
@@ -38,8 +40,20 @@ class SwapApprovals extends Component
     #[Url]
     public $request = null;
 
-    #[Url]
+    #[Url(keep: true)]
     public string $swapStatusFilter = 'pending_manager';
+
+    #[Url]
+    public string $listView = 'pending';
+
+    #[Url(keep: true)]
+    public string $sort = 'oldest';
+
+    #[Url]
+    public string $requesterSearch = '';
+
+    #[Url]
+    public string $substituteSearch = '';
 
     public ?int $pendingRevertSwapId = null;
 
@@ -61,17 +75,79 @@ class SwapApprovals extends Component
     public function mount(): void
     {
         $this->authorize('viewAny', ShiftSwap::class);
+        if ($this->listView === 'history' && ! request()->query->has('swapStatusFilter')) {
+            $this->swapStatusFilter = '';
+        } elseif ($this->listView === 'pending' && $this->swapStatusFilter !== 'pending_manager') {
+            $this->listView = 'history';
+        }
+        if ($this->listView === 'history' && ! request()->query->has('sort')) {
+            $this->sort = 'newest';
+        }
     }
 
     public function updatedSwapStatusFilter(): void
     {
+        if ($this->swapStatusFilter !== 'pending_manager') {
+            if ($this->listView === 'pending') {
+                $this->sort = 'newest';
+            }
+            $this->listView = 'history';
+        }
         $this->resetPage();
+    }
+
+    public function updated(string $property): void
+    {
+        if (in_array($property, ['requesterSearch', 'substituteSearch', 'sort', 'listView'], true)) {
+            $this->resetPage();
+        }
+    }
+
+    public function showHistory(): void
+    {
+        $this->listView = 'history';
+        $this->swapStatusFilter = '';
+        $this->sort = 'newest';
+        $this->request = null;
+        $this->resetPage();
+    }
+
+    public function showPending(): void
+    {
+        $this->listView = 'pending';
+        $this->swapStatusFilter = 'pending_manager';
+        $this->sort = 'oldest';
+        $this->request = null;
+        $this->resetPage();
+    }
+
+    public function listFilters(): array
+    {
+        return $this->only(['search', 'filterSectorId', 'filterCategoryId', 'dateFrom', 'dateTo', 'requesterSearch', 'substituteSearch']);
+    }
+
+    protected function validListFilters(): bool
+    {
+        $request = new ManagerSwapFiltersRequest;
+        $payload = $this->listFilters() + $this->only(['swapStatusFilter', 'listView', 'sort']);
+        $request->replace($payload);
+        $validator = Validator::make($payload, $request->rules(), $request->messages());
+        $this->resetValidation(array_keys($payload));
+        foreach ($validator->errors()->messages() as $key => $messages) {
+            $this->addError($key, $messages[0]);
+        }
+
+        return ! $validator->fails();
     }
 
     public function clearFilters(): void
     {
         $this->clearListFilters();
-        $this->swapStatusFilter = 'pending_manager';
+        if (! in_array($this->listView, ['pending', 'history'], true)) {
+            $this->listView = 'pending';
+        }
+        $this->swapStatusFilter = $this->listView === 'history' ? '' : 'pending_manager';
+        $this->sort = $this->listView === 'history' ? 'newest' : 'oldest';
         $this->request = null;
     }
 
@@ -154,6 +230,13 @@ class SwapApprovals extends Component
                 'substituteShift.sector',
                 'requester',
                 'substitute',
+                'manager',
+                'shift.user',
+                'substituteShift.user',
+                'shift' => fn ($query) => $query->withExists([
+                    'swaps as pending_swaps_exists' => fn ($q) => $q->whereIn('status', [ShiftSwapStatus::PendingProfessional, ShiftSwapStatus::PendingManager]),
+                    'absences',
+                ]),
             ])
             ->when($this->request === null, function ($query) use ($validFilters): void {
                 if (! $validFilters) {
@@ -162,10 +245,16 @@ class SwapApprovals extends Component
                     return;
                 }
                 OperationalFilters::swaps($query, $this->listFilters());
+                $query->when(trim($this->requesterSearch) !== '', fn ($q) => $q->whereHas('requester', fn ($user) => OperationalFilters::name($user, $this->requesterSearch)));
+                $query->when(trim($this->substituteSearch) !== '', fn ($q) => $q->whereHas('substitute', fn ($user) => OperationalFilters::name($user, $this->substituteSearch)));
+                if ($this->listView === 'pending') {
+                    $query->where('status', ShiftSwapStatus::PendingManager);
+                }
                 $query->when($this->swapStatusFilter !== '', fn ($q) => $q->where('status', $this->swapStatusFilter));
             })
             ->when($this->request !== null, fn ($query) => $query->whereKey($this->request))
-            ->oldest()->orderBy('id');
+            ->orderBy('created_at', $this->sort === 'newest' ? 'desc' : 'asc')
+            ->orderBy('id', $this->sort === 'newest' ? 'desc' : 'asc');
 
         if ($this->request !== null) {
             $records = $swaps->get();
@@ -178,26 +267,20 @@ class SwapApprovals extends Component
             $swaps = $swaps->paginate(10);
         }
 
+        $revertPermissions = [];
+        foreach ($swaps as $swap) {
+            if ($swap->status === ShiftSwapStatus::Approved) {
+                $permission = Gate::inspect('revert', $swap);
+                $revertPermissions[$swap->id] = ['allowed' => $permission->allowed(), 'reason' => $permission->message()];
+            }
+        }
+
         return view('livewire.manager.swap-approvals', [
             'swaps' => $swaps,
             'focusedSwap' => $focusedSwap,
             'doubleShifts' => $this->doubleShiftLabels($swaps->getCollection()->where('status', ShiftSwapStatus::PendingManager)),
-            'approvedSwaps' => $this->request !== null || $this->swapStatusFilter !== 'pending_manager' || ! $validFilters ? collect() : OperationalFilters::swaps(ShiftSwap::query(), $this->listFilters())
-                ->with([
-                    'shift.category',
-                    'shift.sector',
-                    'substituteShift.category',
-                    'substituteShift.sector',
-                    'requester',
-                    'substitute',
-                ])
-                ->where('status', ShiftSwapStatus::Approved)
-                ->whereHas('shift', fn ($query) => $query
-                    ->whereDate('date', '>=', today())
-                    ->where('status', ShiftStatus::Scheduled))
-                ->latest()
-                ->limit(10)
-                ->get(),
+            'revertPermissions' => $revertPermissions,
+            'focusedReceipt' => $focusedSwap ? app(ShiftSwapReceipt::class)->current($focusedSwap) : null,
         ]);
     }
 

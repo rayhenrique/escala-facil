@@ -2,9 +2,18 @@
 
 return [
     // Versão do código instalado. APP_VERSION não pode sobrepor este registro.
-    'current' => '1.32.2',
+    'current' => '1.33.0',
 
     'releases' => [
+        [
+            'version' => '1.33.0',
+            'date' => '2026-10-11',
+            'title' => 'Histórico completo de trocas',
+            'summary' => 'Agora é possível consultar todas as trocas realizadas, pesquisar por profissionais e encontrar pedidos antigos.',
+            'highlights' => [
+                'Agora é possível consultar todas as trocas realizadas, pesquisar por profissionais e encontrar pedidos antigos.',
+            ],
+        ],
         [
             'version' => '1.32.2',
             'date' => '2026-10-11',

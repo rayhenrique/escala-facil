@@ -196,3 +196,7 @@ Impedimentos ficam no início da análise; ausência de conflito não os oculta.
 ## Continuidade da navegação e dos modais
 
 Livewire/Alpine e os interceptores iniciam uma vez por documento. Se o JavaScript instalado mudar durante wire:navigate, o destino é recarregado antes de iniciar outro runtime, mantendo a URL e seus filtros. Os modais conservam foco, fundo inerte, validação e cancelamento; os controles ficam ocupados apenas durante a requisição. Detalhes e diagnóstico estão em docs/frontend-runtime.md.
+
+## Consulta completa de trocas
+
+Aguardando decisão mantém a fila operacional; Histórico de trocas inclui todas as situações e datas, com dez resultados por página SQL e contagem total. Pesquisa geral e campos separados por participante combinam com período inclusivo do início do plantão solicitado, setor, categoria e situação. Ordenação por solicitação usa ID como desempate. Trocas mútuas mostram os dois intervalos e os profissionais previstos/atuais com rótulos diferentes. Filtros reiniciam a página; limpar mantém a visão atual. Estado, detalhes e retorno persistem por URL validada. Comprovante atual não substitui eventos anteriores. Desfazer depende da Policy e explica impedimentos sem mudar as regras de reversão. Contrato detalhado em docs/manager-swap-history.md.

@@ -258,3 +258,9 @@ As definições completas dos indicadores ficam em um disclosure nativo com summ
 O modal existente mostra conferência dos dois plantões, cotas atuais e participação após aprovação. Avisos de horário usam borda primary/texto ink e ficam separados dos impedimentos em danger. Um botão Aprovar desabilitado referencia as razões específicas com aria-describedby; não há mensagem genérica de atribuição ou cota. Falha de revisão mostra a condição atual e oferece Atualizar análise, que apenas recarrega a conferência. O erro recebe foco e a atualização retorna ao início do corpo do modal. Decisões concluídas ficam somente para consulta, sem ações habilitadas. Composição, tipografia, tokens e confirmação explícita são preservados.
 
 Os impedimentos aparecem primeiro no corpo do modal, antes dos dados de conferência, para explicar imediatamente o botão desabilitado. As atribuições mostram nomes dos participantes com IDs quando conhecidos.
+
+## Consulta gerencial de trocas
+
+Duas ações nativas com aria-pressed alternam Aguardando decisão e Histórico de trocas. Filtros e paginação reutilizam os controles existentes. Cartões mostram pedido, modalidade e situação, com dois blocos de plantão lado a lado no desktop e empilhados no celular nas trocas mútuas. Profissionais previstos e atuais recebem rótulos distintos; razões para não desfazer usam texto informativo, sem sugerir falha do aplicativo. Detalhes preservam destaque e navegação contextual; comprovante da situação atual fica em disclosure nativo. Paleta, Instrument Sans, tokens e confirmação de operações permanecem existentes.
+
+Rótulos e descrições nos blocos destacados do comprovante usam primary-strong para manter contraste AA sobre o fundo existente.

@@ -169,7 +169,7 @@ class OperationalFiltersTest extends TestCase
             ->assertDontSeeHtml('wire:click="requestDecision(')
             ->set('swapStatusFilter', 'forged')->assertHasErrors('swapStatusFilter')
             ->assertViewHas('swaps', fn ($rows) => $rows->total() === 0)
-            ->call('clearFilters')->assertSet('swapStatusFilter', 'pending_manager')->assertSet('search', '');
+            ->call('clearFilters')->assertSet('swapStatusFilter', '')->assertSet('listView', 'history')->assertSet('search', '');
         $this->assertSame(ShiftSwapStatus::Rejected, $swap->fresh()->status);
     }
 

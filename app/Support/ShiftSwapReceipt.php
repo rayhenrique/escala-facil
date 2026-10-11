@@ -3,10 +3,23 @@
 namespace App\Support;
 
 use App\Enums\ShiftSwapEvent;
+use App\Enums\ShiftSwapStatus;
 use App\Models\ShiftSwap;
 
 class ShiftSwapReceipt
 {
+    /** Consulta da situação atual; não substitui comprovantes de eventos anteriores. */
+    public function current(ShiftSwap $swap): array
+    {
+        return $this->make($swap, match ($swap->status) {
+            ShiftSwapStatus::PendingProfessional => ShiftSwapEvent::Requested,
+            ShiftSwapStatus::PendingManager => ShiftSwapEvent::Accepted,
+            ShiftSwapStatus::Approved => ShiftSwapEvent::Approved,
+            ShiftSwapStatus::Rejected => ShiftSwapEvent::Rejected,
+            ShiftSwapStatus::Reverted => ShiftSwapEvent::Reverted,
+        });
+    }
+
     /** Enriquecimento apenas para leitura de comprovantes antigos, sem regravar notificações. */
     public static function withTimeLabels(array $receipt): array
     {
