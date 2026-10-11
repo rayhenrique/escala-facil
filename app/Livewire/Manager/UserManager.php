@@ -4,6 +4,7 @@ namespace App\Livewire\Manager;
 
 use App\Enums\UserRole;
 use App\Http\Requests\SaveUserRequest;
+use App\Livewire\Concerns\HasOperationalContext;
 use App\Models\Category;
 use App\Models\Sector;
 use App\Models\User;
@@ -18,6 +19,7 @@ use Livewire\WithPagination;
 #[Layout('layouts.app', ['title' => 'Usuários'])]
 class UserManager extends Component
 {
+    use HasOperationalContext;
     use WithPagination;
 
     #[Url]

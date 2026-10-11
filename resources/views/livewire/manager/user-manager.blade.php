@@ -126,7 +126,8 @@
                         <div><dt class="meta-label">Setor</dt><dd class="mt-1">{{ $user->sector?->name ?? 'Não se aplica' }}</dd></div>
                     </dl>
                     <div class="mt-4 grid grid-cols-2 gap-2">
-                        <button type="button" wire:click="edit({{ $user->id }})" class="button-secondary">Editar</button>
+                        <x-operational-audit-link entity="user" :record="$user->id" from="users" :context="$this->navigationContext()" />
+<button type="button" wire:click="edit({{ $user->id }})" class="button-secondary">Editar</button>
                         <button type="button" wire:click="requestDelete({{ $user->id }})" class="button-secondary text-danger">Excluir</button>
                     </div>
                 </article>
@@ -145,7 +146,8 @@
                             <td><span class="status-badge {{ $user->role === \App\Enums\UserRole::Manager ? 'status-pending_manager' : 'status-scheduled' }}">{{ $user->role->label() }}</span></td>
                             <td>{{ $user->category?->name ?? 'Não se aplica' }}</td>
                             <td>{{ $user->sector?->name ?? 'Não se aplica' }}</td>
-                            <td><div class="flex justify-end gap-2"><button type="button" wire:click="edit({{ $user->id }})" class="table-action">Editar</button><button type="button" wire:click="requestDelete({{ $user->id }})" class="table-action text-danger">Excluir</button></div></td>
+                            <td><div class="flex justify-end gap-2"><x-operational-audit-link entity="user" :record="$user->id" from="users" :context="$this->navigationContext()" />
+<button type="button" wire:click="edit({{ $user->id }})" class="table-action">Editar</button><button type="button" wire:click="requestDelete({{ $user->id }})" class="table-action text-danger">Excluir</button></div></td>
                         </tr>
                     @empty
                         <tr><td colspan="5" class="py-12 text-center text-muted">Nenhum usuário encontrado.</td></tr>

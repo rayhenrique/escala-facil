@@ -7,10 +7,10 @@ use App\Http\Requests\ReallocateShiftRequest;
 use App\Models\Shift;
 use App\Models\ShiftReallocation as Audit;
 use App\Models\User;
+use App\Support\OperationalAuditContext;
 use App\Support\ShiftReallocation;
 use Illuminate\Database\DetectsConcurrencyErrors;
 use Illuminate\Database\QueryException;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
@@ -21,7 +21,7 @@ class ReallocateShiftAction
     public function execute(User $manager, int $shiftId, int $professionalId, string $expectedSnapshot): Audit
     {
         try {
-            return DB::transaction(function () use ($manager, $shiftId, $professionalId, $expectedSnapshot): Audit {
+            return app(OperationalAuditContext::class)->transaction($manager, function () use ($manager, $shiftId, $professionalId, $expectedSnapshot): Audit {
                 $users = User::query()->whereKey([$manager->id, $professionalId])->orderBy('id')->lockForUpdate()->get()->keyBy('id');
                 $manager = $users->get($manager->id);
                 abort_unless($manager, 403);

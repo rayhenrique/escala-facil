@@ -8,7 +8,7 @@ use App\Models\Shift;
 use App\Models\ShiftSwap;
 use App\Models\User;
 use App\Services\ShiftSwapNotificationService;
-use Illuminate\Support\Facades\DB;
+use App\Support\OperationalAuditContext;
 
 class CreateShiftSwapAction
 {
@@ -17,7 +17,7 @@ class CreateShiftSwapAction
     /** @param array{shift_id: int|string, substitute_id: int|string, substitute_shift_id?: int|string|null} $payload */
     public function execute(User $requester, array $payload): ShiftSwap
     {
-        return DB::transaction(function () use ($requester, $payload): ShiftSwap {
+        return app(OperationalAuditContext::class)->transaction($requester, function () use ($requester, $payload): ShiftSwap {
             Shift::query()->lockForUpdate()->findOrFail($payload['shift_id']);
 
             if (! empty($payload['substitute_shift_id'])) {

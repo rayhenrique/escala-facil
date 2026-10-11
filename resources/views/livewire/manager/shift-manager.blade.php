@@ -132,7 +132,8 @@
                 <x-shift-card :shift="$shift" :show-professional="true" wire:key="mobile-shift-{{ $shift->id }}" class="{{ $focus === $shift->id ? 'context-record' : '' }}" data-context-record="{{ $focus === $shift->id ? 'shift-'.$shift->id : '' }}">
                     <div class="flex flex-wrap gap-2">
                         @can('reallocate', $shift)<button type="button" wire:click="openReallocation({{ $shift->id }})" wire:loading.attr="disabled" wire:target="openReallocation" class="button-primary">Preencher plantão</button>@endcan
-                        <button type="button" wire:click="edit({{ $shift->id }})" class="button-secondary">Editar</button>
+                        <x-operational-audit-link entity="shift" :record="$shift->id" from="shifts" :context="$this->navigationContext()" />
+<button type="button" wire:click="edit({{ $shift->id }})" class="button-secondary">Editar</button>
                         <button type="button" wire:click="requestDelete({{ $shift->id }})" class="table-action min-h-10 text-danger">Excluir</button>
                     </div>
                 </x-shift-card>
@@ -151,7 +152,8 @@
                             <td><strong>{{ $shift->sector->name }}</strong><span>{{ $shift->category->name }}</span></td>
                             <td>{{ $shift->user?->name ?? 'Não alocado' }}</td>
                             <td><x-status-badge :status="$shift->status" /></td>
-                            <td><div class="flex flex-wrap justify-end gap-2">@can('reallocate', $shift)<button type="button" wire:click="openReallocation({{ $shift->id }})" wire:loading.attr="disabled" wire:target="openReallocation" class="table-action">Preencher plantão</button>@endcan<button type="button" wire:click="edit({{ $shift->id }})" class="table-action">Editar</button><button type="button" wire:click="requestDelete({{ $shift->id }})" class="table-action text-danger">Excluir</button></div></td>
+                            <td><div class="flex flex-wrap justify-end gap-2">@can('reallocate', $shift)<button type="button" wire:click="openReallocation({{ $shift->id }})" wire:loading.attr="disabled" wire:target="openReallocation" class="table-action">Preencher plantão</button>@endcan<x-operational-audit-link entity="shift" :record="$shift->id" from="shifts" :context="$this->navigationContext()" />
+<button type="button" wire:click="edit({{ $shift->id }})" class="table-action">Editar</button><button type="button" wire:click="requestDelete({{ $shift->id }})" class="table-action text-danger">Excluir</button></div></td>
                         </tr>
                     @empty
                         <tr><td colspan="5" class="py-12 text-center text-muted">Nenhum plantão corresponde aos filtros. Ajuste a pesquisa ou limpe os filtros.</td></tr>

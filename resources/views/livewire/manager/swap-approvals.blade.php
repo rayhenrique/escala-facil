@@ -40,6 +40,7 @@
                                 <x-status-badge status="double_shift" label="Dobra" />
                             @endif
                             <span class="font-mono text-xs text-muted">Pedido #{{ $swap->id }}</span>
+                            <x-operational-audit-link entity="swap" :record="$swap->id" from="swaps" :context="$this->navigationContext()" />
                         </div>
                         <h2 class="mt-4 text-xl font-semibold">{{ $swap->shift->date->format('d/m/Y') }} · {{ $swap->shift->time_label }}</h2>
                         <p class="mt-2 text-sm text-muted">{{ $swap->shift->sector->name }} · {{ $swap->shift->category->name }}</p>
@@ -103,6 +104,7 @@
                     <div class="flex flex-wrap items-center gap-3">
                         <x-status-badge :status="$swap->status" />
                         <span class="font-mono text-xs text-muted">Pedido #{{ $swap->id }}</span>
+                            <x-operational-audit-link entity="swap" :record="$swap->id" from="swaps" :context="$this->navigationContext()" />
                     </div>
                     <h3 class="mt-2 font-semibold">
                         {{ $swap->shift->date->format('d/m/Y') }} · {{ $swap->shift->time_label }}

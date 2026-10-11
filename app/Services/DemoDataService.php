@@ -14,6 +14,7 @@ use App\Models\ShiftSwap;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use DomainException;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
@@ -211,22 +212,21 @@ class DemoDataService
                 ->orWhereIn('user_id', $userIds)
                 ->delete();
 
-            $deletedSwaps = ShiftSwap::query()
+            $deletedSwaps = $this->deleteAudited(ShiftSwap::query()
                 ->whereIn('id', $manifest['shift_swaps'] ?? [])
                 ->orWhereIn('shift_id', $shiftIds)
                 ->orWhereIn('requester_id', $userIds)
                 ->orWhereIn('substitute_id', $userIds)
-                ->orWhereIn('manager_id', $userIds)
-                ->delete();
+                ->orWhereIn('manager_id', $userIds));
 
-            $deletedShifts = Shift::query()->whereIn('id', $shiftIds)->delete();
+            $deletedShifts = $this->deleteAudited(Shift::query()->whereIn('id', $shiftIds));
             DB::table('notifications')
                 ->where('notifiable_type', User::class)
                 ->whereIn('notifiable_id', $userIds)
                 ->delete();
-            $deletedUsers = User::query()->whereIn('id', $userIds)->delete();
-            $deletedCategories = Category::query()->whereIn('id', $categoryIds)->delete();
-            $deletedSectors = Sector::query()->whereIn('id', $sectorIds)->delete();
+            $deletedUsers = $this->deleteAudited(User::query()->whereIn('id', $userIds));
+            $deletedCategories = $this->deleteAudited(Category::query()->whereIn('id', $categoryIds));
+            $deletedSectors = $this->deleteAudited(Sector::query()->whereIn('id', $sectorIds));
 
             DB::table('demo_data_batches')->where('id', $batch->id)->delete();
 
@@ -239,6 +239,16 @@ class DemoDataService
                 'absences' => $deletedAbsences,
             ];
         });
+    }
+
+    private function deleteAudited(Builder $query): int
+    {
+        $deleted = 0;
+        $query->lockForUpdate()->eachById(function ($record) use (&$deleted): void {
+            $deleted += (int) $record->delete();
+        }, 100);
+
+        return $deleted;
     }
 
     /** @param array<string, array<int, int>> $manifest

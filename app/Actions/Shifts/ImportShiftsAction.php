@@ -10,11 +10,11 @@ use App\Models\Sector;
 use App\Models\Shift;
 use App\Models\User;
 use App\Services\ShiftSpreadsheetService;
+use App\Support\OperationalAuditContext;
 use App\Support\ShiftPeriod;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -85,7 +85,7 @@ class ImportShiftsAction
 
         $created = 0;
 
-        DB::transaction(function () use ($validated, &$created): void {
+        app(OperationalAuditContext::class)->transaction($manager, function () use ($validated, &$created): void {
             foreach ($validated as $attributes) {
                 Shift::query()->create($attributes);
                 $created++;

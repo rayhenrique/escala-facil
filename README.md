@@ -4,7 +4,7 @@
 
 Sistema interno para gestão de escalas médicas, plantões, trocas e ausências em unidades de saúde. A aplicação centraliza a operação da gerência, permite que profissionais acompanhem a própria agenda e aplica as regras de compatibilidade e limite mensal em todas as decisões de troca.
 
-**Versão atual:** `1.28.0` — consulte o histórico completo em [`versoes.md`](versoes.md).
+**Versão atual:** `1.29.0` — consulte o histórico completo em [`versoes.md`](versoes.md).
 
 Desenvolvido por [KL Tecnologia](https://kltecnologia.com).
 
@@ -157,7 +157,7 @@ Crie um banco MySQL chamado `escala_facil` e ajuste o `.env`:
 APP_NAME="Escala Fácil"
 APP_URL=http://127.0.0.1:8000
 APP_TIMEZONE=America/Maceio
-APP_VERSION=1.28.0
+APP_VERSION=1.29.0
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR
 APP_FAKER_LOCALE=pt_BR
@@ -436,12 +436,21 @@ Na **Minha escala**, o setor é fixo; nome pesquisa os participantes das suas tr
 
 Regressão no navegador: `npm run test:filters:browser`, usando uma base local descartável, `FILTERS_URL`, `FILTERS_QA_PASSWORD`, `PLAYWRIGHT_MODULE`/`PLAYWRIGHT_CHANNEL`, `AXE_MODULE` e `FILTERS_FIXTURE`. A fixture JSON descreve `managerEmail`, `professionalEmail`, `professionalName`, `substituteName`, `month`, `sector`, `category`, `foreignSector`, `from`, `to`, `shiftCount`, `periodCount`, `pendingCount` e `rejectedCount`. Prepare mais de dez plantões e pedidos no mesmo mês para verificar paginação; os contadores esperados referem-se somente a esses dados fictícios. `FILTERS_SCREENSHOTS` salva a inspeção em 320, 390 e 1440 px. O teste consulta filtros sem aprovar, rejeitar ou realocar registros.
 
+### Consultar histórico operacional
+
+No registro em Escalas, Trocas, Usuários, Setores ou Categorias, use **Histórico**. A gerência também encontra **Histórico operacional** na sidebar, com filtros combináveis, quantidade total e páginas de dez eventos. A tela informa autor, ação, data/hora e diferenças anteriores/posteriores; **Voltar** restaura a consulta de origem. Eventos começam na instalação da versão 1.29.0, sem reconstruir o passado.
+
+A gravação acontece no backend e na mesma transação da alteração. Eventos não podem ser editados/excluídos pelo aplicativo, e a migração instala proteções no banco. Comprovantes/notificações existentes permanecem no fluxo atual. O [plano de retenção](docs/operational-audit.md) descreve dados mínimos, acesso administrativo, limites das triggers e decisões de prazo que cabem à instituição; nenhum expurgo automático foi aplicado.
+
+Regressão da consulta: `npm run test:audit:browser`, com fixture local descartável e variáveis descritas em [Verificação](docs/operational-audit.md#verificação). A suíte PHP cobre persistência, rollback, permissões, imutabilidade e concorrência.
+
 ## Documentação
 
 - [`PRD.md`](PRD.md): visão do produto, perfis e regras de negócio;
 - [`MVP-SCOPE.md`](MVP-SCOPE.md): escopo do MVP e funcionalidades futuras;
 - [`DATABASE-SCHEMA.md`](DATABASE-SCHEMA.md): tabelas, tipos e relacionamentos;
 - [`docs/shift-timing.md`](docs/shift-timing.md): horários, plantões de 24h, compatibilidade e resultado da auditoria;
+- [`docs/operational-audit.md`](docs/operational-audit.md): histórico, transações, imutabilidade e plano de retenção;
 - [`TASKS.md`](TASKS.md): roteiro sequencial de implementação;
 - [`DESIGN.md`](DESIGN.md): identidade visual e regras da interface;
 - [`UX-CONTRACT.md`](UX-CONTRACT.md): navegação, estados, feedback e responsividade;

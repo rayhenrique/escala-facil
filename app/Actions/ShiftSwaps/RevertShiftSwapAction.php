@@ -8,7 +8,7 @@ use App\Models\Shift;
 use App\Models\ShiftSwap;
 use App\Models\User;
 use App\Services\ShiftSwapNotificationService;
-use Illuminate\Support\Facades\DB;
+use App\Support\OperationalAuditContext;
 use Illuminate\Support\Facades\Gate;
 
 class RevertShiftSwapAction
@@ -17,7 +17,7 @@ class RevertShiftSwapAction
 
     public function execute(User $manager, int $shiftSwapId): ShiftSwap
     {
-        return DB::transaction(function () use ($manager, $shiftSwapId): ShiftSwap {
+        return app(OperationalAuditContext::class)->transaction($manager, function () use ($manager, $shiftSwapId): ShiftSwap {
             $shiftSwap = ShiftSwap::query()
                 ->with(['requester', 'substitute'])
                 ->lockForUpdate()

@@ -70,6 +70,12 @@ class ConcurrentShiftReallocationTest extends TestCase
             $this->assertSame(1, (int) $pdo->query('SELECT COUNT(*) FROM shift_reallocations')->fetchColumn());
             $this->assertSame(1, (int) $pdo->query("SELECT COUNT(*) FROM shifts WHERE status = 'scheduled'")->fetchColumn());
             $this->assertSame(0, (int) $pdo->query('SELECT COUNT(*) FROM notifications')->fetchColumn());
+            $events = $pdo->query("SELECT author_id, changes FROM operational_audit_events WHERE entity_type = 'shift' AND action = 'reallocated'")->fetchAll(\PDO::FETCH_ASSOC);
+            $this->assertCount(1, $events);
+            $this->assertContains((int) $events[0]['author_id'], [$managerId, $otherManagerId]);
+            $changes = json_decode($events[0]['changes'], true, flags: JSON_THROW_ON_ERROR);
+            $this->assertNull($changes['user_id']['before']);
+            $this->assertContains($changes['user_id']['after'], [$professionalId, $otherProfessionalId]);
             $pdo = null;
         } finally {
             foreach ([$first ?? null, $second ?? null] as $process) {

@@ -3,6 +3,7 @@
 namespace App\Livewire\Manager;
 
 use App\Http\Requests\SaveCategoryRequest;
+use App\Livewire\Concerns\HasOperationalContext;
 use App\Models\Category;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
@@ -13,6 +14,7 @@ use Livewire\WithPagination;
 #[Layout('layouts.app', ['title' => 'Categorias'])]
 class CategoryManager extends Component
 {
+    use HasOperationalContext;
     use WithPagination;
 
     #[Url]

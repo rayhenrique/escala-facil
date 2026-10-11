@@ -61,7 +61,8 @@
                         <p class="mt-1 text-sm text-muted">{{ $category->users_count }} usuário(s) · {{ $category->shifts_count }} plantão(ões)</p>
                     </div>
                     <div class="mt-4 grid grid-cols-2 gap-2">
-                        <button type="button" wire:click="edit({{ $category->id }})" class="button-secondary">Editar</button>
+                        <x-operational-audit-link entity="category" :record="$category->id" from="categories" :context="$this->navigationContext()" />
+<button type="button" wire:click="edit({{ $category->id }})" class="button-secondary">Editar</button>
                         <button type="button" wire:click="requestDelete({{ $category->id }})" class="button-secondary text-danger">Excluir</button>
                     </div>
                 </article>
@@ -79,7 +80,8 @@
                             <td><strong>{{ $category->name }}</strong></td>
                             <td>{{ $category->users_count }}</td>
                             <td>{{ $category->shifts_count }}</td>
-                            <td><div class="flex justify-end gap-2"><button type="button" wire:click="edit({{ $category->id }})" class="table-action">Editar</button><button type="button" wire:click="requestDelete({{ $category->id }})" class="table-action text-danger">Excluir</button></div></td>
+                            <td><div class="flex justify-end gap-2"><x-operational-audit-link entity="category" :record="$category->id" from="categories" :context="$this->navigationContext()" />
+<button type="button" wire:click="edit({{ $category->id }})" class="table-action">Editar</button><button type="button" wire:click="requestDelete({{ $category->id }})" class="table-action text-danger">Excluir</button></div></td>
                         </tr>
                     @empty
                         <tr><td colspan="4" class="py-12 text-center text-muted">Nenhuma categoria encontrada.</td></tr>

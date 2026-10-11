@@ -2,9 +2,18 @@
 
 return [
     // Versão do código instalado. APP_VERSION não pode sobrepor este registro.
-    'current' => '1.28.0',
+    'current' => '1.29.0',
 
     'releases' => [
+        [
+            'version' => '1.29.0',
+            'date' => '2026-10-10',
+            'title' => 'Histórico de alterações operacionais',
+            'summary' => 'Gerentes agora podem consultar quem alterou um plantão, quando a mudança aconteceu e o que foi modificado.',
+            'highlights' => [
+                'Gerentes agora podem consultar quem alterou um plantão, quando a mudança aconteceu e o que foi modificado.',
+            ],
+        ],
         [
             'version' => '1.28.0',
             'date' => '2026-10-10',

@@ -1,5 +1,11 @@
 # TASKS - Plano de Execução Sequencial
 
+- [x] **Auditoria operacional (1.29.0)**
+  - [x] Auditar operações efetivas, transações, mutações em lote e dados pessoais.
+  - [x] Registrar diferenças mínimas de plantões, cadastros e trocas em histórico append-only.
+  - [x] Proteger imutabilidade e acesso; oferecer consulta por registro com filtros e paginação.
+  - [x] Planejar retenção, testar rollback/concorrência, validar navegador, Pint, build e release.
+
 - [x] **Pesquisa e filtros operacionais (1.28.0)**
   - [x] Auditar consultas, filtros, paginação, navegação e isolamento de setor.
   - [x] Implementar filtros combináveis na URL, limpeza, contagens e estados vazios.

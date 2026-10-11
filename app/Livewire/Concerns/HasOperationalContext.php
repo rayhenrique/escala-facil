@@ -16,7 +16,7 @@ trait HasOperationalContext
     public function navigationContext(): array
     {
         $module = match (class_basename($this)) {
-            'Dashboard' => 'dashboard', 'ShiftManager' => 'shifts', 'SwapApprovals' => 'swaps',
+            'UserManager' => 'users', 'SectorManager' => 'sectors', 'CategoryManager' => 'categories', 'AuditHistory' => 'audit', 'Dashboard' => 'dashboard', 'ShiftManager' => 'shifts', 'SwapApprovals' => 'swaps',
             'MonthlyCalendar' => 'calendar', 'Reports' => 'reports',
         };
         $state = [];

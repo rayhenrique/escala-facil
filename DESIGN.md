@@ -233,3 +233,8 @@ Escalas, Trocas e Minha escala compartilham campos nativos rotulados, painel de 
 Os contadores das abas de relatórios usam `ink`/`primary-strong` nas superfícies claras e branco na aba ativa; os links de submódulos da sidebar usam branco integral para manter contraste AA.
 
 A paginação Livewire reutiliza a composição e os tokens da paginação existente, com botões nativos desabilitados e rótulos acessíveis em vez de `aria-label` em spans sem papel semântico.
+
+
+## Histórico operacional
+
+A gerência consulta o histórico pelos links “Histórico” junto aos registros e pela sidebar. A tela reutiliza o painel de filtros, campos nativos, botões e paginação existentes. Eventos mostram ação/registro, autor, data com fuso e diferenças Anterior/Posterior; UUID e IDs usam a tipografia operacional. Comparações ficam em três colunas no desktop e empilhadas no celular, com quebra de nomes/identificadores longos. Não há ações de edição ou exclusão de eventos. Estado vazio explica filtros e o início da captura, sem inventar eventos antigos.

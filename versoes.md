@@ -6,6 +6,12 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.29.0 — 10/10/2026
+
+### Histórico de alterações operacionais
+
+- Gerentes agora podem consultar quem alterou um plantão, quando a mudança aconteceu e o que foi modificado.
+
 ## 1.28.0 — 10/10/2026
 
 ### Pesquisa e filtros operacionais

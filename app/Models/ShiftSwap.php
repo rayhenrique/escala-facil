@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ShiftSwapStatus;
+use App\Models\Concerns\HasOperationalAudit;
 use Database\Factories\ShiftSwapFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,6 +13,8 @@ class ShiftSwap extends Model
 {
     /** @use HasFactory<ShiftSwapFactory> */
     use HasFactory;
+
+    use HasOperationalAudit;
 
     protected $fillable = [
         'shift_id',

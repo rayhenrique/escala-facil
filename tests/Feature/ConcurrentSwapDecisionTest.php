@@ -63,6 +63,13 @@ class ConcurrentSwapDecisionTest extends TestCase
             $status = $record['status'];
             $this->assertContains($status, [ShiftSwapStatus::Approved->value, ShiftSwapStatus::Rejected->value]);
             $this->assertSame((int) ($status === ShiftSwapStatus::Approved->value ? $record['substitute_id'] : $record['requester_id']), (int) $record['user_id']);
+            $audit = $pdo->prepare("SELECT author_id, action FROM operational_audit_events WHERE entity_type = 'swap' AND entity_id = ? AND action IN ('approved', 'rejected')");
+            $audit->execute([$swapId]);
+            $decisions = $audit->fetchAll(\PDO::FETCH_ASSOC);
+            $this->assertCount(1, $decisions);
+            $this->assertSame($managerId, (int) $decisions[0]['author_id']);
+            $this->assertSame($status, $decisions[0]['action']);
+            $audit = null;
             $statement = null;
             $pdo = null;
         } finally {

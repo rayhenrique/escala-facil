@@ -9,6 +9,7 @@ use App\Http\Controllers\Manager\WallRosterPdfController;
 use App\Http\Controllers\SwapReceiptPdfController;
 use App\Http\Middleware\ValidateOperationalQuery;
 use App\Livewire\HelpCenter;
+use App\Livewire\Manager\AuditHistory;
 use App\Livewire\Manager\CategoryManager;
 use App\Livewire\Manager\Dashboard;
 use App\Livewire\Manager\IssueReports;
@@ -75,6 +76,7 @@ Route::middleware(['auth', 'manager', ValidateOperationalQuery::class])
         Route::get('sectors', SectorManager::class)->name('sectors');
         Route::get('categories', CategoryManager::class)->name('categories');
         Route::get('users', UserManager::class)->name('users');
+        Route::get('audit', AuditHistory::class)->name('audit');
         Route::get('issue-reports', IssueReports::class)->name('issue-reports');
         Route::get('issue-reports/{report}/attachment', IssueAttachmentController::class)->name('issue-reports.attachment');
     });

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ShiftStatus;
+use App\Models\Concerns\HasOperationalAudit;
 use App\Support\ShiftPeriod;
 use Database\Factories\ShiftFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,6 +16,8 @@ class Shift extends Model
 {
     /** @use HasFactory<ShiftFactory> */
     use HasFactory;
+
+    use HasOperationalAudit;
 
     protected $fillable = [
         'date',

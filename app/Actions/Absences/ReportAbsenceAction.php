@@ -9,8 +9,8 @@ use App\Http\Requests\ReportAbsenceRequest;
 use App\Models\Absence;
 use App\Models\Shift;
 use App\Models\User;
+use App\Support\OperationalAuditContext;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
@@ -23,7 +23,7 @@ class ReportAbsenceAction
         $attachmentPath = null;
 
         try {
-            return DB::transaction(function () use ($user, $payload, &$attachmentPath): Absence {
+            return app(OperationalAuditContext::class)->transaction($user, function () use ($user, $payload, &$attachmentPath): Absence {
                 $shift = Shift::query()->lockForUpdate()->findOrFail($payload['shift_id']);
                 Gate::forUser($user)->authorize('create', [Absence::class, $shift]);
 
@@ -52,7 +52,7 @@ class ReportAbsenceAction
                         ShiftSwapStatus::PendingProfessional,
                         ShiftSwapStatus::PendingManager,
                     ])
-                    ->update(['status' => ShiftSwapStatus::Rejected]);
+                    ->lockForUpdate()->eachById(fn ($swap) => $swap->update(['status' => ShiftSwapStatus::Rejected]));
 
                 return $absence;
             });

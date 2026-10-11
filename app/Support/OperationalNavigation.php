@@ -4,11 +4,16 @@ namespace App\Support;
 
 use App\Enums\ShiftSwapStatus;
 use App\Enums\UserRole;
+use App\Models\OperationalAuditEvent;
 use Illuminate\Support\Facades\Auth;
 
 class OperationalNavigation
 {
     public const FIELDS = [
+        'users' => ['search', 'roleFilter', 'page'],
+        'sectors' => ['search', 'page'],
+        'categories' => ['search', 'page'],
+        'audit' => ['entity', 'record', 'action', 'author', 'dateFrom', 'dateTo', 'page'],
         'dashboard' => ['period', 'page'],
         'calendar' => ['month', 'selectedDate', 'sectorId', 'categoryId'],
         'shifts' => ['month', 'filter', 'focus', 'page', 'search', 'filterSectorId', 'filterCategoryId', 'dateFrom', 'dateTo'],
@@ -39,9 +44,12 @@ class OperationalNavigation
             }
             $value = (string) $value;
             $valid = match ($key) {
-                'focus', 'request', 'page', 'sectorId', 'categoryId', 'filterSectorId', 'filterCategoryId', 'professionalsPage', 'swapsPage', 'absencesPage' => filter_var($value, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) !== false,
+                'record', 'focus', 'request', 'page', 'sectorId', 'categoryId', 'filterSectorId', 'filterCategoryId', 'professionalsPage', 'swapsPage', 'absencesPage' => filter_var($value, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) !== false,
                 'month' => preg_match('/^[1-9][0-9]{3}-(0[1-9]|1[0-2])$/', $value),
                 'selectedDate', 'dateFrom', 'dateTo' => preg_match('/^([1-9][0-9]{3})-(\d{2})-(\d{2})$/', $value, $parts) && checkdate((int) $parts[2], (int) $parts[3], (int) $parts[1]),
+                'roleFilter' => in_array($value, array_column(UserRole::cases(), 'value'), true),
+                'entity' => isset(OperationalAuditEvent::ENTITIES[$value]),
+                'action' => isset(OperationalAuditEvent::ACTIONS[$value]),
                 'period' => in_array($value, ['1', '3', '7'], true),
                 'filter' => in_array($value, ['scheduled', 'uncovered', 'absence_reported', 'uncovered_month'], true),
                 'tab' => in_array($value, ['all', 'coverage', 'professionals', 'swaps', 'absences', 'wall'], true),
@@ -96,7 +104,7 @@ class OperationalNavigation
         $manager = Auth::user()?->role === UserRole::Manager;
         $allowed = $manager ? array_keys(self::FIELDS) : ['calendar', 'reports'];
         $module = is_string($from) && in_array($from, $allowed, true) ? $from : ($manager ? 'dashboard' : 'calendar');
-        $names = ['dashboard' => 'Voltar ao painel', 'calendar' => 'Voltar ao calendário', 'shifts' => 'Voltar à escala', 'swaps' => 'Voltar às trocas', 'reports' => 'Voltar ao relatório'];
+        $names = ['users' => 'Voltar aos usuários', 'sectors' => 'Voltar aos setores', 'categories' => 'Voltar às categorias', 'audit' => 'Voltar ao histórico', 'dashboard' => 'Voltar ao painel', 'calendar' => 'Voltar ao calendário', 'shifts' => 'Voltar à escala', 'swaps' => 'Voltar às trocas', 'reports' => 'Voltar ao relatório'];
 
         return ['url' => self::url($module, self::clean($module, $context)), 'label' => $names[$module]];
     }

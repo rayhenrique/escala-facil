@@ -9,10 +9,10 @@ use App\Models\Shift;
 use App\Models\ShiftSwap;
 use App\Models\User;
 use App\Services\ShiftSwapNotificationService;
+use App\Support\OperationalAuditContext;
 use App\Support\ShiftSwapAnalysis;
 use Illuminate\Database\DetectsConcurrencyErrors;
 use Illuminate\Database\QueryException;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
@@ -39,7 +39,7 @@ class DecideShiftSwapAction
         $reference = ShiftSwap::query()->findOrFail($id);
 
         try {
-            return DB::transaction(function () use ($manager, $id, $decision, $reason, $expected, $reference): ShiftSwap {
+            return app(OperationalAuditContext::class)->transaction($manager, function () use ($manager, $id, $decision, $reason, $expected, $reference): ShiftSwap {
                 // Stable ordering serializes shared participants (including their monthly quota),
                 // then both assignments. Retry deadlocks involving other operational actions.
                 $users = User::query()->whereKey([$manager->id, $reference->requester_id, $reference->substitute_id])

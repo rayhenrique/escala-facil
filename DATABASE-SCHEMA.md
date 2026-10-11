@@ -74,3 +74,8 @@ O campo `data` preserva a referência da troca, plantão, horários, setor, cate
 * `timestamps`
 
 Essa tabela não pertence ao domínio de plantões. Ela permite que `php artisan demo:data clear` remova somente a carga fictícia e os registros de teste vinculados a ela.
+
+
+## operational_audit_events (1.29.0)
+
+Tabela append-only com `id`, `author_id` nullable sem FK de cascata, `entity_type`, `entity_id`, `action`, `occurred_at` (microssegundos), `operation_id` (UUID) e `changes` (JSON com diferenças relevantes). Índices por tipo/registro/horário, autor/horário, horário e UUID. Não contém senhas, tokens, anexos ou cópias de comprovantes. Modelo/builders e triggers impedem alteração/exclusão ordinária; rollback da migração recusa remover eventos existentes. O histórico especializado em `shift_reallocations` permanece intacto.

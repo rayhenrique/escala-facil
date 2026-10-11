@@ -6,10 +6,10 @@ use App\Enums\ShiftStatus;
 use App\Enums\UserRole;
 use App\Models\Shift;
 use App\Models\User;
+use App\Support\OperationalAuditContext;
 use App\Support\ShiftPeriod;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
@@ -80,7 +80,7 @@ class DuplicateMonthAction
             return ['created' => 0, 'ignored' => 0, 'adjusted' => 0];
         }
 
-        return DB::transaction(function () use ($targetMonth, $mode, $selectedIds): array {
+        return app(OperationalAuditContext::class)->transaction($manager, function () use ($targetMonth, $mode, $selectedIds): array {
             [$targetYear, $targetMonthNumber] = $this->parseMonth($targetMonth, 'target_month');
 
             $existing = Shift::query()

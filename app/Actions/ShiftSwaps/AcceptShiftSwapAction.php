@@ -7,7 +7,7 @@ use App\Models\Shift;
 use App\Models\ShiftSwap;
 use App\Models\User;
 use App\Services\ShiftSwapNotificationService;
-use Illuminate\Support\Facades\DB;
+use App\Support\OperationalAuditContext;
 use Illuminate\Support\Facades\Gate;
 
 class AcceptShiftSwapAction
@@ -16,7 +16,7 @@ class AcceptShiftSwapAction
 
     public function execute(User $substitute, int $shiftSwapId): ShiftSwap
     {
-        return DB::transaction(function () use ($substitute, $shiftSwapId): ShiftSwap {
+        return app(OperationalAuditContext::class)->transaction($substitute, function () use ($substitute, $shiftSwapId): ShiftSwap {
             $shiftId = ShiftSwap::query()->whereKey($shiftSwapId)->firstOrFail(['shift_id'])->shift_id;
 
             Shift::query()

@@ -90,6 +90,9 @@
                                     <a href="{{ route('manager.reports', ['tab' => 'wall']) }}" wire:navigate class="block rounded px-2 py-1 text-white hover:bg-white/10 hover:text-white {{ request()->query('tab') === 'wall' ? 'font-semibold text-white bg-white/10' : '' }}">Mural (Afixar)</a>
                                 </div>
                             @endif
+                            <a href="{{ route('manager.audit') }}" wire:navigate title="Histórico operacional" class="sidebar-nav-link {{ request()->routeIs('manager.audit') ? 'sidebar-nav-link-active' : '' }}" @if(request()->routeIs('manager.audit')) aria-current="page" @endif>
+                                <x-nav-icon name="report" class="sidebar-nav-icon" /><span class="sidebar-label">Histórico operacional</span>
+                            </a>
                             <a href="{{ route('manager.sectors') }}" wire:navigate title="Setores" class="sidebar-nav-link {{ request()->routeIs('manager.sectors') ? 'sidebar-nav-link-active' : '' }}" @if(request()->routeIs('manager.sectors')) aria-current="page" @endif>
                                 <x-nav-icon name="building" class="sidebar-nav-icon" /><span class="sidebar-label">Setores</span>
                             </a>
