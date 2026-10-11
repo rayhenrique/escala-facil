@@ -8,15 +8,20 @@ use App\Enums\ShiftStatus;
 use App\Enums\ShiftSwapEvent;
 use App\Enums\ShiftSwapStatus;
 use App\Livewire\Concerns\AnalyzesShiftSwaps;
+use App\Livewire\Concerns\FiltersOperationalLists;
 use App\Livewire\Concerns\HasOperationalContext;
+use App\Models\Category;
+use App\Models\Sector;
 use App\Models\Shift;
 use App\Models\ShiftSwap;
+use App\Support\OperationalFilters;
 use App\Support\OperationalNavigation;
 use App\Support\ShiftCoverage;
 use App\Support\ShiftSwapReceipt;
 use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -26,20 +31,48 @@ use Livewire\WithPagination;
 class SwapApprovals extends Component
 {
     use AnalyzesShiftSwaps;
+    use FiltersOperationalLists;
     use HasOperationalContext;
     use WithPagination;
 
     #[Url]
     public $request = null;
 
+    #[Url]
+    public string $swapStatusFilter = 'pending_manager';
+
     public ?int $pendingRevertSwapId = null;
 
     /** @var array<string, string|null>|null */
     public ?array $pendingRevertSummary = null;
 
+    #[Computed]
+    public function sectors()
+    {
+        return Sector::query()->orderBy('name')->get();
+    }
+
+    #[Computed]
+    public function categories()
+    {
+        return Category::query()->orderBy('name')->get();
+    }
+
     public function mount(): void
     {
         $this->authorize('viewAny', ShiftSwap::class);
+    }
+
+    public function updatedSwapStatusFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    public function clearFilters(): void
+    {
+        $this->clearListFilters();
+        $this->swapStatusFilter = 'pending_manager';
+        $this->request = null;
     }
 
     public function approve(int $shiftSwapId, DecideShiftSwapAction $action, ShiftSwapReceipt $receipts): void
@@ -112,6 +145,7 @@ class SwapApprovals extends Component
     {
         $this->authorize('viewAny', ShiftSwap::class);
         $this->request = OperationalNavigation::id($this->request);
+        $validFilters = $this->validListFilters();
         $swaps = ShiftSwap::query()
             ->with([
                 'shift.category',
@@ -121,9 +155,17 @@ class SwapApprovals extends Component
                 'requester',
                 'substitute',
             ])
-            ->when($this->request === null, fn ($query) => $query->where('status', ShiftSwapStatus::PendingManager))
+            ->when($this->request === null, function ($query) use ($validFilters): void {
+                if (! $validFilters) {
+                    $query->whereRaw('1 = 0');
+
+                    return;
+                }
+                OperationalFilters::swaps($query, $this->listFilters());
+                $query->when($this->swapStatusFilter !== '', fn ($q) => $q->where('status', $this->swapStatusFilter));
+            })
             ->when($this->request !== null, fn ($query) => $query->whereKey($this->request))
-            ->oldest();
+            ->oldest()->orderBy('id');
 
         if ($this->request !== null) {
             $records = $swaps->get();
@@ -140,7 +182,7 @@ class SwapApprovals extends Component
             'swaps' => $swaps,
             'focusedSwap' => $focusedSwap,
             'doubleShifts' => $this->doubleShiftLabels($swaps->getCollection()->where('status', ShiftSwapStatus::PendingManager)),
-            'approvedSwaps' => $this->request !== null ? collect() : ShiftSwap::query()
+            'approvedSwaps' => $this->request !== null || $this->swapStatusFilter !== 'pending_manager' || ! $validFilters ? collect() : OperationalFilters::swaps(ShiftSwap::query(), $this->listFilters())
                 ->with([
                     'shift.category',
                     'shift.sector',

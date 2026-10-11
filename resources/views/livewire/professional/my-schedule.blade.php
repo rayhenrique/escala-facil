@@ -9,6 +9,8 @@
     </div>
 
     <x-flash-notifications />
+    <x-operational-filters kind="personal" />
+    <p class="mt-3 text-sm text-muted" role="status">{{ $shifts->total() }} plantão(ões) e {{ $mySwaps->total() }} pedido(s) de troca encontrado(s).</p>
 
     @if ($swapReceipt)
         <x-swap-receipt :receipt="$swapReceipt" class="mt-6" />
@@ -26,7 +28,7 @@
 
     @if ($incomingSwaps->isNotEmpty())
         <section class="mt-8" aria-labelledby="incoming-title">
-            <div class="flex items-end justify-between gap-4"><div><p class="eyebrow">Sua resposta</p><h2 id="incoming-title" class="mt-2 text-xl font-semibold">Pedidos para você cobrir</h2></div><span class="count-badge">{{ $incomingSwaps->count() }}</span></div>
+            <div class="flex items-end justify-between gap-4"><div><p class="eyebrow">Sua resposta</p><h2 id="incoming-title" class="mt-2 text-xl font-semibold">Pedidos para você cobrir</h2></div><span class="count-badge">{{ $incomingSwaps->total() }}</span></div>
             <div class="mt-4 grid gap-4 lg:grid-cols-2">
                 @foreach ($incomingSwaps as $swap)
                     <article class="panel" wire:key="incoming-swap-{{ $swap->id }}">
@@ -41,6 +43,7 @@
                     </article>
                 @endforeach
             </div>
+            <div class="mt-4">{{ $incomingSwaps->links() }}</div>
         </section>
     @endif
 
@@ -163,14 +166,23 @@
                     </div>
                 </article>
             @empty
-                <div class="empty-state lg:col-span-2"><p class="font-semibold text-ink">Nenhum plantão neste mês.</p><p class="mt-2 text-sm">Altere o mês para consultar outros períodos.</p></div>
+                <div class="empty-state lg:col-span-2"><p class="font-semibold text-ink">Nenhum plantão correspondente aos filtros neste mês.</p><p class="mt-2 text-sm">Altere o mês, ajuste a pesquisa ou limpe os filtros.</p></div>
             @endforelse
         </div>
+        <div class="mt-4">{{ $shifts->links() }}</div>
     </section>
 
     <section class="panel mt-10" aria-labelledby="my-swaps-title">
         <p class="eyebrow">Acompanhamento</p><h2 id="my-swaps-title" class="mt-2 text-xl font-semibold">Minhas solicitações de troca</h2>
         <div class="mt-5 divide-y divide-line">
+            <div class="mb-4">
+                <label for="personal-swap-status" class="field-label">Situação das minhas trocas</label>
+                <select id="personal-swap-status" wire:model.live="swapStatusFilter" class="field-input sm:max-w-sm" @error('swapStatusFilter') aria-invalid="true" aria-describedby="personal-swap-status-error" @enderror>
+                    <option value="">Todas as situações</option>
+                    @foreach (\App\Enums\ShiftSwapStatus::cases() as $status)<option value="{{ $status->value }}">{{ $status->label() }}</option>@endforeach
+                </select>
+            </div>
+            @error('swapStatusFilter')<p id="personal-swap-status-error" class="field-error">{{ $message }}</p>@enderror
             @forelse ($mySwaps as $swap)
                 <div class="flex flex-col gap-2 py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between" wire:key="my-swap-{{ $swap->id }}">
                     <div>
@@ -187,9 +199,10 @@
                     <x-status-badge :status="$swap->status" />
                 </div>
             @empty
-                <p class="py-4 text-sm text-muted">Você ainda não possui solicitações de troca.</p>
+                <p class="py-4 text-sm text-muted">Nenhuma solicitação corresponde aos filtros. Ajuste a pesquisa ou limpe os filtros.</p>
             @endforelse
         </div>
+        <div class="mt-4">{{ $mySwaps->links() }}</div>
     </section>
 
     <x-confirmation-modal

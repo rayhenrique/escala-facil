@@ -9,11 +9,84 @@ use App\Models\Absence;
 use App\Models\Shift;
 use App\Models\ShiftSwap;
 use App\Models\User;
+use App\Support\OperationalFilters;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 
 class ShiftReportService
 {
+    /** Screen lists are paginated; aggregates retain the same scope as the PDF. */
+    public function forScreen(string $month, string $sectorId, string $categoryId, User $forUser, string $search = '', string $status = '', bool $validSearch = true): array
+    {
+        $isManager = $forUser->role === UserRole::Manager;
+        $sectorId = $isManager ? $sectorId : (string) ($forUser->sector_id ?? 0);
+        $start = CarbonImmutable::parse($month.'-01');
+        $next = $start->addMonth();
+        $scope = fn ($q) => $q
+            ->where('date', '>=', $start->format('Y-m-d'))->where('date', '<', $next->format('Y-m-d'))
+            ->when($sectorId !== '', fn ($q) => $q->where('sector_id', $sectorId))
+            ->when($categoryId !== '', fn ($q) => $q->where('category_id', $categoryId));
+        $shifts = $scope(Shift::query());
+        $swaps = ShiftSwap::query()->where('created_at', '>=', $start)->where('created_at', '<', $next)
+            ->whereHas('shift', fn ($q) => $q
+                ->when($sectorId !== '', fn ($q) => $q->where('sector_id', $sectorId))
+                ->when($categoryId !== '', fn ($q) => $q->where('category_id', $categoryId)));
+        $absences = Absence::query()->whereHas('shift', $scope);
+        $visibleSwaps = (clone $swaps)->when(! $isManager, fn ($q) => $q->where(fn ($q) => $q
+            ->where('requester_id', $forUser->id)->orWhere('substitute_id', $forUser->id)));
+        $counts = (clone $shifts)->selectRaw('status, COUNT(*) AS total')->groupBy('status')->pluck('total', 'status');
+        $swapCounts = (clone $visibleSwaps)->selectRaw('status, COUNT(*) AS total')->groupBy('status')->pluck('total', 'status');
+        $total = (int) $counts->sum();
+        $covered = (int) $counts->get(ShiftStatus::Scheduled->value, 0);
+        $groups = function (string $table, string $foreignKey) use ($shifts) {
+            return (clone $shifts)->join($table, $table.'.id', '=', 'shifts.'.$foreignKey)
+                ->selectRaw($table.'.name AS name, COUNT(*) AS total, SUM(CASE WHEN shifts.user_id IS NULL THEN 1 ELSE 0 END) AS uncovered')
+                ->groupBy($table.'.name')->orderBy($table.'.name')->get()->map(fn ($row) => [
+                    'name' => $row->name, 'total' => (int) $row->total, 'uncovered' => (int) $row->uncovered,
+                ]);
+        };
+        $professionals = User::query()->with(['sector', 'category'])->when(! $validSearch, fn ($q) => $q->whereRaw('1 = 0'))
+            ->whereIn('id', (clone $shifts)->select('user_id')->whereNotNull('user_id'))
+            ->when(trim($search) !== '', fn ($q) => $q->where(fn ($names) => $names
+                ->where(fn ($name) => OperationalFilters::name($name, $search))
+                ->orWhereHas('sector', fn ($name) => OperationalFilters::name($name, $search))
+                ->orWhereHas('category', fn ($name) => OperationalFilters::name($name, $search))))
+            ->addSelect([
+                'shift_count' => (clone $shifts)->selectRaw('COUNT(*)')->whereColumn('shifts.user_id', 'users.id'),
+                'requested_count' => (clone $swaps)->selectRaw('COUNT(*)')->where('status', ShiftSwapStatus::Approved)->whereColumn('requester_id', 'users.id'),
+                'substituted_count' => (clone $swaps)->selectRaw('COUNT(*)')->where('status', ShiftSwapStatus::Approved)->whereColumn('substitute_id', 'users.id'),
+                'absence_count' => (clone $absences)->selectRaw('COUNT(*)')->whereColumn('user_id', 'users.id'),
+            ])->orderBy('name')->orderBy('id')->paginate(10, ['*'], 'professionalsPage')
+            ->through(fn (User $user) => [
+                'name' => $user->name, 'team' => ($user->sector?->name ?? 'Sem setor').' · '.($user->category?->name ?? 'Sem categoria'),
+                'shifts' => (int) $user->shift_count,
+                'approvedSwaps' => (int) $user->requested_count + (int) $user->substituted_count,
+                'absences' => (int) $user->absence_count,
+            ]);
+
+        return [
+            'monthLabel' => $start->translatedFormat('F \d\e Y'),
+            'summary' => [
+                'total' => $total, 'covered' => $covered, 'coverageRate' => $total > 0 ? (int) round($covered / $total * 100) : null,
+                'uncovered' => (int) $counts->get(ShiftStatus::Uncovered->value, 0),
+                'absenceReported' => (int) $counts->get(ShiftStatus::AbsenceReported->value, 0),
+                'absences' => (clone $absences)->count(),
+                'swapsPendingProfessional' => (int) $swapCounts->get(ShiftSwapStatus::PendingProfessional->value, 0),
+                'swapsPendingManager' => (int) $swapCounts->get(ShiftSwapStatus::PendingManager->value, 0),
+                'swapsApproved' => (int) $swapCounts->get(ShiftSwapStatus::Approved->value, 0),
+                'swapsRejected' => (int) $swapCounts->get(ShiftSwapStatus::Rejected->value, 0),
+            ],
+            'bySector' => $groups('sectors', 'sector_id'), 'byCategory' => $groups('categories', 'category_id'),
+            'byProfessional' => $professionals,
+            'swaps' => $visibleSwaps->when($status !== '', fn ($q) => $q->where('status', $status))
+                ->with(['shift.sector', 'shift.category', 'requester', 'substitute'])->oldest()->orderBy('id')->paginate(10, ['*'], 'swapsPage'),
+            'absencesList' => (clone $absences)->when(! $isManager, fn ($q) => $q->where('user_id', $forUser->id))
+                ->with(['user', 'shift.sector', 'shift.category'])->oldest()->orderBy('id')->paginate(10, ['*'], 'absencesPage'),
+            'isManager' => $isManager,
+            'hasActiveFilters' => $isManager ? ($sectorId !== '' || $categoryId !== '') : ($categoryId !== ''),
+        ];
+    }
+
     /** @return array<string, mixed> */
     public function wallRoster(string $month, string $sectorId = '', string $categoryId = '', ?User $forUser = null): array
     {

@@ -6,6 +6,12 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.28.0 — 10/10/2026
+
+### Pesquisa e filtros operacionais
+
+- Agora você encontra plantões e pedidos de troca com mais facilidade usando novos filtros.
+
 ## 1.27.0 — 10/10/2026
 
 ### Realocação assistida de plantões

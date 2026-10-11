@@ -224,3 +224,12 @@ A fila gerencial oferece “Analisar no painel” como ação principal e “Abr
 ## Realocação assistida
 
 “Preencher plantão” abre o mesmo fluxo no painel, calendário e Escalas. O modal canônico apresenta primeiro o plantão e a seleção de profissionais, depois a prévia de atribuição e status. A lista usa campos radio nativos e a composição existente de `record-card`, com dobra em texto; profissionais com sobreposição não aparecem como opções. A área de conteúdo recebe foco para rolagem por teclado quando a prévia é longa. O calendário preserva sua grade visual, com cabeçalho e semanas agrupados semanticamente em linhas. As duas análises do painel são mutuamente exclusivas, com foco, fundo inerte e bloqueio durante confirmação compartilhados.
+
+
+## Pesquisa e filtros operacionais
+
+Escalas, Trocas e Minha escala compartilham campos nativos rotulados, painel de filtros em uma coluna no celular e grade no desktop, sem novos efeitos. Nome usa debounce de 350ms; seletores e datas atualizam a lista. Limpar filtros fica ao lado da explicação do período; contagens distinguem total de resultados da página atual. Registros abertos por ID desabilitam os filtros e oferecem retorno à lista com a seleção anterior. Relatórios mantêm composição e indicadores, com paginação independente por lista. Na área profissional, setor é fixo e a pesquisa por nome refere-se aos participantes das trocas.
+
+Os contadores das abas de relatórios usam `ink`/`primary-strong` nas superfícies claras e branco na aba ativa; os links de submódulos da sidebar usam branco integral para manter contraste AA.
+
+A paginação Livewire reutiliza a composição e os tokens da paginação existente, com botões nativos desabilitados e rótulos acessíveis em vez de `aria-label` em spans sem papel semântico.

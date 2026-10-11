@@ -11,10 +11,14 @@ use App\Enums\ShiftSwapStatus;
 use App\Enums\UserRole;
 use App\Http\Requests\ReportAbsenceRequest;
 use App\Http\Requests\StoreShiftSwapRequest;
+use App\Livewire\Concerns\FiltersOperationalLists;
 use App\Models\Absence;
+use App\Models\Category;
+use App\Models\Sector;
 use App\Models\Shift;
 use App\Models\ShiftSwap;
 use App\Models\User;
+use App\Support\OperationalFilters;
 use App\Support\ShiftCoverage;
 use App\Support\ShiftSwapReceipt;
 use Carbon\CarbonImmutable;
@@ -25,11 +29,61 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\WithFileUploads;
+use Livewire\WithPagination;
 
 #[Layout('layouts.app', ['title' => 'Minha escala'])]
 class MySchedule extends Component
 {
+    use FiltersOperationalLists;
     use WithFileUploads;
+    use WithPagination;
+
+    #[Url]
+    public string $filter = '';
+
+    #[Url]
+    public string $swapStatusFilter = '';
+
+    public function updatedFilter(): void
+    {
+        $this->resetPage('shiftsPage');
+    }
+
+    public function updatedSwapStatusFilter(): void
+    {
+        $this->resetPage('swapsPage');
+    }
+
+    public function updated(string $property): void
+    {
+        if (in_array($property, ['month', 'search', 'filterCategoryId', 'dateFrom', 'dateTo'], true)) {
+            foreach (['shiftsPage', 'swapsPage', 'incomingPage'] as $page) {
+                $this->resetPage($page);
+            }
+        }
+    }
+
+    public function clearFilters(): void
+    {
+        $this->clearListFilters();
+        $this->filter = '';
+        $this->swapStatusFilter = '';
+        foreach (['shiftsPage', 'swapsPage', 'incomingPage'] as $page) {
+            $this->resetPage($page);
+        }
+    }
+
+    #[Computed]
+    public function sectors(): Collection
+    {
+        return Sector::query()->whereKey(auth()->user()->sector_id ?? 0)->get();
+    }
+
+    #[Computed]
+    public function categories(): Collection
+    {
+        return Category::query()->orderBy('name')->get();
+    }
 
     #[Url]
     public string $month = '';
@@ -338,16 +392,24 @@ class MySchedule extends Component
 
     public function render(): View
     {
-        [$year, $month] = array_pad(explode('-', $this->month), 2, null);
+        $start = CarbonImmutable::parse($this->month.'-01');
+        $this->filterSectorId = (string) (auth()->user()->sector_id ?? '');
+        $filters = $this->listFilters();
+        $validFilters = $this->validListFilters();
+        $validShiftStatus = $this->filter === '' || ShiftStatus::tryFrom($this->filter);
+        $validSwapStatus = $this->swapStatusFilter === '' || ShiftSwapStatus::tryFrom($this->swapStatusFilter);
         $swapLimitReached = auth()->user()->hasReachedSwapLimit(now()->month, now()->year);
 
         $shifts = Shift::query()
             ->with(['category', 'sector', 'swaps'])
             ->where('user_id', auth()->id())
-            ->when($year && $month, fn ($query) => $query->whereYear('date', $year)->whereMonth('date', $month))
+            ->when(! $validFilters || ! $validShiftStatus, fn ($q) => $q->whereRaw('1 = 0'))
+            ->when($validFilters, fn ($q) => OperationalFilters::shifts($q, $filters))
+            ->when($this->dateFrom === '' && $this->dateTo === '', fn ($q) => $q->where('date', '>=', $start->format('Y-m-d'))->where('date', '<', $start->addMonth()->format('Y-m-d')))
+            ->when($this->filter !== '' && $validShiftStatus, fn ($q) => $q->where('status', $this->filter))
             ->orderBy('date')
-            ->orderBy('start_time')
-            ->get();
+            ->orderBy('start_time')->orderBy('id')
+            ->paginate(10, ['*'], 'shiftsPage');
 
         $shiftIds = $shifts->pluck('id')->all();
         $approvedSwaps = ! empty($shiftIds)
@@ -403,8 +465,10 @@ class MySchedule extends Component
             ->with(['shift.category', 'shift.sector', 'substituteShift.category', 'substituteShift.sector', 'requester'])
             ->where('substitute_id', auth()->id())
             ->where('status', ShiftSwapStatus::PendingProfessional)
-            ->oldest()
-            ->get();
+            ->when(! $validFilters, fn ($q) => $q->whereRaw('1 = 0'))
+            ->when($validFilters, fn ($q) => OperationalFilters::swaps($q, $filters))
+            ->oldest()->orderBy('id')
+            ->paginate(10, ['*'], 'incomingPage');
 
         $mySwaps = ShiftSwap::query()
             ->with(['shift', 'substituteShift', 'substitute', 'requester'])
@@ -412,9 +476,11 @@ class MySchedule extends Component
                 $query->where('requester_id', auth()->id())
                     ->orWhere('substitute_id', auth()->id());
             })
-            ->latest()
-            ->limit(8)
-            ->get();
+            ->when(! $validFilters || ! $validSwapStatus, fn ($q) => $q->whereRaw('1 = 0'))
+            ->when($validFilters, fn ($q) => OperationalFilters::swaps($q, $filters))
+            ->when($this->swapStatusFilter !== '' && $validSwapStatus, fn ($q) => $q->where('status', $this->swapStatusFilter))
+            ->latest()->orderByDesc('id')
+            ->paginate(8, ['*'], 'swapsPage');
 
         return view('livewire.professional.my-schedule', compact(
             'shifts',

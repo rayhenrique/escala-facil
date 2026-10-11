@@ -21,7 +21,7 @@ trait HasOperationalContext
         };
         $state = [];
         foreach (OperationalNavigation::FIELDS[$module] as $field) {
-            $state[$field] = $field === 'page' ? $this->getPage() : $this->{$field};
+            $state[$field] = ($field === 'page' || str_ends_with($field, 'Page')) ? $this->getPage($field) : $this->{$field};
         }
         $state['from'] = $this->from;
         $state['context'] = $this->context;

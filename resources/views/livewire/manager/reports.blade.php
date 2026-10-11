@@ -41,7 +41,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
                 </svg>
                 <span>Visão Consolidada</span>
-                <span @class(['ml-1 rounded-full px-1.5 py-0.5 font-mono text-[0.6875rem]', 'bg-white/20 text-white' => $tab === 'all', 'bg-line/60 text-muted' => $tab !== 'all'])>Todos</span>
+                <span @class(['ml-1 rounded-full px-1.5 py-0.5 font-mono text-[0.6875rem]', 'bg-primary-strong text-white' => $tab === 'all', 'bg-line/60 text-ink' => $tab !== 'all'])>Todos</span>
             </button>
 
             <button
@@ -60,7 +60,7 @@
                 </svg>
                 <span>Cobertura e Indicadores</span>
                 @if ($this->report['summary']['coverageRate'] !== null)
-                    <span @class(['ml-1 rounded-full px-1.5 py-0.5 font-mono text-[0.6875rem]', 'bg-white/20 text-white' => $tab === 'coverage', 'bg-coverage/15 text-coverage font-bold' => $tab !== 'coverage'])>{{ $this->report['summary']['coverageRate'] }}%</span>
+                    <span @class(['ml-1 rounded-full px-1.5 py-0.5 font-mono text-[0.6875rem]', 'bg-primary-strong text-white' => $tab === 'coverage', 'bg-coverage/15 text-primary-strong font-bold' => $tab !== 'coverage'])>{{ $this->report['summary']['coverageRate'] }}%</span>
                 @endif
             </button>
 
@@ -78,7 +78,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
                 </svg>
                 <span>Por Profissional</span>
-                <span @class(['ml-1 rounded-full px-1.5 py-0.5 font-mono text-[0.6875rem]', 'bg-white/20 text-white' => $tab === 'professionals', 'bg-line/60 text-muted' => $tab !== 'professionals'])>{{ $this->report['byProfessional']->count() }}</span>
+                <span @class(['ml-1 rounded-full px-1.5 py-0.5 font-mono text-[0.6875rem]', 'bg-primary-strong text-white' => $tab === 'professionals', 'bg-line/60 text-ink' => $tab !== 'professionals'])>{{ $this->report['byProfessional']->total() }}</span>
             </button>
 
             <button
@@ -95,7 +95,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
                 </svg>
                 <span>Trocas de Plantão</span>
-                <span @class(['ml-1 rounded-full px-1.5 py-0.5 font-mono text-[0.6875rem]', 'bg-white/20 text-white' => $tab === 'swaps', 'bg-amber-100 text-amber-800 font-semibold' => $tab !== 'swaps'])>{{ $this->report['swaps']->count() }}</span>
+                <span @class(['ml-1 rounded-full px-1.5 py-0.5 font-mono text-[0.6875rem]', 'bg-primary-strong text-white' => $tab === 'swaps', 'bg-amber-100 text-amber-800 font-semibold' => $tab !== 'swaps'])>{{ $this->report['swaps']->total() }}</span>
             </button>
 
             <button
@@ -112,7 +112,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
                 </svg>
                 <span>Ausências</span>
-                <span @class(['ml-1 rounded-full px-1.5 py-0.5 font-mono text-[0.6875rem]', 'bg-white/20 text-white' => $tab === 'absences', 'bg-red-100 text-danger font-semibold' => $tab !== 'absences'])>{{ $this->report['summary']['absences'] }}</span>
+                <span @class(['ml-1 rounded-full px-1.5 py-0.5 font-mono text-[0.6875rem]', 'bg-primary-strong text-white' => $tab === 'absences', 'bg-red-100 text-danger font-semibold' => $tab !== 'absences'])>{{ $this->report['summary']['absences'] }}</span>
             </button>
 
             <button
@@ -129,7 +129,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
                 </svg>
                 <span>Escala de Mural</span>
-                <span @class(['ml-1 rounded-full px-1.5 py-0.5 font-mono text-[0.6875rem]', 'bg-white/20 text-white' => $tab === 'wall', 'bg-line/60 text-muted' => $tab !== 'wall'])>Afixar</span>
+                <span @class(['ml-1 rounded-full px-1.5 py-0.5 font-mono text-[0.6875rem]', 'bg-primary-strong text-white' => $tab === 'wall', 'bg-line/60 text-ink' => $tab !== 'wall'])>Afixar</span>
             </button>
         </nav>
     </div>
@@ -285,8 +285,9 @@
                     <p class="mt-1 text-sm text-muted">Acompanhamento de alocação de plantões, cota mensal de trocas (máx. 4) e ausências.</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
-                    <span class="text-sm font-semibold text-muted">{{ $this->report['byProfessional']->count() }} profissional(is)</span>
-                    <input wire:model.live.debounce.250ms="searchProfessional" type="search" placeholder="Filtrar por nome..." class="field-input min-h-10 text-xs sm:w-56" aria-label="Filtrar profissionais por nome">
+                    <span class="text-sm font-semibold text-muted">{{ $this->report['byProfessional']->total() }} profissional(is)</span>
+                    <input wire:model.live.debounce.350ms="searchProfessional" maxlength="250" type="search" placeholder="Filtrar por nome..." class="field-input min-h-10 text-xs sm:w-56" aria-label="Filtrar profissionais por nome" @error('searchProfessional') aria-invalid="true" aria-describedby="report-search-error" @enderror>
+                    @error('searchProfessional')<p id="report-search-error" class="field-error">{{ $message }}</p>@enderror
                 </div>
             </div>
 
@@ -323,7 +324,7 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="5" class="py-12 text-center text-muted">Nenhum profissional alocado no período.</td></tr>
+                            <tr><td colspan="5" class="py-12 text-center text-muted">Nenhum profissional corresponde ao mês e aos filtros. Ajuste a pesquisa ou limpe os filtros.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -344,9 +345,10 @@
                         <p class="mt-1 text-sm text-muted">{{ $row['shifts'] }} plantão(ões) · {{ $row['approvedSwaps'] }} de 4 trocas · {{ $row['absences'] }} ausência(s)</p>
                     </article>
                 @empty
-                    <div class="empty-state compact-empty"><p class="font-semibold text-ink">Nenhum profissional alocado no período.</p></div>
+                    <div class="empty-state compact-empty"><p class="font-semibold text-ink">Nenhum profissional corresponde ao mês e aos filtros. Ajuste a pesquisa ou limpe os filtros.</p></div>
                 @endforelse
             </div>
+            <div class="mt-4">{{ $this->report['byProfessional']->links() }}</div>
         </section>
     @endif
 
@@ -360,9 +362,9 @@
                     <p class="mt-1 text-sm text-muted">Auditoria de solicitações, permutas aceitas, aprovações gerenciais e comprovantes.</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
-                    <span class="text-sm font-semibold text-muted">{{ $this->report['swaps']->count() }} troca(s)</span>
-                    @if ($tab === 'swaps')
-                        <select wire:model.live="swapStatusFilter" class="field-input min-h-10 text-xs sm:w-48" aria-label="Filtrar trocas por situação">
+                    <span class="text-sm font-semibold text-muted">{{ $this->report['swaps']->total() }} troca(s)</span>
+                    @if ($tab === 'swaps' || $tab === 'all')
+                        <select wire:model.live="swapStatusFilter" @error('swapStatusFilter') aria-invalid="true" aria-describedby="report-status-error" @enderror class="field-input min-h-10 text-xs sm:w-48" aria-label="Filtrar trocas por situação">
                             <option value="">Todas as situações</option>
                             <option value="approved">Aprovadas</option>
                             <option value="pending_manager">Aguardando Gerência</option>
@@ -371,6 +373,7 @@
                             <option value="reverted">Desfeitas</option>
                         </select>
                     @endif
+                    @error('swapStatusFilter')<p id="report-status-error" class="field-error">{{ $message }}</p>@enderror
                 </div>
             </div>
 
@@ -420,6 +423,7 @@
                     <div class="empty-state compact-empty"><p class="font-semibold text-ink">{{ ($this->report['isManager'] ?? true) ? 'Nenhuma troca criada neste mês.' : 'Você não possui trocas neste mês.' }}</p></div>
                 @endforelse
             </div>
+            <div class="mt-4">{{ $this->report['swaps']->links() }}</div>
         </section>
     @endif
 
@@ -432,7 +436,7 @@
                     <h2 id="report-absences-title" class="text-xl font-bold">Ausências e justificativas</h2>
                     <p class="mt-1 text-sm text-muted">Histórico de ausências notificadas por plantonistas e motivos registrados.</p>
                 </div>
-                <span class="text-sm font-semibold text-muted">{{ count($this->report['absencesList'] ?? []) }} registro(s)</span>
+                <span class="text-sm font-semibold text-muted">{{ $this->report['absencesList']->total() }} registro(s)</span>
             </div>
 
             <div class="mt-4 hidden overflow-x-auto md:block">
@@ -481,6 +485,7 @@
                     <div class="empty-state compact-empty"><p class="font-semibold text-ink">Nenhuma ausência registrada no período.</p></div>
                 @endforelse
             </div>
+            <div class="mt-4">{{ $this->report['absencesList']->links() }}</div>
         </section>
     @endif
 

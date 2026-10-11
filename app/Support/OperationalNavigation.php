@@ -11,9 +11,9 @@ class OperationalNavigation
     public const FIELDS = [
         'dashboard' => ['period', 'page'],
         'calendar' => ['month', 'selectedDate', 'sectorId', 'categoryId'],
-        'shifts' => ['month', 'filter', 'focus', 'page'],
-        'swaps' => ['request', 'page'],
-        'reports' => ['month', 'tab', 'sectorId', 'categoryId', 'searchProfessional', 'swapStatusFilter'],
+        'shifts' => ['month', 'filter', 'focus', 'page', 'search', 'filterSectorId', 'filterCategoryId', 'dateFrom', 'dateTo'],
+        'swaps' => ['request', 'page', 'swapStatusFilter', 'search', 'filterSectorId', 'filterCategoryId', 'dateFrom', 'dateTo'],
+        'reports' => ['month', 'tab', 'sectorId', 'categoryId', 'searchProfessional', 'swapStatusFilter', 'professionalsPage', 'swapsPage', 'absencesPage'],
     ];
 
     public static function id(mixed $value): ?int
@@ -34,18 +34,18 @@ class OperationalNavigation
         $result = [];
         foreach (self::FIELDS[$module] ?? [] as $key) {
             $value = is_array($state) ? ($state[$key] ?? null) : null;
-            if (! is_scalar($value) || is_bool($value) || strlen((string) $value) > 250 || $value === '') {
+            if (! is_scalar($value) || is_bool($value) || strlen((string) $value) > 250 || ($value === '' && ! ($module === 'swaps' && $key === 'swapStatusFilter'))) {
                 continue;
             }
             $value = (string) $value;
             $valid = match ($key) {
-                'focus', 'request', 'page', 'sectorId', 'categoryId' => filter_var($value, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) !== false,
+                'focus', 'request', 'page', 'sectorId', 'categoryId', 'filterSectorId', 'filterCategoryId', 'professionalsPage', 'swapsPage', 'absencesPage' => filter_var($value, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) !== false,
                 'month' => preg_match('/^[1-9][0-9]{3}-(0[1-9]|1[0-2])$/', $value),
-                'selectedDate' => preg_match('/^([1-9][0-9]{3})-(\d{2})-(\d{2})$/', $value, $parts) && checkdate((int) $parts[2], (int) $parts[3], (int) $parts[1]),
+                'selectedDate', 'dateFrom', 'dateTo' => preg_match('/^([1-9][0-9]{3})-(\d{2})-(\d{2})$/', $value, $parts) && checkdate((int) $parts[2], (int) $parts[3], (int) $parts[1]),
                 'period' => in_array($value, ['1', '3', '7'], true),
-                'filter' => in_array($value, ['scheduled', 'uncovered'], true),
+                'filter' => in_array($value, ['scheduled', 'uncovered', 'absence_reported', 'uncovered_month'], true),
                 'tab' => in_array($value, ['all', 'coverage', 'professionals', 'swaps', 'absences', 'wall'], true),
-                'swapStatusFilter' => in_array($value, array_column(ShiftSwapStatus::cases(), 'value'), true),
+                'swapStatusFilter' => $value === '' || in_array($value, array_column(ShiftSwapStatus::cases(), 'value'), true),
                 default => true,
             };
             if ($valid) {
@@ -63,7 +63,7 @@ class OperationalNavigation
 
     public static function validStateShape(array $state, int $depth = 0): bool
     {
-        if ($depth > 3 || count($state) > 10) {
+        if ($depth > 3 || count($state) > 16) {
             return false;
         }
         foreach ($state as $key => $value) {

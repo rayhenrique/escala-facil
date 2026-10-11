@@ -8,7 +8,7 @@
         <div class="grid w-full gap-3 sm:w-auto sm:items-end">
             <div>
                 <label for="month" class="field-label">Mês exibido</label>
-                <input wire:model.live="month" id="month" type="month" class="field-input" @disabled($filter === 'uncovered' || $focus !== null)>
+                <input wire:model.live="month" id="month" type="month" class="field-input" @disabled($filter === 'uncovered' || $focus !== null || $dateFrom !== '' || $dateTo !== '')>
             </div>
             <div class="flex flex-col gap-2 sm:flex-row">
                 <a href="{{ route('manager.shifts.template') }}" class="button-secondary w-full text-center sm:w-auto">Modelo XLSX</a>
@@ -33,19 +33,10 @@
         'Ver relatório' => \App\Support\OperationalNavigation::url('reports', $reportParameters, 'shifts', $this->navigationContext()),
     ]" />
 
-    <div class="mt-5 flex flex-wrap items-end gap-3">
-        <div>
-            <label for="shift-filter" class="field-label">Plantões exibidos</label>
-            <select wire:model.live="filter" id="shift-filter" class="field-input" @disabled($focus !== null)>
-                <option value="">Todos no mês</option>
-                <option value="scheduled">Agendados no mês</option>
-                <option value="uncovered">Descobertos ativos ou futuros (todos os meses)</option>
-            </select>
-        </div>
-        @if ($filter !== '' || $focus !== null)
-            <a href="{{ route('manager.shifts', array_filter(['month' => $month, 'filter' => $focus !== null ? $filter : ''])) }}" wire:navigate class="text-link inline-flex min-h-10 items-center">{{ $focus !== null ? 'Ver lista de plantões' : 'Limpar filtros' }}</a>
-        @endif
-    </div>
+    <x-operational-filters :selected="$focus !== null" />
+    @if ($focus !== null)
+        <a href="{{ route('manager.shifts', array_diff_key($this->navigationContext(), ['focus' => true])) }}" wire:navigate class="text-link mt-3 inline-flex min-h-10 items-center">Ver lista de plantões</a>
+    @endif
 
     @if ($focus !== null)<p class="mt-2 text-sm text-muted">A seleção mostra este registro, independentemente dos filtros da lista.</p>@endif
 
@@ -133,7 +124,7 @@
     <section class="panel mt-8" aria-labelledby="shift-list-title">
         <div class="section-heading">
             <div><p class="eyebrow">Agenda mensal</p><h2 id="shift-list-title" class="mt-2 text-xl font-semibold">Plantões cadastrados</h2></div>
-            <span class="text-sm text-muted">{{ $shifts->total() }} registro(s)</span>
+            <span class="text-sm text-muted" role="status">{{ $shifts->total() }} registro(s) encontrado(s)</span>
         </div>
 
         <div class="mt-6 space-y-4 md:hidden" aria-label="Plantões cadastrados">
@@ -146,7 +137,7 @@
                     </div>
                 </x-shift-card>
             @empty
-                <div class="empty-state compact-empty"><p class="font-semibold text-ink">Nenhum plantão encontrado.</p><p class="mt-2 text-sm">Altere o mês ou crie um novo plantão.</p></div>
+                <div class="empty-state compact-empty"><p class="font-semibold text-ink">Nenhum plantão corresponde aos filtros. Ajuste a pesquisa ou limpe os filtros.</p><p class="mt-2 text-sm">Altere o mês ou crie um novo plantão.</p></div>
             @endforelse
         </div>
 
@@ -163,7 +154,7 @@
                             <td><div class="flex flex-wrap justify-end gap-2">@can('reallocate', $shift)<button type="button" wire:click="openReallocation({{ $shift->id }})" wire:loading.attr="disabled" wire:target="openReallocation" class="table-action">Preencher plantão</button>@endcan<button type="button" wire:click="edit({{ $shift->id }})" class="table-action">Editar</button><button type="button" wire:click="requestDelete({{ $shift->id }})" class="table-action text-danger">Excluir</button></div></td>
                         </tr>
                     @empty
-                        <tr><td colspan="5" class="py-12 text-center text-muted">Nenhum plantão encontrado para este mês.</td></tr>
+                        <tr><td colspan="5" class="py-12 text-center text-muted">Nenhum plantão corresponde aos filtros. Ajuste a pesquisa ou limpe os filtros.</td></tr>
                     @endforelse
                 </tbody>
             </table>

@@ -5,6 +5,7 @@
     "scripts": {
         "test:pwa": "node --test tests/js/service-worker.test.mjs tests/js/pwa-install.test.mjs",
         "test:auth": "node --test tests/js/auth.test.mjs",
+        "test:filters:browser": "node tests/browser/operational-filters.mjs",
         "test:auth:browser": "node tests/browser/auth.mjs",
         "test:reallocation:browser": "node tests/browser/shift-reallocation.mjs",
         "test:swaps:browser": "node tests/browser/swap-analysis.mjs",

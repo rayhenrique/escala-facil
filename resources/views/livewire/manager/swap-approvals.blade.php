@@ -19,14 +19,17 @@
     <x-context-navigation :back="$this->backNavigation()" :label="$focusedSwap ? 'Pedido #'.$focusedSwap->id.' selecionado' : null" :links="$contextLinks" />
 
     @if ($request !== null)
-        <a href="{{ route('manager.swaps') }}" wire:navigate class="text-link mt-4 inline-flex min-h-10 items-center">Ver lista de trocas</a>
+        <a href="{{ route('manager.swaps', array_diff_key($this->navigationContext(), ['request' => true])) }}" wire:navigate class="text-link mt-4 inline-flex min-h-10 items-center">Ver lista de trocas</a>
     @endif
+
+    <x-operational-filters kind="swaps" :selected="$request !== null" />
+    <p class="mt-4 text-sm text-muted" role="status">{{ $swaps->total() }} pedido(s) encontrado(s).</p>
 
     @if ($swapReceipt)
         <x-swap-receipt :receipt="$swapReceipt" class="mt-6" />
     @endif
 
-    <section class="mt-8 space-y-4" aria-label="Trocas aguardando decisão">
+    <section class="mt-8 space-y-4" aria-label="{{ $swapStatusFilter === 'pending_manager' ? 'Trocas aguardando decisão' : 'Resultados de trocas' }}">
         @forelse ($swaps as $swap)
             <article class="panel {{ $request === $swap->id ? 'context-record' : '' }}" data-context-record="{{ $request === $swap->id ? 'swap-'.$swap->id : '' }}" wire:key="swap-approval-{{ $swap->id }}">
                 <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
@@ -79,20 +82,20 @@
                 </div>
             </article>
         @empty
-            <div class="empty-state"><p class="font-semibold text-ink">Nenhuma troca aguarda aprovação.</p><p class="mt-2 text-sm">Novos pedidos aparecerão aqui após o aceite do substituto.</p></div>
+            <div class="empty-state"><p class="font-semibold text-ink">Nenhuma troca corresponde aos filtros.</p><p class="mt-2 text-sm">Ajuste a pesquisa ou limpe os filtros. A lista inicial mostra pedidos que aguardam decisão da gerência.</p></div>
         @endforelse
     </section>
 
     <div class="mt-6">{{ $swaps->links() }}</div>
 
-    @if ($request === null)
+    @if ($request === null && $swapStatusFilter === 'pending_manager')
     <section class="mt-10" aria-labelledby="approved-swaps-title">
         <div class="section-heading">
             <div>
                 <p class="eyebrow">Histórico reversível</p>
                 <h2 id="approved-swaps-title">Trocas aprovadas futuras</h2>
             </div>
-            <span class="text-sm text-muted">{{ $approvedSwaps->count() }} troca(s)</span>
+            <span class="text-sm text-muted">{{ $approvedSwaps->count() }} troca(s) recente(s), até 10</span>
         </div>
         <div class="mt-4 space-y-4">
             @forelse ($approvedSwaps as $swap)

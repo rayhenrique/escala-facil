@@ -1,5 +1,11 @@
 # TASKS - Plano de Execução Sequencial
 
+- [x] **Pesquisa e filtros operacionais (1.28.0)**
+  - [x] Auditar consultas, filtros, paginação, navegação e isolamento de setor.
+  - [x] Implementar filtros combináveis na URL, limpeza, contagens e estados vazios.
+  - [x] Filtrar e paginar consultas gerenciais no banco, preservando métricas e PDFs.
+  - [x] Validar combinações, entradas inválidas, permissões, navegador, Pint, build e versão.
+
 - [x] **Realocação assistida de plantões (1.27.0)**
   - [x] Abrir o plantão exato pelo painel, calendário e Escalas, reutilizando modal e navegação contextual.
   - [x] Listar profissionais compatíveis disponíveis, calcular sobreposição real e alertar dobras inclusive à noite e em 24h.

@@ -4,7 +4,7 @@
 
 Sistema interno para gestão de escalas médicas, plantões, trocas e ausências em unidades de saúde. A aplicação centraliza a operação da gerência, permite que profissionais acompanhem a própria agenda e aplica as regras de compatibilidade e limite mensal em todas as decisões de troca.
 
-**Versão atual:** `1.27.0` — consulte o histórico completo em [`versoes.md`](versoes.md).
+**Versão atual:** `1.28.0` — consulte o histórico completo em [`versoes.md`](versoes.md).
 
 Desenvolvido por [KL Tecnologia](https://kltecnologia.com).
 
@@ -157,7 +157,7 @@ Crie um banco MySQL chamado `escala_facil` e ajuste o `.env`:
 APP_NAME="Escala Fácil"
 APP_URL=http://127.0.0.1:8000
 APP_TIMEZONE=America/Maceio
-APP_VERSION=1.27.0
+APP_VERSION=1.28.0
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR
 APP_FAKER_LOCALE=pt_BR
@@ -427,6 +427,14 @@ No dashboard, calendário ou Escalas, selecione **Preencher plantão**, escolha 
 A atribuição e seu histórico são salvos juntos. Em Escalas, abra o plantão específico para consultar as realocações recentes. A nova migração cria apenas `shift_reallocations`; não converte plantões antigos nem modifica ausências, trocas ou notificações. O comando de migração normal do deploy aplica essa tabela quando a versão for instalada. Este trabalho não executou deploy.
 
 Regressão visual: `npm run test:reallocation:browser`, com servidor local e base sintética descartável, credenciais `DASHBOARD_QA_EMAIL`/`DASHBOARD_QA_PASSWORD`, `PLAYWRIGHT_MODULE`/`PLAYWRIGHT_CHANNEL` e `AXE_MODULE`. `REALLOCATION_FIXTURE` aponta para JSON com `night` (ID de descoberto noturno), `day24` (ID de descoberto de 24h), `date24` (`YYYY-MM-DD`) e `professionalName` (profissional disponível nos dois). A execução confirma esses dois plantões, testa concorrência e exige restaurar a fixture para repetir. Os testes PHP criam suas próprias fixtures e incluem processos concorrentes em SQLite temporário; locks específicos do MySQL precisam de verificação em homologação.
+
+### Pesquisar plantões e pedidos de troca
+
+Em **Escalas** e **Trocas**, combine nome, setor, categoria, situação e datas. A pesquisa por nome aguarda 350ms após digitar. As datas incluem o primeiro e o último dia e se referem ao início do plantão; em Trocas, vale o plantão solicitado. Em Escalas, datas explícitas substituem o mês. **Limpar filtros** mantém o mês e restaura a lista inicial; em Trocas, volta aos pedidos aguardando gerência. Os filtros ficam na URL para atualizar, compartilhar e retornar à consulta.
+
+Na **Minha escala**, o setor é fixo; nome pesquisa os participantes das suas trocas. Categoria e período se aplicam às listas pessoais, com situações separadas para plantões e trocas. Nos **Relatórios**, mês/setor/categoria mantêm o escopo dos indicadores e PDFs. Nome/equipe filtra a lista de profissionais, e situação filtra as trocas criadas no mês. Cada lista possui sua própria página; os totais informam todos os resultados encontrados. PDFs e a grade do mural continuam completos.
+
+Regressão no navegador: `npm run test:filters:browser`, usando uma base local descartável, `FILTERS_URL`, `FILTERS_QA_PASSWORD`, `PLAYWRIGHT_MODULE`/`PLAYWRIGHT_CHANNEL`, `AXE_MODULE` e `FILTERS_FIXTURE`. A fixture JSON descreve `managerEmail`, `professionalEmail`, `professionalName`, `substituteName`, `month`, `sector`, `category`, `foreignSector`, `from`, `to`, `shiftCount`, `periodCount`, `pendingCount` e `rejectedCount`. Prepare mais de dez plantões e pedidos no mesmo mês para verificar paginação; os contadores esperados referem-se somente a esses dados fictícios. `FILTERS_SCREENSHOTS` salva a inspeção em 320, 390 e 1440 px. O teste consulta filtros sem aprovar, rejeitar ou realocar registros.
 
 ## Documentação
 

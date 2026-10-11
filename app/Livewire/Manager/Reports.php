@@ -3,6 +3,7 @@
 namespace App\Livewire\Manager;
 
 use App\Enums\UserRole;
+use App\Http\Requests\OperationalFiltersRequest;
 use App\Livewire\Concerns\HasOperationalContext;
 use App\Models\Category;
 use App\Models\Sector;
@@ -11,15 +12,18 @@ use App\Services\ShiftReportService;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Support\Facades\Validator;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 #[Layout('layouts.app', ['title' => 'Relatórios'])]
 class Reports extends Component
 {
     use HasOperationalContext;
+    use WithPagination;
 
     #[Url]
     public string $month = '';
@@ -52,6 +56,15 @@ class Reports extends Component
         $this->tab = $this->normalizeTab($this->tab);
         $this->updatedSectorId($this->sectorId);
         $this->updatedCategoryId($this->categoryId);
+    }
+
+    public function updated(string $property): void
+    {
+        if (in_array($property, ['month', 'sectorId', 'categoryId', 'searchProfessional', 'swapStatusFilter'], true)) {
+            foreach (['professionalsPage', 'swapsPage', 'absencesPage'] as $page) {
+                $this->resetPage($page);
+            }
+        }
     }
 
     public function updatedMonth(): void
@@ -88,6 +101,9 @@ class Reports extends Component
 
     public function clearFilters(): void
     {
+        foreach (['professionalsPage', 'swapsPage', 'absencesPage'] as $page) {
+            $this->resetPage($page);
+        }
         $user = auth()->user();
         $this->searchProfessional = '';
         $this->swapStatusFilter = '';
@@ -130,27 +146,18 @@ class Reports extends Component
             ? (string) ($user->sector_id ?? 0)
             : $this->sectorId;
 
-        $report = app(ShiftReportService::class)->forPeriod(
-            $this->month,
-            $effectiveSectorId,
-            $this->categoryId,
-            $user
+        $request = new OperationalFiltersRequest;
+        $validator = Validator::make($this->only(['searchProfessional', 'swapStatusFilter']), $request->rules(), $request->messages());
+        $this->resetValidation(['searchProfessional', 'swapStatusFilter']);
+        foreach ($validator->errors()->messages() as $key => $messages) {
+            $this->addError($key, $messages[0]);
+        }
+
+        return app(ShiftReportService::class)->forScreen(
+            $this->month, $effectiveSectorId, $this->categoryId, $user,
+            $this->searchProfessional, $this->swapStatusFilter,
+            mb_strlen($this->searchProfessional) <= 250,
         );
-
-        if ($this->searchProfessional !== '') {
-            $term = mb_strtolower(trim($this->searchProfessional));
-            $report['byProfessional'] = $report['byProfessional']->filter(
-                fn (array $row): bool => str_contains(mb_strtolower($row['name']), $term) || str_contains(mb_strtolower($row['team']), $term)
-            )->values();
-        }
-
-        if ($this->swapStatusFilter !== '') {
-            $report['swaps'] = $report['swaps']->filter(
-                fn ($swap): bool => $swap->status->value === $this->swapStatusFilter
-            )->values();
-        }
-
-        return $report;
     }
 
     /** @return array<string, mixed> */

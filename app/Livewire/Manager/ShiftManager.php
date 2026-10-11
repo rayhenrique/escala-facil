@@ -9,6 +9,7 @@ use App\Enums\ShiftStatus;
 use App\Enums\UserRole;
 use App\Http\Requests\ImportShiftsRequest;
 use App\Http\Requests\SaveShiftRequest;
+use App\Livewire\Concerns\FiltersOperationalLists;
 use App\Livewire\Concerns\HasOperationalContext;
 use App\Livewire\Concerns\ReallocatesShifts;
 use App\Models\Category;
@@ -17,6 +18,7 @@ use App\Models\Shift;
 use App\Models\ShiftReallocation;
 use App\Models\User;
 use App\Support\ManagerAttention;
+use App\Support\OperationalFilters;
 use App\Support\OperationalNavigation;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
@@ -35,6 +37,7 @@ use Livewire\WithPagination;
 #[Layout('layouts.app', ['title' => 'Gestão de escalas'])]
 class ShiftManager extends Component
 {
+    use FiltersOperationalLists;
     use HasOperationalContext;
     use ReallocatesShifts;
     use WithFileUploads;
@@ -135,6 +138,13 @@ class ShiftManager extends Component
         $this->month = $this->normalizeMonth($this->month);
         $this->focus = null;
         $this->resetPage();
+    }
+
+    public function clearFilters(): void
+    {
+        $this->clearListFilters();
+        $this->filter = '';
+        $this->focus = null;
     }
 
     public function updatedFilter(): void
@@ -402,16 +412,31 @@ class ShiftManager extends Component
     {
         $this->authorize('viewAny', Shift::class);
         $this->focus = OperationalNavigation::id($this->focus);
-        [$year, $month] = array_pad(explode('-', $this->month), 2, null);
+        $start = CarbonImmutable::parse($this->month.'-01');
+        $validFilters = $this->validListFilters();
 
-        $this->filter = in_array($this->filter, ['scheduled', 'uncovered'], true) ? $this->filter : '';
         $shifts = ($this->focus === null && $this->filter === 'uncovered' ? ManagerAttention::uncovered(now()) : Shift::query())
             ->with(['category', 'sector', 'user'])
-            ->when($this->focus === null && $this->filter !== 'uncovered' && $year && $month, fn ($query) => $query->whereYear('date', $year)->whereMonth('date', $month))
-            ->when($this->focus === null && $this->filter === 'scheduled', fn ($query) => $query->where('status', ShiftStatus::Scheduled))
+            ->when($this->focus === null, function ($query) use ($start, $validFilters): void {
+                if (! $validFilters) {
+                    $query->whereRaw('1 = 0');
+
+                    return;
+                }
+                OperationalFilters::shifts($query, $this->listFilters());
+                if ($this->filter !== 'uncovered' && $this->dateFrom === '' && $this->dateTo === '') {
+                    $query->where('date', '>=', $start->format('Y-m-d'))->where('date', '<', $start->addMonth()->format('Y-m-d'));
+                }
+                if ($this->filter !== '' && $this->filter !== 'uncovered') {
+                    $query->where('status', $this->filter === 'uncovered_month' ? ShiftStatus::Uncovered->value : $this->filter);
+                }
+                if (trim($this->search) !== '') {
+                    $query->whereHas('user', fn ($user) => OperationalFilters::name($user, $this->search));
+                }
+            })
             ->when($this->focus !== null, fn ($query) => $query->whereKey($this->focus))
             ->orderBy('date')
-            ->orderBy('start_time');
+            ->orderBy('start_time')->orderBy('id');
 
         if ($this->focus !== null) {
             $records = $shifts->get();

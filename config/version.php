@@ -2,9 +2,18 @@
 
 return [
     // Versão do código instalado. APP_VERSION não pode sobrepor este registro.
-    'current' => '1.27.0',
+    'current' => '1.28.0',
 
     'releases' => [
+        [
+            'version' => '1.28.0',
+            'date' => '2026-10-10',
+            'title' => 'Pesquisa e filtros operacionais',
+            'summary' => 'Agora você encontra plantões e pedidos de troca com mais facilidade usando novos filtros.',
+            'highlights' => [
+                'Agora você encontra plantões e pedidos de troca com mais facilidade usando novos filtros.',
+            ],
+        ],
         [
             'version' => '1.27.0',
             'date' => '2026-10-10',
