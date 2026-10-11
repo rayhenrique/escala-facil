@@ -2,9 +2,18 @@
 
 return [
     // Versão do código instalado. APP_VERSION não pode sobrepor este registro.
-    'current' => '1.31.0',
+    'current' => '1.32.0',
 
     'releases' => [
+        [
+            'version' => '1.32.0',
+            'date' => '2026-10-11',
+            'title' => 'Indicadores operacionais por setor',
+            'summary' => 'Os novos indicadores ajudam a acompanhar a cobertura, as trocas e as ausências de cada setor.',
+            'highlights' => [
+                'Os novos indicadores ajudam a acompanhar a cobertura, as trocas e as ausências de cada setor.',
+            ],
+        ],
         [
             'version' => '1.31.0',
             'date' => '2026-10-11',

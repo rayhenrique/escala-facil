@@ -246,3 +246,9 @@ A revisão de criação/edição ocupa o modal de cadastro existente, sem sobrep
 ## Convites de profissionais
 
 O módulo Usuários reutiliza seu modal de cadastro em uma variante de convite: perfil Profissional fixo e campos de nome/e-mail/setor/categoria, sem senha. Status e ações de convite aparecem junto ao cadastro em tabela e cartão, com texto explícito. Revogação usa confirmation-modal e confirmação de manutenção do convite como alternativa. A ativação reutiliza o layout institucional guest em duas colunas, auth/form, campos de senha com autofill e auth/submit; nenhuma identidade é mostrada na página pública. Controles, contraste, teclado e estados de requisição seguem os componentes existentes.
+
+## Indicadores por setor
+
+Relatórios apresenta duas tabelas gerenciais: situação atual dos plantões do mês e registros do período. Total, cobertos, sem cobertura, descobertos e ausência informada não se confundem com contagem de pedidos de troca ou registros de ausência. Proporções mostram numerador e denominador, “—” quando indefinidas; setores sem movimento permanecem com zero. Não há gráficos decorativos ou métricas de desempenho. Tabelas com rolagem interna recebem foco por teclado; no celular, cartões com listas de definição mostram os mesmos indicadores. A paginação por setor usa os controles existentes. PDF consolidado e CSV reutilizam filtros e definições, sem mudar a identidade visual.
+
+As definições completas dos indicadores ficam em um disclosure nativo com summary, acionável por teclado. O período e a fórmula resumida permanecem visíveis; no PDF, as definições são impressas integralmente.

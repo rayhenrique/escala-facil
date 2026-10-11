@@ -18,7 +18,7 @@ class OperationalNavigation
         'calendar' => ['month', 'selectedDate', 'sectorId', 'categoryId'],
         'shifts' => ['month', 'filter', 'focus', 'page', 'search', 'filterSectorId', 'filterCategoryId', 'dateFrom', 'dateTo'],
         'swaps' => ['request', 'page', 'swapStatusFilter', 'search', 'filterSectorId', 'filterCategoryId', 'dateFrom', 'dateTo'],
-        'reports' => ['month', 'tab', 'sectorId', 'categoryId', 'searchProfessional', 'swapStatusFilter', 'professionalsPage', 'swapsPage', 'absencesPage'],
+        'reports' => ['month', 'tab', 'sectorId', 'categoryId', 'searchProfessional', 'swapStatusFilter', 'professionalsPage', 'swapsPage', 'absencesPage', 'sectorsPage'],
     ];
 
     public static function id(mixed $value): ?int
@@ -44,7 +44,7 @@ class OperationalNavigation
             }
             $value = (string) $value;
             $valid = match ($key) {
-                'record', 'focus', 'request', 'page', 'sectorId', 'categoryId', 'filterSectorId', 'filterCategoryId', 'professionalsPage', 'swapsPage', 'absencesPage' => filter_var($value, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) !== false,
+                'record', 'focus', 'request', 'page', 'sectorId', 'categoryId', 'filterSectorId', 'filterCategoryId', 'professionalsPage', 'swapsPage', 'absencesPage', 'sectorsPage' => filter_var($value, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) !== false,
                 'month' => preg_match('/^[1-9][0-9]{3}-(0[1-9]|1[0-2])$/', $value),
                 'selectedDate', 'dateFrom', 'dateTo' => preg_match('/^([1-9][0-9]{3})-(\d{2})-(\d{2})$/', $value, $parts) && checkdate((int) $parts[2], (int) $parts[3], (int) $parts[1]),
                 'roleFilter' => in_array($value, array_column(UserRole::cases(), 'value'), true),

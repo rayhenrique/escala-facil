@@ -11,10 +11,61 @@ use App\Models\ShiftSwap;
 use App\Models\User;
 use App\Support\OperationalFilters;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 class ShiftReportService
 {
+    /**
+     * Independent grouped subqueries prevent multiplication of shifts by joined events.
+     * Date ranges retain the existing report semantics and use the date/created_at indexes.
+     */
+    public function sectorIndicators(string $month, string $sectorId, string $categoryId, User $user, string $swapStatus = ''): Builder
+    {
+        Gate::forUser($user)->authorize('viewAny', Shift::class);
+        $start = CarbonImmutable::createFromFormat('!Y-m-d', $month.'-01');
+        $next = $start->addMonth();
+        $shiftScope = fn ($query) => $query
+            ->when($sectorId !== '', fn ($q) => $q->where('shifts.sector_id', $sectorId))
+            ->when($categoryId !== '', fn ($q) => $q->where('shifts.category_id', $categoryId));
+        $periodScope = fn ($query) => $query->where('shifts.date', '>=', $start->toDateString())
+            ->where('shifts.date', '<', $next->toDateString());
+        $shifts = $periodScope($shiftScope(DB::table('shifts')))
+            ->select('sector_id')->selectRaw('COUNT(*) AS total')
+            ->selectRaw('SUM(CASE WHEN status = ? AND user_id IS NOT NULL THEN 1 ELSE 0 END) AS covered', [ShiftStatus::Scheduled->value])
+            ->selectRaw('SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) AS uncovered', [ShiftStatus::Uncovered->value])
+            ->selectRaw('SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) AS absence_reported', [ShiftStatus::AbsenceReported->value])
+            ->groupBy('sector_id');
+        $swaps = $shiftScope(DB::table('shift_swaps')->join('shifts', 'shifts.id', '=', 'shift_swaps.shift_id'))
+            ->where('shift_swaps.created_at', '>=', $start)->where('shift_swaps.created_at', '<', $next)
+            ->when($swapStatus !== '', fn ($q) => $q->where('shift_swaps.status', $swapStatus))
+            ->select('shifts.sector_id')->selectRaw('COUNT(*) AS swaps')->groupBy('shifts.sector_id');
+        $absences = $periodScope($shiftScope(DB::table('absences')->join('shifts', 'shifts.id', '=', 'absences.shift_id')))
+            ->select('shifts.sector_id')->selectRaw('COUNT(*) AS absences')->groupBy('shifts.sector_id');
+
+        return DB::table('sectors')->leftJoinSub($shifts, 'shift_totals', 'shift_totals.sector_id', '=', 'sectors.id')
+            ->leftJoinSub($swaps, 'swap_totals', 'swap_totals.sector_id', '=', 'sectors.id')
+            ->leftJoinSub($absences, 'absence_totals', 'absence_totals.sector_id', '=', 'sectors.id')
+            ->when($sectorId !== '', fn ($q) => $q->where('sectors.id', $sectorId))
+            ->select('sectors.id', 'sectors.name')
+            ->selectRaw('COALESCE(total, 0) AS total, COALESCE(covered, 0) AS covered, COALESCE(uncovered, 0) AS uncovered, COALESCE(absence_reported, 0) AS absence_reported, COALESCE(swaps, 0) AS swaps, COALESCE(absences, 0) AS absences')
+            ->orderBy('sectors.name')->orderBy('sectors.id');
+    }
+
+    public function indicatorRow(object $row): array
+    {
+        $result = ['id' => (int) $row->id, 'name' => $row->name];
+        foreach (['total', 'covered', 'uncovered', 'absence_reported', 'swaps', 'absences'] as $key) {
+            $result[$key] = (int) $row->{$key};
+        }
+        $result['withoutCoverage'] = $result['total'] - $result['covered'];
+        $result['coverageRate'] = $result['total'] > 0 ? (int) round($result['covered'] / $result['total'] * 100) : null;
+
+        return $result;
+    }
+
     /** Screen lists are paginated; aggregates retain the same scope as the PDF. */
     public function forScreen(string $month, string $sectorId, string $categoryId, User $forUser, string $search = '', string $status = '', bool $validSearch = true): array
     {
@@ -37,10 +88,10 @@ class ShiftReportService
         $counts = (clone $shifts)->selectRaw('status, COUNT(*) AS total')->groupBy('status')->pluck('total', 'status');
         $swapCounts = (clone $visibleSwaps)->selectRaw('status, COUNT(*) AS total')->groupBy('status')->pluck('total', 'status');
         $total = (int) $counts->sum();
-        $covered = (int) $counts->get(ShiftStatus::Scheduled->value, 0);
+        $covered = (clone $shifts)->where('status', ShiftStatus::Scheduled)->whereNotNull('user_id')->count();
         $groups = function (string $table, string $foreignKey) use ($shifts) {
             return (clone $shifts)->join($table, $table.'.id', '=', 'shifts.'.$foreignKey)
-                ->selectRaw($table.'.name AS name, COUNT(*) AS total, SUM(CASE WHEN shifts.user_id IS NULL THEN 1 ELSE 0 END) AS uncovered')
+                ->selectRaw($table.'.name AS name, COUNT(*) AS total, SUM(CASE WHEN shifts.status = ? THEN 1 ELSE 0 END) AS uncovered', [ShiftStatus::Uncovered->value])
                 ->groupBy($table.'.name')->orderBy($table.'.name')->get()->map(fn ($row) => [
                     'name' => $row->name, 'total' => (int) $row->total, 'uncovered' => (int) $row->uncovered,
                 ]);
@@ -127,20 +178,19 @@ class ShiftReportService
     }
 
     /** @return array<string, mixed> */
-    public function forPeriod(string $month, string $sectorId = '', string $categoryId = '', ?User $forUser = null): array
+    public function forPeriod(string $month, string $sectorId = '', string $categoryId = '', ?User $forUser = null, string $search = '', string $swapStatus = ''): array
     {
         $isManager = ! $forUser || $forUser->role === UserRole::Manager;
         if (! $isManager) {
             $sectorId = (string) ($forUser->sector_id ?? 0);
         }
 
-        [$year, $monthNumber] = array_pad(explode('-', $month), 2, null);
         $monthStart = CarbonImmutable::createFromFormat('!Y-m-d', $month.'-01')->startOfMonth();
         $monthEnd = $monthStart->endOfMonth();
 
         $shifts = Shift::query()
             ->with(['sector', 'category', 'user'])
-            ->when($year && $monthNumber, fn ($query) => $query->whereYear('date', $year)->whereMonth('date', $monthNumber))
+            ->where('date', '>=', $monthStart->toDateString())->where('date', '<', $monthStart->addMonth()->toDateString())
             ->when($sectorId !== '', fn ($query) => $query->where('sector_id', $sectorId))
             ->when($categoryId !== '', fn ($query) => $query->where('category_id', $categoryId))
             ->orderBy('date')
@@ -149,8 +199,7 @@ class ShiftReportService
 
         $allSwaps = ShiftSwap::query()
             ->with(['shift.sector', 'shift.category', 'requester', 'substitute'])
-            ->whereYear('created_at', $monthStart->year)
-            ->whereMonth('created_at', $monthStart->month)
+            ->where('created_at', '>=', $monthStart)->where('created_at', '<', $monthStart->addMonth())
             ->when($sectorId !== '', fn ($query) => $query->whereHas('shift', fn ($shift) => $shift->where('sector_id', $sectorId)))
             ->when($categoryId !== '', fn ($query) => $query->whereHas('shift', fn ($shift) => $shift->where('category_id', $categoryId)))
             ->oldest()
@@ -170,7 +219,7 @@ class ShiftReportService
             ->get();
 
         $total = $shifts->count();
-        $covered = $shifts->where('status', ShiftStatus::Scheduled)->count();
+        $covered = $shifts->where('status', ShiftStatus::Scheduled)->whereNotNull('user_id')->count();
 
         return [
             'monthLabel' => $monthStart->translatedFormat('F \d\e Y'),
@@ -188,8 +237,11 @@ class ShiftReportService
             ],
             'bySector' => $this->groupByRelation($shifts, 'sector'),
             'byCategory' => $this->groupByRelation($shifts, 'category'),
-            'byProfessional' => $this->professionalRows($shifts, $allSwaps, $absences),
-            'swaps' => $visibleSwaps,
+            'byProfessional' => $this->professionalRows($shifts, $allSwaps, $absences, $search),
+            'swaps' => $swapStatus !== '' ? $visibleSwaps->where('status', ShiftSwapStatus::from($swapStatus))->values() : $visibleSwaps,
+            'sectorIndicators' => $isManager && $forUser
+                ? $this->sectorIndicators($month, $sectorId, $categoryId, $forUser, $swapStatus)->get()->map($this->indicatorRow(...)) : collect(),
+            'filters' => ['month' => $month, 'sector_id' => $sectorId, 'category_id' => $categoryId, 'searchProfessional' => $search, 'swapStatusFilter' => $swapStatus],
             'absencesList' => $isManager
                 ? $absences
                 : $absences->filter(fn (Absence $absence) => $absence->user_id === $forUser?->id)->values(),
@@ -209,7 +261,7 @@ class ShiftReportService
             ->map(fn (Collection $group, string $name): array => [
                 'name' => $name,
                 'total' => $group->count(),
-                'uncovered' => $group->whereNull('user_id')->count(),
+                'uncovered' => $group->where('status', ShiftStatus::Uncovered)->count(),
             ])
             ->sortBy('name')
             ->values();
@@ -221,7 +273,7 @@ class ShiftReportService
      * @param  Collection<int, Absence>  $absences
      * @return Collection<int, array{name: string, team: string, shifts: int, approvedSwaps: int, absences: int}>
      */
-    private function professionalRows(Collection $shifts, Collection $swaps, Collection $absences): Collection
+    private function professionalRows(Collection $shifts, Collection $swaps, Collection $absences, string $search = ''): Collection
     {
         $approvedByUser = [];
 
@@ -235,6 +287,10 @@ class ShiftReportService
         return User::query()
             ->with(['sector', 'category'])
             ->whereIn('id', $shifts->pluck('user_id')->filter()->unique()->all())
+            ->when(trim($search) !== '', fn ($q) => $q->where(fn ($names) => $names
+                ->where(fn ($name) => OperationalFilters::name($name, $search))
+                ->orWhereHas('sector', fn ($name) => OperationalFilters::name($name, $search))
+                ->orWhereHas('category', fn ($name) => OperationalFilters::name($name, $search))))
             ->orderBy('name')
             ->get()
             ->map(fn (User $user): array => [

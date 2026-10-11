@@ -37,6 +37,7 @@ class OperationalNavigationRequest extends FormRequest
             'professionalsPage' => ['nullable', 'integer', 'min:1', 'max:1000000'],
             'swapsPage' => ['nullable', 'integer', 'min:1', 'max:1000000'],
             'absencesPage' => ['nullable', 'integer', 'min:1', 'max:1000000'],
+            'sectorsPage' => ['nullable', 'integer', 'min:1', 'max:1000000'],
             'page' => ['nullable', 'integer', 'min:1', 'max:1000000'],
         ];
     }

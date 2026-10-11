@@ -3,14 +3,17 @@
         <div>
             <p class="eyebrow">{{ $isProfessional ? 'Profissional' : 'Gerência' }}</p>
             <h1 class="page-title">Relatórios</h1>
-            <p class="page-description">Painel analítico modular de cobertura, produtividade individual, trocas e escalas oficiais.</p>
+            <p class="page-description">Consulte plantões, cobertura, trocas e ausências com os filtros do período.</p>
         </div>
-        <div class="grid w-full gap-3 sm:w-auto sm:grid-cols-3 sm:items-end">
+        <div class="grid w-full gap-3 sm:w-auto sm:items-end {{ $isProfessional ? 'sm:grid-cols-3' : 'sm:grid-cols-2 xl:grid-cols-4' }}">
             <div>
                 <label for="report-month" class="field-label">Mês exibido</label>
                 <input wire:model.live="month" id="report-month" type="month" class="field-input">
             </div>
-            <a href="{{ route($routePrefix.'reports.pdf', ['month' => $month, 'sector_id' => $sectorId, 'category_id' => $categoryId]) }}" class="button-secondary w-full text-center sm:w-auto" title="Baixar relatório analítico consolidado em PDF">Exportar PDF</a>
+            <a href="{{ route($routePrefix.'reports.pdf', ['month' => $month, 'sector_id' => $sectorId, 'category_id' => $categoryId, 'searchProfessional' => $searchProfessional, 'swapStatusFilter' => $swapStatusFilter]) }}" class="button-secondary w-full text-center sm:w-auto" title="Baixar relatório analítico consolidado em PDF">Exportar PDF</a>
+            @if (! $isProfessional)
+                <a href="{{ route('manager.reports.sectors.csv', ['month' => $month, 'sector_id' => $sectorId, 'category_id' => $categoryId, 'swapStatusFilter' => $swapStatusFilter]) }}" class="button-secondary w-full text-center sm:w-auto">Exportar setores CSV</a>
+            @endif
             <a href="{{ route($routePrefix.'reports.wall', ['month' => $month, 'sector_id' => $sectorId, 'category_id' => $categoryId]) }}" class="button-secondary w-full text-center sm:w-auto" title="Baixar grade mensal oficial em PDF para mural">PDF para afixar</a>
         </div>
     </div>
@@ -188,28 +191,28 @@
                 <dl class="coverage-metrics">
                     <div>
                         <dt>Cobertura</dt>
-                        <dd>{{ $this->report['summary']['coverageRate'] === null ? '—' : $this->report['summary']['coverageRate'].'%' }}</dd>
-                        <span>{{ $this->report['summary']['covered'] }} de {{ $this->report['summary']['total'] }} cobertos</span>
+                        <dd>{{ $this->report['summary']['coverageRate'] === null ? '—' : $this->report['summary']['coverageRate'].'%' }}<span class="block">{{ $this->report['summary']['covered'] }} de {{ $this->report['summary']['total'] }} cobertos</span></dd>
                     </div>
                     <div class="coverage-metric-danger">
                         <dt>Descobertos</dt>
-                        <dd>{{ $this->report['summary']['uncovered'] }}</dd>
-                        <span>Sem profissional</span>
+                        <dd>{{ $this->report['summary']['uncovered'] }}<span class="block">Situação atual: Descoberto</span></dd>
                     </div>
                     <div class="coverage-metric-pending">
                         <dt>Trocas aprovadas</dt>
-                        <dd>{{ $this->report['summary']['swapsApproved'] }}</dd>
-                        <span>No mês de criação</span>
+                        <dd>{{ $this->report['summary']['swapsApproved'] }}<span class="block">Pedidos criados no mês; estado atual</span></dd>
                     </div>
                     <div>
                         <dt>Ausências</dt>
-                        <dd>{{ $this->report['summary']['absences'] }}</dd>
-                        <span>Justificativas no mês</span>
+                        <dd>{{ $this->report['summary']['absences'] }}<span class="block">Registros dos plantões do mês</span></dd>
                     </div>
                 </dl>
             </section>
 
-            <div class="mt-8 grid gap-8 xl:grid-cols-2">
+            @if (! $isProfessional)
+                <x-sector-report-indicators :rows="$this->sectorIndicators" :swap-status="$swapStatusFilter" />
+            @endif
+            <div class="mt-8 grid gap-8 {{ $isProfessional ? 'xl:grid-cols-2' : '' }}">
+                @if ($isProfessional)
                 <section aria-labelledby="report-sector-title">
                     <div class="section-heading">
                         <div>
@@ -217,7 +220,7 @@
                             <h2 id="report-sector-title">Plantões por setor</h2>
                         </div>
                     </div>
-                    <div class="mt-4 hidden overflow-x-auto md:block">
+                    <div class="mt-4 hidden overflow-x-auto md:block" tabindex="0" role="region" aria-label="Tabela de plantões por setor">
                         <table class="data-table">
                             <thead><tr><th>Setor</th><th class="text-right">Plantões</th><th class="text-right">Descobertos</th></tr></thead>
                             <tbody>
@@ -241,6 +244,7 @@
                     </div>
                 </section>
 
+                @endif
                 <section aria-labelledby="report-category-title">
                     <div class="section-heading">
                         <div>
@@ -248,7 +252,7 @@
                             <h2 id="report-category-title">Plantões por categoria</h2>
                         </div>
                     </div>
-                    <div class="mt-4 hidden overflow-x-auto md:block">
+                    <div class="mt-4 hidden overflow-x-auto md:block" tabindex="0" role="region" aria-label="Tabela de plantões por categoria">
                         <table class="data-table">
                             <thead><tr><th>Categoria</th><th class="text-right">Plantões</th><th class="text-right">Descobertos</th></tr></thead>
                             <tbody>

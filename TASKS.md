@@ -255,3 +255,5 @@
 
 
 
+
+- [x] **Indicadores operacionais por setor (1.32.0)**: agregações SQL, situação atual separada de registros do período, definições de cobertura/denominadores, filtros, paginação, PDF/CSV, autorização e regressão desktop/mobile.

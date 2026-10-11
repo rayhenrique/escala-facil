@@ -10,6 +10,7 @@ use App\Models\Sector;
 use App\Models\Shift;
 use App\Services\ShiftReportService;
 use Carbon\CarbonImmutable;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Facades\Validator;
@@ -61,7 +62,7 @@ class Reports extends Component
     public function updated(string $property): void
     {
         if (in_array($property, ['month', 'sectorId', 'categoryId', 'searchProfessional', 'swapStatusFilter'], true)) {
-            foreach (['professionalsPage', 'swapsPage', 'absencesPage'] as $page) {
+            foreach (['professionalsPage', 'swapsPage', 'absencesPage', 'sectorsPage'] as $page) {
                 $this->resetPage($page);
             }
         }
@@ -101,7 +102,7 @@ class Reports extends Component
 
     public function clearFilters(): void
     {
-        foreach (['professionalsPage', 'swapsPage', 'absencesPage'] as $page) {
+        foreach (['professionalsPage', 'swapsPage', 'absencesPage', 'sectorsPage'] as $page) {
             $this->resetPage($page);
         }
         $user = auth()->user();
@@ -175,6 +176,16 @@ class Reports extends Component
             $this->categoryId,
             $user
         );
+    }
+
+    #[Computed]
+    public function sectorIndicators(): LengthAwarePaginator
+    {
+        $this->authorize('viewAny', Shift::class);
+        $reports = app(ShiftReportService::class);
+
+        return $reports->sectorIndicators($this->month, $this->sectorId, $this->categoryId, auth()->user(), $this->swapStatusFilter)
+            ->paginate(10, ['*'], 'sectorsPage')->through($reports->indicatorRow(...));
     }
 
     private function normalizeTab(string $tab): string

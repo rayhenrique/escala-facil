@@ -4,6 +4,7 @@ use App\Http\Controllers\ClientErrorController;
 use App\Http\Controllers\DashboardRedirectController;
 use App\Http\Controllers\Manager\IssueAttachmentController;
 use App\Http\Controllers\Manager\ReportPdfController;
+use App\Http\Controllers\Manager\SectorReportCsvController;
 use App\Http\Controllers\Manager\ShiftSpreadsheetController;
 use App\Http\Controllers\Manager\WallRosterPdfController;
 use App\Http\Controllers\SwapReceiptPdfController;
@@ -73,6 +74,7 @@ Route::middleware(['auth', 'manager', ValidateOperationalQuery::class])
         Route::get('reports/pdf', ReportPdfController::class)->name('reports.pdf');
         Route::get('reports/wall', WallRosterPdfController::class)->name('reports.wall');
         Route::get('swaps', SwapApprovals::class)->name('swaps');
+        Route::get('reports/sectors/csv', SectorReportCsvController::class)->name('reports.sectors.csv');
         Route::get('sectors', SectorManager::class)->name('sectors');
         Route::get('categories', CategoryManager::class)->name('categories');
         Route::get('users', UserManager::class)->name('users');

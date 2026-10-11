@@ -39,7 +39,7 @@ Este documento registra o comportamento compartilhado das telas autenticadas. As
 | Exclusão | modal de confirmação compartilhado | plantões, usuários, setores e categorias | registro identificado, consequência descrita, cancelamento e teste do fluxo |
 | Importação e exportação | `ShiftManager` + `ShiftSpreadsheetController` + modal de importação | modelo XLSX, importação e exportação mensal de plantões | referência de setores/categorias, validação por linha com cancelamento total, duplicatas ignoradas e teste do fluxo |
 | Duplicação de escala | `ShiftManager` + `DuplicateMonthAction` + modal de cópia | origem, destino e mapeamento por dia ou dia da semana | prévia com conflitos, revisão com exclusão de itens, criação transacional sem sobrescrita e relatório de criados e ignorados |
-| Relatórios | `Manager\Reports` + `ReportPdfController` + `WallRosterPdfController` | consulta compartilhada entre gerente e profissional: resumo de cobertura, distribuições, desempenho e trocas | filtros de mês, setor e categoria, limpeza, exportação em PDF e teste do fluxo |
+| Relatórios | `Manager\Reports` + `ReportPdfController` + `WallRosterPdfController` | consulta compartilhada: cobertura, plantões e trocas; indicadores por setor exclusivos da gerência | filtros de mês/setor/categoria, listas paginadas, limpeza, PDF e CSV gerencial com definições e teste do fluxo |
 | Scrollbar | regra global de `resources/css/app.css` | rolagem de página e painéis | inspeção no navegador |
 
 ## Navegação e permissões
@@ -176,3 +176,13 @@ Os formulários de acesso não abrem o teclado automaticamente. E-mail usa tecla
 - Página pública reutiliza auth/form e layout guest, sem e-mail/ID/nome. Token é retirado da URL; referência bloqueada identifica uma autorização somente na sessão atual, separada por aba. Refresh funciona, compartilhamento dessa referência não concede acesso em outra sessão.
 - Profissional define senha e confirmação, consumidas com o convite em transação. Pendentes não entram nem usam recuperação para ativação. Sucesso redireciona ao login; erros de convite e mensagens de recuperação não revelam existência/situação da conta.
 - Envio é solicitado após commit, com fila criptografada e verificação da emissão no worker. UI distingue solicitação de envio de entrega; links não são mostrados na gerência nem enviados ao log. Configuração e limites estão em docs/account-invitations.md.
+
+## Indicadores operacionais por setor
+
+- Gerentes consultam situação atual e registros do período separadamente. Cobertura é proporção de plantões agendados com profissional atribuído entre todos os iniciados no mês; não equivale a horas cobertas. Sem cobertura e status Descoberto são contadores distintos.
+- Trocas usam o mês de criação do pedido e situação atual opcional; ausências usam o mês de início do plantão e permanecem após realocação. Setor/categoria atuais não permitem reconstruir um retrato histórico. Definições completas: `docs/sector-report-indicators.md`.
+- Mês/setor/categoria filtram os indicadores; busca por profissional limita apenas sua lista. Setores sem movimento mostram zero, proporções sem denominador mostram “—”. A tela pagina dez setores, conserva `sectorsPage` no retorno contextual e reinicia a página após alterar/limpar filtros.
+- PDF inclui os novos indicadores, a busca da lista de profissionais e situação da lista de trocas. CSV por setor exporta todas as páginas do agregado e registra filtros/definições/geração. Filtros de exportação inválidos são rejeitados. CSV e novos indicadores são exclusivos da gerência; consultas profissionais preservam setor fixo e visibilidade das listas anteriores.
+- Tabelas usam cabeçalhos semânticos e rolagem acessível por teclado; cartões equivalentes no celular. Sem redesenho, gráficos desnecessários ou avaliação profissional.
+
+As definições completas dos indicadores ficam em um disclosure nativo com summary, acionável por teclado. O período e a fórmula resumida permanecem visíveis; no PDF, as definições são impressas integralmente.

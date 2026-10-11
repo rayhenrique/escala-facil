@@ -6,6 +6,12 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.32.0 — 11/10/2026
+
+### Indicadores operacionais por setor
+
+- Os novos indicadores ajudam a acompanhar a cobertura, as trocas e as ausências de cada setor.
+
 ## 1.31.0 — 11/10/2026
 
 ### Ativação de contas por convite

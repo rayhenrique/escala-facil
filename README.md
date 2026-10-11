@@ -4,7 +4,7 @@
 
 Sistema interno para gestão de escalas médicas, plantões, trocas e ausências em unidades de saúde. A aplicação centraliza a operação da gerência, permite que profissionais acompanhem a própria agenda e aplica as regras de compatibilidade e limite mensal em todas as decisões de troca.
 
-**Versão atual:** `1.31.0` — consulte o histórico completo em [`versoes.md`](versoes.md).
+**Versão atual:** `1.32.0` — consulte o histórico completo em [`versoes.md`](versoes.md).
 
 Desenvolvido por [KL Tecnologia](https://kltecnologia.com).
 
@@ -157,7 +157,7 @@ Crie um banco MySQL chamado `escala_facil` e ajuste o `.env`:
 APP_NAME="Escala Fácil"
 APP_URL=http://127.0.0.1:8000
 APP_TIMEZONE=America/Maceio
-APP_VERSION=1.31.0
+APP_VERSION=1.32.0
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR
 APP_FAKER_LOCALE=pt_BR
@@ -469,3 +469,7 @@ Ao criar ou editar, avisos de conflito, dobra e ausência de cobertura aparecem 
 ## Convites de profissionais
 
 Em **Usuários**, use **Convidar profissional** para enviar um link individual de ativação, sem senha provisória. A gerência acompanha status, reenvia e revoga convites; o profissional cria a própria senha pelo link. Contas anteriores permanecem ativas e não há registro público. Configure transporte de e-mail real, `APP_URL` HTTPS e worker da fila antes de usar em produção. [Convites e ativação](docs/account-invitations.md) descreve configuração, expiração, segurança e regressão `npm run test:invitations:browser`.
+
+## Indicadores operacionais por setor
+
+Na gerência, **Relatórios → Cobertura e Indicadores** reúne total de plantões, cobertura, descobertos, trocas e ausências por setor. Consulte separadamente situação atual e registros do período; cobertura em plantões não representa horas. PDF e **Exportar setores CSV** respeitam os filtros aplicáveis, com CSV incluindo todas as páginas. [Definições dos indicadores](docs/sector-report-indicators.md) explica períodos, contadores, limites históricos e regressão no navegador (`npm run test:reports:browser`).

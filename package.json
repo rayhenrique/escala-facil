@@ -6,6 +6,7 @@
         "test:pwa": "node --test tests/js/service-worker.test.mjs tests/js/pwa-install.test.mjs",
         "test:auth": "node --test tests/js/auth.test.mjs",
         "test:filters:browser": "node tests/browser/operational-filters.mjs",
+        "test:reports:browser": "node tests/browser/sector-reports.mjs",
         "test:audit:browser": "node tests/browser/operational-audit.mjs",
         "test:preventive:browser": "node tests/browser/preventive-shift-alerts.mjs",
         "test:invitations:browser": "node tests/browser/account-invitations.mjs",
