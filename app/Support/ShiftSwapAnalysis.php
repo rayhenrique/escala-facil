@@ -14,21 +14,17 @@ class ShiftSwapAnalysis
     /** The same snapshot is used for review and again inside the decision transaction. */
     public function make(ShiftSwap $swap, User $manager): array
     {
+        Gate::forUser($manager)->authorize('viewAny', ShiftSwap::class);
         $swap->loadMissing(['shift.sector', 'shift.category', 'substituteShift.sector', 'substituteShift.category', 'requester', 'substitute']);
+        $eligibility = app(ShiftSwapApproval::class)->inspect($swap);
         $targets = collect([[$swap->substitute, $swap->shift], [$swap->requester, $swap->substituteShift]])
-            ->filter(fn ($pair) => $pair[1] !== null);
+            ->filter(fn ($pair) => $pair[0] !== null && $pair[1] !== null);
         $dates = $targets->map(fn ($pair) => $pair[1]->period()->start)->sort();
-        $pool = Shift::query()->whereIn('user_id', [$swap->requester_id, $swap->substitute_id])
+        $pool = $dates->isEmpty() ? collect() : Shift::query()->whereIn('user_id', [$swap->requester_id, $swap->substitute_id])
             ->where('status', ShiftStatus::Scheduled)
             ->whereBetween('date', [$dates->first()->subDay()->toDateString(), $dates->last()->addDay()->endOfDay()])
             ->whereNotIn('id', array_filter([$swap->shift_id, $swap->substitute_shift_id]))
             ->orderBy('id')->get();
-        $reference = $swap->created_at ?? now();
-        $counts = ShiftSwap::query()->where('status', ShiftSwapStatus::Approved)
-            ->whereMonth('created_at', $reference->month)->whereYear('created_at', $reference->year)
-            ->where(fn ($query) => $query->whereIn('requester_id', [$swap->requester_id, $swap->substitute_id])
-                ->orWhereIn('substitute_id', [$swap->requester_id, $swap->substitute_id]))
-            ->get(['id', 'requester_id', 'substitute_id']);
         $warnings = [];
         foreach ($targets as [$recipient, $candidate]) {
             foreach ($pool->where('user_id', $recipient->id) as $existing) {
@@ -36,32 +32,37 @@ class ShiftSwapAnalysis
                     continue;
                 }
                 $kind = $candidate->period()->overlaps($existing->period()) ? 'Conflito de horários' : 'Dobra';
-                $warnings[] = $kind.': '.$recipient->name.' já tem o plantão #'.$existing->id.' em '.ShiftCoverage::doubleShiftLabel($existing).'. '.($kind === 'Dobra' ? 'Aprove somente se a dobra for autorizada.' : 'Avalie a cobertura antes de aprovar.');
+                $warnings[] = $kind.': '.$recipient->name.' receberia o plantão #'.$candidate->id.' e já tem o plantão #'.$existing->id.' em '.ShiftCoverage::doubleShiftLabel($existing).'. '.($kind === 'Dobra' ? 'Aprove somente se a dobra for autorizada.' : 'Avalie a cobertura antes de aprovar.');
             }
         }
         $quotas = [];
-        foreach ([$swap->requester, $swap->substitute] as $participant) {
-            $count = $counts->filter(fn ($item) => $item->requester_id === $participant->id || $item->substitute_id === $participant->id)->count();
-            $quotas[] = $participant->name.': '.$count.' de '.User::MONTHLY_SWAP_LIMIT.' trocas aprovadas em '.$reference->format('m/Y').'.';
-            if ($count >= User::MONTHLY_SWAP_LIMIT) {
-                $warnings[] = 'Limite mensal atingido por '.$participant->name.'. A aprovação está indisponível.';
-            }
+        foreach ($eligibility['quotas'] as $quota) {
+            $quotas[] = $quota['name'].': '.$quota['count'].' de '.$quota['limit'].' trocas aprovadas em '.$quota['month'].'.'
+                .($swap->status === ShiftSwapStatus::PendingManager && $quota['count'] < $quota['limit'] ? ' Esta aprovação acrescenta 1 participação: '.($quota['count'] + 1).' de '.$quota['limit'].'.' : '');
         }
 
+        // Session, password and read-notification changes cannot invalidate a decision.
+        $shiftFields = ['id', 'date', 'end_date', 'start_time', 'end_time', 'sector_id', 'category_id', 'user_id', 'status'];
+        $userFields = ['id', 'name', 'role', 'sector_id', 'category_id', 'requires_activation'];
+
         return [
-            'shift' => $swap->shift->period()->datedLabel(),
-            'location' => $swap->shift->sector->name.' · '.$swap->shift->category->name,
-            'requester' => $swap->requester->name,
-            'substitute' => $swap->substitute->name,
-            'counterpart' => $swap->substituteShift?->period()->datedLabel(),
-            'counterpart_location' => $swap->substituteShift ? $swap->substituteShift->sector->name.' · '.$swap->substituteShift->category->name : null,
+            'shift' => $swap->shift?->period()->datedLabel() ?? 'Plantão #'.$swap->shift_id.' indisponível',
+            'location' => ($swap->shift?->sector?->name ?? 'Setor indisponível').' · '.($swap->shift?->category?->name ?? 'Categoria indisponível'),
+            'requester' => $swap->requester?->name ?? 'Solicitante indisponível',
+            'substitute' => $swap->substitute?->name ?? 'Substituto indisponível',
+            'counterpart' => $swap->substitute_shift_id ? ($swap->substituteShift?->period()->datedLabel() ?? 'Plantão #'.$swap->substitute_shift_id.' indisponível') : null,
+            'counterpart_location' => $swap->substitute_shift_id ? ($swap->substituteShift?->sector?->name ?? 'Setor indisponível').' · '.($swap->substituteShift?->category?->name ?? 'Categoria indisponível') : null,
             'warnings' => $warnings,
             'quotas' => $quotas,
-            'can_approve' => Gate::forUser($manager)->allows('approve', $swap),
+            'assignments' => $eligibility['assignments'],
+            'approval_blockers' => $eligibility['blockers'],
+            'can_approve' => $eligibility['blockers'] === [],
+            'can_reject' => Gate::forUser($manager)->allows('reject', $swap),
             'fingerprint' => hash('sha256', json_encode([
-                $swap->getAttributes(), $swap->shift->getAttributes(), $swap->substituteShift?->getAttributes(),
-                $swap->requester->getAttributes(), $swap->substitute->getAttributes(),
-                $pool->map->getAttributes()->all(), $counts->sortBy('id')->map->getAttributes()->values()->all(),
+                $swap->only(['id', 'shift_id', 'substitute_shift_id', 'requester_id', 'substitute_id', 'status', 'manager_id', 'created_at']),
+                $swap->shift?->only($shiftFields), $swap->substituteShift?->only($shiftFields),
+                $swap->requester?->only($userFields), $swap->substitute?->only($userFields),
+                $pool->map(fn (Shift $shift) => $shift->only($shiftFields))->all(), $eligibility['quotas'],
             ], JSON_THROW_ON_ERROR)),
         ];
     }

@@ -85,7 +85,7 @@ try {
     await first.getByRole('alertdialog').waitFor({ state: 'detached' });
     assert.equal(await first.locator(`[data-attention="${key}"]`).count(), 0);
     await second.getByRole('button', { name: 'Confirmar rejeição' }).click();
-    await second.getByRole('alertdialog').getByRole('alert').filter({ hasText: /mudaram|mudou|disponível/ }).waitFor();
+    await second.getByRole('alertdialog').getByRole('alert').filter({ hasText: /desatualizada|mudaram|mudou|disponível/ }).waitFor();
     await audit(second);
     if (out) await second.screenshot({ path: `${out}/stale-request.png` });
     await context.close();

@@ -2,9 +2,18 @@
 
 return [
     // Versão do código instalado. APP_VERSION não pode sobrepor este registro.
-    'current' => '1.32.0',
+    'current' => '1.32.1',
 
     'releases' => [
+        [
+            'version' => '1.32.1',
+            'date' => '2026-10-11',
+            'title' => 'Análise de trocas mais clara',
+            'summary' => 'Melhoramos a análise das trocas. Agora o sistema explica por que um pedido não pode ser aprovado.',
+            'highlights' => [
+                'Melhoramos a análise das trocas. Agora o sistema explica por que um pedido não pode ser aprovado.',
+            ],
+        ],
         [
             'version' => '1.32.0',
             'date' => '2026-10-11',

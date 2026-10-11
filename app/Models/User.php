@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\ShiftSwapStatus;
 use App\Enums\UserRole;
 use App\Models\Concerns\HasOperationalAudit;
+use Carbon\CarbonImmutable;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -99,19 +100,25 @@ class User extends Authenticatable
 
     public function hasReachedSwapLimit(int $month, int $year, bool $lockForUpdate = false): bool
     {
+        return $this->approvedSwapCount($month, $year, $lockForUpdate) >= self::MONTHLY_SWAP_LIMIT;
+    }
+
+    public function approvedSwapCount(int $month, int $year, bool $lockForUpdate = false): int
+    {
+        $start = CarbonImmutable::create($year, $month, 1, 0, 0, 0);
         $query = ShiftSwap::query()
             ->where('status', ShiftSwapStatus::Approved)
             ->where(function ($query) {
                 $query->where('requester_id', $this->getKey())
                     ->orWhere('substitute_id', $this->getKey());
             })
-            ->whereMonth('created_at', $month)
-            ->whereYear('created_at', $year);
+            ->where('created_at', '>=', $start)
+            ->where('created_at', '<', $start->addMonth());
 
         $participations = $lockForUpdate
             ? $query->lockForUpdate()->pluck('id')->count()
             : $query->count();
 
-        return $participations >= self::MONTHLY_SWAP_LIMIT;
+        return $participations;
     }
 }

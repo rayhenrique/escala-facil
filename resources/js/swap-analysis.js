@@ -26,11 +26,23 @@ export function registerSwapAnalysis(Livewire) {
             alert.focus();
         };
         onSend(() => setBusy(true));
-        if (hadDialog && [...message.actions].some((action) => ['reviewReallocation', 'returnToReallocation', 'requestDecision', 'returnToSwapAnalysis', 'returnToShiftForm'].includes(action.name ?? action.method))) {
+        if (hadDialog && [...message.actions].some((action) => ['reviewReallocation', 'returnToReallocation', 'requestDecision', 'returnToSwapAnalysis', 'returnToShiftForm', 'openSwapAnalysis', 'confirmDecision'].includes(action.name ?? action.method))) {
             onSuccess(({ onRender }) => onRender(() => {
                 requestAnimationFrame(() => {
                     const body = dialog()?.querySelector('.modal-body');
                     if (!body) return;
+                    const decisionError = dialog()?.querySelector('[data-swap-decision-error]');
+                    if (decisionError) {
+                        decisionError.scrollIntoView({ block: 'nearest' });
+                        decisionError.focus({ preventScroll: true });
+                        return;
+                    }
+                    const invalidField = body.querySelector('[aria-invalid="true"]');
+                    if (invalidField) {
+                        invalidField.scrollIntoView({ block: 'nearest' });
+                        invalidField.focus({ preventScroll: true });
+                        return;
+                    }
                     body.scrollTop = 0;
                     (body.querySelector('[x-ref="firstField"]') ?? body).focus({ preventScroll: true });
                 });

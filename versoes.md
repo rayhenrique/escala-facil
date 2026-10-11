@@ -6,6 +6,12 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.32.1 — 11/10/2026
+
+### Análise de trocas mais clara
+
+- Melhoramos a análise das trocas. Agora o sistema explica por que um pedido não pode ser aprovado.
+
 ## 1.32.0 — 11/10/2026
 
 ### Indicadores operacionais por setor

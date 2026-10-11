@@ -48,7 +48,7 @@ class DecideShiftSwapAction
                     ->orderBy('id')->lockForUpdate()->get()->keyBy('id');
                 $swap = ShiftSwap::query()->lockForUpdate()->findOrFail($id);
                 if ($reference->only(['shift_id', 'substitute_shift_id', 'requester_id', 'substitute_id']) !== $swap->only(['shift_id', 'substitute_shift_id', 'requester_id', 'substitute_id'])) {
-                    throw ValidationException::withMessages(['decision' => 'O pedido mudou. Feche e abra a análise novamente.']);
+                    throw ValidationException::withMessages(['decision' => 'Solicitação desatualizada: participantes ou plantões vinculados foram modificados. Atualize a análise antes de decidir.']);
                 }
                 $manager = $users->get($manager->id);
                 abort_unless($manager, 403);
@@ -60,7 +60,8 @@ class DecideShiftSwapAction
                 if ($expected !== null) {
                     $current = app(ShiftSwapAnalysis::class)->make($swap, $manager);
                     if (! hash_equals($expected, $current['fingerprint'])) {
-                        throw ValidationException::withMessages(['decision' => 'O pedido, os plantões ou os alertas mudaram. Feche e abra a análise novamente antes de decidir.']);
+                        $details = implode(' ', array_column($current['approval_blockers'], 'message'));
+                        throw ValidationException::withMessages(['decision' => 'Análise desatualizada. '.($details ?: 'Os horários, participantes, cotas ou alertas relevantes mudaram.').' Atualize a análise e confira os dados antes de decidir.']);
                     }
                 }
                 Gate::forUser($manager)->authorize($decision, $swap);

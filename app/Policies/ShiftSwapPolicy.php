@@ -7,6 +7,8 @@ use App\Enums\ShiftSwapStatus;
 use App\Enums\UserRole;
 use App\Models\ShiftSwap;
 use App\Models\User;
+use App\Support\ShiftSwapApproval;
+use Illuminate\Auth\Access\Response;
 
 class ShiftSwapPolicy
 {
@@ -57,32 +59,24 @@ class ShiftSwapPolicy
             && ! $user->hasReachedSwapLimit($referenceDate->month, $referenceDate->year);
     }
 
-    public function approve(User $user, ShiftSwap $shiftSwap): bool
+    public function approve(User $user, ShiftSwap $shiftSwap): Response
     {
-        if ($user->role !== UserRole::Manager
-            || $shiftSwap->status !== ShiftSwapStatus::PendingManager) {
-            return false;
+        if ($user->role !== UserRole::Manager) {
+            return Response::deny('Somente gerentes podem aprovar pedidos de troca.');
         }
+        $blockers = app(ShiftSwapApproval::class)->inspect($shiftSwap)['blockers'];
 
-        $shiftSwap->loadMissing(['requester', 'substitute', 'shift', 'substituteShift']);
-        $referenceDate = $shiftSwap->created_at ?? now();
-
-        return $shiftSwap->requester !== null
-            && $shiftSwap->substitute !== null
-            && $shiftSwap->shift !== null
-            && $shiftSwap->shift->user_id === $shiftSwap->requester_id
-            && $shiftSwap->shift->status === ShiftStatus::Scheduled
-            && (! $shiftSwap->substitute_shift_id || ($shiftSwap->substituteShift !== null
-                && $shiftSwap->substituteShift->user_id === $shiftSwap->substitute_id
-                && $shiftSwap->substituteShift->status === ShiftStatus::Scheduled))
-            && ! $shiftSwap->requester->hasReachedSwapLimit($referenceDate->month, $referenceDate->year)
-            && ! $shiftSwap->substitute->hasReachedSwapLimit($referenceDate->month, $referenceDate->year);
+        return $blockers === [] ? Response::allow() : Response::deny(implode(' ', array_column($blockers, 'message')));
     }
 
-    public function reject(User $user, ShiftSwap $shiftSwap): bool
+    public function reject(User $user, ShiftSwap $shiftSwap): Response
     {
-        return $user->role === UserRole::Manager
-            && $shiftSwap->status === ShiftSwapStatus::PendingManager;
+        if ($user->role !== UserRole::Manager) {
+            return Response::deny('Somente gerentes podem rejeitar pedidos de troca.');
+        }
+        $reason = ShiftSwapApproval::statusReason($shiftSwap);
+
+        return $reason === null ? Response::allow() : Response::deny($reason);
     }
 
     public function revert(User $user, ShiftSwap $shiftSwap): bool

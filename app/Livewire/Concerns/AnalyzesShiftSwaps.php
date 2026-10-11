@@ -32,7 +32,7 @@ trait AnalyzesShiftSwaps
     {
         $this->authorize('viewAny', ShiftSwap::class);
         $swap = ShiftSwap::query()->findOrFail($id);
-        $this->authorize('reject', $swap);
+        $this->authorize('view', $swap);
         if (method_exists($this, 'closeReallocation')) {
             $this->closeReallocation();
         }
@@ -51,7 +51,14 @@ trait AnalyzesShiftSwaps
         if ($this->pendingDecisionSwapId !== $shiftSwapId) {
             $this->openSwapAnalysis($shiftSwapId);
         }
-        $this->authorize($decision, ShiftSwap::query()->findOrFail($shiftSwapId));
+        try {
+            $this->authorize($decision, ShiftSwap::query()->findOrFail($shiftSwapId));
+        } catch (AuthorizationException $exception) {
+            $this->authorize('viewAny', ShiftSwap::class);
+            $this->addError('decision', $exception->getMessage());
+
+            return;
+        }
         $this->pendingDecision = $decision;
         $this->resetValidation();
     }
@@ -69,9 +76,9 @@ trait AnalyzesShiftSwaps
             $swap = $this->pendingDecision === 'approve'
                 ? $action->approve(auth()->user(), $this->pendingDecisionSwapId, $this->decisionSnapshot)
                 : $action->reject(auth()->user(), $this->pendingDecisionSwapId, $this->rejectionReason, $this->decisionSnapshot);
-        } catch (AuthorizationException) {
+        } catch (AuthorizationException $exception) {
             $this->authorize('viewAny', ShiftSwap::class);
-            $this->addError('decision', 'A decisão não está mais disponível. Feche e abra a análise novamente.');
+            $this->addError('decision', $exception->getMessage());
 
             return;
         }

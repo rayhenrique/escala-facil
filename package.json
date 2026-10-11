@@ -13,6 +13,7 @@
         "test:auth:browser": "node tests/browser/auth.mjs",
         "test:reallocation:browser": "node tests/browser/shift-reallocation.mjs",
         "test:swaps:browser": "node tests/browser/swap-analysis.mjs",
+        "test:swap-blockers:browser": "node tests/browser/swap-approval-blockers.mjs",
         "test:dashboard:browser": "node tests/browser/dashboard.mjs",
         "test:swaps": "node --test tests/js/swap-analysis.test.mjs",
         "test:context": "node --test tests/js/operational-navigation.test.mjs",

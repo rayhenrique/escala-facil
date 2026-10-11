@@ -4,10 +4,13 @@ import { registerSwapAnalysis } from '../../resources/js/swap-analysis.js';
 
 function harness(triggerAction = 'openSwapAnalysis(1)', shiftFlow = ['openCreateModal', 'edit'].includes(triggerAction), invitationFlow = false) {
     const events = [];
-    const alert = { hidden: true, textContent: '', focused: false, focus() { this.focused = true; } };
+    const alert = { hidden: true, textContent: '', focused: false, focus() { this.focused = true; }, querySelector() { return null; } };
     const trigger = { isConnected: true, focused: false, getAttribute: () => triggerAction, focus() { this.focused = true; } };
     let visible = false;
-    const overlay = { querySelector: () => alert, dispatchEvent: (event) => events.push(event.detail) };
+    let invalidField = null;
+    const body = { scrollTop: 100, focused: false, focus() { this.focused = true; }, querySelector: selector => selector === '[aria-invalid="true"]' ? invalidField : null };
+    let decisionError = null;
+    const overlay = { querySelector: selector => selector === '.modal-body' ? body : selector === '[data-swap-decision-error]' ? decisionError : alert, dispatchEvent: (event) => events.push(event.detail) };
     const component = { el: { hasAttribute: key => key === 'data-shift-assignment-flow' ? shiftFlow : invitationFlow, querySelector: () => visible ? overlay : null, querySelectorAll: () => [trigger] } };
     globalThis.document = { activeElement: trigger };
     globalThis.requestAnimationFrame = (callback) => callback();
@@ -20,7 +23,7 @@ function harness(triggerAction = 'openSwapAnalysis(1)', shiftFlow = ['openCreate
             onFailure: (cb) => hooks.failure = cb, onError: (cb) => hooks.error = cb });
         return hooks;
     }
-    return { alert, trigger, events, message, show: (value) => visible = value };
+    return { alert, body, trigger, events, message, show: (value) => visible = value, decisionError: value => { decisionError = value; }, invalidField: value => { invalidField = value; } };
 }
 
 test('busy state blocks escape until server completion and returns focus after closing', () => {
@@ -49,6 +52,30 @@ test('failed requests retain review and explain revalidation instead of claiming
     request.error({ response: { status: 419 }, preventDefault() { prevented = true; } });
     assert.equal(prevented, true);
     assert.match(h.alert.textContent, /sessão expirou/);
+});
+
+test('explicit analysis refresh restores body focus and stale decisions focus their specific reason', () => {
+    const h = harness(); h.show(true);
+    const refresh = h.message('openSwapAnalysis');
+    refresh.success({ onRender(callback) { callback(); } });
+    assert.equal(h.body.scrollTop, 0);
+    assert.equal(h.body.focused, true);
+    const error = { scrolled: false, focused: false, scrollIntoView() { this.scrolled = true; }, focus() { this.focused = true; } };
+    h.decisionError(error);
+    const confirm = h.message('confirmDecision');
+    confirm.success({ onRender(callback) { callback(); } });
+    assert.equal(error.scrolled, true);
+    assert.equal(error.focused, true);
+});
+
+test('rejection validation brings the invalid justification field into view and focuses it', () => {
+    const h = harness(); h.show(true);
+    const field = { scrolled: false, focused: false, scrollIntoView() { this.scrolled = true; }, focus() { this.focused = true; } };
+    h.invalidField(field);
+    h.message('confirmDecision').success({ onRender(callback) { callback(); } });
+    assert.equal(field.scrolled, true);
+    assert.equal(field.focused, true);
+    assert.equal(h.body.focused, false);
 });
 
 test('reallocation shares busy feedback and returns focus to the original control', () => {

@@ -22,10 +22,12 @@ class ConcurrentSwapDecisionTest extends TestCase
                 $manager=App\\Models\\User::factory()->create(["role"=>"manager"]);
                 $shift=App\\Models\\Shift::factory()->create(["status"=>"scheduled"]);
                 $sub=App\\Models\\User::factory()->create();
-                $swap=App\\Models\\ShiftSwap::factory()->create(["shift_id"=>$shift->id,"requester_id"=>$shift->user_id,"substitute_id"=>$sub->id,"status"=>"pending_manager"]);
-                echo json_encode([$manager->id,$swap->id]);'], base_path(), $environment);
+                $counterpart=$shift->replicate();
+                $counterpart->fill(["user_id"=>$sub->id,"date"=>$shift->date->copy()->addDay()])->save();
+                $swap=App\\Models\\ShiftSwap::factory()->create(["shift_id"=>$shift->id,"substitute_shift_id"=>$counterpart->id,"requester_id"=>$shift->user_id,"substitute_id"=>$sub->id,"status"=>"pending_manager"]);
+                echo json_encode([$manager->id,$swap->id,$counterpart->id]);'], base_path(), $environment);
             $seed->mustRun();
-            [$managerId, $swapId] = json_decode($seed->getOutput(), true, flags: JSON_THROW_ON_ERROR);
+            [$managerId, $swapId, $counterpartId] = json_decode($seed->getOutput(), true, flags: JSON_THROW_ON_ERROR);
             $worker = $boot.'
                 $manager=App\\Models\\User::findOrFail((int)$argv[1]);
                 file_put_contents($argv[3].".".$argv[4], "ready");
@@ -63,6 +65,8 @@ class ConcurrentSwapDecisionTest extends TestCase
             $status = $record['status'];
             $this->assertContains($status, [ShiftSwapStatus::Approved->value, ShiftSwapStatus::Rejected->value]);
             $this->assertSame((int) ($status === ShiftSwapStatus::Approved->value ? $record['substitute_id'] : $record['requester_id']), (int) $record['user_id']);
+            $counterpartOwner = $pdo->query('SELECT user_id FROM shifts WHERE id = '.(int) $counterpartId)->fetchColumn();
+            $this->assertSame((int) ($status === ShiftSwapStatus::Approved->value ? $record['requester_id'] : $record['substitute_id']), (int) $counterpartOwner);
             $audit = $pdo->prepare("SELECT author_id, action FROM operational_audit_events WHERE entity_type = 'swap' AND entity_id = ? AND action IN ('approved', 'rejected')");
             $audit->execute([$swapId]);
             $decisions = $audit->fetchAll(\PDO::FETCH_ASSOC);

@@ -252,3 +252,9 @@ O módulo Usuários reutiliza seu modal de cadastro em uma variante de convite: 
 Relatórios apresenta duas tabelas gerenciais: situação atual dos plantões do mês e registros do período. Total, cobertos, sem cobertura, descobertos e ausência informada não se confundem com contagem de pedidos de troca ou registros de ausência. Proporções mostram numerador e denominador, “—” quando indefinidas; setores sem movimento permanecem com zero. Não há gráficos decorativos ou métricas de desempenho. Tabelas com rolagem interna recebem foco por teclado; no celular, cartões com listas de definição mostram os mesmos indicadores. A paginação por setor usa os controles existentes. PDF consolidado e CSV reutilizam filtros e definições, sem mudar a identidade visual.
 
 As definições completas dos indicadores ficam em um disclosure nativo com summary, acionável por teclado. O período e a fórmula resumida permanecem visíveis; no PDF, as definições são impressas integralmente.
+
+## Razões de bloqueio na análise de trocas
+
+O modal existente mostra conferência dos dois plantões, cotas atuais e participação após aprovação. Avisos de horário usam borda primary/texto ink e ficam separados dos impedimentos em danger. Um botão Aprovar desabilitado referencia as razões específicas com aria-describedby; não há mensagem genérica de atribuição ou cota. Falha de revisão mostra a condição atual e oferece Atualizar análise, que apenas recarrega a conferência. O erro recebe foco e a atualização retorna ao início do corpo do modal. Decisões concluídas ficam somente para consulta, sem ações habilitadas. Composição, tipografia, tokens e confirmação explícita são preservados.
+
+Os impedimentos aparecem primeiro no corpo do modal, antes dos dados de conferência, para explicar imediatamente o botão desabilitado. As atribuições mostram nomes dos participantes com IDs quando conhecidos.

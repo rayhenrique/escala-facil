@@ -186,3 +186,9 @@ Os formulários de acesso não abrem o teclado automaticamente. E-mail usa tecla
 - Tabelas usam cabeçalhos semânticos e rolagem acessível por teclado; cartões equivalentes no celular. Sem redesenho, gráficos desnecessários ou avaliação profissional.
 
 As definições completas dos indicadores ficam em um disclosure nativo com summary, acionável por teclado. O período e a fórmula resumida permanecem visíveis; no PDF, as definições são impressas integralmente.
+
+## Razões de bloqueio na análise de trocas
+
+O modal existente mostra conferência dos dois plantões, cotas atuais e participação após aprovação. Avisos de horário usam borda primary/texto ink e ficam separados dos impedimentos em danger. Um botão Aprovar desabilitado referencia as razões específicas com aria-describedby; não há mensagem genérica de atribuição ou cota. Falha de revisão mostra a condição atual e oferece Atualizar análise, que apenas recarrega a conferência. O erro recebe foco e a atualização retorna ao início do corpo do modal. Decisões concluídas ficam somente para consulta, sem ações habilitadas. Composição, tipografia, tokens e confirmação explícita são preservados.
+
+Impedimentos ficam no início da análise; ausência de conflito não os oculta. Atribuição prevista e atual identificam os participantes por nome/ID quando conhecidos.
