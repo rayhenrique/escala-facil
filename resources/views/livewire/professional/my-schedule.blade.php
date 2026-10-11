@@ -2,7 +2,7 @@
     <div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
             <p class="eyebrow">Área profissional</p>
-            <h1 class="page-title">Minha escala</h1>
+            <h1 id="professional-home" tabindex="-1" class="page-title">Minha escala</h1>
             <p class="page-description">Consulte seus plantões, negocie trocas e informe ausências.</p>
         </div>
         <div class="w-full sm:w-auto"><label for="month" class="field-label">Mês exibido</label><input wire:model.live="month" id="month" type="month" class="field-input sm:w-48"></div>
@@ -28,7 +28,7 @@
 
     @if ($incomingSwaps->isNotEmpty())
         <section class="mt-8" aria-labelledby="incoming-title">
-            <div class="flex items-end justify-between gap-4"><div><p class="eyebrow">Sua resposta</p><h2 id="incoming-title" class="mt-2 text-xl font-semibold">Pedidos para você cobrir</h2></div><span class="count-badge">{{ $incomingSwaps->total() }}</span></div>
+            <div class="flex items-end justify-between gap-4"><div><p class="eyebrow">Sua resposta</p><h2 id="incoming-title" tabindex="-1" class="mt-2 text-xl font-semibold">Pedidos para você cobrir</h2></div><span class="count-badge">{{ $incomingSwaps->total() }}</span></div>
             <div class="mt-4 grid gap-4 lg:grid-cols-2">
                 @foreach ($incomingSwaps as $swap)
                     <article class="panel" wire:key="incoming-swap-{{ $swap->id }}">
@@ -94,7 +94,7 @@
     @endif
 
     <section class="mt-10" aria-labelledby="schedule-title">
-        <div><p class="eyebrow">Agenda mensal</p><h2 id="schedule-title" class="mt-2 text-xl font-semibold">Seus plantões</h2></div>
+        <div><p class="eyebrow">Agenda mensal</p><h2 id="schedule-title" tabindex="-1" class="mt-2 text-xl font-semibold">Seus plantões</h2></div>
         <div class="mt-5 grid gap-4 lg:grid-cols-2">
             @forelse ($shifts as $shift)
                 @php
@@ -173,7 +173,7 @@
     </section>
 
     <section class="panel mt-10" aria-labelledby="my-swaps-title">
-        <p class="eyebrow">Acompanhamento</p><h2 id="my-swaps-title" class="mt-2 text-xl font-semibold">Minhas solicitações de troca</h2>
+        <p class="eyebrow">Acompanhamento</p><h2 id="my-swaps-title" tabindex="-1" class="mt-2 text-xl font-semibold">Minhas solicitações de troca</h2>
         <div class="mt-5 divide-y divide-line">
             <div class="mb-4">
                 <label for="personal-swap-status" class="field-label">Situação das minhas trocas</label>
@@ -202,6 +202,9 @@
                 <p class="py-4 text-sm text-muted">Nenhuma solicitação corresponde aos filtros. Ajuste a pesquisa ou limpe os filtros.</p>
             @endforelse
         </div>
+        @if ($incomingSwaps->total())
+            <a href="#incoming-title" class="mt-3 inline-flex min-h-11 items-center font-semibold text-primary">Ver {{ $incomingSwaps->total() }} pedido(s) aguardando sua resposta</a>
+        @endif
         <div class="mt-4">{{ $mySwaps->links() }}</div>
     </section>
 

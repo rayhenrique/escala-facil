@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { actionDialog, toastMessage, registerMobileUi } from '../../resources/js/mobile-ui.js';
+import { actionDialog, toastMessage, registerMobileUi, mobileNavigation } from '../../resources/js/mobile-ui.js';
 
 function dialogHarness() {
  const events=[];
@@ -51,7 +51,7 @@ test('registers once and overlapping Livewire requests keep the dialog busy unti
  const events=[],hooks=[],data=[];
  let intercept;
  const livewire={interceptMessage:cb=>intercept=cb};const alpine={data:(name)=>data.push(name)};
- registerMobileUi(livewire,alpine);registerMobileUi(livewire,alpine);assert.deepEqual(data,['actionDialog','toastMessage']);
+ registerMobileUi(livewire,alpine);registerMobileUi(livewire,alpine);assert.deepEqual(data,['actionDialog','toastMessage','mobileNavigation']);
  const node={dispatchEvent:e=>events.push(e.detail)};
  const component={el:{querySelector:()=>node}};
  for(let i=0;i<2;i++) {
@@ -69,4 +69,29 @@ test('transport failure keeps the dialog visible and validation focuses the inva
  intercept({message:{component},onSend:()=>{},onFinish:()=>{},onSuccess:cb=>hooks.success=cb,onFailure:cb=>hooks.failure=cb});
  hooks.failure();assert.equal(alert.hidden,false);assert(alert.focused);
  hooks.success({onRender:cb=>cb()});assert(field.focused&&field.scrolled);
+});
+
+test('client controlled dialogs stay closed initially and restore focus after local closure',()=>{
+ const {events,field,origin}=dialogHarness();let active=false,watch;
+ document.activeElement=origin;
+ const ui=actionDialog({active:()=>active,close:()=>{active=false;watch(false);}});
+ ui.$el={querySelectorAll:()=>[field],querySelector:()=>field,contains:()=>false};ui.$nextTick=fn=>fn();ui.$watch=(getter,cb)=>watch=cb;
+ ui.init();assert.equal(ui.opened,false);
+ active=true;watch(true);assert.equal(ui.opened,true);assert.equal(events.at(-1),'field-focus');
+ document.activeElement=document.body;ui.requestClose();assert.equal(events.at(-1),'return-focus');ui.destroy();
+});
+
+test('professional anchors select one destination and keyboard listeners are removed on navigation',()=>{
+ const listeners=[];const removed=[];const classes=new Set();
+ const surface={addEventListener:(name,cb)=>listeners.push([name,cb]),removeEventListener:(name)=>removed.push(name)};
+ const viewport={...surface,height:900};
+ globalThis.window={...surface,innerHeight:900,innerWidth:390,visualViewport:viewport,location:{hash:'#schedule-title'}};
+ globalThis.document={...surface,activeElement:{matches:()=>false},querySelector:()=>null,body:{classList:{toggle:(key,value)=>value?classes.add(key):classes.delete(key),remove:key=>classes.delete(key)}}};
+ globalThis.requestAnimationFrame=fn=>fn();
+ const ui=mobileNavigation({group:'home',professional:true});ui.$nextTick=fn=>fn();ui.init();assert(ui.isActive('schedule'));assert(!ui.isActive('home'));
+ window.location.hash='#my-swaps-title';listeners.find(([name])=>name==='hashchange')[1]();assert(ui.isActive('swaps'));
+ document.activeElement={matches:()=>true};viewport.height=550;listeners.find(([name])=>name==='resize')[1]();assert(ui.keyboardOpen);assert(classes.has('mobile-keyboard-open'));
+ document.activeElement={matches:()=>false};viewport.height=900;listeners.find(([name])=>name==='resize')[1]();assert(!ui.keyboardOpen);
+ ui.menuOpen=true;window.innerWidth=1440;listeners.find(([name])=>name==='resize')[1]();assert(!ui.menuOpen);
+ ui.destroy();assert.equal(removed.length,listeners.length);assert.equal(classes.size,0);
 });

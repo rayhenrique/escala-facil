@@ -1,23 +1,25 @@
 @props([
-    'show' => false, 'id', 'title', 'eyebrow' => null, 'closeAction',
+    'show' => false, 'id', 'title', 'eyebrow' => null, 'closeAction' => null, 'clientState' => null, 'closeEvent' => null,
     'submitAction' => null, 'role' => 'dialog', 'maxWidth' => 'lg',
     'trackChanges' => false, 'initialFocus' => null, 'returnFocus' => null,
     'restoreFocus' => true, 'busyAction' => null,
 ])
 @php
+    if ($clientState !== null && ! preg_match('/^[a-zA-Z][a-zA-Z0-9_]*$/', $clientState)) throw new InvalidArgumentException('Estado local da janela inválido.');
     $width = ['sm' => 'max-w-sm', 'md' => 'max-w-md', 'lg' => 'max-w-lg', 'xl' => 'max-w-xl', '2xl' => 'max-w-2xl'][$maxWidth] ?? 'max-w-lg';
 @endphp
 @if ($show)
     <div {{ $attributes->class(['modal-overlay']) }}
-        x-data="actionDialog({ close: () => $wire.call(@js($closeAction)), trackChanges: @js($trackChanges), initialFocus: @js($initialFocus), returnFocus: @js($returnFocus), restoreFocus: @js($restoreFocus) })"
-        x-trap.inert.noscroll.noautofocus.noreturn="true"
+        x-data="actionDialog({ close: () => {{ $closeEvent ? '$dispatch(' : '$wire.call(' }}@js($closeEvent ?? $closeAction)), active: {{ $clientState ? '() => '.$clientState : 'null' }}, trackChanges: @js($trackChanges), initialFocus: @js($initialFocus), returnFocus: @js($returnFocus), restoreFocus: @js($restoreFocus) })"
+        x-trap.inert.noscroll.noautofocus.noreturn="{{ $clientState ?? 'true' }}"
+        @if ($clientState) x-show="{{ $clientState }}" x-cloak @endif
         @keydown.escape.stop.prevent="requestClose()" @input="changed()" @change="changed()"
         @ui-dialog-busy="busy = $event.detail"
         @if ($busyAction) data-decision-component="{{ $this->getId() }}" x-on:swap-decision-busy.window="busy = $event.detail" @endif
         @if (! $busyAction && isset($this) && $this instanceof \Livewire\Component) data-ui-dialog-component="{{ $this->getId() }}" @endif
     >
         <div class="modal-backdrop" aria-hidden="true" @click="requestClose()"></div>
-        <section class="modal-dialog {{ $width }} {{ $role === 'alertdialog' ? 'confirmation-dialog' : '' }}" role="{{ $role }}" aria-modal="true" aria-labelledby="{{ $id }}-title" aria-describedby="{{ $id }}-description" :aria-busy="busy.toString()"
+        <section id="{{ $id }}" class="modal-dialog {{ $width }} {{ $role === 'alertdialog' ? 'confirmation-dialog' : '' }}" role="{{ $role }}" aria-modal="true" aria-labelledby="{{ $id }}-title" aria-describedby="{{ $id }}-description" :aria-busy="busy.toString()"
             >
             @if ($submitAction)
                 <form class="modal-form" method="post" wire:submit="{{ $submitAction }}" novalidate>

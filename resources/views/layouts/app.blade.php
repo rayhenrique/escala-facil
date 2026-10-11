@@ -19,7 +19,7 @@
         @keydown.escape.window="navigationOpen = false"
         x-on:livewire:navigated.window="navigationOpen = false"
     >
-        <div class="app-shell" :class="{ 'app-shell-collapsed': sidebarCollapsed }">
+        <div class="app-shell mobile-navigation-space" :class="{ 'app-shell-collapsed': sidebarCollapsed }">
             <div
                 x-cloak
                 x-show="navigationOpen"
@@ -31,7 +31,7 @@
 
             <aside
                 id="primary-sidebar"
-                class="app-sidebar"
+                class="app-sidebar hidden lg:flex"
                 :class="{ 'app-sidebar-open': navigationOpen, 'app-sidebar-collapsed': sidebarCollapsed }"
                 aria-label="Barra lateral principal"
             >
@@ -153,21 +153,10 @@
 
             <div class="flex min-h-screen min-w-0 flex-col">
                 <header class="mobile-topbar">
-                    <button
-                        type="button"
-                        class="button-secondary size-11 p-0"
-                        @click="navigationOpen = true"
-                        :aria-expanded="navigationOpen.toString()"
-                        aria-controls="primary-sidebar"
-                        aria-label="Abrir menu principal"
-                    >
-                        <x-nav-icon name="menu" class="size-5" />
-                    </button>
                     <a href="{{ route('dashboard') }}" wire:navigate class="brand-lockup text-ink">
                         <x-application-logo class="size-9" />
                         <span>Escala Fácil</span>
                     </a>
-                    <span class="size-11" aria-hidden="true"></span>
                 </header>
 
                 <main class="mx-auto w-full max-w-page flex-1 px-4 py-8 sm:px-8 sm:py-12 lg:px-10 lg:py-14">
@@ -176,6 +165,7 @@
                 <x-system-footer class="mx-4 sm:mx-8 lg:mx-10" />
             </div>
         </div>
+        <livewire:mobile-navigation />
         <livewire:release-announcement />
         @livewireScriptConfig
     </body>

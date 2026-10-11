@@ -31,7 +31,7 @@ A biblioteca usa os tokens de `resources/css/app.css`, as regras de `DESIGN.md` 
 </x-bottom-sheet>
 ```
 
-`action-modal` possui a mesma API e aceita `role`, `restore-focus` e `busy-action`. `heading` é opcional e deve conter o título com ID `{id}-title`. IDs devem ser únicos; o componente associa título e descrição automaticamente. `close-action` e `submit-action` são métodos Livewire existentes, definidos pela aplicação, não por entrada do usuário. Use botões nativos para ações e links para navegação. O slot `actions` permanece fora do corpo rolável; não aninhe outro form quando usar submit-action.
+`action-modal` possui a mesma API e aceita `role`, `restore-focus` e `busy-action`. Janelas locais, como Menu móvel, usam client-state (identificador Alpine validado) e close-event; o componente começa fechado, acompanha abertura/fechamento e compartilha o mesmo controle de foco. `heading` é opcional e deve conter o título com ID `{id}-title`. IDs devem ser únicos; o componente associa título e descrição automaticamente. `close-action` e `submit-action` são métodos Livewire existentes, definidos pela aplicação, não por entrada do usuário. Use botões nativos para ações e links para navegação. O slot `actions` permanece fora do corpo rolável; não aninhe outro form quando usar submit-action.
 
 `track-changes` compara os valores locais iniciais com os campos atuais. Escape, Cancelar, X e fundo solicitam fechamento; se houver mudanças, é necessário escolher Continuar editando ou Descartar alterações. Reverter os campos aos valores iniciais remove o bloqueio. Não confunda esse recurso com proteção contra concorrência ou persistência no backend. O sucesso do servidor fecha normalmente. Atualizar/fechar o navegador não salva um rascunho.
 

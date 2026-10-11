@@ -4,7 +4,7 @@
 
 Sistema interno para gestão de escalas médicas, plantões, trocas e ausências em unidades de saúde. A aplicação centraliza a operação da gerência, permite que profissionais acompanhem a própria agenda e aplica as regras de compatibilidade e limite mensal em todas as decisões de troca.
 
-**Versão atual:** `1.36.0` — consulte o histórico completo em [`versoes.md`](versoes.md).
+**Versão atual:** `1.37.0` — consulte o histórico completo em [`versoes.md`](versoes.md).
 
 Desenvolvido por [KL Tecnologia](https://kltecnologia.com).
 
@@ -158,7 +158,7 @@ Crie um banco MySQL chamado `escala_facil` e ajuste o `.env`:
 APP_NAME="Escala Fácil"
 APP_URL=http://127.0.0.1:8000
 APP_TIMEZONE=America/Maceio
-APP_VERSION=1.36.0
+APP_VERSION=1.37.0
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR
 APP_FAKER_LOCALE=pt_BR
@@ -456,6 +456,7 @@ Regressão da consulta: `npm run test:audit:browser`, com fixture local descart�
 - [`DESIGN.md`](DESIGN.md): identidade visual e regras da interface;
 - [`UX-CONTRACT.md`](UX-CONTRACT.md): navegação, estados, feedback e responsividade;
 - [`docs/mobile-components.md`](docs/mobile-components.md): biblioteca Mobile First, APIs, adoção gradual e testes;
+- [`docs/mobile-navigation.md`](docs/mobile-navigation.md): destinos móveis por perfil, contadores, permissões e testes;
 - [`versoes.md`](versoes.md): histórico completo e processo de lançamento;
 - [`deploy.md`](deploy.md): instalação e atualização na VPS Hostinger com CloudPanel;
 - [`.cursorrules.json`](.cursorrules.json): convenções técnicas do projeto.

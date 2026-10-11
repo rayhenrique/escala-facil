@@ -14,7 +14,7 @@ Este documento registra o comportamento compartilhado das telas autenticadas. As
 
 | Capacidade | Responsável canônico | Variantes permitidas | Verificação |
 | --- | --- | --- | --- |
-| Navegação | sidebar em `resources/views/layouts/app.blade.php` | fixa e recolhível no desktop; gaveta no celular | rota ativa, persistência do toggle, ícones com texto e fechamento da gaveta |
+| Navegação | sidebar em `resources/views/layouts/app.blade.php` | fixa e recolhível no desktop; barra inferior + Menu no celular | rota ativa, persistência do toggle, ícones com texto, foco e fechamento do Menu |
 | Campos e formulários | classes compartilhadas de `resources/css/app.css` + Form Requests | criar, editar, troca e ausência | validação próxima ao campo e testes Livewire |
 | Acesso e recuperação | `layouts/guest` + componentes `auth/form`, `auth/password-field`, `auth/submit` + módulos Livewire Auth | login, solicitar recuperação e definir senha | campos nativos com autofill, erros associados, foco no primeiro inválido, carregamento, recuperação de falha e política de sessão preservada |
 | Seleção | elemento HTML `select` com `field-input` | simples | rótulo, teclado e valor persistido |
@@ -54,7 +54,7 @@ Este documento registra o comportamento compartilhado das telas autenticadas. As
 - Links podem antecipar a navegação com Livewire, mas a autorização permanece obrigatória no servidor.
 - A rota ativa recebe indicação visual e `aria-current="page"`.
 - No desktop, o toggle alterna a sidebar entre 18rem e 6rem e persiste a preferência no navegador; Usuários é o último item dos módulos gerenciais.
-- No celular, o botão “Abrir menu principal” exibe a sidebar como gaveta. A gaveta fecha pelo botão, pelo fundo de proteção, pela tecla `Esc` ou após a escolha de uma rota.
+- No celular, o botão Menu da barra inferior (“Abrir menu principal”) exibe os demais módulos autorizados na janela responsiva compartilhada. Ela fecha pelo botão, pelo fundo de proteção, pela tecla `Esc` ou após a escolha de uma rota, com foco preso e retorno ao acionador. A sidebar permanece restrita ao desktop.
 - Uma resposta 403 deve preservar a possibilidade de retorno a uma área autorizada.
 - Notificações e Ajuda e versões pertencem ao grupo Suporte e estão disponíveis para gerente e profissional; o número da versão atual aparece na sidebar.
 - O item Notificações mostra um contador de não lidas, inclusive quando a sidebar está recolhida, e atualiza o total periodicamente.
@@ -96,7 +96,7 @@ Os formulários de acesso não abrem o teclado automaticamente. E-mail usa tecla
 
 - O conteúdo usa largura máxima de 76rem e margens adaptáveis.
 - Todos os fluxos começam em uma coluna e controles ocupam a largura disponível no celular.
-- A sidebar fica fixa e recolhível a partir de `lg`; abaixo desse breakpoint, uma barra móvel compacta apresenta marca e botão do menu, sem exibir o toggle do desktop.
+- A sidebar fica fixa e recolhível a partir de `lg`; abaixo desse breakpoint, o cabeçalho móvel apresenta a marca, e a barra inferior concentra os destinos principais e Menu, sem exibir o toggle do desktop.
 - Modais ocupam a largura disponível no celular, mantêm cabeçalho e ações visíveis e permitem rolagem interna do formulário.
 - Tabelas são usadas a partir do breakpoint médio. No celular, os mesmos registros aparecem como cartões com editar e excluir visíveis.
 - Métricas do painel se empilham no celular e formam colunas no desktop.
@@ -218,3 +218,9 @@ Os cartões iniciam recolhidos e mantêm a situação atual visível junto ao ev
 A base canônica action-modal fornece aria-modal, título/descrição associados, focus trap, fundo inerte e bloqueio de scroll. Foco inicial é configurável; confirmação começa no cancelamento. Desmontar restaura o acionador ou um destino de retorno conectado, sem roubar foco de uma nova tela. Escape, Cancelar, X e fundo percorrem a mesma função; com track-changes, mudanças locais exigem descarte explícito, mantendo a edição e o foco quando o usuário continua. Durante requisições, fechamento fica bloqueado; falha preserva dados e validação foca o campo inválido. Controle de decisão operacional continua no interceptor existente.
 
 Bottom sheet e modal compartilham estrutura: mobile encostado na base, desktop centralizado, corpo rolável e ações fora da rolagem. Altura limitada à viewport dinâmica, áreas seguras e movimento reduzido são respeitados. Toast de sucesso pausa em hover/foco e limpa timer ao desmontar; erro permanece até fechamento. Botões ocupados preservam geometria. Etapas usam lista textual, etapa atual com aria-current e conclusão explícita. Implementação canônica e APIs: docs/mobile-components.md. Integração inicial em Setores; outros formulários são migrados gradualmente, sem mudança de regras ou autorização.
+
+## Barra inferior por perfil
+
+MobileNavigation oferece Início/Calendário/Trocas/Menu ao gerente e Início/Escala/Trocas/Menu ao profissional. O Menu contém somente os demais módulos e suporte, segundo papel, Policies e rotas existentes. Profissionais usam âncoras da própria Minha escala para preservar filtros e estado; a partir de outra tela, o link abre a rota autorizada com fragmento. Hash, refresh e foco no título do bloco mantêm o destino. Trocas aponta ao histórico e permite saltar para pedidos aguardando resposta quando disponíveis.
+
+A rota ativa, inclusive subrotas e blocos profissionais, recebe aria-current e destaque sem depender apenas de cor. Nome de rota é Locked durante atualizações; autorização continua no servidor. Contadores usam pedidos aguardando decisão/resposta e notificações próprias, com evento notifications-updated e polling somente da barra visível. Eles não gravam leitura ou histórico. Barra tem quatro alvos de pelo menos 44px e reserva inferior para não cobrir paginação, formulários ou rodapé; sheets/modais têm camada superior, toasts ficam no topo. Viewport reduzida durante edição oculta a barra até o retorno do teclado, respeitando áreas seguras. Abrir Menu prende foco e bloqueia o fundo; fechar ou mudar para desktop libera foco/scroll. Saída e sessão expirada mantêm o fluxo e os controles de acesso existentes. Sidebar desktop não foi reorganizada.

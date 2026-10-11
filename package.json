@@ -3,6 +3,7 @@
     "private": true,
     "type": "module",
     "scripts": {
+        "test:mobile-navigation:browser": "node tests/browser/mobile-navigation.mjs",
         "test:mobile-ui": "node --test tests/js/mobile-ui.test.mjs",
         "test:mobile-ui:browser": "node tests/browser/mobile-components.mjs",
         "test:runtime": "node --test tests/js/livewire-runtime.test.mjs",

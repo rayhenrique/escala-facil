@@ -278,3 +278,9 @@
   - [x] Foco, trap, fundo inerte, área segura, busy e descarte explícito no piloto Setores.
   - [x] Botões, ícones, loading, estado vazio e etapas reutilizáveis.
   - [x] Contratos, exemplos e testes de componentes/interação/acessibilidade.
+
+- [x] **Navegação móvel por perfil (1.37.0)**
+  - [x] Barra de quatro destinos e Menu autorizado sem duplicar destinos principais.
+  - [x] Preservar sidebar desktop, rotas, sessão e isolamento profissional.
+  - [x] Âncoras profissionais, contadores, foco, teclado, áreas seguras e reserva inferior.
+  - [x] Regressões por perfil, logout, sessão ausente, Livewire, acessibilidade e PWA.
