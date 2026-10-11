@@ -192,3 +192,7 @@ As definições completas dos indicadores ficam em um disclosure nativo com summ
 O modal existente mostra conferência dos dois plantões, cotas atuais e participação após aprovação. Avisos de horário usam borda primary/texto ink e ficam separados dos impedimentos em danger. Um botão Aprovar desabilitado referencia as razões específicas com aria-describedby; não há mensagem genérica de atribuição ou cota. Falha de revisão mostra a condição atual e oferece Atualizar análise, que apenas recarrega a conferência. O erro recebe foco e a atualização retorna ao início do corpo do modal. Decisões concluídas ficam somente para consulta, sem ações habilitadas. Composição, tipografia, tokens e confirmação explícita são preservados.
 
 Impedimentos ficam no início da análise; ausência de conflito não os oculta. Atribuição prevista e atual identificam os participantes por nome/ID quando conhecidos.
+
+## Continuidade da navegação e dos modais
+
+Livewire/Alpine e os interceptores iniciam uma vez por documento. Se o JavaScript instalado mudar durante wire:navigate, o destino é recarregado antes de iniciar outro runtime, mantendo a URL e seus filtros. Os modais conservam foco, fundo inerte, validação e cancelamento; os controles ficam ocupados apenas durante a requisição. Detalhes e diagnóstico estão em docs/frontend-runtime.md.

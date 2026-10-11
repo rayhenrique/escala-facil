@@ -1,38 +1,4 @@
-import './bootstrap';
-
-import { Livewire } from '../../vendor/livewire/livewire/dist/livewire.esm';
-import { initLandingPage } from './landing';
-import { registerAuthUi } from './auth';
-import { initPwaInstall } from './pwa-install';
-import { initOperationalNavigation } from './operational-navigation';
-import { registerSwapAnalysis } from './swap-analysis';
-
-registerAuthUi(Livewire);
-registerSwapAnalysis(Livewire);
-initPwaInstall();
-document.addEventListener('livewire:navigated', initOperationalNavigation);
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initOperationalNavigation);
-} else {
-    initOperationalNavigation();
-}
-Livewire.start();
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initLandingPage);
-} else {
-    initLandingPage();
-}
-
-document.addEventListener('livewire:navigated', initLandingPage);
-
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js', { scope: '/', updateViaCache: 'none' }).catch(() => {
-            // A aplicação continua funcional quando o navegador bloqueia service workers.
-        });
-    }, { once: true });
-}
+import { bootLivewire } from './livewire-runtime';
 
 let lastNotifiedUnreadCount = null;
 
@@ -111,9 +77,6 @@ export const printSwapReceipt = (triggerElement) => {
     }
 };
 
-window.syncAppBadge = syncAppBadge;
-window.requestDeviceNotificationPermission = requestDeviceNotificationPermission;
-
 const initErrorReporting = () => {
     if (! document.body.hasAttribute('data-error-reporting') || window.__escalaFacilErrorReporting) {
         return;
@@ -176,11 +139,50 @@ const initErrorReporting = () => {
     });
 };
 
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initErrorReporting);
-} else {
-    initErrorReporting();
-}
-
-document.addEventListener('livewire:navigated', initErrorReporting);
+bootLivewire({
+    window,
+    asset: import.meta.url,
+    load: () => import('../../vendor/livewire/livewire/dist/livewire.esm'),
+    initialize: async ({ Livewire }) => {
+        const [, { registerAuthUi }, { initPwaInstall }, { initOperationalNavigation }, { registerSwapAnalysis }] = await Promise.all([
+            import('./bootstrap'), import('./auth'),
+            import('./pwa-install'), import('./operational-navigation'), import('./swap-analysis'),
+        ]);
+        window.syncAppBadge = syncAppBadge;
+        window.requestDeviceNotificationPermission = requestDeviceNotificationPermission;
+        registerAuthUi(Livewire);
+        registerSwapAnalysis(Livewire);
+        initPwaInstall();
+        let landingModule;
+        const initializeLanding = () => {
+            if (!landingModule && !document.getElementById('landing-page')) return;
+            landingModule ??= import('./landing');
+            landingModule.then(({ initLandingPage }) => initLandingPage()).catch((error) => {
+                // Animações opcionais nunca impedem autenticação ou operações.
+                console.warn('Animações da landing indisponíveis.', error);
+            });
+        };
+        const initializePage = () => {
+            initOperationalNavigation();
+            initializeLanding();
+            initErrorReporting();
+        };
+        document.addEventListener('livewire:navigated', initializePage);
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializePage, { once: true });
+        } else {
+            initializePage();
+        }
+        Livewire.start();
+        if ('serviceWorker' in navigator) {
+            const register = () => navigator.serviceWorker.register('/sw.js', { scope: '/', updateViaCache: 'none' }).catch(() => {
+                // A aplicação continua funcional quando o navegador bloqueia service workers.
+            });
+            if (document.readyState === 'complete') register();
+            else window.addEventListener('load', register, { once: true });
+        }
+    },
+}).catch((error) => {
+    console.error('Não foi possível iniciar o aplicativo. Atualize a página para tentar novamente.', error);
+});
 

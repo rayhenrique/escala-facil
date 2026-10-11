@@ -6,6 +6,12 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.32.2 — 11/10/2026
+
+### Correção dos botões de escalas e trocas
+
+- Corrigimos o funcionamento dos botões e modais de escalas e trocas após atualizações do aplicativo.
+
 ## 1.32.1 — 11/10/2026
 
 ### Análise de trocas mais clara

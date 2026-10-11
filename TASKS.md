@@ -259,3 +259,5 @@
 - [x] **Indicadores operacionais por setor (1.32.0)**: agregações SQL, situação atual separada de registros do período, definições de cobertura/denominadores, filtros, paginação, PDF/CSV, autorização e regressão desktop/mobile.
 
 - [x] **Correção da análise de trocas (1.32.1)**: razões específicas compartilhadas com a Policy, conferência de ambas as atribuições, cota 3/4 e 4/4, fingerprint operacional, atualização explícita, testes e investigação somente leitura do caso #89 sem pressupor acesso à produção.
+
+- [x] **Correção dos controles operacionais (1.32.2)**: inicialização única antes do import de Livewire/Alpine, recuperação de mudanças do bundle durante navegação, metatag PWA, regressões de modais desktop/mobile e preservação dos fluxos e regras existentes.

@@ -3,6 +3,8 @@
     "private": true,
     "type": "module",
     "scripts": {
+        "test:runtime": "node --test tests/js/livewire-runtime.test.mjs",
+        "test:runtime:browser": "node tests/browser/frontend-runtime.mjs",
         "test:pwa": "node --test tests/js/service-worker.test.mjs tests/js/pwa-install.test.mjs",
         "test:auth": "node --test tests/js/auth.test.mjs",
         "test:filters:browser": "node tests/browser/operational-filters.mjs",

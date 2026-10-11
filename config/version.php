@@ -2,9 +2,18 @@
 
 return [
     // Versão do código instalado. APP_VERSION não pode sobrepor este registro.
-    'current' => '1.32.1',
+    'current' => '1.32.2',
 
     'releases' => [
+        [
+            'version' => '1.32.2',
+            'date' => '2026-10-11',
+            'title' => 'Correção dos botões de escalas e trocas',
+            'summary' => 'Corrigimos o funcionamento dos botões e modais de escalas e trocas após atualizações do aplicativo.',
+            'highlights' => [
+                'Corrigimos o funcionamento dos botões e modais de escalas e trocas após atualizações do aplicativo.',
+            ],
+        ],
         [
             'version' => '1.32.1',
             'date' => '2026-10-11',
