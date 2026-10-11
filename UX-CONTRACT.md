@@ -224,3 +224,13 @@ Bottom sheet e modal compartilham estrutura: mobile encostado na base, desktop c
 MobileNavigation oferece Início/Calendário/Trocas/Menu ao gerente e Início/Escala/Trocas/Menu ao profissional. O Menu contém somente os demais módulos e suporte, segundo papel, Policies e rotas existentes. Profissionais usam âncoras da própria Minha escala para preservar filtros e estado; a partir de outra tela, o link abre a rota autorizada com fragmento. Hash, refresh e foco no título do bloco mantêm o destino. Trocas aponta ao histórico e permite saltar para pedidos aguardando resposta quando disponíveis.
 
 A rota ativa, inclusive subrotas e blocos profissionais, recebe aria-current e destaque sem depender apenas de cor. Nome de rota é Locked durante atualizações; autorização continua no servidor. Contadores usam pedidos aguardando decisão/resposta e notificações próprias, com evento notifications-updated e polling somente da barra visível. Eles não gravam leitura ou histórico. Barra tem quatro alvos de pelo menos 44px e reserva inferior para não cobrir paginação, formulários ou rodapé; sheets/modais têm camada superior, toasts ficam no topo. Viewport reduzida durante edição oculta a barra até o retorno do teclado, respeitando áreas seguras. Abrir Menu prende foco e bloqueia o fundo; fechar ou mudar para desktop libera foco/scroll. Saída e sessão expirada mantêm o fluxo e os controles de acesso existentes. Sidebar desktop não foi reorganizada.
+
+
+## Início profissional
+
+- O resumo móvel busca o primeiro plantão agendado atribuído ao usuário cujo início ainda não passou, independentemente do mês, filtros e paginação do histórico. Plantões já iniciados continuam consultáveis na escala; o resumo não os chama de próximos.
+- Detalhes consultam novamente a atribuição no servidor; IDs de outros profissionais não são aceitos. A janela compartilhada restaura foco, fecha com Escape e mantém ações fora da área rolável.
+- Solicitar troca mantém as regras existentes: plantão após hoje, cadastro compatível, cota e ausência de troca ativa, inclusive quando é contrapartida. Impedimentos têm explicação; a confirmação continua revalidada pelas Actions e Policies existentes.
+- Pedidos recebidos ficam antes dos filtros no celular. O contador de respostas pendentes não depende dos filtros; quando há pedidos ocultos, a tela oferece limpeza dos filtros. As listas e seus filtros continuam paginados no banco.
+- Até três solicitações enviadas em andamento aparecem no resumo, com acesso ao histórico completo. Nenhum limite é aplicado ao histórico. A última ausência informada é identificada sem expor anexos ou justificativas.
+- A apresentação desktop, a navegação inferior, os comprovantes e as regras institucionais permanecem preservados.

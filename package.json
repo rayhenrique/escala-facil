@@ -3,6 +3,7 @@
     "private": true,
     "type": "module",
     "scripts": {
+        "test:professional-home:browser": "node tests/browser/professional-home.mjs",
         "test:mobile-navigation:browser": "node tests/browser/mobile-navigation.mjs",
         "test:mobile-ui": "node --test tests/js/mobile-ui.test.mjs",
         "test:mobile-ui:browser": "node tests/browser/mobile-components.mjs",

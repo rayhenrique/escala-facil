@@ -1,4 +1,4 @@
-<div>
+<div class="professional-home-layout" x-data x-on:professional-form-opened.window="$nextTick(() => { const target = document.getElementById($event.detail.target); target?.focus(); target?.scrollIntoView({ block: 'start' }); })">
     <div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
             <p class="eyebrow">Área profissional</p>
@@ -9,8 +9,72 @@
     </div>
 
     <x-flash-notifications />
+    <section class="professional-next panel mt-6 lg:hidden" aria-labelledby="next-shift-title">
+        <p class="eyebrow">Sua próxima atividade</p>
+        <h2 id="next-shift-title" class="mt-2 text-xl font-semibold">Próximo plantão</h2>
+        <p class="mt-1 text-xs text-muted">A partir de agora, independentemente dos filtros abaixo.</p>
+        @if ($nextShift)
+            @php
+                $period = $nextShift->period();
+            @endphp
+            <p class="mt-4 text-lg font-semibold">{{ $nextShift->date->translatedFormat('l, d/m/Y') }}</p>
+            <dl class="mt-3 grid grid-cols-2 gap-3 text-sm">
+                <div><dt class="text-muted">Início</dt><dd class="font-semibold">{{ $period->start->format('H:i') }}</dd></div>
+                <div><dt class="text-muted">Término</dt><dd class="font-semibold">{{ $period->endLabel() }}</dd></div>
+                <div><dt class="text-muted">Duração</dt><dd class="font-semibold">{{ $period->durationLabel() }}</dd></div>
+                <div><dt class="text-muted">Setor</dt><dd class="break-words font-semibold">{{ $nextShift->sector?->name ?? 'Setor não informado' }}</dd></div>
+                <div class="col-span-2"><dt class="text-muted">Categoria</dt><dd class="font-semibold">{{ $nextShift->category?->name ?? 'Categoria não informada' }}</dd></div>
+            </dl>
+            <div class="mt-4 flex flex-wrap gap-2">
+                <x-action-button id="professional-next-details" wire:click="showShiftDetails({{ $nextShift->id }})" variant="secondary" target="showShiftDetails">Ver detalhes</x-action-button>
+                @if ($nextSwapReason === null)
+                    <x-action-button variant="primary" wire:click="openSwap({{ $nextShift->id }})" target="openSwap">Solicitar troca</x-action-button>
+                @endif
+                <a href="#schedule-title" class="button-secondary">Ver escala</a>
+            </div>
+            @if ($nextSwapReason)<p class="mt-3 text-sm text-muted">{{ $nextSwapReason }}</p>@endif
+        @else
+            <p class="mt-4 font-semibold">Nenhum próximo plantão agendado.</p>
+            <p class="mt-1 text-sm text-muted">Consulte a escala mensal para ver plantões anteriores ou outras situações.</p>
+            <a href="#schedule-title" class="button-secondary mt-4 inline-flex">Ver escala</a>
+        @endif
+        @if ($pendingResponses)
+            <p class="mt-4 font-semibold">{{ $pendingResponses }} pedido(s) aguardando sua resposta.</p>
+            @if ($pendingResponses !== $incomingSwaps->total())
+                <p class="mt-1 text-sm text-muted">Há pedidos fora dos filtros atuais.</p>
+                <x-action-button variant="secondary" wire:click="clearFilters" class="mt-2">Limpar filtros para ver pedidos</x-action-button>
+            @else
+                <a href="#incoming-title" class="mt-1 inline-flex min-h-11 items-center font-semibold text-primary">Ver pedidos recebidos</a>
+            @endif
+        @endif
+        @if ($latestAbsence)
+            <p class="mt-4 border-t border-line pt-3 text-sm text-muted">Última ausência informada: {{ $latestAbsence->shift?->date?->format('d/m/Y') ?? 'Plantão indisponível' }}. <x-status-badge :status="$latestAbsence->status" /></p>
+        @endif
+    </section>
+
+
+    <x-professional.incoming-swaps :incoming-swaps="$incomingSwaps" :swap-limit-reached="$swapLimitReached" heading-id="incoming-title" class="lg:hidden" />
+    <section class="mt-6 lg:hidden" aria-labelledby="sent-overview-title">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+            <h2 id="sent-overview-title" class="text-lg font-semibold">Solicitações enviadas</h2>
+            <a href="#my-swaps-title" class="inline-flex min-h-11 items-center font-semibold text-primary">Ver todas</a>
+        </div>
+        @forelse ($sentSwaps as $sent)
+            <article class="mt-3 rounded-lg border border-line bg-surface p-4" wire:key="sent-overview-{{ $sent->id }}">
+                <div class="flex flex-wrap items-center gap-2"><span class="text-xs font-semibold">{{ sprintf('TROCA-%06d', $sent->id) }}</span><x-status-badge :status="$sent->status" /></div>
+                <p class="mt-2 text-sm font-semibold">{{ $sent->shift->period()->datedLabel() }}</p>
+                <p class="mt-1 text-sm text-muted">Para {{ $sent->substitute?->name ?? 'Profissional indisponível' }} · {{ $sent->shift->sector?->name ?? 'Setor não informado' }}</p>
+                @if ($sent->substituteShift)<p class="mt-1 text-sm text-muted">Contrapartida: {{ $sent->substituteShift->period()->datedLabel() }}</p>@endif
+            </article>
+        @empty
+            <p class="mt-2 text-sm text-muted">Nenhuma solicitação enviada aguardando resposta ou decisão.</p>
+        @endforelse
+        @if ($sentSwaps->isNotEmpty())<p class="mt-2 text-xs text-muted">Até três pedidos recentes em andamento. O histórico completo está em suas solicitações.</p>@endif
+    </section>
+    <div class="professional-filters">
     <x-operational-filters kind="personal" />
     <p class="mt-3 text-sm text-muted" role="status">{{ $shifts->total() }} plantão(ões) e {{ $mySwaps->total() }} pedido(s) de troca encontrado(s).</p>
+    </div>
 
     @if ($swapReceipt)
         <x-swap-receipt :receipt="$swapReceipt" class="mt-6" />
@@ -26,30 +90,11 @@
         </div>
     @endif
 
-    @if ($incomingSwaps->isNotEmpty())
-        <section class="mt-8" aria-labelledby="incoming-title">
-            <div class="flex items-end justify-between gap-4"><div><p class="eyebrow">Sua resposta</p><h2 id="incoming-title" tabindex="-1" class="mt-2 text-xl font-semibold">Pedidos para você cobrir</h2></div><span class="count-badge">{{ $incomingSwaps->total() }}</span></div>
-            <div class="mt-4 grid gap-4 lg:grid-cols-2">
-                @foreach ($incomingSwaps as $swap)
-                    <article class="panel" wire:key="incoming-swap-{{ $swap->id }}">
-                        <x-status-badge :status="$swap->status" label="Aguardando você" />
-                        <h3 class="mt-4 text-lg font-semibold">{{ $swap->shift->date->format('d/m/Y') }} · {{ $swap->shift->time_label }}</h3>
-                        <p class="mt-2 text-sm text-muted">{{ $swap->shift->sector->name }} · {{ $swap->shift->category->name }}</p>
-                        @if ($swap->substituteShift)
-                            <p class="mt-2 text-xs font-semibold text-coverage">Contrapartida: você cederá seu plantão de {{ $swap->substituteShift->date->format('d/m/Y') }} ({{ $swap->substituteShift->time_label }}).</p>
-                        @endif
-                        <p class="mt-4 text-sm"><span class="text-muted">Solicitado por</span> <strong>{{ $swap->requester->name }}</strong></p>
-                        <button type="button" wire:click="requestAcceptSwap({{ $swap->id }})" wire:loading.attr="disabled" class="button-primary mt-5 inline-flex w-full sm:w-auto" @disabled($swapLimitReached)>{{ $swapLimitReached ? 'Cota mensal atingida' : 'Aceitar e enviar à gerência' }}</button>
-                    </article>
-                @endforeach
-            </div>
-            <div class="mt-4">{{ $incomingSwaps->links() }}</div>
-        </section>
-    @endif
+    <x-professional.incoming-swaps :incoming-swaps="$incomingSwaps" :swap-limit-reached="$swapLimitReached" heading-id="incoming-desktop-title" class="hidden lg:block" />
 
     @if ($swapShiftId)
         <section class="panel mt-8 border-primary" aria-labelledby="swap-form-title">
-            <div class="section-heading"><div><p class="eyebrow">Solicitação de troca</p><h2 id="swap-form-title">Escolha um substituto elegível</h2></div><button type="button" wire:click="cancelAction" class="button-secondary w-full sm:w-auto">Cancelar</button></div>
+            <div class="section-heading"><div><p class="eyebrow">Solicitação de troca</p><h2 id="swap-form-title" tabindex="-1">Escolha um substituto elegível</h2></div><button type="button" wire:click="cancelAction" class="button-secondary w-full sm:w-auto">Cancelar</button></div>
             <form method="post" wire:submit="reviewSwapRequest" class="mt-6 max-w-xl" novalidate>
                 @csrf
                 <label for="substitute" class="field-label">Profissional substituto</label>
@@ -82,7 +127,7 @@
 
     @if ($absenceShiftId)
         <section class="panel mt-8 border-amber-300" aria-labelledby="absence-form-title">
-            <div class="section-heading"><div><p class="eyebrow">Ausência justificada</p><h2 id="absence-form-title">Informe o motivo da ausência</h2></div><button type="button" wire:click="cancelAction" class="button-secondary w-full sm:w-auto">Cancelar</button></div>
+            <div class="section-heading"><div><p class="eyebrow">Ausência justificada</p><h2 id="absence-form-title" tabindex="-1">Informe o motivo da ausência</h2></div><button type="button" wire:click="cancelAction" class="button-secondary w-full sm:w-auto">Cancelar</button></div>
             <form method="post" wire:submit="reviewAbsence" class="mt-6 max-w-2xl space-y-5" novalidate>
                 @csrf
                 <div><label for="absence-reason" class="field-label">Justificativa</label><textarea wire:model="absenceReason" id="absence-reason" rows="5" class="field-input min-h-32 resize-none" @error('reason') aria-invalid="true" aria-describedby="reason-error" @enderror></textarea>@error('reason') <p id="reason-error" class="field-error">{{ $message }}</p> @enderror</div>
@@ -93,7 +138,9 @@
         </section>
     @endif
 
-    <section class="mt-10" aria-labelledby="schedule-title">
+
+
+    <section class="professional-schedule mt-10" aria-labelledby="schedule-title">
         <div><p class="eyebrow">Agenda mensal</p><h2 id="schedule-title" tabindex="-1" class="mt-2 text-xl font-semibold">Seus plantões</h2></div>
         <div class="mt-5 grid gap-4 lg:grid-cols-2">
             @forelse ($shifts as $shift)
@@ -156,12 +203,15 @@
                             @endif
                         </div>
                         <h3 class="mt-3 text-lg font-semibold">{{ $shift->time_label }}</h3>
-                        <p class="mt-1 text-sm text-muted">{{ $shift->sector->name }} · {{ $shift->category->name }}</p>
+                        <p class="mt-1 text-sm text-muted">{{ $shift->sector?->name ?? 'Setor não informado' }} · {{ $shift->category?->name ?? 'Categoria não informada' }}</p>
                         @if ($shift->date->isAfter(today()) && $shift->status === \App\Enums\ShiftStatus::Scheduled)
                             <div class="mt-5 flex flex-wrap gap-2">
                                 <button type="button" wire:click="openSwap({{ $shift->id }})" class="button-secondary" @disabled($hasActiveSwap || $swapLimitReached)>Solicitar troca</button>
                                 <button type="button" wire:click="openAbsence({{ $shift->id }})" class="table-action min-h-10">Informar ausência</button>
                             </div>
+                            @if ($hasActiveSwap || $swapLimitReached)
+                                <p class="mt-2 text-sm text-muted">{{ $swapLimitReached ? 'Cota mensal de quatro trocas atingida.' : 'Este plantão já possui uma troca em andamento ou aprovada.' }}</p>
+                            @endif
                         @endif
                     </div>
                 </article>
@@ -172,7 +222,7 @@
         <div class="mt-4">{{ $shifts->links() }}</div>
     </section>
 
-    <section class="panel mt-10" aria-labelledby="my-swaps-title">
+    <section class="professional-swaps panel mt-6 lg:mt-10" aria-labelledby="my-swaps-title">
         <p class="eyebrow">Acompanhamento</p><h2 id="my-swaps-title" tabindex="-1" class="mt-2 text-xl font-semibold">Minhas solicitações de troca</h2>
         <div class="mt-5 divide-y divide-line">
             <div class="mb-4">
@@ -187,13 +237,18 @@
                 <div class="flex flex-col gap-2 py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between" wire:key="my-swap-{{ $swap->id }}">
                     <div>
                         <p class="font-semibold">
+                            <span class="lg:hidden">{{ $swap->requester_id === auth()->id() ? 'Enviada' : 'Recebida' }} · {{ sprintf('TROCA-%06d', $swap->id) }}<br></span>
                             {{ $swap->shift->date->format('d/m/Y') }} · 
                             @if ($swap->requester_id === auth()->id())
-                                {{ $swap->substitute->name }}
+                                {{ $swap->substitute?->name ?? 'Profissional indisponível' }}
                             @else
-                                Solicitado por {{ $swap->requester->name }}
+                                Solicitado por {{ $swap->requester?->name ?? 'Profissional indisponível' }}
                             @endif
                         </p>
+                        <div class="mt-1 text-sm text-muted lg:hidden">
+                            <p>{{ $swap->shift->time_label }} · {{ $swap->shift->sector?->name ?? 'Setor não informado' }} · {{ $swap->shift->category?->name ?? 'Categoria não informada' }}</p>
+                            @if ($swap->substituteShift)<p class="mt-1">Contrapartida: {{ $swap->substituteShift->period()->datedLabel() }}</p>@endif
+                        </div>
                         <p class="mt-1 text-sm text-muted">Atualizado em {{ $swap->updated_at->format('d/m/Y H:i') }}</p>
                     </div>
                     <x-status-badge :status="$swap->status" />
@@ -203,11 +258,22 @@
             @endforelse
         </div>
         @if ($incomingSwaps->total())
-            <a href="#incoming-title" class="mt-3 inline-flex min-h-11 items-center font-semibold text-primary">Ver {{ $incomingSwaps->total() }} pedido(s) aguardando sua resposta</a>
+            <a href="#incoming-title" class="lg:hidden mt-3 inline-flex min-h-11 items-center font-semibold text-primary">Ver {{ $incomingSwaps->total() }} pedido(s) aguardando sua resposta</a>
+        @endif
+        @if ($incomingSwaps->total())
+            <a href="#incoming-desktop-title" class="mt-3 hidden min-h-11 items-center font-semibold text-primary lg:inline-flex">Ver {{ $incomingSwaps->total() }} pedido(s) aguardando sua resposta</a>
         @endif
         <div class="mt-4">{{ $mySwaps->links() }}</div>
     </section>
 
+    <x-bottom-sheet :show="$detailShiftId !== null" id="professional-shift-details" title="Detalhes do seu plantão" close-action="closeShiftDetails" return-focus="#professional-next-details">
+        @if ($this->detailShift)
+            <p class="font-semibold">{{ $this->detailShift->period()->datedLabel() }}</p>
+            <p class="mt-2">{{ $this->detailShift->sector?->name ?? 'Setor não informado' }} · {{ $this->detailShift->category?->name ?? 'Categoria não informada' }}</p>
+            <div class="mt-3"><x-status-badge :status="$this->detailShift->status" /></div>
+        @endif
+        <x-slot:actions><x-action-button variant="secondary" wire:click="closeShiftDetails">Fechar</x-action-button></x-slot:actions>
+    </x-bottom-sheet>
     <x-confirmation-modal
         :show="$pendingConfirmation !== null"
         id="professional-action"

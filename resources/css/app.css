@@ -372,3 +372,9 @@
 @layer utilities {
     .context-record .text-muted, .context-record .meta-label, .context-record td > span:not(.status-badge) { @apply text-primary-strong; }
 }
+
+/* Compact requests retain existing desktop geometry and shared tokens. */
+@media (max-width: 1023px) {
+    .professional-request { padding: 1rem; }
+    .professional-request h3 { margin-top: .75rem; font-size: 1rem; }
+}

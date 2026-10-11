@@ -280,3 +280,8 @@ Cada cartão da Central apresenta primeiro Situação atual da troca, com estado
 ## Navegação móvel por perfil (1.37.0)
 
 A barra inferior é uma superfície branca com borda line, sem sombra nova: quatro colunas com ícones existentes e rótulos de 12px, alvos mínimos de 44px e altura reservada no documento. Primary-soft/primary-strong identificam o destino ativo; contadores reaproveitam âmbar e texto escuro da notificação. Gerente: Início, Calendário, Trocas, Menu. Profissional: Início, Escala, Trocas, Menu. Menu reutiliza action-modal, sem repetir os destinos principais. Safe-area inferior/lateral, viewport reduzida e overlays preservam ações e conteúdo. A marca permanece no cabeçalho móvel e a sidebar desktop mantém identidade, ordem e recolhimento existentes. Mapeamento e testes em docs/mobile-navigation.md.
+
+
+## Início profissional no celular
+
+O próximo plantão aparece antes dos filtros mensais, com início, término, duração, setor e categoria. Pedidos recebidos aguardando resposta vêm em seguida; solicitações enviadas em andamento usam cartões compactos. O desktop mantém a composição anterior. Os detalhes usam `bottom-sheet`, badges e botões existentes, sem novos efeitos visuais.

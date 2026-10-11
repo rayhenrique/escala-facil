@@ -6,6 +6,12 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.38.0 — 11/10/2026
+
+### Próximo plantão em destaque
+
+- Agora você encontra seu próximo plantão e suas solicitações logo ao abrir o aplicativo.
+
 ## 1.37.0 — 11/10/2026
 
 ### Navegação mais fácil pelo celular

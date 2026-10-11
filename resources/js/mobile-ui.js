@@ -54,7 +54,7 @@ export function actionDialog(options = {}) {
             requestAnimationFrame(() => {
                 const active = document.activeElement;
                 if (active !== document.body && !this.$el.contains(active)) return;
-                const target = origin?.isConnected ? origin : (options.returnFocus && document.querySelector(options.returnFocus));
+                const target = origin?.isConnected && origin !== document.body ? origin : (options.returnFocus && document.querySelector(options.returnFocus));
                 target?.focus({ preventScroll: true });
             });
         },

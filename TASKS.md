@@ -284,3 +284,5 @@
   - [x] Preservar sidebar desktop, rotas, sessão e isolamento profissional.
   - [x] Âncoras profissionais, contadores, foco, teclado, áreas seguras e reserva inferior.
   - [x] Regressões por perfil, logout, sessão ausente, Livewire, acessibilidade e PWA.
+
+- [x] 1.38.0: início profissional móvel com próximo plantão, detalhes autorizados, pedidos compactos, ausência, testes e preservação do desktop.

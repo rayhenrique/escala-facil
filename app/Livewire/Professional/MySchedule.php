@@ -26,6 +26,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\WithFileUploads;
@@ -87,6 +88,29 @@ class MySchedule extends Component
 
     #[Url]
     public string $month = '';
+
+    #[Locked]
+    public ?int $detailShiftId = null;
+
+    #[Computed]
+    public function detailShift(): ?Shift
+    {
+        return $this->detailShiftId === null ? null : Shift::query()
+            ->with(['sector', 'category'])
+            ->where('user_id', auth()->id())->findOrFail($this->detailShiftId);
+    }
+
+    public function showShiftDetails(int $shiftId): void
+    {
+        $this->detailShiftId = Shift::query()->where('user_id', auth()->id())->findOrFail($shiftId)->id;
+        unset($this->detailShift);
+    }
+
+    public function closeShiftDetails(): void
+    {
+        $this->detailShiftId = null;
+        unset($this->detailShift);
+    }
 
     public ?int $swapShiftId = null;
 
@@ -208,6 +232,7 @@ class MySchedule extends Component
         $this->resetValidation();
         unset($this->eligibleSubstitutes);
         unset($this->eligibleSubstituteShifts);
+        $this->dispatch('professional-form-opened', target: 'swap-form-title');
     }
 
     public function requestSwap(CreateShiftSwapAction $action, ShiftSwapReceipt $receipts): void
@@ -305,6 +330,7 @@ class MySchedule extends Component
         $this->absenceReason = '';
         $this->attachment = null;
         $this->resetValidation();
+        $this->dispatch('professional-form-opened', target: 'absence-form-title');
     }
 
     public function reportAbsence(ReportAbsenceAction $action): void
@@ -373,7 +399,7 @@ class MySchedule extends Component
                 substr((string) $shift->start_time, 0, 5),
                 $shift->period()->endLabel().' · '.$shift->period()->durationLabel(),
             ),
-            'location' => $shift->sector->name.' · '.$shift->category->name,
+            'location' => ($shift->sector?->name ?? 'Setor não informado').' · '.($shift->category?->name ?? 'Categoria não informada'),
         ];
     }
 
@@ -399,6 +425,31 @@ class MySchedule extends Component
         $validShiftStatus = $this->filter === '' || ShiftStatus::tryFrom($this->filter);
         $validSwapStatus = $this->swapStatusFilter === '' || ShiftSwapStatus::tryFrom($this->swapStatusFilter);
         $swapLimitReached = auth()->user()->hasReachedSwapLimit(now()->month, now()->year);
+
+        // Independent of history filters: bounded, current assignments only.
+        $nextShift = Shift::query()->with(['sector', 'category'])
+            ->where('user_id', auth()->id())->where('status', ShiftStatus::Scheduled)
+            ->where(function ($query): void {
+                $query->whereDate('date', '>', today()->toDateString())
+                    ->orWhere(fn ($today) => $today->whereDate('date', today()->toDateString())
+                        ->whereTime('start_time', '>=', now()->format('H:i:s')));
+            })->orderBy('date')->orderBy('start_time')->orderBy('id')->first();
+        $nextHasActiveSwap = $nextShift && ShiftSwap::query()
+            ->where(fn ($query) => $query->where('shift_id', $nextShift->id)->orWhere('substitute_shift_id', $nextShift->id))
+            ->whereIn('status', [ShiftSwapStatus::PendingProfessional, ShiftSwapStatus::PendingManager, ShiftSwapStatus::Approved])->exists();
+        $nextSwapReason = null;
+        if ($nextShift) {
+            $nextSwapReason = match (true) {
+                ! $nextShift->date->isAfter(today()) => 'Trocas só podem ser solicitadas para plantões após o dia de hoje.',
+                $swapLimitReached => 'A cota mensal de quatro trocas aprovadas foi atingida.',
+                ! auth()->user()->can('create', ShiftSwap::class) => 'Complete o setor e a categoria do seu cadastro com a gerência.',
+                $nextShift->sector_id !== auth()->user()->sector_id || $nextShift->category_id !== auth()->user()->category_id => 'O setor ou a categoria do plantão difere do seu cadastro. Consulte a gerência antes de solicitar troca.',
+                $nextHasActiveSwap => 'Este plantão já possui uma troca em andamento ou aprovada. Consulte suas solicitações.',
+                default => null,
+            };
+        }
+        $latestAbsence = Absence::query()->with('shift')->where('user_id', auth()->id())
+            ->latest()->orderByDesc('id')->first();
 
         $shifts = Shift::query()
             ->with(['category', 'sector', 'swaps'])
@@ -470,8 +521,14 @@ class MySchedule extends Component
             ->oldest()->orderBy('id')
             ->paginate(10, ['*'], 'incomingPage');
 
+        $sentSwaps = ShiftSwap::query()->with(['shift.sector', 'shift.category', 'substituteShift', 'substitute'])
+            ->where('requester_id', auth()->id())->whereIn('status', [ShiftSwapStatus::PendingProfessional, ShiftSwapStatus::PendingManager])
+            ->latest()->orderByDesc('id')->limit(3)->get();
+
+        $pendingResponses = ShiftSwap::query()->where('substitute_id', auth()->id())->where('status', ShiftSwapStatus::PendingProfessional)->count();
+
         $mySwaps = ShiftSwap::query()
-            ->with(['shift', 'substituteShift', 'substitute', 'requester'])
+            ->with(['shift.sector', 'shift.category', 'substituteShift.sector', 'substituteShift.category', 'substitute', 'requester'])
             ->where(function ($query) {
                 $query->where('requester_id', auth()->id())
                     ->orWhere('substitute_id', auth()->id());
@@ -483,6 +540,11 @@ class MySchedule extends Component
             ->paginate(8, ['*'], 'swapsPage');
 
         return view('livewire.professional.my-schedule', compact(
+            'sentSwaps',
+            'pendingResponses',
+            'nextShift',
+            'nextSwapReason',
+            'latestAbsence',
             'shifts',
             'incomingSwaps',
             'mySwaps',

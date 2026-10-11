@@ -2,9 +2,18 @@
 
 return [
     // Versão do código instalado. APP_VERSION não pode sobrepor este registro.
-    'current' => '1.37.0',
+    'current' => '1.38.0',
 
     'releases' => [
+        [
+            'version' => '1.38.0',
+            'date' => '2026-10-11',
+            'title' => 'Próximo plantão em destaque',
+            'summary' => 'Agora você encontra seu próximo plantão e suas solicitações logo ao abrir o aplicativo.',
+            'highlights' => [
+                'Agora você encontra seu próximo plantão e suas solicitações logo ao abrir o aplicativo.',
+            ],
+        ],
         [
             'version' => '1.37.0',
             'date' => '2026-10-11',

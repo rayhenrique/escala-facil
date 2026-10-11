@@ -95,3 +95,16 @@ test('professional anchors select one destination and keyboard listeners are rem
  ui.menuOpen=true;window.innerWidth=1440;listeners.find(([name])=>name==='resize')[1]();assert(!ui.menuOpen);
  ui.destroy();assert.equal(removed.length,listeners.length);assert.equal(classes.size,0);
 });
+
+
+test('dialog returns to explicit trigger when loading disabled it before initialization',()=>{
+ const {field,events}=dialogHarness();
+ const trigger={focus:()=>events.push('fallback-focus')};
+ document.body.isConnected=true;
+ document.activeElement=document.body;
+ document.querySelector=()=>trigger;
+ const ui=actionDialog({returnFocus:'#trigger'});
+ ui.$el={querySelectorAll:()=>[field],querySelector:()=>field,contains:()=>false};
+ ui.$nextTick=fn=>fn();ui.init();ui.destroy();
+ assert.equal(events.at(-1),'fallback-focus');
+});
