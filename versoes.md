@@ -6,6 +6,12 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.34.1 — 11/10/2026
+
+### Situação das trocas mais clara nas notificações
+
+- As notificações agora mostram claramente a situação atual das trocas, sem confundir pedidos antigos com decisões pendentes.
+
 ## 1.34.0 — 11/10/2026
 
 ### Revisão segura para desfazer trocas

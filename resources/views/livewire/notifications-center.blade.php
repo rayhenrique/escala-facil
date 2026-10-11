@@ -35,7 +35,7 @@
     >
         <div>
             <p class="text-sm font-semibold text-ink">Notificações no celular ou computador</p>
-            <p class="text-xs text-muted">Ative para receber avisos imediatos na tela do seu aparelho quando houver pedidos ou respostas de troca.</p>
+            <p class="text-xs text-ink">Ative para receber avisos imediatos na tela do seu aparelho quando houver pedidos ou respostas de troca.</p>
         </div>
         <button type="button" @click="requestNotification" class="button-primary min-h-9 px-3.5 py-1.5 text-xs shrink-0">
             Ativar avisos no aparelho
@@ -46,23 +46,32 @@
         @forelse ($notifications as $notification)
             @php
                 $receipt = $notification->data['receipt'] ?? null;
-                $swapId = is_array($receipt) ? ($receipt['shift_swap_id'] ?? null) : null;
-                if (! is_numeric($swapId) && is_array($receipt) && ! empty($receipt['reference']) && preg_match('/(\d+)/', (string) $receipt['reference'], $swapMatches)) {
-                    $swapId = (int) $swapMatches[1];
-                }
-                $swapId = is_numeric($swapId) ? (int) $swapId : null;
+                $swapId = \App\Support\ShiftSwapReceipt::swapId($receipt);
                 $currentSwap = $swapId ? (($swapStatuses ?? [])[$swapId] ?? null) : null;
-                $recordedStatus = is_array($receipt) ? ($receipt['status'] ?? null) : null;
-                $showsCurrentStatus = $currentSwap && $recordedStatus && $currentSwap['status'] !== $recordedStatus;
             @endphp
-            <article class="notification-card {{ $notification->read_at ? '' : 'notification-card-unread' }}" wire:key="notification-{{ $notification->id }}">
+            <article data-notification-swap="{{ $swapId }}" class="notification-card {{ $notification->read_at ? '' : 'notification-card-unread' }}" wire:key="notification-{{ $notification->id }}">
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div class="min-w-0">
                         <div class="flex flex-wrap items-center gap-2">
                             @unless ($notification->read_at)<span class="status-badge status-pending_professional">Nova</span>@endunless
                             <time class="font-mono text-xs text-muted" datetime="{{ $notification->created_at->toIso8601String() }}">{{ $notification->created_at->format('d/m/Y H:i') }}</time>
                         </div>
-                        <h2 class="mt-3 text-lg font-semibold">{{ $notification->data['title'] }}</h2>
+                        @if (is_array($receipt))
+                            <div class="mt-3" data-current-swap-status>
+                                <h2 class="text-lg font-semibold text-ink">Situação atual da troca: {{ $currentSwap['status_label'] ?? 'Indisponível para consulta' }}</h2>
+                                @if ($currentSwap)
+                                    <div class="mt-2"><x-status-badge :status="$currentSwap['status']" :label="$currentSwap['status_label']" /></div>
+                                    @if (! empty($currentSwap['manager']))<p class="mt-2 text-sm text-muted">Responsável pela decisão: {{ $currentSwap['manager'] }}</p>@endif
+                                    @if (! empty($currentSwap['rejection_reason']))<p class="mt-1 text-sm text-muted">Justificativa: {{ $currentSwap['rejection_reason'] }}</p>@endif
+                                @else
+                                    <p class="mt-2 text-sm text-muted">O registro histórico permanece disponível. A situação atual não pode ser consultada nesta conta.</p>
+                                @endif
+                            </div>
+                            <p class="meta-label mt-4">Evento histórico desta notificação</p>
+                            <h3 class="mt-1 text-sm font-medium text-muted">{{ $notification->data['title'] }}</h3>
+                        @else
+                            <h2 class="mt-3 text-lg font-semibold">{{ $notification->data['title'] }}</h2>
+                        @endif
                         <p class="mt-2 text-sm leading-6 text-muted">{{ $notification->data['message'] }}</p>
                     </div>
                     <div class="flex shrink-0 flex-col gap-2 sm:flex-row">
@@ -73,21 +82,8 @@
                     </div>
                 </div>
 
-                @if ($showsCurrentStatus)
-                    <div class="mt-4 rounded-xl border border-primary/20 bg-primary-soft/40 p-4" role="status" aria-live="polite">
-                        <p class="text-sm font-semibold text-ink">Situação atual da troca: {{ $currentSwap['status_label'] }}</p>
-                        @if (! empty($currentSwap['manager']))
-                            <p class="mt-1 text-xs text-muted">Responsável pela decisão: {{ $currentSwap['manager'] }}</p>
-                        @endif
-                        @if (! empty($currentSwap['rejection_reason']))
-                            <p class="mt-1 text-xs text-muted">Justificativa: {{ $currentSwap['rejection_reason'] }}</p>
-                        @endif
-                        <p class="mt-2 text-xs text-muted">Este comprovante preserva o evento original.</p>
-                    </div>
-                @endif
-
                 @if (is_array($receipt))
-                    <x-swap-receipt :receipt="$receipt" class="mt-5" />
+                    <x-swap-receipt :receipt="$receipt" historical :allow-official-pdf="$currentSwap !== null" class="mt-5" />
                 @endif
             </article>
         @empty

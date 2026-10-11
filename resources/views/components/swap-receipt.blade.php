@@ -1,4 +1,4 @@
-@props(['receipt'])
+@props(['receipt', 'historical' => false, 'allowOfficialPdf' => true])
 
 @php
     $receipt = \App\Support\ShiftSwapReceipt::withTimeLabels($receipt);
@@ -6,49 +6,53 @@
     $shiftDate = \Carbon\CarbonImmutable::parse($receipt['shift_date']);
     $hasCounterpart = ! empty($receipt['has_counterpart']) && ! empty($receipt['counterpart_shift_date']);
     $counterpartDate = $hasCounterpart ? \Carbon\CarbonImmutable::parse($receipt['counterpart_shift_date']) : null;
-    $swapId = $receipt['shift_swap_id'] ?? null;
-    if (! $swapId && ! empty($receipt['reference']) && preg_match('/(\d+)/', $receipt['reference'], $matches)) {
-        $swapId = (int) $matches[1];
-    }
+    $swapId = \App\Support\ShiftSwapReceipt::swapId($receipt);
 @endphp
 
-<article {{ $attributes->class(['swap-receipt']) }} aria-label="Comprovante {{ $receipt['reference'] }}">
+<article data-receipt-kind="{{ $historical ? 'historical' : 'current' }}" {{ $attributes->class(['swap-receipt']) }} aria-label="Comprovante {{ $receipt['reference'] }}">
     <div class="swap-receipt-heading">
         <div>
-            <p class="eyebrow">Comprovante da troca</p>
-            <h2>{{ $receipt['event_label'] }}</h2>
+            <p class="eyebrow">{{ $historical ? 'Comprovante histórico da notificação' : 'Comprovante da troca' }}</p>
+            @if ($historical)<h3 class="font-semibold">{{ $receipt['event_label'] }}</h3>@else<h2>{{ $receipt['event_label'] }}</h2>@endif
         </div>
         <div class="flex flex-wrap items-center gap-2.5 text-left sm:text-right">
             <div>
                 <span class="meta-label">Referência</span>
                 <p class="mt-1 font-mono text-sm font-semibold text-primary">{{ $receipt['reference'] }}</p>
             </div>
-            @if ($swapId)
+            @if ($swapId && $allowOfficialPdf)
                 <a
                     href="{{ route('swaps.receipt.pdf', $swapId) }}"
-                    class="button-secondary print:hidden ml-auto sm:ml-0 min-h-9 px-3 py-1.5 text-xs inline-flex items-center gap-1.5 text-ink hover:text-primary transition-colors"
-                    title="Baixar comprovante oficial em PDF"
+                    class="button-secondary print:hidden ml-auto sm:ml-0 min-h-10 px-3 py-1.5 text-xs inline-flex items-center gap-1.5 text-ink hover:text-primary transition-colors"
+                    title="{{ $historical ? 'Baixar comprovante oficial atualizado em PDF' : 'Baixar comprovante oficial em PDF' }}"
                 >
                     <svg class="size-4 text-muted" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 14.25l3 3m0 0l3-3m-3 3V9" />
                     </svg>
-                    <span>Salvar PDF</span>
+                    <span>{{ $historical ? 'PDF oficial atualizado' : 'Salvar PDF' }}</span>
                 </a>
             @endif
             <button
                 type="button"
                 onclick="window.printSwapReceipt ? window.printSwapReceipt(this) : window.print()"
-                class="button-secondary print:hidden {{ ! $swapId ? 'ml-auto' : '' }} min-h-9 px-3 py-1.5 text-xs inline-flex items-center gap-1.5 text-ink hover:text-primary transition-colors"
-                title="Imprimir apenas este comprovante"
+                class="button-secondary print:hidden {{ ! $swapId ? 'ml-auto' : '' }} min-h-10 px-3 py-1.5 text-xs inline-flex items-center gap-1.5 text-ink hover:text-primary transition-colors"
+                title="{{ $historical ? 'Imprimir apenas o registro histórico desta notificação' : 'Imprimir apenas este comprovante' }}"
             >
                 <svg class="size-4 text-muted" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.75A2.25 2.25 0 0 0 14.25 1.5h-4.5A2.25 2.25 0 0 0 7.5 3.75v3.456" />
                 </svg>
-                <span>Imprimir</span>
+                <span>{{ $historical ? 'Imprimir registro histórico' : 'Imprimir' }}</span>
             </button>
         </div>
     </div>
+
+    @if ($historical)
+        <div class="border-b border-line bg-white p-5 text-sm text-muted">
+            <p>Este comprovante preserva o evento original.</p>
+            @if ($swapId && $allowOfficialPdf)<p class="mt-1">O PDF oficial atualizado mostra a situação atual da troca.</p>@endif
+        </div>
+    @endif
 
     <div class="swap-receipt-grid">
         <div class="swap-receipt-primary">
@@ -76,8 +80,12 @@
             <p>{{ $receipt['substitute'] }}</p>
         </div>
         <div>
-            <span class="meta-label">Situação</span>
-            <div class="mt-2"><x-status-badge :status="$receipt['status']" :label="$receipt['status_label']" /></div>
+            <span class="meta-label">{{ $historical ? 'Situação no momento deste registro' : 'Situação' }}</span>
+            @if ($historical)
+                <p class="mt-2 text-sm text-muted" data-recorded-swap-status>{{ $receipt['status_label'] }}</p>
+            @else
+                <div class="mt-2"><x-status-badge :status="$receipt['status']" :label="$receipt['status_label']" /></div>
+            @endif
         </div>
         <div @class(['lg:col-span-2' => ! $receipt['manager'] && ! $hasCounterpart])>
             <span class="meta-label">Registrado em</span>
@@ -183,6 +191,8 @@ window.printSwapReceipt = function (triggerElement) {
         stylesHtml += style.outerHTML;
     });
 
+    var historical = receipt.dataset.receiptKind === 'historical';
+    var documentLabel = historical ? 'Comprovante histórico da notificação' : 'Comprovante Oficial de Troca de Plantão';
     var clone = receipt.cloneNode(true);
     clone.querySelectorAll('.print\\:hidden, button, a').forEach(function (el) {
         el.remove();
@@ -196,7 +206,7 @@ window.printSwapReceipt = function (triggerElement) {
         '<html lang="pt-BR">' +
         '<head>' +
         '<meta charset="utf-8">' +
-        '<title>Comprovante de Troca · Escala Fácil</title>' +
+        '<title>' + documentLabel + ' · Escala Fácil</title>' +
         stylesHtml +
         '<style>' +
         '@page { size: a4 portrait; margin: 15mm; }' +
@@ -218,7 +228,7 @@ window.printSwapReceipt = function (triggerElement) {
         '<div class="print-official-header">' +
         '<div>' +
         '<div style="font-size: 20px; font-weight: bold; color: #005f56; letter-spacing: -0.02em;">Escala Fácil</div>' +
-        '<div style="font-size: 11px; color: #5e7377; margin-top: 2px;">Comprovante Oficial de Troca de Plantão</div>' +
+        '<div style="font-size: 11px; color: #5e7377; margin-top: 2px;">' + documentLabel + '</div>' +
         '</div>' +
         '<div style="text-align: right; font-size: 11px; color: #5e7377;">' +
         '<div>Documento para conferência operacional</div>' +
@@ -231,13 +241,14 @@ window.printSwapReceipt = function (triggerElement) {
         '<div><div class="print-sign-line">Plantonista Substituto</div><div class="print-sign-role">Assinatura</div></div>' +
         '<div><div class="print-sign-line">Gerência / Coordenação</div><div class="print-sign-role">Visto da Chefia</div></div>' +
         '</div>' +
-        '<div class="print-official-footer">Escala Fácil · Documento eletrônico oficial gerado pelo sistema · Autenticação operacional</div>' +
+        '<div class="print-official-footer">Escala Fácil · ' + (historical ? 'Registro histórico do evento; a situação atual deve ser consultada na Central ou no PDF oficial atualizado.' : 'Documento eletrônico oficial gerado pelo sistema · Autenticação operacional') + '</div>' +
         '</body></html>';
 
     doc.write(printContent);
     doc.close();
 
     setTimeout(function () {
+        if (!iframe.isConnected || !iframe.contentWindow) return;
         try {
             iframe.contentWindow.focus();
             iframe.contentWindow.print();

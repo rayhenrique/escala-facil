@@ -16,6 +16,7 @@
         "test:reallocation:browser": "node tests/browser/shift-reallocation.mjs",
         "test:swaps:browser": "node tests/browser/swap-analysis.mjs",
         "test:swap-blockers:browser": "node tests/browser/swap-approval-blockers.mjs",
+        "test:notification-receipts:browser": "node tests/browser/notification-receipts.mjs",
         "test:swap-reversion:browser": "node tests/browser/swap-reversion.mjs",
         "test:swap-history:browser": "node tests/browser/manager-swap-history.mjs",
         "test:dashboard:browser": "node tests/browser/dashboard.mjs",

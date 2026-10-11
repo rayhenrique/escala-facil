@@ -268,3 +268,7 @@ Rótulos e descrições nos blocos destacados do comprovante usam primary-strong
 ## Revisão de desfazimento de trocas
 
 O modal existente apresenta Situação atual → Situação após desfazer para cada plantão, com horários e duração. Motivos de bloqueio ficam visíveis; avisos de dobra usam texto ink. Justificativa administrativa tem rótulo, limite e erro associado. Cancelar, Escape, foco preso, feedback de requisição e retorno ao botão de origem seguem os componentes existentes. Casos bloqueados oferecem Analisar correção administrativa em uma etapa de consulta, com links para históricos e sem confirmação destrutiva. Tokens e identidade visual permanecem os mesmos.
+
+## Situação das trocas nas notificações
+
+Cada cartão da Central apresenta primeiro Situação atual da troca, com estado e badge atuais. O título e a mensagem originais ficam sob Evento histórico desta notificação, em hierarquia secundária. O comprovante incorporado identifica Situação no momento deste registro em texto neutro; sua impressão é explicitamente histórica. PDF oficial atualizado é uma ação distinta, autorizada, que consulta o estado atual. Paleta, tipografia, cartões e paginação existentes permanecem.

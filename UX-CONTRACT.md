@@ -204,3 +204,7 @@ Aguardando decisão mantém a fila operacional; Histórico de trocas inclui toda
 ## Reversão administrativa de trocas
 
 Desfazer está disponível para revisar qualquer pedido aprovado no histórico completo. Abrir ou atualizar revisão não escreve dados. A confirmação exige justificativa e prévia emitida pelo servidor; IDs e assinatura são Locked. Os dois plantões de uma troca mútua são revisados e restaurados juntos ou nenhum é modificado. Após sucesso, modal fecha, fila e comprovante atualizam e foco retorna ao controle de origem ou ao título da lista. Motivos específicos e erros recebem foco; erro de rede mantém revisão para conferência. Plantões iniciados, passados, concluídos, alterados ou sem evidência original oferecem análise administrativa separada de somente leitura, com links para o histórico. Não existe confirmação forçada.
+
+## Situação atual e histórico de notificações
+
+A Central consulta os estados atuais em lote para os IDs da página e aplica a Policy de consulta. Situação atual da troca é sempre explícita, mesmo quando coincide com a notificação; ausência ou falta de permissão mostra Indisponível para consulta, sem adotar o estado antigo como atual. Evento histórico e Situação no momento deste registro preservam o snapshot da notificação. A impressão clona apenas esse registro e o identifica como histórico; PDF oficial atualizado usa o controlador autorizado de consulta atual. Renderizar, paginar e imprimir não marcam leitura nem regravam comprovantes. Só ações explícitas de leitura alteram read_at, sem mudar o payload.

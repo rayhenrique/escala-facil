@@ -265,3 +265,5 @@
 - [x] **Histórico completo de trocas (1.33.0)**: fila e consulta separadas, paginação SQL sem limite total, filtros/ordenação por URL, dois plantões nas permutas, detalhes/comprovantes, impedimentos de reversão e regressões sem modificar as regras existentes.
 
 - [x] 1.34.0: revisão de qualquer troca aprovada, restauração simples/mútua com evidência original, justificativa e locks, análise administrativa de consulta para bloqueios, registro imutável, comprovantes corretos e testes de concorrência.
+
+- [x] 1.34.1: situação atual das trocas em destaque na Central, comprovantes identificados como históricos, impressão distinta do PDF atualizado, consulta em lote autorizada e regressão reproduzida do pedido #106 sem escrita durante renderização.

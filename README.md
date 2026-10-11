@@ -4,7 +4,7 @@
 
 Sistema interno para gestão de escalas médicas, plantões, trocas e ausências em unidades de saúde. A aplicação centraliza a operação da gerência, permite que profissionais acompanhem a própria agenda e aplica as regras de compatibilidade e limite mensal em todas as decisões de troca.
 
-**Versão atual:** `1.34.0` — consulte o histórico completo em [`versoes.md`](versoes.md).
+**Versão atual:** `1.34.1` — consulte o histórico completo em [`versoes.md`](versoes.md).
 
 Desenvolvido por [KL Tecnologia](https://kltecnologia.com).
 
@@ -158,7 +158,7 @@ Crie um banco MySQL chamado `escala_facil` e ajuste o `.env`:
 APP_NAME="Escala Fácil"
 APP_URL=http://127.0.0.1:8000
 APP_TIMEZONE=America/Maceio
-APP_VERSION=1.34.0
+APP_VERSION=1.34.1
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR
 APP_FAKER_LOCALE=pt_BR
@@ -480,3 +480,5 @@ Na gerência, **Relatórios → Cobertura e Indicadores** reúne total de plant�
 A análise mostra exatamente qual atribuição, situação ou cota impede a aprovação, inclusive na contrapartida de uma permuta. 3/4 permite a quarta participação; conflitos/dobras continuam sendo avisos conforme a regra vigente. Alterações relevantes exigem **Atualizar análise**, mantendo revalidação, locks e confirmação. [Diagnóstico e regra mensal](docs/swap-approval-diagnostics.md) documenta o caso informado #89, os limites da investigação local e os testes.
 
 Revisão e limites do desfazimento de trocas: [`docs/swap-reversion.md`](docs/swap-reversion.md).
+
+Situação atual e comprovantes históricos das notificações: [`docs/notification-receipts.md`](docs/notification-receipts.md).

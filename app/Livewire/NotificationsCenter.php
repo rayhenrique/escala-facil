@@ -3,9 +3,11 @@
 namespace App\Livewire;
 
 use App\Models\ShiftSwap;
+use App\Support\ShiftSwapReceipt;
 use Illuminate\Contracts\View\View;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -78,7 +80,7 @@ class NotificationsCenter extends Component
     private function currentSwapStatuses(Collection $notifications): array
     {
         $swapIds = $notifications
-            ->map(fn ($notification) => $this->swapIdFromData($notification->data))
+            ->map(fn ($notification) => ShiftSwapReceipt::swapId($notification->data['receipt'] ?? null))
             ->filter()
             ->unique()
             ->values();
@@ -88,7 +90,8 @@ class NotificationsCenter extends Component
         }
 
         $swaps = ShiftSwap::query()
-            ->with(['requester', 'substitute', 'manager'])
+            ->select(['id', 'status', 'requester_id', 'substitute_id', 'manager_id', 'rejection_reason'])
+            ->with('manager:id,name')
             ->whereKey($swapIds)
             ->get()
             ->keyBy('id');
@@ -99,7 +102,7 @@ class NotificationsCenter extends Component
             /** @var ShiftSwap|null $swap */
             $swap = $swaps->get($swapId);
 
-            if (! $swap) {
+            if (! $swap || Gate::denies('view', $swap)) {
                 continue;
             }
 
@@ -112,24 +115,5 @@ class NotificationsCenter extends Component
         }
 
         return $statuses;
-    }
-
-    private function swapIdFromData(mixed $data): ?int
-    {
-        if (! is_array($data) || ! isset($data['receipt']) || ! is_array($data['receipt'])) {
-            return null;
-        }
-
-        $swapId = $data['receipt']['shift_swap_id'] ?? null;
-
-        if (is_numeric($swapId)) {
-            return (int) $swapId;
-        }
-
-        if (! empty($data['receipt']['reference']) && preg_match('/(\d+)/', (string) $data['receipt']['reference'], $matches)) {
-            return (int) $matches[1];
-        }
-
-        return null;
     }
 }

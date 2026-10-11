@@ -8,6 +8,29 @@ use App\Models\ShiftSwap;
 
 class ShiftSwapReceipt
 {
+    /** Resolve only valid receipt references; never consult or rewrite historical data. */
+    public static function swapId(mixed $receipt): ?int
+    {
+        if (! is_array($receipt)) {
+            return null;
+        }
+        $id = $receipt['shift_swap_id'] ?? null;
+        if (is_int($id) || is_string($id)) {
+            $valid = filter_var($id, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+            if ($valid !== false) {
+                return $valid;
+            }
+        }
+        $reference = $receipt['reference'] ?? null;
+        if (is_string($reference) && preg_match('/^TROCA-0*([1-9]\d*)$/D', $reference, $matches)) {
+            $valid = filter_var($matches[1], FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+
+            return $valid !== false ? $valid : null;
+        }
+
+        return null;
+    }
+
     /** Consulta da situação atual; não substitui comprovantes de eventos anteriores. */
     public function current(ShiftSwap $swap): array
     {
