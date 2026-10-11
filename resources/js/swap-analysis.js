@@ -7,7 +7,8 @@ export function registerSwapAnalysis(Livewire) {
         const opening = [...message.actions].some((action) => {
             const name = action.name ?? action.method;
             return ['openSwapAnalysis', 'requestDecision', 'openReallocation'].includes(name)
-                || (message.component.el.hasAttribute('data-shift-assignment-flow') && ['openCreateModal', 'edit'].includes(name));
+                || (message.component.el.hasAttribute('data-shift-assignment-flow') && ['openCreateModal', 'edit'].includes(name))
+                || (message.component.el.hasAttribute('data-account-invitation-flow') && ['openInvitationModal', 'requestInvitationRevocation'].includes(name));
         });
         if (!dialog() && !opening) return;
         if (!dialog()) {

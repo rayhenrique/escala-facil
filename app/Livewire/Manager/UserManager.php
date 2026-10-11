@@ -2,9 +2,11 @@
 
 namespace App\Livewire\Manager;
 
+use App\Actions\Accounts\InviteProfessionalAction;
 use App\Enums\UserRole;
 use App\Http\Requests\SaveUserRequest;
 use App\Livewire\Concerns\HasOperationalContext;
+use App\Models\AccountInvitation;
 use App\Models\Category;
 use App\Models\Sector;
 use App\Models\User;
@@ -12,6 +14,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -35,6 +38,15 @@ class UserManager extends Component
     public string $pendingDeleteName = '';
 
     public bool $showFormModal = false;
+
+    #[Locked]
+    public bool $invitationMode = false;
+
+    #[Locked]
+    public bool $pendingActivation = false;
+
+    #[Locked]
+    public ?int $pendingInvitationRevocation = null;
 
     public string $name = '';
 
@@ -87,6 +99,13 @@ class UserManager extends Component
 
     public function save(): void
     {
+        if ($this->invitationMode) {
+            app(InviteProfessionalAction::class)->create(auth()->user(), $this->payload());
+            $this->resetForm();
+            session()->flash('status', 'Convite criado. O envio do link de ativação foi solicitado.');
+
+            return;
+        }
         $user = $this->editingUserId ? User::query()->findOrFail($this->editingUserId) : null;
         $this->authorize($user ? 'update' : 'create', $user ?? User::class);
 
@@ -146,12 +165,52 @@ class UserManager extends Component
         $this->showFormModal = true;
     }
 
+    public function openInvitationModal(): void
+    {
+        $this->authorize('create', AccountInvitation::class);
+        $this->resetForm();
+        $this->invitationMode = true;
+        $this->showFormModal = true;
+    }
+
+    public function resendInvitation(int $userId): void
+    {
+        app(InviteProfessionalAction::class)->resend(auth()->user(), $userId);
+        session()->flash('status', 'Novo convite solicitado. O link anterior não pode mais ser usado.');
+    }
+
+    public function revokeInvitation(int $userId): void
+    {
+        app(InviteProfessionalAction::class)->revoke(auth()->user(), $userId);
+        session()->flash('status', 'Convite revogado. O link não pode mais ativar a conta.');
+    }
+
+    public function requestInvitationRevocation(int $userId): void
+    {
+        $invitation = AccountInvitation::where('user_id', $userId)->firstOrFail();
+        $this->authorize('update', $invitation);
+        $this->pendingInvitationRevocation = $userId;
+    }
+
+    public function cancelInvitationRevocation(): void
+    {
+        $this->pendingInvitationRevocation = null;
+    }
+
+    public function confirmInvitationRevocation(): void
+    {
+        abort_unless($this->pendingInvitationRevocation, 404);
+        $this->revokeInvitation($this->pendingInvitationRevocation);
+        $this->cancelInvitationRevocation();
+    }
+
     public function edit(int $userId): void
     {
         $user = User::query()->findOrFail($userId);
         $this->authorize('update', $user);
 
         $this->editingUserId = $user->id;
+        $this->pendingActivation = $user->requires_activation;
         $this->pendingDeleteId = null;
         $this->name = $user->name;
         $this->email = $user->email;
@@ -219,6 +278,8 @@ class UserManager extends Component
     {
         $this->reset([
             'editingUserId',
+            'invitationMode',
+            'pendingActivation',
             'pendingDeleteId',
             'pendingDeleteName',
             'showFormModal',
@@ -275,8 +336,10 @@ class UserManager extends Component
 
     public function render(): View
     {
+        $this->authorize('viewAny', User::class);
+        $canManageInvitations = auth()->user()->can('create', AccountInvitation::class);
         $users = User::query()
-            ->with(['category', 'sector'])
+            ->with(['category', 'sector', 'invitation'])
             ->when($this->search !== '', function ($query) {
                 $query->where(function ($query) {
                     $query->where('name', 'like', '%'.$this->search.'%')
@@ -287,6 +350,6 @@ class UserManager extends Component
             ->orderBy('name')
             ->paginate(10);
 
-        return view('livewire.manager.user-manager', compact('users'));
+        return view('livewire.manager.user-manager', compact('users', 'canManageInvitations'));
     }
 }

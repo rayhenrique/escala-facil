@@ -4,7 +4,7 @@
 
 Sistema interno para gestão de escalas médicas, plantões, trocas e ausências em unidades de saúde. A aplicação centraliza a operação da gerência, permite que profissionais acompanhem a própria agenda e aplica as regras de compatibilidade e limite mensal em todas as decisões de troca.
 
-**Versão atual:** `1.30.0` — consulte o histórico completo em [`versoes.md`](versoes.md).
+**Versão atual:** `1.31.0` — consulte o histórico completo em [`versoes.md`](versoes.md).
 
 Desenvolvido por [KL Tecnologia](https://kltecnologia.com).
 
@@ -157,7 +157,7 @@ Crie um banco MySQL chamado `escala_facil` e ajuste o `.env`:
 APP_NAME="Escala Fácil"
 APP_URL=http://127.0.0.1:8000
 APP_TIMEZONE=America/Maceio
-APP_VERSION=1.30.0
+APP_VERSION=1.31.0
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR
 APP_FAKER_LOCALE=pt_BR
@@ -465,3 +465,7 @@ O MVP não inclui geração automática de escalas, integração com folha de pa
 ## Alertas preventivos de plantões
 
 Ao criar ou editar, avisos de conflito, dobra e ausência de cobertura aparecem antes da confirmação. Use **Revisar dados** para ajustar ou **Confirmar com os avisos** após conferir. Compatibilidade continua obrigatória; a realocação continua bloqueando sobreposição. Não há novos limites de descanso ou carga horária. As regras preservadas, verificações no servidor e testes estão em [Alertas preventivos](docs/preventive-shift-alerts.md). Regressão no navegador: `npm run test:preventive:browser`, exclusivamente com base sintética descartável.
+
+## Convites de profissionais
+
+Em **Usuários**, use **Convidar profissional** para enviar um link individual de ativação, sem senha provisória. A gerência acompanha status, reenvia e revoga convites; o profissional cria a própria senha pelo link. Contas anteriores permanecem ativas e não há registro público. Configure transporte de e-mail real, `APP_URL` HTTPS e worker da fila antes de usar em produção. [Convites e ativação](docs/account-invitations.md) descreve configuração, expiração, segurança e regressão `npm run test:invitations:browser`.

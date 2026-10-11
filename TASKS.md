@@ -1,5 +1,11 @@
 # TASKS - Plano de Execução Sequencial
 
+- [x] **Ativação segura por convite (1.31.0)**
+  - [x] Integrar conta pendente, token com hash, expiração, uso único, reenvio e revogação.
+  - [x] Proteger autorização, recuperação, sessão, concorrência e dados do convite.
+  - [x] Enfileirar envio após commit com payload criptografado e bloquear transporte de log.
+  - [x] Validar interface, regressões, fila, navegador, Pint, build, documentação e versão.
+
 - [x] **Alertas preventivos de plantões (1.30.0)**
   - [x] Auditar políticas, intervalos, cobertura, compatibilidade e limites configurados.
   - [x] Compartilhar análise e apresentar revisão de avisos antes da confirmação.

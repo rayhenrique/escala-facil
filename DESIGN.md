@@ -242,3 +242,7 @@ A gerência consulta o histórico pelos links “Histórico” junto aos registr
 ## Alertas preventivos de plantões
 
 A revisão de criação/edição ocupa o modal de cadastro existente, sem sobrepor outro modal. Mostra período, profissional e avisos, com Revisar dados e confirmação explícita. Bloqueios usam texto e cor danger; avisos usam texto ink com borda primary, sem confundir recomendação com proibição. O componente shift-assignment-alerts é compartilhado com a prévia de realocação. Campos são preservados ao retornar; foco, fundo inerte, estado ocupado e recuperação de falha seguem os modais operacionais existentes.
+
+## Convites de profissionais
+
+O módulo Usuários reutiliza seu modal de cadastro em uma variante de convite: perfil Profissional fixo e campos de nome/e-mail/setor/categoria, sem senha. Status e ações de convite aparecem junto ao cadastro em tabela e cartão, com texto explícito. Revogação usa confirmation-modal e confirmação de manutenção do convite como alternativa. A ativação reutiliza o layout institucional guest em duas colunas, auth/form, campos de senha com autofill e auth/submit; nenhuma identidade é mostrada na página pública. Controles, contraste, teclado e estados de requisição seguem os componentes existentes.

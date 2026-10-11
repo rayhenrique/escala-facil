@@ -168,3 +168,11 @@ Os formulários de acesso não abrem o teclado automaticamente. E-mail usa tecla
 - Incompatibilidade bloqueia cadastro/realocação. Sobreposição permanece aviso na criação/edição e bloqueio na realocação; consecutividade permanece aviso de dobra. Nenhum limite de descanso ou horas foi criado. Critérios pendentes e classificação estão em docs/preventive-shift-alerts.md.
 - Salvar com avisos abre revisão sem persistir. Revisar dados conserva valores; Confirmar com os avisos revalida tudo sob locks no backend. Mudanças posteriores pedem nova revisão; a assinatura da edição impede sobrescrever um registro desatualizado.
 - Modais compartilham foco, fundo inerte, carregamento e tratamento de erro de transporte. Durante a requisição, confirmação/cancelamento são desabilitados; a prévia não comunica sucesso antes da persistência. Notificações, comprovantes e histórico transacional permanecem existentes.
+
+## Convites e ativação
+
+- Gerência cria convites individuais para novos profissionais. Formulário reutiliza cadastro e fixa o perfil, sem solicitar senha. Cadastro existente não é sobrescrito; registro público continua indisponível.
+- Status Pendente/Aceito/Expirado/Revogado é equivalente em tabela e cartão. Reenvio invalida link anterior; revogação exige confirmação e preserva cadastro. Ambos revalidam Policy/estado no backend; conta aceita segue recuperação de senha.
+- Página pública reutiliza auth/form e layout guest, sem e-mail/ID/nome. Token é retirado da URL; referência bloqueada identifica uma autorização somente na sessão atual, separada por aba. Refresh funciona, compartilhamento dessa referência não concede acesso em outra sessão.
+- Profissional define senha e confirmação, consumidas com o convite em transação. Pendentes não entram nem usam recuperação para ativação. Sucesso redireciona ao login; erros de convite e mensagens de recuperação não revelam existência/situação da conta.
+- Envio é solicitado após commit, com fila criptografada e verificação da emissão no worker. UI distingue solicitação de envio de entrega; links não são mostrados na gerência nem enviados ao log. Configuração e limites estão em docs/account-invitations.md.

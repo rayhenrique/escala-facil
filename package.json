@@ -8,6 +8,7 @@
         "test:filters:browser": "node tests/browser/operational-filters.mjs",
         "test:audit:browser": "node tests/browser/operational-audit.mjs",
         "test:preventive:browser": "node tests/browser/preventive-shift-alerts.mjs",
+        "test:invitations:browser": "node tests/browser/account-invitations.mjs",
         "test:auth:browser": "node tests/browser/auth.mjs",
         "test:reallocation:browser": "node tests/browser/shift-reallocation.mjs",
         "test:swaps:browser": "node tests/browser/swap-analysis.mjs",

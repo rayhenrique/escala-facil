@@ -135,7 +135,7 @@ APP_KEY=
 APP_DEBUG=false
 APP_URL=https://escalafacil.kltecnologia.com
 APP_TIMEZONE=America/Maceio
-APP_VERSION=1.30.0
+APP_VERSION=1.31.0
 
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR
@@ -500,3 +500,7 @@ php8.5 artisan up
 - [Laravel 13 — deployment](https://laravel.com/docs/13.x/deployment)
 - [Hostinger — apontar domínio para VPS](https://www.hostinger.com/support/1583227-how-to-point-a-domain-to-your-vps-at-hostinger/)
 - [NVM — instalação oficial](https://github.com/nvm-sh/nvm#installing-and-updating)
+
+### Convites de profissionais (1.31.0)
+
+Antes de liberar convites, aplique a migração da versão no fluxo normal, configure `APP_URL` HTTPS e `INVITATION_MAILER=smtp` (ou mailer real existente) com os parâmetros `MAIL_*`. Preserve as credenciais locais. Mantenha o worker supervisionado para `QUEUE_CONNECTION=database` e verifique `failed_jobs`; `sync` envia após commit na requisição. Transporte `log`/`null` e fallback para log são recusados. Detalhes: [convites](docs/account-invitations.md). Esta alteração de código não executou deploy.

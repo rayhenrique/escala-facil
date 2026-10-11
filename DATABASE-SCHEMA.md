@@ -79,3 +79,7 @@ Essa tabela não pertence ao domínio de plantões. Ela permite que `php artisan
 ## operational_audit_events (1.29.0)
 
 Tabela append-only com `id`, `author_id` nullable sem FK de cascata, `entity_type`, `entity_id`, `action`, `occurred_at` (microssegundos), `operation_id` (UUID) e `changes` (JSON com diferenças relevantes). Índices por tipo/registro/horário, autor/horário, horário e UUID. Não contém senhas, tokens, anexos ou cópias de comprovantes. Modelo/builders e triggers impedem alteração/exclusão ordinária; rollback da migração recusa remover eventos existentes. O histórico especializado em `shift_reallocations` permanece intacto.
+
+## Convites de contas
+
+`users.requires_activation` é booleano com padrão falso; convites novos usam verdadeiro até o aceite. `account_invitations` tem ID, `user_id` único (FK com exclusão em cascata), `invited_by`, hash SHA-256 de token único/nullable, hash do e-mail vinculado, contador de geração e datas de expiração/envio/aceite/revogação. Aceite/revogação apagam o digest do token. Autor não sofre cascata, e metadados relevantes são preservados no histórico append-only sem copiar tokens ou senhas.

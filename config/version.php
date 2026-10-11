@@ -2,9 +2,18 @@
 
 return [
     // Versão do código instalado. APP_VERSION não pode sobrepor este registro.
-    'current' => '1.30.0',
+    'current' => '1.31.0',
 
     'releases' => [
+        [
+            'version' => '1.31.0',
+            'date' => '2026-10-11',
+            'title' => 'Ativação de contas por convite',
+            'summary' => 'Gerentes agora podem convidar profissionais, que recebem um link para criar sua própria senha e acessar o aplicativo.',
+            'highlights' => [
+                'Gerentes agora podem convidar profissionais, que recebem um link para criar sua própria senha e acessar o aplicativo.',
+            ],
+        ],
         [
             'version' => '1.30.0',
             'date' => '2026-10-10',

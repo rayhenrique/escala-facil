@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Enums\ShiftSwapStatus;
+use App\Models\AccountInvitation;
 use App\Models\Category;
 use App\Models\OperationalAuditEvent;
 use App\Models\Sector;
@@ -18,7 +19,8 @@ class OperationalAudit
     private const FIELDS = [
         Shift::class => ['date', 'start_time', 'end_time', 'end_date', 'sector_id', 'category_id', 'user_id', 'status'],
         ShiftSwap::class => ['shift_id', 'substitute_shift_id', 'requester_id', 'substitute_id', 'status', 'manager_id'],
-        User::class => ['name', 'role', 'sector_id', 'category_id'],
+        User::class => ['name', 'role', 'sector_id', 'category_id', 'requires_activation'],
+        AccountInvitation::class => ['user_id', 'invited_by', 'generation', 'expires_at', 'last_sent_at', 'accepted_at', 'revoked_at'],
         Sector::class => ['name'], Category::class => ['name'],
     ];
 
@@ -29,7 +31,7 @@ class OperationalAudit
             $value = $model->getAttribute($field);
             $result[$field] = match (true) {
                 $value instanceof BackedEnum => $value->value,
-                $value instanceof DateTimeInterface => $value->format('Y-m-d'),
+                $value instanceof DateTimeInterface => $value->format($model instanceof AccountInvitation ? 'c' : 'Y-m-d'),
                 in_array($field, ['start_time', 'end_time'], true) => substr((string) $value, 0, 5),
                 default => $value,
             };
@@ -63,9 +65,16 @@ class OperationalAudit
                 default => $action,
             };
         }
+        if ($model instanceof AccountInvitation && $action === 'updated') {
+            $action = match (true) {
+                isset($changes['accepted_at']) => 'activated', isset($changes['revoked_at']) && $after['revoked_at'] !== null => 'revoked',
+                isset($changes['generation']) => 'resent', default => $action,
+            };
+        }
         $entity = match ($model::class) {
             Shift::class => 'shift', ShiftSwap::class => 'swap', User::class => 'user',
             Sector::class => 'sector', Category::class => 'category',
+            AccountInvitation::class => 'invitation',
         };
         $context = app(OperationalAuditContext::class);
         OperationalAuditEvent::on($model->getConnectionName())->create([

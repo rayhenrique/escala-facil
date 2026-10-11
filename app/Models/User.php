@@ -9,6 +9,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -29,6 +30,7 @@ class User extends Authenticatable
         'category_id',
         'sector_id',
         'last_seen_version',
+        'requires_activation',
     ];
 
     protected $hidden = [
@@ -40,6 +42,7 @@ class User extends Authenticatable
     {
         return [
             'id' => 'integer',
+            'requires_activation' => 'boolean',
             'password' => 'hashed',
             'role' => UserRole::class,
             'category_id' => 'integer',
@@ -57,6 +60,11 @@ class User extends Authenticatable
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function invitation(): HasOne
+    {
+        return $this->hasOne(AccountInvitation::class);
     }
 
     public function sector(): BelongsTo

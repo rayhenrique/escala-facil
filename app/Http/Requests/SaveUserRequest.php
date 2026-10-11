@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\UserRole;
+use App\Models\User;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\Validator;
@@ -42,6 +43,10 @@ class SaveUserRequest extends DataFormRequest
     {
         return [
             function (Validator $validator): void {
+                $existing = $this->filled('user_id') ? User::find($this->integer('user_id')) : null;
+                if ($existing?->requires_activation && ($this->filled('password') || $this->input('role') !== UserRole::Professional->value)) {
+                    $validator->errors()->add('role', 'A conta aguarda ativação por convite. Preserve o perfil Profissional; a senha deve ser definida pelo próprio profissional.');
+                }
                 if ($this->input('role') !== UserRole::Professional->value) {
                     return;
                 }

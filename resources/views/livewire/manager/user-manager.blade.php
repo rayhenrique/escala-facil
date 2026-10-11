@@ -1,4 +1,4 @@
-<div>
+<div data-account-invitation-flow>
     <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div>
             <p class="eyebrow">Cadastros</p>
@@ -19,28 +19,35 @@
                     @endforeach
                 </select>
             </div>
-            <button type="button" wire:click="openCreateModal" class="button-primary w-full sm:col-span-2 lg:col-span-1 lg:w-auto">Adicionar usuário</button>
+            <div class="flex flex-col gap-2 sm:col-span-2 lg:col-span-1">
+                <button type="button" wire:click="openInvitationModal" class="button-primary">Convidar profissional</button>
+                <button type="button" wire:click="openCreateModal" class="button-secondary">Adicionar usuário</button>
+            </div>
         </div>
     </div>
 
     <x-flash-notifications />
+    @error('invitation')<p class="field-error mt-4" role="alert">{{ $message }}</p>@enderror
 
     @if ($showFormModal)
-        <div class="modal-overlay" x-data x-init="$nextTick(() => $refs.firstField?.focus())" @keydown.escape.window="$wire.closeFormModal()">
-            <button type="button" wire:click="closeFormModal" class="modal-backdrop" aria-label="Fechar formulário de usuário"></button>
-            <form method="post" wire:submit="save" class="modal-dialog max-w-4xl" role="dialog" aria-modal="true" aria-labelledby="user-form-title" novalidate>
+        <div class="modal-overlay" x-data="{ busy: false }" @if ($invitationMode) data-decision-component="{{ $this->getId() }}" x-on:swap-decision-busy.window="busy = $event.detail" @endif x-trap.inert.noscroll.noreturn="true" x-init="$nextTick(() => $refs.firstField?.focus())" @keydown.escape.window="if (!busy) $wire.closeFormModal()">
+            <button type="button" wire:click="closeFormModal" :disabled="busy" class="modal-backdrop" aria-label="Fechar formulário de usuário"></button>
+            <section class="relative z-10 w-full max-w-4xl" role="dialog" aria-modal="true" aria-labelledby="user-form-title">
+            <form method="post" wire:submit="save" class="modal-dialog" novalidate>
                 @csrf
                 <header class="modal-header">
                     <div>
                         <p class="eyebrow">{{ $editingUserId ? 'Edição' : 'Novo cadastro' }}</p>
-                        <h2 id="user-form-title">{{ $editingUserId ? 'Editar usuário' : 'Adicionar usuário' }}</h2>
+                        <h2 id="user-form-title">{{ $invitationMode ? 'Convidar profissional' : ($editingUserId ? 'Editar usuário' : 'Adicionar usuário') }}</h2>
                     </div>
-                    <button type="button" wire:click="closeFormModal" class="modal-close-button" aria-label="Fechar formulário">
+                    <button type="button" wire:click="closeFormModal" :disabled="busy" class="modal-close-button" aria-label="Fechar formulário">
                         <x-nav-icon name="close" class="size-5" />
                     </button>
                 </header>
 
                 <div class="modal-body grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                    @if ($invitationMode)<p hidden data-decision-request-error tabindex="-1" role="alert" class="field-error col-span-full"></p>@endif
+                    @if ($invitationMode)<p class="col-span-full text-sm text-muted">O profissional receberá um link para criar a própria senha. O acesso ficará pendente até a ativação.</p>@endif
                     <div>
                         <label for="user-name" class="field-label">Nome completo</label>
                         <input x-ref="firstField" wire:model="name" id="user-name" type="text" class="field-input" maxlength="255" autocomplete="name" @error('name') aria-invalid="true" aria-describedby="user-name-error" @enderror>
@@ -53,7 +60,7 @@
                     </div>
                     <div>
                         <label for="user-role" class="field-label">Perfil</label>
-                        <select wire:model.live="role" id="user-role" class="field-input" @error('role') aria-invalid="true" aria-describedby="user-role-error" @enderror>
+                        <select wire:model.live="role" id="user-role" class="field-input" @disabled($invitationMode || $pendingActivation) @error('role') aria-invalid="true" aria-describedby="user-role-error" @enderror>
                             @foreach (\App\Enums\UserRole::cases() as $option)
                                 <option value="{{ $option->value }}">{{ $option->label() }}</option>
                             @endforeach
@@ -80,6 +87,7 @@
                         </div>
                     @endif
 
+                    @if (! $invitationMode && ! $pendingActivation)
                     <div>
                         <label for="user-password" class="field-label">{{ $editingUserId ? 'Nova senha (opcional)' : 'Senha' }}</label>
                         <input wire:model="password" id="user-password" type="password" class="field-input" autocomplete="new-password" @error('password') aria-invalid="true" aria-describedby="user-password-error" @enderror>
@@ -89,16 +97,18 @@
                         <label for="user-password-confirmation" class="field-label">Confirmar senha</label>
                         <input wire:model="passwordConfirmation" id="user-password-confirmation" type="password" class="field-input" autocomplete="new-password">
                     </div>
+                    @elseif ($pendingActivation)<p class="col-span-full text-sm text-muted">A senha será definida pelo profissional ao aceitar o convite. Alterar o e-mail invalida o link atual; reenvie o convite após salvar.</p>@endif
                 </div>
 
                 <footer class="modal-footer">
-                    <button type="button" wire:click="closeFormModal" class="button-secondary w-full sm:w-auto">Cancelar</button>
-                    <button type="submit" class="button-primary w-full sm:w-auto" wire:loading.attr="disabled" wire:target="save">
-                        <span wire:loading.remove wire:target="save">{{ $editingUserId ? 'Salvar alterações' : 'Criar usuário' }}</span>
+                    <button type="button" wire:click="closeFormModal" :disabled="busy" class="button-secondary w-full sm:w-auto">Cancelar</button>
+                    <button type="submit" :disabled="busy" class="button-primary w-full sm:w-auto" wire:loading.attr="disabled" wire:target="save">
+                        <span wire:loading.remove wire:target="save">{{ $invitationMode ? 'Enviar convite' : ($editingUserId ? 'Salvar alterações' : 'Criar usuário') }}</span>
                         <span wire:loading wire:target="save">Salvando…</span>
                     </button>
                 </footer>
             </form>
+            </section>
         </div>
     @endif
 
@@ -125,6 +135,7 @@
                         <div><dt class="meta-label">Categoria</dt><dd class="mt-1">{{ $user->category?->name ?? 'Não se aplica' }}</dd></div>
                         <div><dt class="meta-label">Setor</dt><dd class="mt-1">{{ $user->sector?->name ?? 'Não se aplica' }}</dd></div>
                     </dl>
+                    <x-account-invitation-status :user="$user" :manageable="$canManageInvitations" />
                     <div class="mt-4 grid grid-cols-2 gap-2">
                         <x-operational-audit-link entity="user" :record="$user->id" from="users" :context="$this->navigationContext()" />
 <button type="button" wire:click="edit({{ $user->id }})" class="button-secondary">Editar</button>
@@ -142,7 +153,7 @@
                 <tbody>
                     @forelse ($users as $user)
                         <tr wire:key="user-row-{{ $user->id }}">
-                            <td><strong>{{ $user->name }}</strong><span>{{ $user->email }}</span></td>
+                            <td><strong>{{ $user->name }}</strong><span>{{ $user->email }}</span><x-account-invitation-status :user="$user" :manageable="$canManageInvitations" /></td>
                             <td><span class="status-badge {{ $user->role === \App\Enums\UserRole::Manager ? 'status-pending_manager' : 'status-scheduled' }}">{{ $user->role->label() }}</span></td>
                             <td>{{ $user->category?->name ?? 'Não se aplica' }}</td>
                             <td>{{ $user->sector?->name ?? 'Não se aplica' }}</td>
@@ -159,6 +170,15 @@
         <div class="mt-6">{{ $users->links() }}</div>
     </section>
 
+    <x-confirmation-modal :show="$pendingInvitationRevocation !== null" id="revoke-invitation" title="Revogar convite?" close-action="cancelInvitationRevocation" busy-action="confirmInvitationRevocation" trap-focus>
+        <p>O link atual não poderá ativar a conta. O cadastro será preservado e a gerência poderá enviar outro convite.</p>
+        @error('invitation')<p class="field-error" role="alert">{{ $message }}</p>@enderror
+        <p hidden data-decision-request-error tabindex="-1" role="alert" class="field-error"></p>
+        <x-slot:actions>
+            <button type="button" wire:click="cancelInvitationRevocation" class="button-secondary" data-confirm-cancel wire:loading.attr="disabled" wire:target="confirmInvitationRevocation">Manter convite</button>
+            <button type="button" wire:click="confirmInvitationRevocation" class="button-danger" wire:loading.attr="disabled" wire:target="confirmInvitationRevocation">Revogar convite</button>
+        </x-slot:actions>
+    </x-confirmation-modal>
     <x-confirmation-modal :show="$pendingDeleteId !== null" id="delete-user" title="Excluir usuário?" close-action="cancelDelete">
         <p>Você está prestes a excluir <strong>{{ $pendingDeleteName }}</strong>.</p>
         <p>Contas com histórico de plantões, trocas ou ausências serão preservadas para manter a rastreabilidade.</p>

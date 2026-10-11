@@ -40,7 +40,7 @@ class ResetPassword extends Component
         ]);
 
         $status = Password::reset(
-            $validated,
+            $validated + ['requires_activation' => false],
             function (User $user, string $password): void {
                 $user->forceFill([
                     'password' => Hash::make($password),
@@ -52,7 +52,7 @@ class ResetPassword extends Component
         );
 
         if ($status !== Password::PasswordReset) {
-            $this->addError('email', __($status));
+            $this->addError('email', 'Não foi possível redefinir a senha. Solicite um novo link e tente novamente.');
 
             return;
         }

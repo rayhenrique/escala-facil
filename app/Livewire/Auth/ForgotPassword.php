@@ -4,6 +4,7 @@ namespace App\Livewire\Auth;
 
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
@@ -18,15 +19,12 @@ class ForgotPassword extends Component
     {
         $this->validate();
 
-        $status = Password::sendResetLink(['email' => $this->email]);
-
-        if ($status !== Password::ResetLinkSent) {
-            $this->addError('email', __($status));
-
-            return;
+        $key = 'password-recovery:'.hash('sha256', (string) request()->ip());
+        if (! RateLimiter::tooManyAttempts($key, 5)) {
+            RateLimiter::hit($key, 60);
+            Password::sendResetLink(['email' => $this->email, 'requires_activation' => false]);
         }
-
-        session()->flash('status', __($status));
+        session()->flash('status', 'Se houver uma conta ativa para este e-mail, você receberá um link para redefinir a senha.');
     }
 
     public function render(): View

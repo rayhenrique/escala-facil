@@ -17,6 +17,8 @@ class OperationalAuditPresentation
             'name' => 'Nome', 'role' => 'Perfil', 'email_changed' => 'Endereço de acesso alterado (conteúdo não registrado)',
             'shift_id' => 'Plantão (ID)', 'substitute_shift_id' => 'Contrapartida (ID)', 'requester_id' => 'Solicitante (ID)',
             'substitute_id' => 'Substituto (ID)', 'manager_id' => 'Gerente (ID)',
+            'requires_activation' => 'Ativação pendente', 'invited_by' => 'Gerente do convite (ID)', 'generation' => 'Emissão do convite',
+            'expires_at' => 'Expiração', 'last_sent_at' => 'Envio solicitado', 'accepted_at' => 'Aceite', 'revoked_at' => 'Revogação',
         ][$field] ?? $field;
     }
 
@@ -37,7 +39,10 @@ class OperationalAuditPresentation
         if (in_array($field, ['date', 'end_date'], true)) {
             return CarbonImmutable::parse($value)->format('d/m/Y');
         }
-        if (str_ends_with($field, '_id')) {
+        if (in_array($field, ['expires_at', 'last_sent_at', 'accepted_at', 'revoked_at'], true)) {
+            return CarbonImmutable::parse($value)->setTimezone(config('app.timezone'))->format('d/m/Y H:i:s');
+        }
+        if (str_ends_with($field, '_id') || $field === 'invited_by') {
             return '#'.$value;
         }
 

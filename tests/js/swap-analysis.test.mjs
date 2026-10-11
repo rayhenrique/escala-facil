@@ -2,13 +2,13 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { registerSwapAnalysis } from '../../resources/js/swap-analysis.js';
 
-function harness(triggerAction = 'openSwapAnalysis(1)', shiftFlow = ['openCreateModal', 'edit'].includes(triggerAction)) {
+function harness(triggerAction = 'openSwapAnalysis(1)', shiftFlow = ['openCreateModal', 'edit'].includes(triggerAction), invitationFlow = false) {
     const events = [];
     const alert = { hidden: true, textContent: '', focused: false, focus() { this.focused = true; } };
     const trigger = { isConnected: true, focused: false, getAttribute: () => triggerAction, focus() { this.focused = true; } };
     let visible = false;
     const overlay = { querySelector: () => alert, dispatchEvent: (event) => events.push(event.detail) };
-    const component = { el: { hasAttribute: () => shiftFlow, querySelector: () => visible ? overlay : null, querySelectorAll: () => [trigger] } };
+    const component = { el: { hasAttribute: key => key === 'data-shift-assignment-flow' ? shiftFlow : invitationFlow, querySelector: () => visible ? overlay : null, querySelectorAll: () => [trigger] } };
     globalThis.document = { activeElement: trigger };
     globalThis.requestAnimationFrame = (callback) => callback();
     let intercept;
@@ -84,5 +84,17 @@ test('ordinary admin forms retain their existing lifecycle', () => {
         const h = harness(action, false);
         assert.equal(h.message(action).send, undefined);
         assert.equal(h.trigger.focused, false);
+    }
+});
+
+test('invitation forms and revocation share occupied feedback and recoverable errors', () => {
+    for (const action of ['openInvitationModal', 'requestInvitationRevocation']) {
+        const h = harness(action, false, true);
+        const opening = h.message(action);
+        opening.send(); h.show(true); opening.finish();
+        const saving = h.message(action === 'openInvitationModal' ? 'save' : 'confirmInvitationRevocation');
+        saving.send(); saving.failure(); saving.finish();
+        assert.equal(h.alert.hidden, false);
+        assert.equal(h.events.at(-1), false);
     }
 });
