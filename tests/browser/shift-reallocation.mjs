@@ -18,7 +18,7 @@ async function login(page) {
     await page.locator('#email').fill(process.env.DASHBOARD_QA_EMAIL);
     await page.locator('#password').fill(process.env.DASHBOARD_QA_PASSWORD);
     await page.locator('button[type="submit"]').click();
-    await page.waitForURL('**/manager/dashboard'); await settled(page);
+    await page.waitForURL('**/manager/dashboard', { timeout: 60000 }); await settled(page);
     const announcement = page.getByRole('button', { name: 'Entendi, continuar' });
     if (await announcement.isVisible()) await announcement.click();
 }
@@ -27,9 +27,23 @@ async function audit(page) {
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
     if (!process.env.AXE_MODULE) return;
     await page.addScriptTag({ path: process.env.AXE_MODULE });
+    const sheet = page.locator('#reallocate-shift');
+    if (await sheet.isVisible()) {
+        const box = await sheet.locator('.modal-footer:visible').boundingBox();
+        assert(box.y >= 0 && box.y + box.height <= page.viewportSize().height + 1);
+    }
     const result = await page.evaluate(async () => (await axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a','wcag2aa','wcag21aa','best-practice'] } })).violations);
     if (result.length) console.error(JSON.stringify(result.map(({ id, nodes }) => ({ id, nodes: nodes.map(({ html, failureSummary }) => ({ html, failureSummary })) }))));
     assert.deepEqual(result.map(({ id }) => id), []);
+}
+async function openFromDashboard(page) {
+    const trigger = page.getByRole('button', { name: `Preencher plantão #${fixture.night}`, exact: true });
+    for (let i = 0; i < 30 && !await trigger.count(); i++) {
+        const next = page.getByRole('navigation', { name: 'Paginação das pendências', exact: true }).getByRole('button', { name: 'Próxima', exact: true });
+        assert(await next.isEnabled(), 'Fixture must be in the operational queue');
+        await next.click(); await settled(page);
+    }
+    await trigger.click();
 }
 async function select(page) {
     await page.getByRole('radio', { name: new RegExp(fixture.professionalName ?? 'Carlos Lima') }).check();
@@ -39,17 +53,21 @@ async function select(page) {
 try {
     for (const width of [320,390,1440]) {
         const context = await browser.newContext({ viewport: { width, height: 900 }, serviceWorkers: 'block', reducedMotion: 'reduce' });
-        const page = await context.newPage(); const errors = [];
+        const page = await context.newPage(); page.setDefaultTimeout(15000); const errors = [];
         page.on('pageerror', (error) => errors.push(error.message));
         await login(page);
-        const trigger = page.getByRole('button', { name: `Preencher plantão #${fixture.night}`, exact: true });
-        await trigger.click(); const dialog = page.getByRole('alertdialog'); await dialog.waitFor();
+        await openFromDashboard(page); const dialog = page.locator('#reallocate-shift'); await dialog.waitFor();
         await audit(page);
-        assert.ok(await dialog.getByRole('radio').count());
-        assert.equal(await dialog.getByRole('radio', { name: /Bruna QA ocupada/ }).count(), 0);
         await page.waitForFunction(() => document.activeElement?.matches('[data-confirm-cancel]'));
+        assert.ok(await dialog.getByRole('radio').count());
+        await dialog.getByLabel('Pesquisar profissional').fill('nome inexistente');
+        await dialog.getByText('Nenhum profissional corresponde à pesquisa.', { exact: true }).waitFor();
+        await dialog.getByRole('button', { name: 'Limpar pesquisa', exact: true }).click();
+        await dialog.getByRole('radio', { name: new RegExp(fixture.professionalName) }).waitFor();
+        assert.equal(await dialog.getByRole('radio', { name: /Bruna QA ocupada/ }).count(), 0);
+        await dialog.locator('[data-confirm-cancel]').focus();
         await page.keyboard.press('Shift+Tab');
-        assert.equal(await page.evaluate(() => !!document.activeElement?.closest('[role="alertdialog"]')), true);
+        assert.equal(await page.evaluate(() => !!document.activeElement?.closest('#reallocate-shift')), true);
         await page.keyboard.press('Tab');
         await dialog.getByRole('button', { name: 'Revisar alteração' }).click();
         await dialog.locator('#reallocation-user-error').waitFor();
@@ -58,15 +76,40 @@ try {
         if (width === 390) await page.setViewportSize({ width, height: 480 });
         await select(page); await audit(page);
         if (out) await page.screenshot({ path: `${out}/preview-${width}.png` });
-        await page.keyboard.press('Escape'); await dialog.waitFor({ state: 'detached' });
+        await page.keyboard.press('Escape'); await dialog.getByRole('button', { name: 'Descartar alterações' }).click(); await dialog.waitFor({ state: 'detached' });
         await page.waitForFunction(() => document.activeElement?.matches('button[wire\\:click^="openReallocation"]'));
+        await page.setViewportSize({ width, height: 900 });
+        if (fixture.empty) {
+            await page.goto(origin + `/manager/calendar?month=${fixture.dateEmpty.slice(0,7)}&selectedDate=${fixture.dateEmpty}&sectorId=${fixture.emptySector}`, { waitUntil: 'networkidle' });
+            if (width < 1024) {
+                await page.getByRole('button', { name: `Ver detalhes do plantão #${fixture.empty}`, exact: true }).click();
+                await page.locator('#calendar-shift-detail').getByRole('button', { name: 'Preencher plantão', exact: true }).click();
+            } else {
+                await page.getByRole('button', { name: `Preencher plantão #${fixture.empty}`, exact: true }).click();
+            }
+            await dialog.waitFor();
+            await dialog.getByText('Nenhum profissional disponível para este plantão.', { exact: true }).waitFor();
+            assert(await dialog.getByRole('button', { name: 'Revisar alteração', exact: true }).isDisabled());
+            await audit(page);
+            // Model an overlay keyboard changing only the visual viewport, not layout height.
+            await page.evaluate(() => {
+                Object.defineProperty(visualViewport, 'height', { configurable: true, get: () => 380 });
+                visualViewport.dispatchEvent(new Event('resize'));
+            });
+            const footer = await dialog.locator('.modal-footer:visible').boundingBox();
+            assert(footer.y + footer.height <= 381);
+            await page.evaluate(() => { delete visualViewport.height; visualViewport.dispatchEvent(new Event('resize')); });
+            await dialog.getByRole('button', { name: 'Fechar', exact: true }).click();
+            await dialog.waitFor({ state: 'detached' });
+            await page.waitForFunction(() => document.activeElement?.matches('[data-decision-return], button[wire\\:click^="openReallocation"]'));
+        }
         assert.deepEqual(errors, []); await context.close();
     }
     const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, serviceWorkers: 'allow' });
-    const page = await context.newPage(); await login(page);
-    const other = await context.newPage(); await other.goto(origin + '/manager/dashboard', { waitUntil: 'networkidle' });
+    const page = await context.newPage(); page.setDefaultTimeout(15000); await login(page);
+    const other = await context.newPage(); other.setDefaultTimeout(15000); await other.goto(origin + '/manager/dashboard', { waitUntil: 'networkidle' });
     for (const target of [page,other]) {
-        await target.getByRole('button', { name: `Preencher plantão #${fixture.night}`, exact: true }).click(); await select(target);
+        await openFromDashboard(target); await select(target);
     }
     let release; let signal;
     const started = new Promise((resolve) => signal = resolve);

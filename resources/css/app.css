@@ -164,7 +164,7 @@
     .record-card { @apply rounded-xl border border-line bg-white p-4 shadow-soft; }
     .modal-overlay { @apply fixed inset-0 z-[70] flex items-end justify-center p-0 sm:items-center sm:p-5; padding-left: max(env(safe-area-inset-left, 0px), 0px); padding-right: max(env(safe-area-inset-right, 0px), 0px); }
     .modal-backdrop { @apply absolute inset-0 cursor-default bg-slate-950/60; }
-    .modal-dialog { max-height: calc(100dvh - env(safe-area-inset-top, 0px)); @apply relative z-10 flex w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl; }
+    .modal-dialog { max-height: calc(var(--dialog-viewport-height, 100dvh) - env(safe-area-inset-top, 0px)); @apply relative z-10 flex w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl; }
     .modal-form { @apply flex min-h-0 flex-col; }
     .modal-header { @apply flex shrink-0 items-start justify-between gap-4 border-b border-line px-5 py-5 sm:px-6; }
     .modal-header > div { min-width: 0; overflow-wrap: anywhere; }
@@ -294,7 +294,7 @@
 
 @media (min-width: 40rem) {
     .modal-overlay { padding: max(1.25rem, env(safe-area-inset-top, 0px)) max(1.25rem, env(safe-area-inset-right, 0px)) max(1.25rem, env(safe-area-inset-bottom, 0px)) max(1.25rem, env(safe-area-inset-left, 0px)); }
-    .modal-dialog { max-height: calc(100dvh - max(1.25rem, env(safe-area-inset-top, 0px)) - max(1.25rem, env(safe-area-inset-bottom, 0px))); }
+    .modal-dialog { max-height: calc(var(--dialog-viewport-height, 100dvh) - max(1.25rem, env(safe-area-inset-top, 0px)) - max(1.25rem, env(safe-area-inset-bottom, 0px))); }
 }
 
 @media (min-width: 64rem) {

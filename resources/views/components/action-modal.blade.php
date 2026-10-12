@@ -3,7 +3,7 @@
     'show' => false, 'id', 'title', 'eyebrow' => null, 'closeAction' => null, 'clientState' => null, 'closeEvent' => null,
     'submitAction' => null, 'role' => 'dialog', 'maxWidth' => 'lg',
     'trackChanges' => false, 'initialFocus' => null, 'returnFocus' => null,
-    'restoreFocus' => true, 'busyAction' => null,
+    'restoreFocus' => true, 'busyAction' => null, 'fitViewport' => false,
 ])
 @php
     if ($clientState !== null && ! preg_match('/^[a-zA-Z][a-zA-Z0-9_]*$/', $clientState)) throw new InvalidArgumentException('Estado local da janela inválido.');
@@ -11,7 +11,7 @@
 @endphp
 @if ($show)
     <div {{ $attributes->class(['modal-overlay']) }}
-        x-data="actionDialog({ close: () => {{ $closeEvent ? '$dispatch(' : '$wire.call(' }}@js($closeEvent ?? $closeAction)), active: {{ $clientState ? '() => '.$clientState : 'null' }}, trackChanges: @js($trackChanges), initialFocus: @js($initialFocus), returnFocus: @js($returnFocus), restoreFocus: @js($restoreFocus) })"
+        x-data="actionDialog({ close: () => {{ $closeEvent ? '$dispatch(' : '$wire.call(' }}@js($closeEvent ?? $closeAction)), active: {{ $clientState ? '() => '.$clientState : 'null' }}, trackChanges: @js($trackChanges), initialFocus: @js($initialFocus), returnFocus: @js($returnFocus), restoreFocus: @js($restoreFocus), fitViewport: @js($fitViewport) })"
         x-trap.inert.noscroll.noautofocus.noreturn="{{ $clientState ?? 'true' }}"
         @if ($clientState) x-show="{{ $clientState }}" x-cloak @endif
         @keydown.escape.stop.prevent="requestClose()" @input="changed()" @change="changed()"

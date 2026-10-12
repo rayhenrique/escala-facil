@@ -253,6 +253,47 @@ class ShiftReallocationTest extends TestCase
         $this->assertDatabaseCount('shift_reallocations', 0);
     }
 
+    public function test_search_keeps_selection_and_preview_without_changing_eligibility_or_history(): void
+    {
+        [$manager, $shift, $professional] = $this->team();
+        $professional->update(['name' => 'Márcia Lima']);
+        $other = User::factory()->create(['sector_id' => $shift->sector_id, 'category_id' => $shift->category_id, 'name' => 'Ana Souza']);
+        $panel = Livewire::actingAs($manager)->test(Dashboard::class)->call('openReallocation', $shift->id)
+            ->set('reallocationSearch', 'MARCIA')->assertSee('Márcia Lima')->assertDontSee('Ana Souza')
+            ->set('reallocationUserId', (string) $professional->id)
+            ->set('reallocationSearch', 'ninguém')->assertSee('Nenhum profissional corresponde à pesquisa.')
+            ->assertSet('reallocationUserId', (string) $professional->id)
+            ->set('reallocationSearch', 'Marcia')->call('reviewReallocation')->assertHasNoErrors()
+            ->call('returnToReallocation')->assertSet('reallocationSearch', 'Marcia')
+            ->assertSet('reallocationUserId', (string) $professional->id)
+            ->call('reviewReallocation')->call('confirmReallocation')->assertHasNoErrors()
+            ->assertSet('reallocationSearch', '')->assertDispatched('notifications-updated');
+        $this->assertSame($professional->id, $shift->refresh()->user_id);
+        $this->assertDatabaseCount('shift_reallocations', 1);
+    }
+
+    public function test_calendar_opens_compact_read_only_reallocation_and_search_is_bounded(): void
+    {
+        [$manager, $shift] = $this->team();
+        $panel = Livewire::actingAs($manager)->test(MonthlyCalendar::class)->call('openReallocation', $shift->id)
+            ->assertSee('Pesquisar profissional')->assertSee('Plantão descoberto #'.$shift->id)
+            ->set('reallocationSearch', str_repeat('a', 200));
+        $this->assertSame(100, mb_strlen($panel->get('reallocationSearch')));
+        $this->assertSame(ShiftStatus::Uncovered, $shift->refresh()->status);
+        $this->assertDatabaseCount('shift_reallocations', 0);
+    }
+
+    public function test_empty_candidate_list_explains_unavailability_without_creating_an_assignment(): void
+    {
+        [$manager, $shift, $professional] = $this->team();
+        $this->assigned($shift, $professional, '08:00', '09:00');
+        Livewire::actingAs($manager)->test(Dashboard::class)->call('openReallocation', $shift->id)
+            ->assertSee('Nenhum profissional disponível para este plantão.')
+            ->assertSee('por conflito de horários')->assertSet('reallocationCandidates', []);
+        $this->assertSame(ShiftStatus::Uncovered, $shift->refresh()->status);
+        $this->assertDatabaseCount('shift_reallocations', 0);
+    }
+
     private function preview(User $manager, Shift $shift, User $professional)
     {
         return Livewire::actingAs($manager)->test(Dashboard::class)->call('openReallocation', $shift->id)

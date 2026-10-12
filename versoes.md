@@ -6,6 +6,12 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.43.0 — 12/10/2026
+
+### Realocação mais fácil pelo celular
+
+- Gerentes agora conseguem escolher profissionais para plantões descobertos com menos etapas.
+
 ## 1.42.0 — 11/10/2026
 
 ### Revisão de trocas pelo celular

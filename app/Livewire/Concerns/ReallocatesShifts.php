@@ -8,7 +8,9 @@ use App\Models\Shift;
 use App\Models\User;
 use App\Support\ShiftReallocation;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 
 trait ReallocatesShifts
@@ -29,6 +31,23 @@ trait ReallocatesShifts
     public ?int $reallocationPreviewUserId = null;
 
     public string $reallocationUserId = '';
+
+    public string $reallocationSearch = '';
+
+    #[Computed]
+    public function filteredReallocationCandidates(): array
+    {
+        $search = mb_strtolower(Str::ascii(mb_substr(trim($this->reallocationSearch), 0, 100)));
+
+        return array_values(array_filter($this->reallocationCandidates,
+            fn (array $candidate): bool => $search === '' || str_contains(mb_strtolower(Str::ascii($candidate['name'])), $search)));
+    }
+
+    public function updatedReallocationSearch(): void
+    {
+        $this->reallocationSearch = mb_substr($this->reallocationSearch, 0, 100);
+        unset($this->filteredReallocationCandidates);
+    }
 
     public function openReallocation(int $id): void
     {
@@ -85,12 +104,13 @@ trait ReallocatesShifts
         }
         $this->closeReallocation();
         $this->dispatch('shift-reallocated', shiftId: $audit->shift_id);
+        $this->dispatch('notifications-updated');
         session()->flash('status', 'Plantão preenchido por '.$audit->after['professional'].'. Realocação registrada em '.$audit->performed_at->format('d/m/Y H:i').' por '.$audit->manager_name.'.');
     }
 
     public function closeReallocation(): void
     {
-        $this->reset(['reallocationShiftId', 'reallocationSummary', 'reallocationCandidates', 'reallocationPreview', 'reallocationPreviewUserId', 'reallocationUserId']);
+        $this->reset(['reallocationShiftId', 'reallocationSummary', 'reallocationCandidates', 'reallocationPreview', 'reallocationPreviewUserId', 'reallocationUserId', 'reallocationSearch']);
         $this->resetValidation();
     }
 }

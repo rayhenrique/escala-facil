@@ -274,3 +274,10 @@ A análise usa a janela responsiva `action-modal`, com largura ampliada no deskt
 A rejeição exige a justificativa vigente. Escape, botão de fechar e fundo da janela pedem confirmação antes de descartar texto digitado. Voltar à análise e atualizar a revisão preservam a justificativa. A reversão apresenta situação atual e resultado esperado dos dois plantões; alterações posteriores continuam bloqueadas e encaminhadas para consulta administrativa separada. Apenas uma revisão fica aberta por vez.
 
 Foco, bloqueio de rolagem, altura da viewport, área segura e movimento reduzido pertencem à biblioteca compartilhada. Enquanto houver requisições em andamento, as ações ficam indisponíveis. Erros preservam a janela e o texto; somente a resposta bem-sucedida do servidor fecha a revisão e atualiza comprovantes e notificações. As Actions, Policies, locks e regras institucionais permanecem responsáveis por todas as decisões.
+
+
+## Realocação assistida no celular
+
+A janela responsiva ampla mostra um cartão compacto do plantão e duas telas: seleção pesquisável e revisão. O progresso identifica Selecionar profissional, Revisar e Confirmar; a confirmação usa o resumo já revisado, sem uma tela intermediária. Busca por nome ignora acentos, conserva a escolha e filtra a lista elegível calculada na abertura. Não recalcula disponibilidade a cada tecla. Resultados vazios distinguem pesquisa sem correspondência de ausência de profissionais disponíveis.
+
+O rodapé permanece fora da rolagem. Esta janela usa a opção `fitViewport` da biblioteca para acompanhar altura e deslocamento da área visual quando o teclado sobrepõe a página, com fallback para `dvh` e área segura. Voltar conserva pesquisa e seleção; fechamento com alterações exige descarte explícito. Bloqueios obrigatórios e avisos informativos continuam usando a análise centralizada existente. A Action revalida o cadastro, o plantão e a disponibilidade com transação e locks; somente o sucesso confirmado fecha a janela e atualiza os indicadores.

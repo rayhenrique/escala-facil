@@ -7,7 +7,7 @@ export function registerSwapAnalysis(Livewire) {
         const hadDialog = !!dialog();
         const opening = [...message.actions].some((action) => {
             const name = action.name ?? action.method;
-            return ['openSwapAnalysis', 'requestDecision', 'openReallocation', 'requestRevert'].includes(name)
+            return ['openSwapAnalysis', 'requestDecision', 'openReallocation', 'reallocateCalendarDetail', 'requestRevert'].includes(name)
                 || (message.component.el.hasAttribute('data-shift-assignment-flow') && ['openCreateModal', 'edit'].includes(name))
                 || (message.component.el.hasAttribute('data-account-invitation-flow') && ['openInvitationModal', 'requestInvitationRevocation'].includes(name));
         });

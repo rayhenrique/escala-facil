@@ -154,3 +154,15 @@ test('parallel requests keep the operational dialog busy until every response co
     confirm.finish();
     assert.equal(h.events.at(-1), false);
 });
+
+
+test('calendar detail entry preserves the reallocation request lifecycle and focus return', () => {
+    const h = harness('reallocateCalendarDetail');
+    const opening = h.message('reallocateCalendarDetail');
+    opening.send(); h.show(true); opening.finish();
+    const confirming = h.message('confirmReallocation');
+    confirming.send();
+    assert.equal(h.events.at(-1), true);
+    h.show(false); confirming.finish();
+    assert.equal(h.trigger.focused, true);
+});

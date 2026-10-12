@@ -120,3 +120,27 @@ test('child button handlers retain the dialog root for focus and dirty checks', 
  assert(ui.dirty);
  assert.equal(ui.discardRequested, false);
 });
+
+
+test('opt-in sheet follows the visual viewport above the keyboard and removes listeners', () => {
+ const listeners = new Map(), removed = [], styles = new Map();
+ const viewport = { height: 800, offsetTop: 0, scale: 1,
+  addEventListener: (name, fn) => listeners.set(name, fn),
+  removeEventListener: (name, fn) => { assert.equal(fn, listeners.get(name)); removed.push(name); } };
+ const previous = globalThis.visualViewport;
+ globalThis.visualViewport = viewport;
+ try {
+  globalThis.document = { activeElement: null, body: {} };
+  globalThis.requestAnimationFrame = fn => fn();
+  const ui = actionDialog({ fitViewport: true, restoreFocus: false });
+  ui.$el = { style: { setProperty: (key, value) => styles.set(key, value) }, querySelectorAll: () => [], querySelector: () => null };
+  ui.$nextTick = fn => fn(); ui.init();
+  assert.equal(styles.get('height'), '800px');
+  viewport.height = 430; viewport.offsetTop = 25; listeners.get('resize')();
+  assert.equal(styles.get('--dialog-viewport-height'), '430px');
+  assert.equal(styles.get('top'), '25px'); assert.equal(styles.get('bottom'), 'auto');
+  viewport.scale = 2; viewport.height = 200; listeners.get('scroll')();
+  assert.equal(styles.get('height'), '430px');
+  ui.destroy(); assert.deepEqual(removed, ['resize', 'scroll']);
+ } finally { globalThis.visualViewport = previous; }
+});

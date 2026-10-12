@@ -300,3 +300,11 @@
 - [x] Corpo rolável e rodapé fixo usando biblioteca UI; proteção da justificativa e revisão exclusiva.
 - [x] Reversão mantém prévia, justificativa, bloqueios e consulta administrativa separada.
 - [x] Revalidação, autorização, histórico e concorrência preservados; testes PHP/JS e navegador em 320, 390 e 1440 px.
+
+
+## 1.43.0 — Realocação assistida no celular
+
+- [x] Busca por nome na seleção elegível existente, com estados vazios e preservação da escolha.
+- [x] Cartão compacto, seleção/revisão/confirmar e rodapé acessível na janela compartilhada.
+- [x] Ajuste opcional à área visual do teclado, foco e proteção contra descarte acidental.
+- [x] Actions, autorização, locks, histórico e disponibilidade preservados; testes de fronteira, busca e interação.

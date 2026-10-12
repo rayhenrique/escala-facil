@@ -2,9 +2,18 @@
 
 return [
     // Versão do código instalado. APP_VERSION não pode sobrepor este registro.
-    'current' => '1.42.0',
+    'current' => '1.43.0',
 
     'releases' => [
+        [
+            'version' => '1.43.0',
+            'date' => '2026-10-12',
+            'title' => 'Realocação mais fácil pelo celular',
+            'summary' => 'Gerentes agora conseguem escolher profissionais para plantões descobertos com menos etapas.',
+            'highlights' => [
+                'Gerentes agora conseguem escolher profissionais para plantões descobertos com menos etapas.',
+            ],
+        ],
         [
             'version' => '1.42.0',
             'date' => '2026-10-11',

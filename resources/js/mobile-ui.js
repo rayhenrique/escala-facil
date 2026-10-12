@@ -3,10 +3,24 @@ export function actionDialog(options = {}) {
     return {
         busy: false, dirty: false, discardRequested: false,
         origin: null, dialogRoot: null, initialValues: '',
-        opened: false,
+        opened: false, viewport: null, viewportChanged: null,
         init() {
             // Alpine $el follows the event handler element; keep the dialog root stable.
             this.dialogRoot = this.$el;
+            if (options.fitViewport && globalThis.visualViewport) {
+                this.viewport = globalThis.visualViewport;
+                this.viewportChanged = () => {
+                    // Keep this sheet above overlay keyboards; zoom retains native behavior.
+                    if (this.viewport.scale !== 1) return;
+                    this.dialogRoot.style.setProperty('--dialog-viewport-height', `${this.viewport.height}px`);
+                    this.dialogRoot.style.setProperty('height', `${this.viewport.height}px`);
+                    this.dialogRoot.style.setProperty('top', `${this.viewport.offsetTop}px`);
+                    this.dialogRoot.style.setProperty('bottom', 'auto');
+                };
+                this.viewport.addEventListener('resize', this.viewportChanged);
+                this.viewport.addEventListener('scroll', this.viewportChanged);
+                this.viewportChanged();
+            }
             if (options.active) {
                 this.$watch(() => options.active(), value => value ? this.begin() : this.restore());
                 if (options.active()) this.begin();
@@ -60,7 +74,11 @@ export function actionDialog(options = {}) {
                 target?.focus({ preventScroll: true });
             });
         },
-        destroy() { this.restore(); },
+        destroy() {
+            this.viewport?.removeEventListener('resize', this.viewportChanged);
+            this.viewport?.removeEventListener('scroll', this.viewportChanged);
+            this.restore();
+        },
     };
 }
 
