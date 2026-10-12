@@ -2,9 +2,18 @@
 
 return [
     // Versão do código instalado. APP_VERSION não pode sobrepor este registro.
-    'current' => '1.38.0',
+    'current' => '1.39.0',
 
     'releases' => [
+        [
+            'version' => '1.39.0',
+            'date' => '2026-10-11',
+            'title' => 'Calendário mais fácil no celular',
+            'summary' => 'Ficou mais fácil consultar seus plantões por dia, semana ou mês, diretamente no celular.',
+            'highlights' => [
+                'Ficou mais fácil consultar seus plantões por dia, semana ou mês, diretamente no celular.',
+            ],
+        ],
         [
             'version' => '1.38.0',
             'date' => '2026-10-11',

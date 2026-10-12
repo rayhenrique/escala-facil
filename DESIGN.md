@@ -285,3 +285,10 @@ A barra inferior é uma superfície branca com borda line, sem sombra nova: quat
 ## Início profissional no celular
 
 O próximo plantão aparece antes dos filtros mensais, com início, término, duração, setor e categoria. Pedidos recebidos aguardando resposta vêm em seguida; solicitações enviadas em andamento usam cartões compactos. O desktop mantém a composição anterior. Os detalhes usam `bottom-sheet`, badges e botões existentes, sem novos efeitos visuais.
+
+
+## Agenda móvel do calendário (1.39.0)
+
+No celular, a grade mensal dá lugar a cartões de plantão agrupados por data de início. Semana, Mês e Lista usam botões existentes, com estado pressionado; filtros e data ficam explícitos. Hoje, próximo plantão, troca realizada e necessidade de cobertura usam badges/texto, sem depender apenas de cor. Detalhes e ações autorizadas reutilizam bottom-sheet; os horários continuam definidos por ShiftPeriod. A grade e os cartões diários do desktop permanecem preservados.
+
+O painel móvel recolhe os campos de filtro para dar espaço à agenda; o botão de filtro mantém o rótulo explícito e o desktop mantém os campos abertos.

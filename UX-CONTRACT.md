@@ -234,3 +234,17 @@ A rota ativa, inclusive subrotas e blocos profissionais, recebe aria-current e d
 - Pedidos recebidos ficam antes dos filtros no celular. O contador de respostas pendentes não depende dos filtros; quando há pedidos ocultos, a tela oferece limpeza dos filtros. As listas e seus filtros continuam paginados no banco.
 - Até três solicitações enviadas em andamento aparecem no resumo, com acesso ao histórico completo. Nenhum limite é aplicado ao histórico. A última ausência informada é identificada sem expor anexos ou justificativas.
 - A apresentação desktop, a navegação inferior, os comprovantes e as regras institucionais permanecem preservados.
+
+
+## Agenda móvel do calendário
+
+- Semana corresponde a domingo–sábado, incluindo dias de meses diferentes. Mês cobre o mês selecionado. Lista cobre 30 dias a partir da data de referência. O agrupamento usa a data de início; turnos noturnos exibem a data de término, sem duplicar o plantão no dia seguinte.
+- A agenda pagina 25 plantões no banco. Um dia pode continuar na página seguinte, com seu título repetido. A grade desktop continua consultando o mês e o dia selecionado, incluindo o dia anterior para os cálculos de cobertura existentes.
+- Data de referência, mês, visualização, filtros e página ficam na URL e no retorno contextual autorizado. Alterar período, filtro ou visualização reinicia a paginação e fecha detalhes antigos; selecionar outra visualização mantém a data e os filtros.
+- Profissionais consultam apenas o setor cadastrado, inclusive nos detalhes por ID. Sem setor, a consulta retorna vazia. Categorias continuam combináveis. Gerentes mantêm os filtros e as ações existentes de escala, análise de troca e realocação.
+- Próximo plantão significa o primeiro agendado com início igual ou posterior a agora nos filtros vigentes; para profissionais, somente a própria atribuição é destacada. Colegas continuam visíveis na escala compartilhada do setor. Se o próximo plantão estiver fora da página ou período, uma ação leva à data e à página correspondente mantendo os filtros.
+- A janela usa foco preso, Escape, restauração do foco, rolagem interna e áreas seguras. A realocação abre o fluxo existente, sem duas janelas simultâneas e sem modificar regras de elegibilidade ou confirmação.
+
+Os filtros do calendário ficam recolhidos inicialmente no celular, com botão rotulado, aria-expanded e indicação dos filtros ativos. No desktop permanecem visíveis. O feedback de carregamento fica oculto quando nenhuma consulta está em andamento.
+
+Tocar no corpo do cartão ou acionar Ver detalhes abre a mesma consulta autorizada; o botão fornece o equivalente por teclado. O atalho do próximo plantão move o foco até o botão do registro encontrado, inclusive quando a paginação muda.

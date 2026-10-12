@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Enums\ShiftStatus;
 use App\Enums\ShiftSwapStatus;
 use App\Enums\UserRole;
 use App\Livewire\Concerns\HasOperationalContext;
@@ -15,18 +16,24 @@ use App\Support\ShiftCoverage;
 use Carbon\CarbonImmutable;
 use Carbon\WeekDay;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 #[Layout('layouts.app', ['title' => 'Calendário de plantões'])]
 class MonthlyCalendar extends Component
 {
     use HasOperationalContext;
     use ReallocatesShifts;
+    use WithPagination;
+
+    private const AGENDA_PAGE_SIZE = 25;
 
     #[Url]
     public string $month = '';
@@ -40,6 +47,107 @@ class MonthlyCalendar extends Component
     #[Url]
     public string $categoryId = '';
 
+    #[Url]
+    public string $agendaView = 'week';
+
+    #[Locked]
+    public ?int $calendarDetailId = null;
+
+    #[Computed]
+    public function calendarDetail(): ?Shift
+    {
+        $this->authorize('viewCalendar', Shift::class);
+
+        return $this->calendarDetailId === null ? null : $this->visibleShiftsQuery()->findOrFail($this->calendarDetailId);
+    }
+
+    public function openCalendarDetail(int $id): void
+    {
+        $this->authorize('viewCalendar', Shift::class);
+        $this->calendarDetailId = $this->visibleShiftsQuery()->findOrFail($id)->id;
+        unset($this->calendarDetail);
+    }
+
+    public function closeCalendarDetail(): void
+    {
+        $this->calendarDetailId = null;
+        unset($this->calendarDetail);
+    }
+
+    public function reallocateCalendarDetail(): void
+    {
+        abort_unless($this->calendarDetailId, 404);
+        $id = $this->calendarDetail->id;
+        $this->openReallocation($id);
+        $this->closeCalendarDetail();
+    }
+
+    public function updated(string $property): void
+    {
+        if (in_array($property, ['month', 'selectedDate', 'sectorId', 'categoryId', 'agendaView'], true)) {
+            $this->resetPage('agendaPage');
+            $this->closeCalendarDetail();
+        }
+    }
+
+    public function updatedAgendaView(): void
+    {
+        if (! in_array($this->agendaView, ['week', 'month', 'list'], true)) {
+            $this->agendaView = 'week';
+        }
+    }
+
+    public function selectAgendaDate(string $date): void
+    {
+        $clean = OperationalNavigation::clean('calendar', ['selectedDate' => $date])['selectedDate'] ?? null;
+        if ($clean === null) {
+            return;
+        }
+        $this->selectedDate = $clean;
+        $this->month = substr($clean, 0, 7);
+        $this->resetPage('agendaPage');
+        $this->closeCalendarDetail();
+    }
+
+    public function goToNextShift(): void
+    {
+        $this->authorize('viewCalendar', Shift::class);
+        $shift = $this->upcomingShiftQuery()->first(['id', 'date', 'start_time']);
+        if ($shift) {
+            $this->selectAgendaDate($shift->date->toDateString());
+            [$start, $end] = $this->agendaPeriod();
+            $before = $this->visibleShiftsQuery()->whereBetween('date', [$start->toDateString(), $end->toDateTimeString()])
+                ->where(fn ($query) => $query->whereDate('date', '<', $shift->date)
+                    ->orWhere(fn ($sameDay) => $sameDay->whereDate('date', $shift->date)
+                        ->where(fn ($time) => $time->where('start_time', '<', $shift->start_time)
+                            ->orWhere(fn ($tie) => $tie->where('start_time', $shift->start_time)->where('id', '<', $shift->id)))))
+                ->count();
+            $this->setPage(intdiv($before, self::AGENDA_PAGE_SIZE) + 1, 'agendaPage');
+            $this->dispatch('calendar-shift-located', target: 'calendar-agenda-shift-'.$shift->id);
+        }
+    }
+
+    public function previousAgendaPeriod(): void
+    {
+        $this->moveAgendaPeriod(-1);
+    }
+
+    public function nextAgendaPeriod(): void
+    {
+        $this->moveAgendaPeriod(1);
+    }
+
+    private function moveAgendaPeriod(int $direction): void
+    {
+        $date = CarbonImmutable::parse($this->selectedDate);
+        $date = match ($this->agendaView) {
+            'month' => $date->addMonthsNoOverflow($direction),
+            'list' => $date->addDays(30 * $direction),
+            default => $date->addDays(7 * $direction),
+        };
+        $this->selectAgendaDate($date->toDateString());
+    }
+
     public function mount(): void
     {
         $this->authorize('viewCalendar', Shift::class);
@@ -49,6 +157,7 @@ class MonthlyCalendar extends Component
             $this->sectorId = (string) ($user->sector_id ?? '');
         }
 
+        $this->updatedAgendaView();
         $this->month = $this->validMonth($this->month) ? $this->month : now()->format('Y-m');
         $selected = OperationalNavigation::clean('calendar', ['selectedDate' => $this->selectedDate])['selectedDate'] ?? '';
         $this->selectedDate = str_starts_with($selected, $this->month.'-') ? $selected : ($this->month === now()->format('Y-m') ? today()->format('Y-m-d') : $this->month.'-01');
@@ -94,6 +203,8 @@ class MonthlyCalendar extends Component
 
     public function clearFilters(): void
     {
+        $this->resetPage('agendaPage');
+        $this->closeCalendarDetail();
         $user = auth()->user();
         if ($user?->role === UserRole::Professional) {
             $this->reset('categoryId');
@@ -138,6 +249,8 @@ class MonthlyCalendar extends Component
     {
         $this->month = now()->format('Y-m');
         $this->selectedDate = today()->format('Y-m-d');
+        $this->resetPage('agendaPage');
+        $this->closeCalendarDetail();
     }
 
     public function selectDate(string $date): void
@@ -157,10 +270,14 @@ class MonthlyCalendar extends Component
         }
 
         $this->selectedDate = $date;
+        $this->resetPage('agendaPage');
+        $this->closeCalendarDetail();
     }
 
     private function moveMonth(int $months): void
     {
+        $this->resetPage('agendaPage');
+        $this->closeCalendarDetail();
         $date = CarbonImmutable::createFromFormat('!Y-m-d', $this->month.'-01')
             ->addMonthsNoOverflow($months);
 
@@ -198,10 +315,16 @@ class MonthlyCalendar extends Component
 
         $monthStart = CarbonImmutable::createFromFormat('!Y-m-d', $this->month.'-01')->startOfMonth();
         $monthEnd = $monthStart->endOfMonth();
+        $this->updatedAgendaView();
+        [$agendaStart, $agendaEnd] = $this->agendaPeriod();
+        $agendaShifts = $this->visibleShiftsQuery()->whereBetween('date', [$agendaStart->toDateString(), $agendaEnd->toDateTimeString()])
+            ->orderBy('date')->orderBy('start_time')->orderBy('id')->paginate(self::AGENDA_PAGE_SIZE, ['*'], 'agendaPage');
+        $agendaDays = $agendaShifts->getCollection()->groupBy(fn (Shift $shift): string => $shift->date->toDateString());
+        $nextUpcomingId = $this->upcomingShiftQuery()->value('id');
 
         $allShifts = $this->getShiftsForMonth($monthStart, $monthEnd);
         $shiftsByDate = $allShifts->groupBy(fn (Shift $shift): string => $shift->date->format('Y-m-d'));
-        $swappedShiftsDetails = $this->getSwappedShiftsDetails($monthStart, $monthEnd);
+        $swappedShiftsDetails = $this->getSwappedShiftsDetails($monthStart->min($agendaStart), $monthEnd->max($agendaEnd));
         $swappedShiftIds = array_keys($swappedShiftsDetails);
 
         $hasSectorFilter = $effectiveSectorId !== '';
@@ -209,9 +332,10 @@ class MonthlyCalendar extends Component
         $selectedShifts = $shiftsByDate->get($this->selectedDate, collect());
         $canManageShifts = $user?->can('create', Shift::class) ?? false;
 
-        $pendingSwapIds = $canManageShifts && $selectedShifts->isNotEmpty()
+        $visibleIds = $selectedShifts->pluck('id')->merge($agendaShifts->pluck('id'))->unique()->values()->all();
+        $pendingSwapIds = $canManageShifts && $visibleIds !== []
             ? ShiftSwap::query()
-                ->where(fn ($query) => $query->whereIn('shift_id', $selectedShifts->pluck('id')->all())->orWhereIn('substitute_shift_id', $selectedShifts->pluck('id')->all()))
+                ->where(fn ($query) => $query->whereIn('shift_id', $visibleIds)->orWhereIn('substitute_shift_id', $visibleIds))
                 ->where('status', ShiftSwapStatus::PendingManager)
                 ->oldest()->get(['id', 'shift_id', 'substitute_shift_id'])
             : collect();
@@ -225,6 +349,11 @@ class MonthlyCalendar extends Component
         $pendingSwapShiftIds = array_keys($pendingSwapsByShift);
 
         return view('livewire.monthly-calendar', [
+            'agendaShifts' => $agendaShifts,
+            'agendaDays' => $agendaDays,
+            'agendaStart' => $agendaStart,
+            'agendaEnd' => $agendaEnd,
+            'nextUpcomingId' => $nextUpcomingId,
             'calendarDays' => $calendarDays,
             'monthLabel' => $monthStart->translatedFormat('F \d\e Y'),
             'selectedDateLabel' => CarbonImmutable::parse($this->selectedDate)->translatedFormat('l, d \d\e F \d\e Y'),
@@ -246,19 +375,40 @@ class MonthlyCalendar extends Component
      */
     private function getShiftsForMonth(CarbonImmutable $monthStart, CarbonImmutable $monthEnd): EloquentCollection
     {
-        $user = auth()->user();
-        $effectiveSectorId = ($user?->role === UserRole::Professional)
-            ? (string) ($user->sector_id ?? 0)
-            : $this->sectorId;
-
-        return Shift::query()
-            ->with(['category', 'sector', 'user'])
+        return $this->visibleShiftsQuery()
             ->whereBetween('date', [$monthStart->subDay(), $monthEnd])
-            ->when($effectiveSectorId !== '', fn ($query) => $query->where('sector_id', $effectiveSectorId))
-            ->when($this->categoryId !== '', fn ($query) => $query->where('category_id', $this->categoryId))
-            ->orderBy('date')
-            ->orderBy('start_time')
-            ->get();
+            ->orderBy('date')->orderBy('start_time')->get();
+    }
+
+    /** @return array{CarbonImmutable, CarbonImmutable} */
+    private function agendaPeriod(): array
+    {
+        $date = CarbonImmutable::parse($this->selectedDate);
+
+        return match ($this->agendaView) {
+            'month' => [$date->startOfMonth(), $date->endOfMonth()],
+            'list' => [$date->startOfDay(), $date->addDays(29)->endOfDay()],
+            default => [$date->startOfWeek(WeekDay::Sunday), $date->endOfWeek(WeekDay::Saturday)],
+        };
+    }
+
+    private function upcomingShiftQuery(): Builder
+    {
+        return $this->visibleShiftsQuery()->withoutEagerLoads()->where('status', ShiftStatus::Scheduled)
+            ->when(auth()->user()->role === UserRole::Professional, fn ($query) => $query->where('user_id', auth()->id()))
+            ->where(fn ($query) => $query->whereDate('date', '>', today())
+                ->orWhere(fn ($today) => $today->whereDate('date', today())->whereTime('start_time', '>=', now()->format('H:i:s'))))
+            ->orderBy('date')->orderBy('start_time')->orderBy('id');
+    }
+
+    private function visibleShiftsQuery(): Builder
+    {
+        $user = auth()->user();
+        $sector = $user->role === UserRole::Professional ? (string) ($user->sector_id ?? 0) : $this->sectorId;
+
+        return Shift::query()->with(['category', 'sector', 'user'])
+            ->when($sector !== '', fn ($query) => $query->where('sector_id', $sector))
+            ->when($this->categoryId !== '', fn ($query) => $query->where('category_id', $this->categoryId));
     }
 
     /**

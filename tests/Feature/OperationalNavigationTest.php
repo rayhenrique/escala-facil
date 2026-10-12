@@ -114,9 +114,10 @@ class OperationalNavigationTest extends TestCase
         $primary = Shift::factory()->create(['date' => today()->addDays(5)]);
         $swap = ShiftSwap::factory()->create(['shift_id' => $primary->id, 'substitute_shift_id' => $counterpart->id, 'status' => ShiftSwapStatus::PendingManager]);
         $state = ['month' => now()->format('Y-m'), 'selectedDate' => today()->format('Y-m-d'), 'sectorId' => (string) $counterpart->sector_id, 'categoryId' => (string) $counterpart->category_id];
-        $target = OperationalNavigation::url('swaps', ['request' => $swap->id], 'calendar', $state);
+        $returnState = $state + ['agendaView' => 'week', 'agendaPage' => '1'];
+        $target = OperationalNavigation::url('swaps', ['request' => $swap->id], 'calendar', $returnState);
         $this->get(route('manager.calendar', $state))->assertOk()->assertSee('href="'.e($target).'"', false);
-        $this->get($target)->assertOk()->assertSee('href="'.e(route('manager.calendar', $state)).'"', false);
+        $this->get($target)->assertOk()->assertSee('href="'.e(route('manager.calendar', $returnState)).'"', false);
     }
 
     public function test_professional_shared_links_cannot_change_sector_scope_or_expose_other_peoples_requests(): void

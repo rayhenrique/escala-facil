@@ -15,7 +15,7 @@ class OperationalNavigation
         'categories' => ['search', 'page'],
         'audit' => ['entity', 'record', 'action', 'author', 'dateFrom', 'dateTo', 'page'],
         'dashboard' => ['period', 'page'],
-        'calendar' => ['month', 'selectedDate', 'sectorId', 'categoryId'],
+        'calendar' => ['month', 'selectedDate', 'sectorId', 'categoryId', 'agendaView', 'agendaPage'],
         'shifts' => ['month', 'filter', 'focus', 'page', 'search', 'filterSectorId', 'filterCategoryId', 'dateFrom', 'dateTo'],
         'swaps' => ['request', 'page', 'listView', 'sort', 'swapStatusFilter', 'search', 'requesterSearch', 'substituteSearch', 'filterSectorId', 'filterCategoryId', 'dateFrom', 'dateTo'],
         'reports' => ['month', 'tab', 'sectorId', 'categoryId', 'searchProfessional', 'swapStatusFilter', 'professionalsPage', 'swapsPage', 'absencesPage', 'sectorsPage'],
@@ -48,7 +48,7 @@ class OperationalNavigation
             }
             $value = (string) $value;
             $valid = match ($key) {
-                'record', 'focus', 'request', 'page', 'sectorId', 'categoryId', 'filterSectorId', 'filterCategoryId', 'professionalsPage', 'swapsPage', 'absencesPage', 'sectorsPage' => filter_var($value, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) !== false,
+                'record', 'focus', 'request', 'page', 'agendaPage', 'sectorId', 'categoryId', 'filterSectorId', 'filterCategoryId', 'professionalsPage', 'swapsPage', 'absencesPage', 'sectorsPage' => filter_var($value, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) !== false,
                 'month' => preg_match('/^[1-9][0-9]{3}-(0[1-9]|1[0-2])$/', $value),
                 'selectedDate', 'dateFrom', 'dateTo' => preg_match('/^([1-9][0-9]{3})-(\d{2})-(\d{2})$/', $value, $parts) && checkdate((int) $parts[2], (int) $parts[3], (int) $parts[1]),
                 'roleFilter' => in_array($value, array_column(UserRole::cases(), 'value'), true),
@@ -58,6 +58,7 @@ class OperationalNavigation
                 'filter' => in_array($value, ['scheduled', 'uncovered', 'absence_reported', 'uncovered_month'], true),
                 'tab' => in_array($value, ['all', 'coverage', 'professionals', 'swaps', 'absences', 'wall'], true),
                 'swapStatusFilter' => $value === '' || in_array($value, array_column(ShiftSwapStatus::cases(), 'value'), true),
+                'agendaView' => in_array($value, ['week', 'month', 'list'], true),
                 'listView' => in_array($value, ['pending', 'history'], true),
                 'sort' => in_array($value, ['oldest', 'newest'], true),
                 default => true,

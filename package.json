@@ -3,6 +3,7 @@
     "private": true,
     "type": "module",
     "scripts": {
+        "test:mobile-calendar:browser": "node tests/browser/mobile-calendar.mjs",
         "test:professional-home:browser": "node tests/browser/professional-home.mjs",
         "test:mobile-navigation:browser": "node tests/browser/mobile-navigation.mjs",
         "test:mobile-ui": "node --test tests/js/mobile-ui.test.mjs",

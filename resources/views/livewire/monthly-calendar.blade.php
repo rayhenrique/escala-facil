@@ -1,4 +1,4 @@
-<div>
+<div x-data x-on:calendar-shift-located.window="$nextTick(() => { const target = document.getElementById($event.detail.target); target?.focus(); target?.scrollIntoView({ block: 'center' }); })">
     <x-flash-notifications />
     <x-context-navigation :back="$isProfessional && $from === '' ? null : $this->backNavigation()" :links="array_filter([
         'Abrir escala deste mês' => $canManageShifts ? \App\Support\OperationalNavigation::url('shifts', ['month' => $month], 'calendar', $this->navigationContext()) : null,
@@ -6,12 +6,12 @@
     ])" />
     <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div>
-            <p class="eyebrow">Visão mensal</p>
+            <p class="eyebrow"><span class="lg:hidden">Agenda de plantões</span><span class="hidden lg:inline">Visão mensal</span></p>
             <h1 class="page-title" tabindex="-1" data-decision-return>Calendário de plantões</h1>
             <p class="page-description">Selecione um dia para consultar todos os plantões e profissionais escalados.</p>
         </div>
 
-        <div class="flex w-full flex-wrap items-end gap-2 sm:w-auto">
+        <div class="hidden w-full flex-wrap items-end gap-2 sm:w-auto lg:flex">
             <button type="button" wire:click="previousMonth" wire:loading.attr="disabled" class="button-secondary size-12 p-0" aria-label="Mês anterior">
                 <span aria-hidden="true">‹</span>
             </button>
@@ -26,13 +26,27 @@
         </div>
     </div>
 
-    <section class="panel mt-8" aria-labelledby="calendar-title">
+    <div class="mt-6 lg:hidden">
+        <div class="grid grid-cols-3 gap-2" role="group" aria-label="Visualização da agenda">
+            @foreach (['week' => 'Semana', 'month' => 'Mês', 'list' => 'Lista'] as $value => $label)
+                <button type="button" wire:click="$set('agendaView', '{{ $value }}')" wire:loading.attr="disabled" class="{{ $agendaView === $value ? 'button-primary' : 'button-secondary' }} min-h-11" aria-pressed="{{ $agendaView === $value ? 'true' : 'false' }}">{{ $label }}</button>
+            @endforeach
+        </div>
+        <div class="mt-4"><label for="agenda-date" class="field-label">Data de referência @if ($selectedDate === today()->toDateString())<span class="font-normal">· Hoje</span>@endif</label><input id="agenda-date" type="date" class="field-input" value="{{ $selectedDate }}" wire:change="selectAgendaDate($event.target.value)"></div>
+        <div class="mt-3 flex flex-wrap gap-2">
+            <x-action-button wire:click="previousAgendaPeriod" target="previousAgendaPeriod" busy-label="Aguarde" aria-label="Período anterior">Anterior</x-action-button>
+            <x-action-button wire:click="goToToday" target="goToToday" busy-label="Aguarde">Hoje</x-action-button>
+            <x-action-button wire:click="nextAgendaPeriod" target="nextAgendaPeriod" busy-label="Aguarde" aria-label="Próximo período">Próximo</x-action-button>
+        </div>
+    </div>
+
+    <section class="panel mt-8" aria-labelledby="calendar-title" x-data="{ filtersOpen: false, desktop: window.innerWidth >= 1024 }" x-on:resize.window="desktop = window.innerWidth >= 1024">
         <div class="section-heading">
             <div>
-                <p class="eyebrow">Agenda completa</p>
-                <h2 id="calendar-title" class="capitalize">{{ $monthLabel }}</h2>
+                <p class="eyebrow hidden lg:block">Agenda completa</p>
+                <h2 id="calendar-title" class="capitalize"><span class="lg:hidden">Filtros da agenda</span><span class="hidden lg:inline">{{ $monthLabel }}</span></h2>
             </div>
-            <div class="flex flex-wrap gap-3 text-xs text-muted" aria-label="Legenda do calendário">
+            <div class="hidden flex-wrap gap-3 text-xs text-muted lg:flex" aria-label="Legenda do calendário">
                 <span class="inline-flex items-center gap-2"><span class="size-2.5 rounded-full bg-coverage"></span>Com plantão</span>
                 <span class="inline-flex items-center gap-2"><span class="size-2.5 rounded-full bg-danger"></span>Sem profissional</span>
                 <span class="inline-flex items-center gap-2"><span class="font-bold text-coverage" aria-hidden="true">✓</span>24h cobertas</span>
@@ -43,7 +57,8 @@
             </div>
         </div>
 
-        <div class="mt-6 grid gap-4 sm:grid-cols-2">
+        <button type="button" class="button-secondary mt-4 w-full lg:hidden" x-on:click="filtersOpen = !filtersOpen" :aria-expanded="filtersOpen.toString()" aria-controls="calendar-filter-controls">Filtrar por setor e categoria</button>
+        <div id="calendar-filter-controls" x-show="filtersOpen || desktop" class="mt-6 grid gap-4 sm:grid-cols-2">
             <div>
                 <label for="calendar-sector" class="field-label">Setor</label>
                 @if ($isProfessional)
@@ -77,7 +92,7 @@
 
         <p wire:loading.delay class="mt-4 text-sm text-muted" role="status">Atualizando calendário…</p>
 
-        <div class="calendar-grid mt-6" role="grid" aria-label="Calendário de {{ $monthLabel }}">
+        <div class="calendar-grid mt-6 hidden lg:grid" role="grid" aria-label="Calendário de {{ $monthLabel }}">
             <div class="contents" role="row">
             @foreach (['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'] as $weekday)
                 <div class="calendar-weekday" role="columnheader">{{ $weekday }}</div>
@@ -142,7 +157,7 @@
         </div>
     </section>
 
-    <section class="mt-8" aria-labelledby="selected-day-title" aria-live="polite">
+    <section class="mt-8 hidden lg:block" aria-labelledby="selected-day-title" aria-live="polite">
         <div class="section-heading">
             <div>
                 <p class="eyebrow">Plantões do dia</p>
@@ -239,5 +254,63 @@
             @endforelse
         </div>
     </section>
+    <section class="mt-6 lg:hidden" aria-labelledby="agenda-title">
+        <h2 id="agenda-title" tabindex="-1" class="text-xl font-semibold">{{ match ($agendaView) { 'month' => 'Agenda do mês', 'list' => 'Lista de plantões', default => 'Agenda da semana' } }}</h2>
+        <p class="mt-2 text-sm text-muted">{{ $agendaStart->format('d/m/Y') }} a {{ $agendaEnd->format('d/m/Y') }} · {{ $agendaShifts->total() }} plantão(ões)</p>
+        @if ($nextUpcomingId && ! $agendaShifts->pluck('id')->contains($nextUpcomingId))
+            <x-action-button wire:click="goToNextShift" target="goToNextShift" class="mt-3">Ir ao próximo plantão</x-action-button>
+        @endif
+        <p class="mt-1 text-xs text-muted">{{ $agendaView === 'list' ? '30 dias a partir da data de referência.' : ($agendaView === 'week' ? 'Semana de domingo a sábado, incluindo a virada do mês.' : 'Todos os dias do mês selecionado.') }} Agrupamento pela data de início.</p>
+        <div wire:loading.delay><x-loading-state label="Atualizando agenda…" class="mt-3" /></div>
+        <div class="mt-4 space-y-5" id="calendar-agenda-list">
+            @forelse ($agendaDays as $day => $dayShifts)
+                <section aria-labelledby="agenda-day-{{ $day }}">
+                    <div class="mb-3 flex flex-wrap items-center gap-2">
+                        <h3 id="agenda-day-{{ $day }}" class="font-semibold capitalize">{{ \Carbon\CarbonImmutable::parse($day)->translatedFormat('l, d/m/Y') }}</h3>
+                        @if ($day === today()->toDateString())<x-status-badge status="scheduled" label="Hoje" />@endif
+                    </div>
+                    <div class="space-y-3">
+                        @foreach ($dayShifts as $agendaShift)
+                            <x-shift-card :shift="$agendaShift" :show-professional="true" wire:key="agenda-shift-{{ $agendaShift->id }}" class="cursor-pointer" x-on:click="if (!$event.target.closest('button, a')) $wire.openCalendarDetail({{ $agendaShift->id }})" wire:loading.class="pointer-events-none" wire:target="openCalendarDetail">
+                                <div class="mb-3 flex flex-wrap gap-2">
+                                    @if ($agendaShift->id === $nextUpcomingId)<x-status-badge status="scheduled" :label="$isProfessional ? 'Seu próximo plantão' : 'Próximo plantão'" />@endif
+                                    @if (isset($swappedShiftsDetails[$agendaShift->id]))<x-status-badge status="pending_manager" label="Troca realizada" />@endif
+                                    @if ($canManageShifts && ! $agendaShift->user_id)<span class="text-sm font-semibold text-danger">Precisa de cobertura</span>@endif
+                                </div>
+                                <x-action-button id="calendar-agenda-shift-{{ $agendaShift->id }}" wire:click="openCalendarDetail({{ $agendaShift->id }})" target="openCalendarDetail" class="w-full" aria-label="Ver detalhes do plantão #{{ $agendaShift->id }}">Ver detalhes</x-action-button>
+                            </x-shift-card>
+                        @endforeach
+                    </div>
+                </section>
+            @empty
+                <x-empty-state title="Nenhum plantão neste período." description="Escolha outra data ou revise os filtros de setor e categoria." />
+            @endforelse
+        </div>
+        <div class="mt-4"><x-operational-pagination :paginator="$agendaShifts" label="Paginação da agenda" controls="calendar-agenda-list" heading="agenda-title" /></div>
+    </section>
+    <x-bottom-sheet :show="$calendarDetailId !== null" id="calendar-shift-detail" title="Detalhes do plantão" close-action="closeCalendarDetail" :return-focus="$calendarDetailId ? '#calendar-agenda-shift-'.$calendarDetailId : '#agenda-title'">
+        @if ($this->calendarDetail)
+            <p class="font-semibold">{{ $this->calendarDetail->period()->datedLabel() }}</p>
+            <p class="mt-2">{{ $this->calendarDetail->sector?->name ?? 'Setor não informado' }} · {{ $this->calendarDetail->category?->name ?? 'Categoria não informada' }}</p>
+            <p class="mt-2">Profissional: <strong>{{ $this->calendarDetail->user?->name ?? 'Não alocado' }}</strong></p>
+            <div class="mt-3"><x-status-badge :status="$this->calendarDetail->status" /></div>
+            @if (isset($swappedShiftsDetails[$calendarDetailId]))<p class="mt-3 text-sm">{{ $swappedShiftsDetails[$calendarDetailId]['headline'] }}</p>@endif
+            @if ($isProfessional && $this->calendarDetail->user_id === auth()->id())<p class="mt-3 text-sm text-muted">Em Minha escala você pode solicitar trocas ou informar ausências, conforme as regras vigentes.</p>@endif
+        @endif
+        <x-slot:actions>
+            <x-action-button variant="secondary" wire:click="closeCalendarDetail">Fechar</x-action-button>
+            @if ($this->calendarDetail && $canManageShifts)
+                @can('reallocate', $this->calendarDetail)
+                    <x-action-button variant="primary" wire:click="reallocateCalendarDetail" target="reallocateCalendarDetail">Preencher plantão</x-action-button>
+                @endcan
+                @if (isset($pendingSwapsByShift[$calendarDetailId]))
+                    <a href="{{ \App\Support\OperationalNavigation::url('swaps', ['request' => $pendingSwapsByShift[$calendarDetailId]], 'calendar', $this->navigationContext()) }}" wire:navigate class="button-secondary">Analisar troca</a>
+                @endif
+                <a href="{{ \App\Support\OperationalNavigation::url('shifts', ['focus' => $calendarDetailId], 'calendar', $this->navigationContext()) }}" wire:navigate class="button-secondary">Abrir escala</a>
+            @elseif ($this->calendarDetail && $this->calendarDetail->user_id === auth()->id())
+                <a href="{{ route('professional.dashboard', ['month' => $this->calendarDetail->date->format('Y-m')]) }}#schedule-title" wire:navigate class="button-secondary">Ver minha escala</a>
+            @endif
+        </x-slot:actions>
+    </x-bottom-sheet>
     @include('livewire.manager.partials.shift-reallocation')
 </div>

@@ -6,6 +6,12 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.39.0 — 11/10/2026
+
+### Calendário mais fácil no celular
+
+- Ficou mais fácil consultar seus plantões por dia, semana ou mês, diretamente no celular.
+
 ## 1.38.0 — 11/10/2026
 
 ### Próximo plantão em destaque

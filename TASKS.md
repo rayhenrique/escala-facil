@@ -286,3 +286,5 @@
   - [x] Regressões por perfil, logout, sessão ausente, Livewire, acessibilidade e PWA.
 
 - [x] 1.38.0: início profissional móvel com próximo plantão, detalhes autorizados, pedidos compactos, ausência, testes e preservação do desktop.
+
+- [x] 1.39.0: agenda móvel do calendário por semana, mês e lista, detalhes autorizados, paginação, preservação do desktop e testes de turnos/isolamento.
