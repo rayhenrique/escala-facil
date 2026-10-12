@@ -99,6 +99,16 @@ class ShiftSwapNotificationService
         );
     }
 
+    public function declined(ShiftSwap $shiftSwap): void
+    {
+        $shiftSwap->loadMissing(['requester', 'substitute']);
+        Notification::send(collect([$shiftSwap->requester, $shiftSwap->substitute]), new ShiftSwapEventNotification($this->payload(
+            $shiftSwap, ShiftSwapEvent::Declined, 'Solicitação recusada',
+            $shiftSwap->substitute->name.' recusou o pedido. Os plantões permanecem com os profissionais originais.',
+            route('notifications', [], false),
+        )));
+    }
+
     public function reverted(ShiftSwap $shiftSwap): void
     {
         $shiftSwap->loadMissing(['requester', 'substitute', 'manager']);

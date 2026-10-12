@@ -5,6 +5,7 @@ namespace App\Livewire\Professional;
 use App\Actions\Absences\ReportAbsenceAction;
 use App\Actions\ShiftSwaps\AcceptShiftSwapAction;
 use App\Actions\ShiftSwaps\CreateShiftSwapAction;
+use App\Actions\ShiftSwaps\DeclineShiftSwapAction;
 use App\Enums\ShiftStatus;
 use App\Enums\ShiftSwapEvent;
 use App\Enums\ShiftSwapStatus;
@@ -19,8 +20,9 @@ use App\Models\Shift;
 use App\Models\ShiftSwap;
 use App\Models\User;
 use App\Support\OperationalFilters;
-use App\Support\ShiftCoverage;
 use App\Support\ShiftSwapReceipt;
+use App\Support\ShiftSwapResponse;
+use App\Support\ShiftSwapTimingWarnings;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -145,7 +147,55 @@ class MySchedule extends Component
 
     public ?string $pendingConfirmation = null;
 
+    #[Locked]
     public ?int $pendingAcceptSwapId = null;
+
+    #[Locked]
+    public ?int $incomingDetailId = null;
+
+    #[Locked]
+    public ?string $responseSnapshot = null;
+
+    public string $declineReason = '';
+
+    #[Computed]
+    public function incomingReview(): ?array
+    {
+        if (! $this->incomingDetailId) {
+            return null;
+        }
+        $swap = ShiftSwap::query()->where('substitute_id', auth()->id())->findOrFail($this->incomingDetailId);
+        $this->authorize('viewResponse', $swap);
+
+        return app(ShiftSwapResponse::class)->inspect($swap, auth()->user());
+    }
+
+    public function openIncomingDetails(int $id): void
+    {
+        $swap = ShiftSwap::query()->where('substitute_id', auth()->id())->findOrFail($id);
+        $this->authorize('viewResponse', $swap);
+        if ($this->incomingDetailId !== $swap->id) {
+            $this->declineReason = '';
+        }
+        $this->incomingDetailId = $swap->id;
+        $this->cancelConfirmation();
+        $this->resetValidation();
+        unset($this->incomingReview);
+    }
+
+    public function closeIncomingDetails(): void
+    {
+        $this->incomingDetailId = null;
+        $this->cancelConfirmation();
+        unset($this->incomingReview);
+    }
+
+    public function refreshIncomingDetails(): void
+    {
+        abort_unless($this->incomingDetailId, 404);
+        $this->openIncomingDetails($this->incomingDetailId);
+        $this->dispatch('notifications-updated');
+    }
 
     /** @var array<string, mixed>|null */
     public ?array $confirmationSummary = null;
@@ -361,31 +411,8 @@ class MySchedule extends Component
             'requester' => auth()->user()->name,
             'quota' => auth()->user()->approvedSwapCount(now()->month, now()->year).' de 4',
             'substitute_quota' => $substitute->approvedSwapCount(now()->month, now()->year).' de 4',
-            'warnings' => $this->swapWarnings($shift, $substitute, $counterpart),
+            'warnings' => app(ShiftSwapTimingWarnings::class)->make($shift, $substitute, $counterpart, auth()->user()),
         ];
-    }
-
-    /** Informational only: acceptance and approval keep their existing validation. */
-    private function swapWarnings(Shift $shift, User $substitute, ?Shift $counterpart): array
-    {
-        $warnings = [];
-        foreach ([[$substitute, $shift], [auth()->user(), $counterpart]] as [$recipient, $candidate]) {
-            if (! $candidate) {
-                continue;
-            }
-            $pool = Shift::query()->where('user_id', $recipient->id)->where('status', ShiftStatus::Scheduled)
-                ->whereBetween('date', [$candidate->period()->start->subDay()->toDateString(), $candidate->period()->end->addDay()->endOfDay()])
-                ->whereNotIn('id', array_filter([$shift->id, $counterpart?->id]))->get();
-            foreach ($pool as $existing) {
-                if (! ShiftCoverage::findDoubleShiftIn(collect([$existing]), $recipient->id, $candidate)) {
-                    continue;
-                }
-                $kind = $candidate->period()->overlaps($existing->period()) ? 'Conflito de horários' : 'Dobra';
-                $warnings[] = $kind.': '.$recipient->name.' já tem o plantão #'.$existing->id.' em '.ShiftCoverage::doubleShiftLabel($existing).'. Revise a escolha; o aceite e a gerência revalidarão a disponibilidade.';
-            }
-        }
-
-        return $warnings;
     }
 
     public function confirmSwapRequest(CreateShiftSwapAction $action, ShiftSwapReceipt $receipts): void
@@ -401,40 +428,53 @@ class MySchedule extends Component
 
     public function acceptSwap(int $shiftSwapId, AcceptShiftSwapAction $action, ShiftSwapReceipt $receipts): void
     {
-        $shiftSwap = ShiftSwap::query()->findOrFail($shiftSwapId);
-        $this->authorize('accept', $shiftSwap);
-        $shiftSwap = $action->execute(auth()->user(), $shiftSwapId);
+        $shiftSwap = $action->execute(auth()->user(), $shiftSwapId, $this->responseSnapshot);
         $this->swapReceipt = $receipts->make($shiftSwap, ShiftSwapEvent::Accepted);
+        $this->finishIncomingResponse('Troca aceita e encaminhada para aprovação da gerência.');
+    }
 
-        $this->cancelConfirmation();
-        session()->flash('status', 'Troca aceita e encaminhada para aprovação da gerência.');
+    private function finishIncomingResponse(string $message): void
+    {
+        $this->closeIncomingDetails();
+        $this->declineReason = '';
+        $this->resetValidation(['response', 'declineReason']);
+        $this->resetPage('incomingPage');
+        $this->dispatch('notifications-updated');
+        $this->dispatch('incoming-response-finished');
+        session()->flash('status', $message);
+    }
+
+    private function reviewIncomingDecision(int $id, string $decision): void
+    {
+        $this->openIncomingDetails($id);
+        $this->confirmationSummary = $this->incomingReview;
+        $this->responseSnapshot = $this->confirmationSummary['fingerprint'];
+        $this->pendingAcceptSwapId = $id;
+        $this->pendingConfirmation = $decision;
     }
 
     public function requestAcceptSwap(int $shiftSwapId): void
     {
-        $shiftSwap = ShiftSwap::query()
-            ->with(['shift.sector', 'shift.category', 'substituteShift.sector', 'substituteShift.category', 'requester'])
-            ->findOrFail($shiftSwapId);
-        $this->authorize('accept', $shiftSwap);
+        $this->reviewIncomingDecision($shiftSwapId, 'accept_swap');
+    }
 
-        $this->pendingAcceptSwapId = $shiftSwap->id;
-        $this->pendingConfirmation = 'accept_swap';
-        $this->confirmationSummary = $this->shiftSummary($shiftSwap->shift) + [
-            'requester' => $shiftSwap->requester->name,
-            'counterpart' => $shiftSwap->substituteShift ? $this->shiftSummary($shiftSwap->substituteShift)['shift'] : null,
-        ];
-
-        $doubleShift = ShiftCoverage::findDoubleShift(auth()->user(), $shiftSwap->shift);
-
-        if ($doubleShift) {
-            $this->confirmationSummary['double_shift'] = ShiftCoverage::doubleShiftLabel($doubleShift);
-        }
+    public function requestDeclineSwap(int $shiftSwapId): void
+    {
+        $this->reviewIncomingDecision($shiftSwapId, 'decline_swap');
     }
 
     public function confirmAcceptSwap(AcceptShiftSwapAction $action, ShiftSwapReceipt $receipts): void
     {
-        abort_unless($this->pendingConfirmation === 'accept_swap' && $this->pendingAcceptSwapId, 404);
+        abort_unless($this->pendingConfirmation === 'accept_swap' && $this->pendingAcceptSwapId && $this->responseSnapshot, 404);
         $this->acceptSwap($this->pendingAcceptSwapId, $action, $receipts);
+    }
+
+    public function confirmDeclineSwap(DeclineShiftSwapAction $action, ShiftSwapReceipt $receipts): void
+    {
+        abort_unless($this->pendingConfirmation === 'decline_swap' && $this->pendingAcceptSwapId && $this->responseSnapshot, 404);
+        $swap = $action->execute(auth()->user(), $this->pendingAcceptSwapId, $this->declineReason, $this->responseSnapshot);
+        $this->swapReceipt = $receipts->make($swap, ShiftSwapEvent::Declined);
+        $this->finishIncomingResponse('Solicitação recusada. Os plantões permanecem com os profissionais originais.');
     }
 
     public function openAbsence(int $shiftId): void

@@ -107,7 +107,7 @@
                 <div class="flex items-start gap-2.5 rounded-lg border border-red-200 bg-red-50/70 p-3 text-red-800">
                     <span class="font-bold text-danger">✕</span>
                     <div>
-                        <strong>Solicitação rejeitada pela gerência</strong> — A escala original foi mantida sem alterações.
+                        <strong>{{ ($receipt['event'] ?? '') === 'declined' ? 'Solicitação recusada pelo profissional' : 'Solicitação rejeitada pela gerência' }}</strong> — A escala original foi mantida sem alterações.
                     </div>
                 </div>
             @elseif ($receipt['status'] === 'reverted')
@@ -149,7 +149,7 @@
     @endif
     @if (! empty($receipt['rejection_reason']))
         <div class="border-t border-red-200 bg-red-50/70 p-5 sm:p-6">
-            <span class="meta-label text-danger">Justificativa da gerência</span>
+            <span class="meta-label text-danger">{{ ($receipt['event'] ?? '') === 'declined' ? 'Motivo da recusa' : 'Justificativa da gerência' }}</span>
             <p class="mt-2 text-sm font-medium text-danger">{{ $receipt['rejection_reason'] }}</p>
         </div>
     @endif

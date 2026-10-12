@@ -296,3 +296,7 @@ O painel móvel recolhe os campos de filtro para dar espaço à agenda; o botão
 ## Solicitação de troca guiada
 
 A solicitação profissional usa o bottom sheet compartilhado amplo no celular e modal centralizado no desktop. Cinco etapas curtas (Plantão, Modalidade, Colega, Revisão, Confirmar) têm progresso textual, título focável e rodapé fixo. Colegas e contrapartidas usam opções nativas com busca e paginação; os cartões da revisão mostram os dois movimentos da permuta. Cotas e alertas usam texto explícito, sem sugerir aprovação automática.
+
+## Respostas aos pedidos recebidos
+
+Cartões compactos identificam modalidade, solicitante, referência, período completo e setor/categoria. Ver detalhes abre o bottom sheet amplo compartilhado, com os dois plantões, cota e alertas. Aceitar e Recusar usam confirmações objetivas; a recusa tem motivo opcional. Bloqueios aparecem em texto danger, separados de avisos informativos. Somente uma janela fica ativa; ações fixas e foco de retorno seguem a biblioteca existente.

@@ -31,7 +31,7 @@ class DoubleShiftTest extends TestCase
             ->test(MySchedule::class)
             ->call('requestAcceptSwap', $swap->id)
             ->assertSet('pendingConfirmation', 'accept_swap')
-            ->assertSee('emenda (dobra)')
+            ->assertSee('Dobra:')
             ->assertSee('12/11/2026, das 19:00 às 07:00');
     }
 

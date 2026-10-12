@@ -12,7 +12,7 @@ class OperationalAuditEvent extends Model
 {
     public const ENTITIES = ['shift' => 'Plantão', 'swap' => 'Troca', 'user' => 'Usuário', 'sector' => 'Setor', 'category' => 'Categoria', 'invitation' => 'Convite'];
 
-    public const ACTIONS = ['created' => 'Criação', 'updated' => 'Edição', 'deleted' => 'Exclusão', 'reallocated' => 'Realocação', 'approved' => 'Aprovação', 'rejected' => 'Rejeição', 'reverted' => 'Troca desfeita', 'accepted' => 'Aceite do profissional', 'activated' => 'Ativação', 'revoked' => 'Revogação', 'resent' => 'Reenvio'];
+    public const ACTIONS = ['created' => 'Criação', 'updated' => 'Edição', 'deleted' => 'Exclusão', 'reallocated' => 'Realocação', 'approved' => 'Aprovação', 'rejected' => 'Rejeição', 'reverted' => 'Troca desfeita', 'accepted' => 'Aceite do profissional', 'declined' => 'Recusa do profissional', 'activated' => 'Ativação', 'revoked' => 'Revogação', 'resent' => 'Reenvio'];
 
     public $timestamps = false;
 

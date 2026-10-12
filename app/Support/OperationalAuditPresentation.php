@@ -16,7 +16,7 @@ class OperationalAuditPresentation
             'sector_id' => 'Setor (ID)', 'category_id' => 'Categoria (ID)', 'user_id' => 'Profissional (ID)', 'status' => 'Situação',
             'name' => 'Nome', 'role' => 'Perfil', 'email_changed' => 'Endereço de acesso alterado (conteúdo não registrado)',
             'shift_id' => 'Plantão (ID)', 'substitute_shift_id' => 'Contrapartida (ID)', 'requester_id' => 'Solicitante (ID)',
-            'substitute_id' => 'Substituto (ID)', 'manager_id' => 'Gerente (ID)',
+            'substitute_id' => 'Substituto (ID)', 'manager_id' => 'Gerente (ID)', 'professional_response' => 'Resposta do profissional', 'professional_responded_at' => 'Data da resposta',
             'approval_state' => 'Atribuições e horários da aprovação original',
             'requires_activation' => 'Ativação pendente', 'invited_by' => 'Gerente do convite (ID)', 'generation' => 'Emissão do convite',
             'expires_at' => 'Expiração', 'last_sent_at' => 'Envio solicitado', 'accepted_at' => 'Aceite', 'revoked_at' => 'Revogação',
@@ -37,13 +37,18 @@ class OperationalAuditPresentation
         if ($field === 'status') {
             return ShiftStatus::tryFrom($value)?->label() ?? ShiftSwapStatus::tryFrom($value)?->label() ?? $value;
         }
+        if ($field === 'professional_response') {
+            return match ($value) {
+                'accepted' => 'Aceita', 'declined' => 'Recusada', default => (string) $value
+            };
+        }
         if ($field === 'role') {
             return UserRole::tryFrom($value)?->label() ?? $value;
         }
         if (in_array($field, ['date', 'end_date'], true)) {
             return CarbonImmutable::parse($value)->format('d/m/Y');
         }
-        if (in_array($field, ['expires_at', 'last_sent_at', 'accepted_at', 'revoked_at'], true)) {
+        if (in_array($field, ['expires_at', 'last_sent_at', 'accepted_at', 'revoked_at', 'professional_responded_at'], true)) {
             return CarbonImmutable::parse($value)->setTimezone(config('app.timezone'))->format('d/m/Y H:i:s');
         }
         if (str_ends_with($field, '_id') || $field === 'invited_by') {

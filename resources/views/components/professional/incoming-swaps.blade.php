@@ -4,15 +4,16 @@
             <div class="flex items-end justify-between gap-4"><div><p class="eyebrow">Sua resposta</p><h2 id="{{ $headingId }}" tabindex="-1" class="mt-2 text-xl font-semibold">Pedidos para você cobrir</h2></div><span class="count-badge">{{ $incomingSwaps->total() }}</span></div>
             <div class="mt-4 grid gap-4 lg:grid-cols-2">
                 @foreach ($incomingSwaps as $swap)
-                    <article class="panel professional-request" wire:key="{{ $headingId }}-swap-{{ $swap->id }}">
+                    <article class="panel professional-request !p-4" wire:key="{{ $headingId }}-swap-{{ $swap->id }}">
                         <div class="flex flex-wrap items-center gap-2"><x-status-badge :status="$swap->status" label="Aguardando você" /><span class="text-xs text-muted">{{ sprintf('TROCA-%06d', $swap->id) }}</span></div>
-                        <h3 class="mt-4 text-lg font-semibold">{{ $swap->shift->date->format('d/m/Y') }} · {{ $swap->shift->time_label }}</h3>
-                        <p class="mt-2 text-sm text-muted">{{ $swap->shift->sector?->name ?? 'Setor não informado' }} · {{ $swap->shift->category?->name ?? 'Categoria não informada' }}</p>
-                        @if ($swap->substituteShift)
-                            <p class="mt-2 text-xs font-semibold text-coverage">Contrapartida: você cederá seu plantão de {{ $swap->substituteShift->date->format('d/m/Y') }} ({{ $swap->substituteShift->time_label }}).</p>
-                        @endif
-                        <p class="mt-4 text-sm"><span class="text-muted">Solicitado por</span> <strong>{{ $swap->requester?->name ?? 'Profissional indisponível' }}</strong></p>
-                        <button type="button" wire:click="requestAcceptSwap({{ $swap->id }})" wire:loading.attr="disabled" class="button-primary mt-5 inline-flex w-full sm:w-auto" @disabled($swapLimitReached)>{{ $swapLimitReached ? 'Cota mensal atingida' : 'Aceitar e enviar à gerência' }}</button>
+                        <p class="mt-3 text-sm text-muted">{{ $swap->substitute_shift_id ? 'Troca mútua' : 'Troca simples' }} · Solicitante: <strong class="text-ink">{{ $swap->requester?->name ?? 'Profissional indisponível' }}</strong></p>
+                        <h3 class="mt-2 text-base font-semibold">{{ $swap->shift?->period()->datedLabel() ?? 'Plantão indisponível' }}</h3>
+                        <p class="mt-1 text-sm text-muted">{{ $swap->shift?->sector?->name ?? 'Setor não informado' }} · {{ $swap->shift?->category?->name ?? 'Categoria não informada' }}</p>
+                        <div class="mt-4 flex flex-wrap gap-2">
+                            <x-action-button id="{{ $headingId }}-details-{{ $swap->id }}" wire:click="openIncomingDetails({{ $swap->id }})" target="openIncomingDetails" x-on:click="responseOpener = $el.id" x-bind:data-response-return="responseOpener === $el.id ? '' : null">Ver detalhes</x-action-button>
+                            <x-action-button id="{{ $headingId }}-accept-{{ $swap->id }}" wire:click="requestAcceptSwap({{ $swap->id }})" target="requestAcceptSwap" variant="primary" x-on:click="responseOpener = $el.id" x-bind:data-response-return="responseOpener === $el.id ? '' : null">Aceitar</x-action-button>
+                            <x-action-button id="{{ $headingId }}-decline-{{ $swap->id }}" wire:click="requestDeclineSwap({{ $swap->id }})" target="requestDeclineSwap" x-on:click="responseOpener = $el.id" x-bind:data-response-return="responseOpener === $el.id ? '' : null">Recusar</x-action-button>
+                        </div>
                     </article>
                 @endforeach
             </div>

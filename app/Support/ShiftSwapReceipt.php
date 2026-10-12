@@ -39,7 +39,7 @@ class ShiftSwapReceipt
             ShiftSwapStatus::PendingProfessional => ShiftSwapEvent::Requested,
             ShiftSwapStatus::PendingManager => ShiftSwapEvent::Accepted,
             ShiftSwapStatus::Approved => ShiftSwapEvent::Approved,
-            ShiftSwapStatus::Rejected => ShiftSwapEvent::Rejected,
+            ShiftSwapStatus::Rejected => $swap->professional_response === 'declined' ? ShiftSwapEvent::Declined : ShiftSwapEvent::Rejected,
             ShiftSwapStatus::Reverted => ShiftSwapEvent::Reverted,
         });
     }
@@ -153,6 +153,8 @@ class ShiftSwapReceipt
             'requester_movement' => $requesterMovement,
             'substitute_movement' => $substituteMovement,
             'rejection_reason' => $shiftSwap->rejection_reason,
+            'professional_response' => $shiftSwap->professional_response,
+            'professional_responded_at' => $shiftSwap->professional_responded_at?->toIso8601String(),
             'reversion_reason' => $reversal?->reason,
             'reversal_id' => $reversal?->id,
             'requester' => $shiftSwap->requester->name,

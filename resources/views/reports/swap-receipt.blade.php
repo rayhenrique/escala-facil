@@ -229,6 +229,8 @@
             @else
                 <div class="movement-item">Troca desfeita pela gerência. A escala original foi restabelecida.</div>
             @endif
+        @elseif ($receipt['status'] === 'rejected')
+            <div class="movement-item">{{ ($receipt['event'] ?? '') === 'declined' ? 'Solicitação recusada pelo profissional.' : 'Solicitação rejeitada.' }} Os plantões permanecem com os profissionais originais.</div>
         @elseif (! empty($receipt['has_counterpart']) && ! empty($receipt['counterpart_shift_date']))
             <div class="movement-item">
                 ⇄ <strong>{{ $receipt['requester'] }}</strong> assume o plantão do dia <strong>{{ \Carbon\CarbonImmutable::parse($receipt['counterpart_shift_date'])->format('d/m/Y') }}</strong>, das {{ $receipt['counterpart_start_time'] }} às {{ $receipt['counterpart_end_time_label'] }} ({{ $receipt['counterpart_sector'] }} · {{ $receipt['counterpart_category'] }}).
@@ -248,7 +250,7 @@
     @endif
     @if (! empty($receipt['rejection_reason']))
         <div class="rejection-box">
-            <strong>Justificativa da Gerência:</strong>
+            <strong>{{ ($receipt['event'] ?? '') === 'declined' ? 'Motivo da recusa:' : 'Justificativa da Gerência:' }}</strong>
             <p style="margin: 4px 0 0;">{{ $receipt['rejection_reason'] }}</p>
         </div>
     @endif

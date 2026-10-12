@@ -93,7 +93,7 @@ class ProfessionalMobileHomeTest extends TestCase
             ->assertSee(sprintf('TROCA-%06d', $sent->id))->assertDontSee(sprintf('TROCA-%06d', $other->id))
             ->assertSee('Aguardando você')->assertSee('Enviada')->assertSee('Recebida')
             ->set('search', 'inexistente')->assertViewHas('pendingResponses', 1)->assertSee('Há pedidos fora dos filtros atuais.')
-            ->call('clearFilters')->assertSee('Aceitar e enviar à gerência');
+            ->call('clearFilters')->assertSee('Aceitar');
     }
 
     public function test_lists_are_bounded_and_load_relations_in_batches(): void

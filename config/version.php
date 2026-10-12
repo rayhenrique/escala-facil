@@ -2,9 +2,18 @@
 
 return [
     // Versão do código instalado. APP_VERSION não pode sobrepor este registro.
-    'current' => '1.40.0',
+    'current' => '1.41.0',
 
     'releases' => [
+        [
+            'version' => '1.41.0',
+            'date' => '2026-10-11',
+            'title' => 'Responda às trocas com mais facilidade',
+            'summary' => 'Agora você pode analisar e responder aos pedidos de troca com mais facilidade pelo celular.',
+            'highlights' => [
+                'Agora você pode analisar e responder aos pedidos de troca com mais facilidade pelo celular.',
+            ],
+        ],
         [
             'version' => '1.40.0',
             'date' => '2026-10-11',

@@ -2,12 +2,12 @@
 
 namespace App\Policies;
 
-use App\Enums\ShiftStatus;
 use App\Enums\ShiftSwapStatus;
 use App\Enums\UserRole;
 use App\Models\ShiftSwap;
 use App\Models\User;
 use App\Support\ShiftSwapApproval;
+use App\Support\ShiftSwapResponse;
 use App\Support\ShiftSwapReversion;
 use Illuminate\Auth\Access\Response;
 
@@ -33,31 +33,24 @@ class ShiftSwapPolicy
             && ! $user->hasReachedSwapLimit(now()->month, now()->year);
     }
 
-    public function accept(User $user, ShiftSwap $shiftSwap): bool
+    public function viewResponse(User $user, ShiftSwap $shiftSwap): bool
     {
-        if ($user->role !== UserRole::Professional
-            || $shiftSwap->substitute_id !== $user->id
-            || $shiftSwap->status !== ShiftSwapStatus::PendingProfessional) {
-            return false;
+        return $user->role === UserRole::Professional && $shiftSwap->substitute_id === $user->id;
+    }
+
+    public function decline(User $user, ShiftSwap $shiftSwap): bool
+    {
+        return $this->viewResponse($user, $shiftSwap) && $shiftSwap->status === ShiftSwapStatus::PendingProfessional;
+    }
+
+    public function accept(User $user, ShiftSwap $shiftSwap): Response
+    {
+        if (! $this->viewResponse($user, $shiftSwap)) {
+            return Response::deny('Somente o profissional destinatário pode aceitar este pedido.');
         }
+        $blocks = app(ShiftSwapResponse::class)->inspect($shiftSwap, $user)['blocks'];
 
-        $shiftSwap->loadMissing(['requester', 'shift']);
-
-        if (! $shiftSwap->requester || ! $shiftSwap->shift) {
-            return false;
-        }
-
-        $matchesAssignment = $user->category_id === $shiftSwap->requester->category_id
-            && $user->sector_id === $shiftSwap->requester->sector_id
-            && $user->category_id === $shiftSwap->shift->category_id
-            && $user->sector_id === $shiftSwap->shift->sector_id;
-
-        $referenceDate = $shiftSwap->created_at ?? now();
-
-        return $matchesAssignment
-            && $shiftSwap->shift->user_id === $shiftSwap->requester_id
-            && $shiftSwap->shift->status === ShiftStatus::Scheduled
-            && ! $user->hasReachedSwapLimit($referenceDate->month, $referenceDate->year);
+        return $blocks === [] ? Response::allow() : Response::deny(implode(' ', $blocks));
     }
 
     public function approve(User $user, ShiftSwap $shiftSwap): Response

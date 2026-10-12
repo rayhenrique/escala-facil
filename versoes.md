@@ -6,6 +6,12 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.41.0 — 11/10/2026
+
+### Responda às trocas com mais facilidade
+
+- Agora você pode analisar e responder aos pedidos de troca com mais facilidade pelo celular.
+
 ## 1.40.0 — 11/10/2026
 
 ### Solicitação de troca guiada

@@ -1,4 +1,4 @@
-<div class="professional-home-layout" x-data="{ swapOpener: '' }" x-on:professional-form-opened.window="$nextTick(() => { const target = document.getElementById($event.detail.target); target?.focus(); if ($event.detail.target !== 'swap-form-title') target?.scrollIntoView({ block: 'start' }); })">
+<div x-on:incoming-response-finished.window="$nextTick(() => { const heading = document.getElementById(window.innerWidth >= 1024 ? 'incoming-desktop-title' : 'incoming-title') ?? document.getElementById('professional-home'); heading?.focus({ preventScroll: true }); })" class="professional-home-layout" x-data="{ swapOpener: '', responseOpener: '' }" x-on:professional-form-opened.window="$nextTick(() => { const target = document.getElementById($event.detail.target); target?.focus(); if ($event.detail.target !== 'swap-form-title') target?.scrollIntoView({ block: 'start' }); })">
     <div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
             <p class="eyebrow">Área profissional</p>
@@ -243,38 +243,50 @@
         @endif
         <x-slot:actions><x-action-button variant="secondary" wire:click="closeShiftDetails">Fechar</x-action-button></x-slot:actions>
     </x-bottom-sheet>
+    @include('livewire.professional.partials.incoming-response')
     <x-confirmation-modal
         :show="$pendingConfirmation !== null && $pendingConfirmation !== 'request_swap'"
         id="professional-action"
         :title="match ($pendingConfirmation) {
             'accept_swap' => 'Aceitar cobertura deste plantão?',
+            'decline_swap' => 'Recusar este pedido?',
             'absence' => 'Registrar ausência?',
             default => 'Confirmar ação?',
         }"
         close-action="cancelConfirmation"
-        :tone="$pendingConfirmation === 'absence' ? 'warning' : 'primary'"
+        :request-error-message="in_array($pendingConfirmation, ['accept_swap', 'decline_swap']) ? 'Não foi possível confirmar a resposta. Atualize os detalhes para conferir a situação antes de tentar novamente.' : 'Não foi possível concluir a solicitação. Confira os dados e tente novamente.'"
+        :tone="in_array($pendingConfirmation, ['absence', 'decline_swap']) ? 'warning' : 'primary'"
     >
         @if ($confirmationSummary)
             <p><strong>{{ $confirmationSummary['shift'] }}</strong></p>
             <p>{{ $confirmationSummary['location'] }}</p>
-            @if ($pendingConfirmation === 'accept_swap')
-                <p>Solicitado por: <strong>{{ $confirmationSummary['requester'] }}</strong></p>
-                @if (! empty($confirmationSummary['counterpart']))
-                    <p class="mt-2 font-semibold text-coverage">Contrapartida: você cederá seu plantão de {{ $confirmationSummary['counterpart'] }} ao solicitante.</p>
+            @if (in_array($pendingConfirmation, ['accept_swap', 'decline_swap']))
+                <p>{{ $confirmationSummary['reference'] }} · Solicitante: <strong>{{ $confirmationSummary['requester'] }}</strong></p>
+                @if ($confirmationSummary['counterpart'])<p>Seu plantão de contrapartida: <strong>{{ $confirmationSummary['counterpart'] }}</strong> · {{ $confirmationSummary['counterpart_location'] }}</p>@endif
+                @foreach ($confirmationSummary['warnings'] as $warning)<p class="mt-2 rounded-lg border border-line p-3 text-sm" role="status">{{ $warning }}</p>@endforeach
+                @if ($pendingConfirmation === 'accept_swap')
+                    @foreach ($confirmationSummary['blocks'] as $block)<p class="field-error" role="alert">{{ $block }}</p>@endforeach
+                    <p>Ao confirmar, o pedido seguirá para decisão da gerência. Nenhum plantão será transferido agora.</p>
+                @else
+                    @if (! $confirmationSummary['can_decline'])<p class="field-error" role="alert">{{ $confirmationSummary['blocks'][0] ?? 'Este pedido já não aguarda sua resposta. Atualize os detalhes.' }}</p>@endif
+                    <p>Ao recusar, este pedido será encerrado e os profissionais serão notificados. Os plantões e as cotas permanecem sem alterações.</p>
+                    <label for="decline-reason" class="field-label mt-4">Motivo da recusa <span class="font-normal text-muted">(opcional)</span></label>
+                    <textarea wire:model="declineReason" id="decline-reason" rows="3" maxlength="1000" class="field-input" @error('declineReason') aria-invalid="true" aria-describedby="decline-reason-error" @enderror></textarea>
+                    @error('declineReason')<p id="decline-reason-error" class="field-error">{{ $message }}</p>@enderror
                 @endif
-                @if (! empty($confirmationSummary['double_shift']))
-                    <p class="mt-2 font-semibold text-amber-700">Atenção: este aceite emenda (dobra) com seu plantão de {{ $confirmationSummary['double_shift'] }}. A gerência decidirá com essa informação.</p>
-                @endif
-                <p>Ao confirmar, o pedido seguirá para decisão da gerência.</p>
+                @error('response')<p class="field-error" role="alert" tabindex="-1" data-validation-error>{{ $message }}</p>@enderror
+                <x-action-button wire:click="refreshIncomingDetails" target="refreshIncomingDetails, confirmAcceptSwap, confirmDeclineSwap" class="mt-3">Atualizar detalhes</x-action-button>
             @elseif ($pendingConfirmation === 'absence')
                 <p>Justificativa: <strong>{{ $confirmationSummary['reason'] }}</strong></p>
                 <p>O plantão ficará descoberto e exigirá realocação pela gerência.</p>
             @endif
         @endif
         <x-slot:actions>
-            <button type="button" wire:click="cancelConfirmation" class="button-secondary w-full sm:w-auto" data-confirm-cancel>Voltar e revisar</button>
+            <button type="button" wire:click="cancelConfirmation" x-bind:disabled="busy" class="button-secondary w-full sm:w-auto" data-confirm-cancel>Voltar e revisar</button>
             @if ($pendingConfirmation === 'accept_swap')
-                <button type="button" wire:click="confirmAcceptSwap" wire:loading.attr="disabled" wire:target="confirmAcceptSwap" class="button-primary w-full sm:w-auto">Confirmar aceite</button>
+                <button type="button" wire:click="confirmAcceptSwap" wire:loading.attr="disabled" wire:target="confirmAcceptSwap" class="button-primary w-full sm:w-auto" @disabled(! ($confirmationSummary['can_accept'] ?? false))>Confirmar aceite</button>
+            @elseif ($pendingConfirmation === 'decline_swap')
+                <x-action-button wire:click="confirmDeclineSwap" target="confirmDeclineSwap" variant="danger" :disabled="! ($confirmationSummary['can_decline'] ?? false)">Confirmar recusa</x-action-button>
             @elseif ($pendingConfirmation === 'absence')
                 <button type="button" wire:click="confirmAbsence" wire:loading.attr="disabled" wire:target="confirmAbsence" class="button-danger w-full sm:w-auto">Confirmar ausência</button>
             @endif

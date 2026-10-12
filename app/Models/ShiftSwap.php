@@ -25,6 +25,8 @@ class ShiftSwap extends Model
         'status',
         'manager_id',
         'rejection_reason',
+        'professional_response',
+        'professional_responded_at',
     ];
 
     protected function casts(): array
@@ -37,6 +39,7 @@ class ShiftSwap extends Model
             'substitute_id' => 'integer',
             'manager_id' => 'integer',
             'status' => ShiftSwapStatus::class,
+            'professional_responded_at' => 'immutable_datetime',
         ];
     }
 

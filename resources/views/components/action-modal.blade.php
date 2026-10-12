@@ -1,4 +1,5 @@
 @props([
+    'requestErrorMessage' => 'Não foi possível concluir a solicitação. Confira os dados e tente novamente.',
     'show' => false, 'id', 'title', 'eyebrow' => null, 'closeAction' => null, 'clientState' => null, 'closeEvent' => null,
     'submitAction' => null, 'role' => 'dialog', 'maxWidth' => 'lg',
     'trackChanges' => false, 'initialFocus' => null, 'returnFocus' => null,
@@ -29,13 +30,13 @@
                 @isset($heading)
                     {{ $heading }}
                 @else
-                    <div>@if ($eyebrow)<p class="eyebrow">{{ $eyebrow }}</p>@endif<h2 id="{{ $id }}-title">{{ $title }}</h2></div>
+                    <div>@if ($eyebrow)<p class="eyebrow">{{ $eyebrow }}</p>@endif<h2 id="{{ $id }}-title" tabindex="-1">{{ $title }}</h2></div>
                     <button type="button" @click="requestClose()" :disabled="busy" class="modal-close-button" aria-label="Fechar janela"><x-nav-icon name="close" class="size-5" /></button>
                 @endisset
             </header>
             <div id="{{ $id }}-description" class="modal-body" tabindex="0" data-dialog-body>
                 {{ $slot }}
-                <p hidden tabindex="-1" role="alert" class="field-error mt-3" data-ui-request-error>Não foi possível concluir a solicitação. Confira os dados e tente novamente.</p>
+                <p hidden tabindex="-1" role="alert" class="field-error mt-3" data-ui-request-error>{{ $requestErrorMessage }}</p>
             </div>
             <footer class="modal-footer" x-show="!discardRequested">
                 {{ $actions }}

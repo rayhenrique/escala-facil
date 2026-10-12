@@ -256,3 +256,12 @@ Tocar no corpo do cartão ou acionar Ver detalhes abre a mesma consulta autoriza
 - A revisão identifica quem assume cada plantão, datas, término no dia seguinte, duração, setor/categoria e cotas. Conflitos reais e dobras são avisos informativos nesta solicitação, preservando as regras posteriores de aceite/aprovação; nenhuma regra de descanso nova é inferida.
 - O envio só produz feedback de sucesso e comprovante após a resposta da Action transacional. Payload alterado após revisão exige nova revisão; indisponibilidade ou cota atualizada mantêm as entradas e mostram o motivo. Locks e validação de pedido ativo impedem duplicações.
 - O foco inicial e o foco após avanço/retorno vão ao título da etapa, sem abrir o teclado automaticamente. Escape/Cancelar oferecem descarte explícito quando há alterações. Foco preso, retorno ao acionador, ações fixas, safe area e movimento reduzido reutilizam a biblioteca Mobile First.
+
+## Responder a solicitações recebidas
+
+- O destinatário profissional pode consultar o pedido, aceitar ou recusar enquanto ele aguarda profissional. Cards e detalhes mostram troca simples/mútua, participantes, horários, duração e ambos os movimentos quando houver contrapartida.
+- ShiftSwapResponse centraliza os impedimentos da resposta: status, atribuição/situação dos dois plantões, setor/categoria e cota do destinatário no mês de criação do pedido. Sobreposição e dobra são avisos calculados por ShiftCoverage/ShiftPeriod e não mudam os critérios de aprovação da gerência.
+- Aceitar encaminha à gerência, sem transferir plantões nem consumir cota. Recusar encerra o pedido no estado terminal Rejeitada, identificado por novo evento Recusa do profissional; o motivo é opcional. Nenhuma recusa ou motivo é fabricado para registros antigos.
+- A Action compartilhada bloqueia participantes, plantões em ordem de ID e pedido, relê autorização/status e compara a revisão. Uma resposta simultânea não sobrescreve a outra. Falhas não produzem comprovantes nem eventos de sucesso.
+- Detalhes e confirmação nunca ficam ativos juntos. Cancelar retorna aos detalhes; fechar devolve foco ao acionador. Após resposta, a fila, contador e notificações se atualizam via Livewire; foco vai à lista restante ou ao título da página.
+- Falha de conexão preserva revisão e motivo, não presume sucesso e oferece Atualizar detalhes. Se o servidor já respondeu, a atualização mostra o estado atual e impede novo envio. Históricos/notificações anteriores e comprovantes mantêm seus dados.

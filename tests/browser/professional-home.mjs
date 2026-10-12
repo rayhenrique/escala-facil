@@ -16,6 +16,7 @@ try {
   page.on('pageerror', e => report.errors.push(e.message));
   page.on('console', m => {if (m.type() === 'error' || /multiple instances/.test(m.text())) report.errors.push(m.text());});
   await page.goto(origin + '/login');
+  await page.waitForLoadState('networkidle');
   await page.locator('#email').fill(process.env.PROFESSIONAL_HOME_EMAIL);
   await page.locator('#password').fill(process.env.PROFESSIONAL_HOME_PASSWORD);
   await page.getByRole('button', {name: 'Entrar', exact: true}).click();
@@ -40,6 +41,7 @@ try {
    const dialog = page.getByRole('dialog', {name: 'Detalhes do seu plantão', exact: true});
    await dialog.waitFor({state: 'visible'});
    assert.equal(await dialog.getAttribute('aria-modal'), 'true');
+   await page.waitForFunction(() => [...document.querySelectorAll('[role=dialog]')].some(el => el.offsetParent !== null && el.contains(document.activeElement)));
    for (let i = 0; i < 6; i++) {await page.keyboard.press('Tab'); assert(await dialog.evaluate(el => el.contains(document.activeElement)));}
    await page.keyboard.press('Escape'); await dialog.waitFor({state: 'detached'});
    await page.waitForFunction(() => document.activeElement?.id === 'professional-next-details');
@@ -61,11 +63,15 @@ try {
      await pagination.getByRole('button', {name: 'Anterior', exact: true}).click();
      await page.waitForFunction(() => document.querySelector('section[aria-labelledby="incoming-title"] nav')?.textContent.includes('Página 1'));
     }
-    await received.getByRole('button', {name: 'Aceitar e enviar à gerência', exact: true}).first().click();
+    await received.getByRole('button', {name: 'Aceitar', exact: true}).first().click();
     const confirmation = page.getByRole('alertdialog', {name: 'Aceitar cobertura deste plantão?', exact: true});
     await confirmation.waitFor({state: 'visible'});
     await confirmation.getByRole('button', {name: 'Voltar e revisar', exact: true}).click();
     await confirmation.waitFor({state: 'detached'});
+    const responseDetails = page.getByRole('dialog', {name: 'Detalhes do pedido recebido', exact: true});
+    await responseDetails.waitFor({state: 'visible'});
+    await responseDetails.getByRole('button', {name: 'Fechar', exact: true}).click();
+    await responseDetails.waitFor({state: 'detached'});
    }
    const before = await overview.innerText();
    await page.locator('#month').fill('2026-09');

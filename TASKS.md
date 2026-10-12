@@ -290,3 +290,5 @@
 - [x] 1.39.0: agenda móvel do calendário por semana, mês e lista, detalhes autorizados, paginação, preservação do desktop e testes de turnos/isolamento.
 
 - [x] v1.40.0 — Solicitação de troca guiada: cinco etapas, busca e paginação de colegas/contrapartidas, revisão dos dois movimentos e confirmação protegida; testes de regras, concorrência e interface mobile.
+
+- [x] v1.41.0 — Cards de solicitações recebidas, detalhes responsivos, aceite/recusa com confirmação, estado revalidado e eventos profissionais distintos; testes de permissões, concorrência e falha de conexão.

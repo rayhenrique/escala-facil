@@ -1,4 +1,5 @@
 @props([
+    'requestErrorMessage' => 'Não foi possível concluir a solicitação. Confira os dados e tente novamente.',
     'show' => false,
     'id',
     'title',
@@ -9,7 +10,7 @@
     'trapFocus' => true,
 ])
 
-<x-action-modal :show="$show" :id="$id" :title="$title" :close-action="$closeAction" role="alertdialog" :busy-action="$busyAction" :restore-focus="$busyAction === null" initial-focus="[data-confirm-cancel]" class="confirmation-overlay">
+<x-action-modal :request-error-message="$requestErrorMessage" :show="$show" :id="$id" :title="$title" :close-action="$closeAction" role="alertdialog" :busy-action="$busyAction" :restore-focus="$busyAction === null" initial-focus="[data-confirm-cancel]" class="confirmation-overlay">
     <x-slot:heading>
         <div class="flex items-start gap-4">
             <span class="confirmation-icon confirmation-icon-{{ $tone }}" aria-hidden="true">
