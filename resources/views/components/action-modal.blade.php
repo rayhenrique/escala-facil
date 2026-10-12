@@ -3,24 +3,30 @@
     'show' => false, 'id', 'title', 'eyebrow' => null, 'closeAction' => null, 'clientState' => null, 'closeEvent' => null,
     'submitAction' => null, 'role' => 'dialog', 'maxWidth' => 'lg',
     'trackChanges' => false, 'initialFocus' => null, 'returnFocus' => null,
-    'restoreFocus' => true, 'busyAction' => null, 'fitViewport' => false,
+    'restoreFocus' => true, 'busyAction' => null, 'fitViewport' => false, 'inlineDesktop' => false,
 ])
 @php
     if ($clientState !== null && ! preg_match('/^[a-zA-Z][a-zA-Z0-9_]*$/', $clientState)) throw new InvalidArgumentException('Estado local da janela inválido.');
-    $width = ['sm' => 'max-w-sm', 'md' => 'max-w-md', 'lg' => 'max-w-lg', 'xl' => 'max-w-xl', '2xl' => 'max-w-2xl'][$maxWidth] ?? 'max-w-lg';
+    $width = ['sm' => 'max-w-sm', 'md' => 'max-w-md', 'lg' => 'max-w-lg', 'xl' => 'max-w-xl', '2xl' => 'max-w-2xl', '4xl' => 'max-w-4xl'][$maxWidth] ?? 'max-w-lg';
 @endphp
 @if ($show)
-    <div {{ $attributes->class(['modal-overlay']) }}
+    <div {{ $attributes->class(['modal-overlay', 'filter-dialog-inline' => $inlineDesktop]) }}
         x-data="actionDialog({ close: () => {{ $closeEvent ? '$dispatch(' : '$wire.call(' }}@js($closeEvent ?? $closeAction)), active: {{ $clientState ? '() => '.$clientState : 'null' }}, trackChanges: @js($trackChanges), initialFocus: @js($initialFocus), returnFocus: @js($returnFocus), restoreFocus: @js($restoreFocus), fitViewport: @js($fitViewport) })"
-        x-trap.inert.noscroll.noautofocus.noreturn="{{ $clientState ?? 'true' }}"
-        @if ($clientState) x-show="{{ $clientState }}" x-cloak @endif
-        @keydown.escape.stop.prevent="requestClose()" @input="changed()" @change="changed()"
+        x-trap.inert.noscroll.noautofocus.noreturn="{{ $clientState ?? 'true' }}{{ $inlineDesktop ? ' && filterMobile' : '' }}"
+        @if ($clientState) x-show="{{ $clientState }}{{ $inlineDesktop ? ' || !filterMobile' : '' }}" x-cloak @endif
+        @if ($inlineDesktop) @keydown.escape="if (filterMobile) { $event.stopPropagation(); $event.preventDefault(); requestClose(); }"
+        @else @keydown.escape.stop.prevent="requestClose()" @endif
+        @input="changed()" @change="changed()"
         @ui-dialog-busy="busy = $event.detail"
         @if ($busyAction) data-decision-component="{{ $this->getId() }}" x-on:swap-decision-busy.window="busy = $event.detail" @endif
-        @if (! $busyAction && isset($this) && $this instanceof \Livewire\Component) data-ui-dialog-component="{{ $this->getId() }}" @endif
+        @if (! $busyAction && isset($this) && $this instanceof \Livewire\Component)
+            @if ($inlineDesktop) :data-ui-dialog-component="{{ $clientState }} && filterMobile ? @js($this->getId()) : null"
+            @else data-ui-dialog-component="{{ $this->getId() }}" @endif
+        @endif
     >
         <div class="modal-backdrop" aria-hidden="true" @click="requestClose()"></div>
         <section id="{{ $id }}" class="modal-dialog {{ $width }} {{ $role === 'alertdialog' ? 'confirmation-dialog' : '' }}" role="{{ $role }}" aria-modal="true" aria-labelledby="{{ $id }}-title" aria-describedby="{{ $id }}-description" :aria-busy="busy.toString()"
+            @if ($inlineDesktop) :role="filterMobile ? 'dialog' : 'region'" :aria-modal="filterMobile ? 'true' : null" @endif
             >
             @if ($submitAction)
                 <form class="modal-form" method="post" wire:submit="{{ $submitAction }}" novalidate>

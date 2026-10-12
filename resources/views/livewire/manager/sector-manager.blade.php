@@ -8,16 +8,18 @@
         <div class="grid w-full gap-3 sm:w-auto sm:grid-cols-[18rem_auto] sm:items-end">
             <div>
                 <label for="sector-search" class="field-label">Buscar setor</label>
-                <input wire:model.live.debounce.300ms="search" id="sector-search" type="search" class="field-input" placeholder="Digite o nome">
+                <input wire:model.live.debounce.300ms="search" id="sector-search" type="search" maxlength="100" autocomplete="off" enterkeyhint="search" class="field-input" placeholder="Digite o nome">
             </div>
             <x-action-button variant="primary" wire:click="openCreateModal" class="w-full sm:w-auto">Adicionar setor</x-action-button>
         </div>
     </div>
 
+    <x-filter-summary focus-id="sector-search" :filters="['search' => ['label' => 'Pesquisa', 'value' => $search]]" />
+
     <x-flash-notifications />
 
     <x-bottom-sheet :show="$showFormModal" id="sector-form" :title="$editingSectorId ? 'Editar setor' : 'Adicionar setor'" :eyebrow="$editingSectorId ? 'Edição' : 'Novo cadastro'"
-        close-action="closeFormModal" submit-action="save" max-width="xl" track-changes initial-focus="#sector-name" return-focus="#sector-page-title">
+        close-action="closeFormModal" submit-action="save" max-width="xl" track-changes fit-viewport initial-focus="#sector-name" return-focus="#sector-page-title">
         <label for="sector-name" class="field-label">Nome do setor</label>
         <input x-ref="firstField" wire:model="name" id="sector-name" type="text" class="field-input" maxlength="255" autocomplete="off" placeholder="Ex.: Unidade de Terapia Intensiva" @error('name') aria-invalid="true" aria-describedby="sector-name-error" @enderror>
         @error('name') <p id="sector-name-error" class="field-error">{{ $message }}</p> @enderror

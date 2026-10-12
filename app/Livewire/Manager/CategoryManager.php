@@ -40,6 +40,12 @@ class CategoryManager extends Component
         $this->resetPage();
     }
 
+    public function clearFilters(): void
+    {
+        $this->reset('search');
+        $this->resetPage();
+    }
+
     public function save(): void
     {
         $category = $this->editingCategoryId

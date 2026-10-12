@@ -1,3 +1,5 @@
+import { mobileFilterPanel } from './mobile-filters.js';
+
 // Shared interaction only. Persistence and permissions remain in Livewire/Actions.
 export function actionDialog(options = {}) {
     return {
@@ -167,6 +169,7 @@ export function registerMobileUi(Livewire, Alpine) {
     Alpine.data('actionDialog', actionDialog);
     Alpine.data('toastMessage', toastMessage);
     Alpine.data('mobileNavigation', mobileNavigation);
+    Alpine.data('mobileFilterPanel', mobileFilterPanel);
     const pending = new WeakMap();
     Livewire.interceptMessage(({ message, onSend, onFinish, onSuccess, onFailure }) => {
         const dialog = () => message.component.el.querySelector('[data-ui-dialog-component]');

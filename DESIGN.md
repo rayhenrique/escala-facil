@@ -325,3 +325,10 @@ Os cards expansíveis existentes permanecem independentes e recolhidos inicialme
 A oferta de avisos do aparelho fica em uma orientação opcional recolhida, preservando a prioridade da lista. O ícone histórico permanece junto ao texto em telas estreitas. Controles têm altura mínima de 44 px, textos legíveis e ações documentais em largura adaptável no celular. Marcar uma notificação como lida reutiliza o método existente, bloqueia cliques enquanto aguarda resposta e retorna o foco a Ver detalhes após confirmação. Falhas preservam o painel e oferecem orientação; não indicam leitura confirmada. O título da Central recebe foco de retorno se o acionador da leitura em massa deixar de existir. Transições conservam movimento reduzido, e toasts e conteúdo usam as áreas seguras e o espaço da navegação inferior já existentes.
 
 Paginação, autenticação, consulta em lote e comprovantes permanecem sob os componentes e serviços anteriores. Expandir e renderizar não alteram o banco. Somente ações explícitas de leitura alteram read_at; os dados históricos permanecem intactos.
+
+
+## Formulários e filtros mobile — 1.45.0
+
+Os filtros complexos de Escalas, Trocas e Relatórios usam `filter-panel`, uma variante da janela canônica `action-modal`: bottom sheet até 1023 px e painel inline no desktop. A única instância dos controles conserva IDs e rótulos; desktop mantém filtro imediato. Chips reutilizam `filter-chip`, com texto e remoção explícita. Pesquisas simples de Usuários, Setores e Categorias continuam inline, com resumo e limpeza compartilhados.
+
+Campos mobile têm 16 px, e ações têm pelo menos 44 px. Os formulários de plantão, usuário, setor e categoria reutilizam a janela responsiva, corpo rolável, rodapé separado e opção de acompanhar a área visual do teclado. Seletores curtos e datas permanecem nativos. `searchable-select` acrescenta busca no servidor antes do select nativo de profissionais, sem transformar texto em ID nem criar um listbox próprio. Paleta, tipografia e composição desktop permanecem sob os tokens existentes.

@@ -83,6 +83,8 @@ class ShiftManager extends Component
 
     public string $userId = '';
 
+    public string $professionalSearch = '';
+
     public string $status = 'scheduled';
 
     public bool $showImportModal = false;
@@ -134,7 +136,15 @@ class ShiftManager extends Component
             ->where('role', UserRole::Professional)
             ->when($this->categoryId !== '', fn ($query) => $query->where('category_id', $this->categoryId))
             ->when($this->sectorId !== '', fn ($query) => $query->where('sector_id', $this->sectorId))
+            ->when(trim($this->professionalSearch) !== '', fn ($query) => $query->where(function ($query): void {
+                OperationalFilters::name($query, mb_substr($this->professionalSearch, 0, 100));
+                if (ctype_digit($this->userId)) {
+                    $query->orWhereKey($this->userId);
+                }
+            }))
+            ->when(ctype_digit($this->userId), fn ($query) => $query->orderByRaw('CASE WHEN id = ? THEN 0 ELSE 1 END', [$this->userId]))
             ->orderBy('name')
+            ->limit(50)
             ->get();
     }
 
@@ -238,6 +248,7 @@ class ShiftManager extends Component
         $this->sectorId = (string) $shift->sector_id;
         $this->categoryId = (string) $shift->category_id;
         $this->userId = $shift->user_id ? (string) $shift->user_id : '';
+        $this->professionalSearch = '';
         $this->status = $shift->status->value;
         $this->showFormModal = true;
         $this->shiftPreview = null;
@@ -400,7 +411,7 @@ class ShiftManager extends Component
 
     public function resetForm(): void
     {
-        $this->reset(['editingShiftId', 'editingShiftSnapshot', 'shiftPreview', 'pendingDeleteId', 'pendingDeleteLabel', 'showFormModal', 'sectorId', 'categoryId', 'userId']);
+        $this->reset(['editingShiftId', 'editingShiftSnapshot', 'shiftPreview', 'pendingDeleteId', 'pendingDeleteLabel', 'showFormModal', 'sectorId', 'categoryId', 'userId', 'professionalSearch']);
         $this->date = today()->addDay()->format('Y-m-d');
         $this->startTime = '07:00';
         $this->endTime = '19:00';

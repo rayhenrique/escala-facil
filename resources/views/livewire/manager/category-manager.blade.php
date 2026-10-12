@@ -8,40 +8,31 @@
         <div class="grid w-full gap-3 sm:w-auto sm:grid-cols-[18rem_auto] sm:items-end">
             <div>
                 <label for="category-search" class="field-label">Buscar categoria</label>
-                <input wire:model.live.debounce.300ms="search" id="category-search" type="search" class="field-input" placeholder="Digite o nome">
+                <input wire:model.live.debounce.300ms="search" id="category-search" type="search" maxlength="100" autocomplete="off" enterkeyhint="search" class="field-input" placeholder="Digite o nome">
             </div>
             <button type="button" wire:click="openCreateModal" class="button-primary w-full sm:w-auto">Adicionar categoria</button>
         </div>
     </div>
 
+    <x-filter-summary focus-id="category-search" :filters="['search' => ['label' => 'Pesquisa', 'value' => $search]]" />
+
     <x-flash-notifications />
 
     @if ($showFormModal)
-        <div class="modal-overlay" x-data x-init="$nextTick(() => $refs.firstField?.focus())" @keydown.escape.window="$wire.closeFormModal()">
-            <button type="button" wire:click="closeFormModal" class="modal-backdrop" aria-label="Fechar formulário de categoria"></button>
-            <form method="post" wire:submit="save" class="modal-dialog max-w-xl" role="dialog" aria-modal="true" aria-labelledby="category-form-title" novalidate>
-                @csrf
-                <header class="modal-header">
-                    <div>
-                        <p class="eyebrow">{{ $editingCategoryId ? 'Edição' : 'Novo cadastro' }}</p>
-                        <h2 id="category-form-title">{{ $editingCategoryId ? 'Editar categoria' : 'Adicionar categoria' }}</h2>
-                    </div>
-                    <button type="button" wire:click="closeFormModal" class="modal-close-button" aria-label="Fechar formulário"><x-nav-icon name="close" class="size-5" /></button>
-                </header>
-                <div class="modal-body">
+    <x-action-modal :show="$showFormModal" id="category-manager-form" :title="$editingCategoryId ? 'Editar categoria' : 'Adicionar categoria'" :eyebrow="$editingCategoryId ? 'Edição' : 'Novo cadastro'" close-action="closeFormModal" submit-action="save" max-width="xl" track-changes fit-viewport>
+                <div>
                     <label for="category-name" class="field-label">Nome da categoria</label>
                     <input x-ref="firstField" wire:model="name" id="category-name" type="text" class="field-input" maxlength="255" autocomplete="off" placeholder="Ex.: Médico Clínico" @error('name') aria-invalid="true" aria-describedby="category-name-error" @enderror>
                     @error('name') <p id="category-name-error" class="field-error">{{ $message }}</p> @enderror
                 </div>
-                <footer class="modal-footer">
-                    <button type="button" wire:click="closeFormModal" class="button-secondary w-full sm:w-auto">Cancelar</button>
+                <x-slot:actions>
+                    <button type="button" @click="requestClose()" class="button-secondary w-full sm:w-auto">Cancelar</button>
                     <button type="submit" class="button-primary w-full sm:w-auto" wire:loading.attr="disabled" wire:target="save">
                         <span wire:loading.remove wire:target="save">{{ $editingCategoryId ? 'Salvar alterações' : 'Criar categoria' }}</span>
                         <span wire:loading wire:target="save">Salvando…</span>
                     </button>
-                </footer>
-            </form>
-        </div>
+                </x-slot:actions>
+    </x-action-modal>
     @endif
 
     <section class="panel mt-8" aria-labelledby="category-list-title">

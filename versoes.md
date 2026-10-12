@@ -6,6 +6,12 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.45.0 — 12/10/2026
+
+### Formulários e filtros mais fáceis no celular
+
+- Melhoramos formulários e filtros para facilitar pesquisas e cadastros pelo celular.
+
 ## 1.44.0 — 12/10/2026
 
 ### Notificações mais práticas no celular

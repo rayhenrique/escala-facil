@@ -51,7 +51,7 @@ test('registers once and overlapping Livewire requests keep the dialog busy unti
  const events=[],hooks=[],data=[];
  let intercept;
  const livewire={interceptMessage:cb=>intercept=cb};const alpine={data:(name)=>data.push(name)};
- registerMobileUi(livewire,alpine);registerMobileUi(livewire,alpine);assert.deepEqual(data,['actionDialog','toastMessage','mobileNavigation']);
+ registerMobileUi(livewire,alpine);registerMobileUi(livewire,alpine);assert.deepEqual(data,['actionDialog','toastMessage','mobileNavigation','mobileFilterPanel']);
  const node={dispatchEvent:e=>events.push(e.detail)};
  const component={el:{querySelector:()=>node}};
  for(let i=0;i<2;i++) {

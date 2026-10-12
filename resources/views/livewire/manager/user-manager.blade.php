@@ -8,7 +8,7 @@
         <div class="grid w-full gap-4 sm:grid-cols-2 lg:w-auto lg:grid-cols-[18rem_12rem_auto] lg:items-end">
             <div class="sm:w-72">
                 <label for="user-search" class="field-label">Buscar usuário</label>
-                <input wire:model.live.debounce.300ms="search" id="user-search" type="search" class="field-input" placeholder="Nome ou e-mail">
+                <input wire:model.live.debounce.300ms="search" id="user-search" type="search" maxlength="100" autocomplete="off" enterkeyhint="search" class="field-input" placeholder="Nome ou e-mail">
             </div>
             <div class="sm:w-48">
                 <label for="role-filter" class="field-label">Filtrar por perfil</label>
@@ -26,26 +26,14 @@
         </div>
     </div>
 
+    <x-filter-summary focus-id="user-search" :filters="['search' => ['label' => 'Pesquisa', 'value' => $search], 'roleFilter' => ['label' => 'Perfil', 'value' => $roleFilter, 'display' => \App\Enums\UserRole::tryFrom($roleFilter)?->label() ?? $roleFilter]]" />
+
     <x-flash-notifications />
     @error('invitation')<p class="field-error mt-4" role="alert">{{ $message }}</p>@enderror
 
     @if ($showFormModal)
-        <div class="modal-overlay" x-data="{ busy: false }" @if ($invitationMode) data-decision-component="{{ $this->getId() }}" x-on:swap-decision-busy.window="busy = $event.detail" @endif x-trap.inert.noscroll.noreturn="true" x-init="$nextTick(() => $refs.firstField?.focus())" @keydown.escape.window="if (!busy) $wire.closeFormModal()">
-            <button type="button" wire:click="closeFormModal" :disabled="busy" class="modal-backdrop" aria-label="Fechar formulário de usuário"></button>
-            <section class="relative z-10 w-full max-w-4xl" role="dialog" aria-modal="true" aria-labelledby="user-form-title">
-            <form method="post" wire:submit="save" class="modal-dialog" novalidate>
-                @csrf
-                <header class="modal-header">
-                    <div>
-                        <p class="eyebrow">{{ $editingUserId ? 'Edição' : 'Novo cadastro' }}</p>
-                        <h2 id="user-form-title">{{ $invitationMode ? 'Convidar profissional' : ($editingUserId ? 'Editar usuário' : 'Adicionar usuário') }}</h2>
-                    </div>
-                    <button type="button" wire:click="closeFormModal" :disabled="busy" class="modal-close-button" aria-label="Fechar formulário">
-                        <x-nav-icon name="close" class="size-5" />
-                    </button>
-                </header>
-
-                <div class="modal-body grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+    <x-action-modal :show="$showFormModal" id="user-manager-form" :title="$invitationMode ? 'Convidar profissional' : ($editingUserId ? 'Editar usuário' : 'Adicionar usuário')" :eyebrow="$editingUserId ? 'Edição' : 'Novo cadastro'" close-action="closeFormModal" submit-action="save" max-width="4xl" track-changes fit-viewport>
+                <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
                     @if ($invitationMode)<p hidden data-decision-request-error tabindex="-1" role="alert" class="field-error col-span-full"></p>@endif
                     @if ($invitationMode)<p class="col-span-full text-sm text-muted">O profissional receberá um link para criar a própria senha. O acesso ficará pendente até a ativação.</p>@endif
                     <div>
@@ -100,16 +88,14 @@
                     @elseif ($pendingActivation)<p class="col-span-full text-sm text-muted">A senha será definida pelo profissional ao aceitar o convite. Alterar o e-mail invalida o link atual; reenvie o convite após salvar.</p>@endif
                 </div>
 
-                <footer class="modal-footer">
-                    <button type="button" wire:click="closeFormModal" :disabled="busy" class="button-secondary w-full sm:w-auto">Cancelar</button>
-                    <button type="submit" :disabled="busy" class="button-primary w-full sm:w-auto" wire:loading.attr="disabled" wire:target="save">
+                <x-slot:actions>
+                    <button type="button" @click="requestClose()" x-bind:disabled="busy" class="button-secondary w-full sm:w-auto">Cancelar</button>
+                    <button type="submit" x-bind:disabled="busy" class="button-primary w-full sm:w-auto" wire:loading.attr="disabled" wire:target="save">
                         <span wire:loading.remove wire:target="save">{{ $invitationMode ? 'Enviar convite' : ($editingUserId ? 'Salvar alterações' : 'Criar usuário') }}</span>
                         <span wire:loading wire:target="save">Salvando…</span>
                     </button>
-                </footer>
-            </form>
-            </section>
-        </div>
+                </x-slot:actions>
+    </x-action-modal>
     @endif
 
     <section class="panel mt-8" aria-labelledby="user-list-title">

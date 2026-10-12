@@ -316,3 +316,12 @@
 - [x] Controles de 44 px, legibilidade, carregamento e foco após leitura.
 - [x] PDF, impressão histórica, expansão independente, paginação e autorização preservados.
 - [x] Testes de situação atual/histórica, registros antigos, ausência de gravação no render e navegador mobile.
+
+
+## 1.45.0 — Formulários e filtros no celular
+
+- [x] Inspeção de Escalas, Trocas, Usuários, Setores, Categorias e Relatórios; reutilização da biblioteca existente.
+- [x] Filtros móveis em sheet, rascunho local, aplicar/limpar/cancelar, chips e URL/paginação preservadas.
+- [x] Busca limitada no banco com select nativo de profissionais, seleção e compatibilidade preservadas.
+- [x] Formulários responsivos, foco, validação, descarte explícito, áreas seguras e ações acima do teclado.
+- [x] Testes PHP, JavaScript e navegador para toque, teclado, validação, filtros combinados e isolamento.

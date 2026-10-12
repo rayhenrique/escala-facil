@@ -2,9 +2,18 @@
 
 return [
     // Versão do código instalado. APP_VERSION não pode sobrepor este registro.
-    'current' => '1.44.0',
+    'current' => '1.45.0',
 
     'releases' => [
+        [
+            'version' => '1.45.0',
+            'date' => '2026-10-12',
+            'title' => 'Formulários e filtros mais fáceis no celular',
+            'summary' => 'Melhoramos formulários e filtros para facilitar pesquisas e cadastros pelo celular.',
+            'highlights' => [
+                'Melhoramos formulários e filtros para facilitar pesquisas e cadastros pelo celular.',
+            ],
+        ],
         [
             'version' => '1.44.0',
             'date' => '2026-10-12',

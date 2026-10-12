@@ -84,6 +84,12 @@ class UserManager extends Component
         $this->resetPage();
     }
 
+    public function clearFilters(): void
+    {
+        $this->reset('search', 'roleFilter');
+        $this->resetPage();
+    }
+
     public function updatedRoleFilter(): void
     {
         $this->resetPage();

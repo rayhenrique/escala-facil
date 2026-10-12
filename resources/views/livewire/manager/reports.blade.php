@@ -138,14 +138,14 @@
     </div>
 
     {{-- Filtros do relatório --}}
-    <section class="panel mt-6" aria-label="Filtros do relatório">
+    <x-filter-panel id="report-filter-sheet" :fields="$isProfessional ? ['categoryId', 'searchProfessional', 'swapStatusFilter'] : ['sectorId', 'categoryId', 'searchProfessional', 'swapStatusFilter']" :labels="['sectorId' => 'Setor', 'categoryId' => 'Categoria', 'searchProfessional' => 'Profissional', 'swapStatusFilter' => 'Situação']">
         <div class="grid gap-4 sm:grid-cols-2">
             <div>
                 <label for="report-sector" class="field-label">Setor</label>
                 @if ($isProfessional)
                     <input type="text" id="report-sector" class="field-input bg-surface-muted text-muted font-medium cursor-not-allowed" value="{{ auth()->user()->sector?->name ?? 'Seu setor' }}" disabled readonly aria-label="Setor vinculado">
                 @else
-                    <select wire:model.live="sectorId" id="report-sector" class="field-input">
+                    <select x-model="draft.sectorId" data-filter-field="sectorId" @change="changeFilter('sectorId', $event)" id="report-sector" class="field-input">
                         <option value="">Todos os setores</option>
                         @foreach ($this->sectors as $sector)
                             <option value="{{ $sector->id }}">{{ $sector->name }}</option>
@@ -155,7 +155,7 @@
             </div>
             <div>
                 <label for="report-category" class="field-label">Categoria</label>
-                <select wire:model.live="categoryId" id="report-category" class="field-input">
+                <select x-model="draft.categoryId" data-filter-field="categoryId" @change="changeFilter('categoryId', $event)" id="report-category" class="field-input">
                     <option value="">Todas as categorias</option>
                     @foreach ($this->categories as $category)
                         <option value="{{ $category->id }}">{{ $category->name }}</option>
@@ -163,13 +163,11 @@
                 </select>
             </div>
         </div>
-        @if ($this->report['hasActiveFilters'] || $searchProfessional !== '' || $swapStatusFilter !== '')
-            <div class="mt-4 flex flex-wrap items-center gap-3">
-                <p class="text-sm text-muted">Exibindo dados com filtros ativos.</p>
-                <button type="button" wire:click="clearFilters" class="table-action">Limpar filtros</button>
-            </div>
-        @endif
-    </section>
+        <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:hidden">
+            <div><label for="report-mobile-professional" class="field-label">Profissional</label><input id="report-mobile-professional" type="search" maxlength="250" x-model="draft.searchProfessional" data-filter-field="searchProfessional" autocomplete="off" class="field-input" @error('searchProfessional') aria-invalid="true" aria-describedby="report-mobile-search-error" @enderror>@error('searchProfessional')<p id="report-mobile-search-error" class="field-error">{{ $message }}</p>@enderror</div>
+            <div><label for="report-mobile-status" class="field-label">Situação da troca</label><select id="report-mobile-status" x-model="draft.swapStatusFilter" data-filter-field="swapStatusFilter" class="field-input" @error('swapStatusFilter') aria-invalid="true" aria-describedby="report-mobile-status-error" @enderror><option value="">Todas as situações</option>@foreach (\App\Enums\ShiftSwapStatus::cases() as $status)<option value="{{ $status->value }}">{{ $status->label() }}</option>@endforeach</select>@error('swapStatusFilter')<p id="report-mobile-status-error" class="field-error">{{ $message }}</p>@enderror</div>
+        </div>
+    </x-filter-panel>
 
     {{-- SUBMÓDULO 1: Cobertura & Indicadores Gerais --}}
     @if ($tab === 'all' || $tab === 'coverage')
@@ -290,7 +288,7 @@
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
                     <span class="text-sm font-semibold text-muted">{{ $this->report['byProfessional']->total() }} profissional(is)</span>
-                    <input wire:model.live.debounce.350ms="searchProfessional" maxlength="250" type="search" placeholder="Filtrar por nome..." class="field-input min-h-10 text-xs sm:w-56" aria-label="Filtrar profissionais por nome" @error('searchProfessional') aria-invalid="true" aria-describedby="report-search-error" @enderror>
+                    <input wire:model.live.debounce.350ms="searchProfessional" maxlength="250" type="search" placeholder="Filtrar por nome..." class="field-input hidden lg:block lg:w-56" aria-label="Filtrar profissionais por nome" @error('searchProfessional') aria-invalid="true" aria-describedby="report-search-error" @enderror>
                     @error('searchProfessional')<p id="report-search-error" class="field-error">{{ $message }}</p>@enderror
                 </div>
             </div>
@@ -368,7 +366,7 @@
                 <div class="flex flex-wrap items-center gap-2">
                     <span class="text-sm font-semibold text-muted">{{ $this->report['swaps']->total() }} troca(s)</span>
                     @if ($tab === 'swaps' || $tab === 'all')
-                        <select wire:model.live="swapStatusFilter" @error('swapStatusFilter') aria-invalid="true" aria-describedby="report-status-error" @enderror class="field-input min-h-10 text-xs sm:w-48" aria-label="Filtrar trocas por situação">
+                        <select wire:model.live="swapStatusFilter" @error('swapStatusFilter') aria-invalid="true" aria-describedby="report-status-error" @enderror class="field-input hidden lg:block lg:w-48" aria-label="Filtrar trocas por situação">
                             <option value="">Todas as situações</option>
                             <option value="approved">Aprovadas</option>
                             <option value="pending_manager">Aguardando Gerência</option>

@@ -72,6 +72,7 @@
     .auth-description { @apply mt-4 max-w-sm text-sm leading-6 text-muted; }
     .field-label { @apply mb-2 block text-sm font-semibold text-ink; }
     .field-input { @apply block min-h-12 w-full rounded-lg border-line bg-white px-4 py-3 text-base text-ink placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/20; }
+    .filter-chip { @apply inline-flex min-h-11 max-w-full items-center gap-2 rounded-lg border border-line bg-white px-3 py-2 text-sm text-primary-strong hover:bg-primary-soft; overflow-wrap: anywhere; }
     .field-input[aria-invalid="true"] { @apply border-danger focus:border-danger focus:ring-danger/15; }
     .field-error { @apply mt-2 text-sm leading-5 text-danger; }
     .text-link { @apply text-sm font-semibold text-primary underline-offset-4 hover:text-primary-strong hover:underline; }
@@ -298,6 +299,12 @@
 }
 
 @media (min-width: 64rem) {
+    .filter-dialog-inline { position: static !important; height: auto !important; display: block !important; padding: 0; }
+    .filter-dialog-inline > .modal-backdrop { display: none; }
+    .filter-dialog-inline > .modal-dialog { max-width: none; max-height: none; overflow: visible; border: 1px solid var(--color-line); border-radius: .75rem; box-shadow: none; }
+    .filter-dialog-inline .modal-header { padding-bottom: 0; border: 0; }
+    .filter-dialog-inline .modal-header h2 { margin: 0; font-size: .875rem; }
+    .filter-dialog-inline .modal-close-button { display: none; }
     .mobile-navigation-space { padding-bottom: 0; }
     .auth-content { padding-top: clamp(2rem, 20svh, 12rem); padding-bottom: 2rem; }
     .app-sidebar { transform: translateX(0) !important; }
@@ -306,6 +313,12 @@
     .app-sidebar-collapsed .sidebar-user-block { display: none; }
     .app-sidebar-collapsed .sidebar-nav-link { justify-content: center; padding-inline: 0.75rem; }
     .app-sidebar-collapsed .sidebar-brand-row { padding-inline: 0.5rem; gap: 0.25rem; }
+}
+
+@media (max-width: 63.999rem) {
+    .field-input { font-size: 1rem; }
+    .button-primary, .button-secondary, .button-danger, .table-action, .modal-close-button { min-height: 44px; }
+    .modal-close-button { min-width: 44px; }
 }
 
 /* Acesso mantém foco e preenchimento legíveis em todos os formulários. */

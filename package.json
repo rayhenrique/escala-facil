@@ -3,6 +3,8 @@
     "private": true,
     "type": "module",
     "scripts": {
+        "test:mobile-forms:browser": "node tests/browser/mobile-forms.mjs",
+        "test:mobile-filters": "node --test tests/js/mobile-filters.test.mjs",
         "test:manager-decisions:browser": "node tests/browser/manager-mobile-decisions.mjs",
         "test:incoming-response:browser": "node tests/browser/incoming-swap-response.mjs",
         "test:guided-swap:browser": "node tests/browser/guided-swap-request.mjs",
