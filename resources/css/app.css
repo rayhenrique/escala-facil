@@ -277,7 +277,7 @@
     .release-highlights { @apply space-y-3; }
     .release-highlights li { @apply flex items-start gap-3 rounded-lg bg-canvas px-4 py-3 text-sm leading-6 text-ink; }
     .release-highlights li > span:first-child { @apply font-bold text-coverage; }
-    .notification-card { @apply min-w-0 rounded-xl border border-line bg-white p-4 sm:p-5; overflow-wrap: anywhere; }
+    .notification-card { @apply min-w-0 rounded-xl border border-line bg-white p-3 sm:p-5; overflow-wrap: anywhere; }
     .notification-card-unread { @apply border-primary bg-primary-soft/30; }
     .swap-receipt { @apply overflow-hidden rounded-xl border border-line bg-canvas; }
     .swap-receipt-heading { @apply flex flex-col gap-4 border-b border-line bg-white px-5 py-4 sm:flex-row sm:items-center sm:justify-between; }

@@ -16,13 +16,13 @@ try {
   const page=await context.newPage(); page.setDefaultTimeout(30000); page.setDefaultNavigationTimeout(60000);
   page.on('pageerror',e=>report.errors.push(e.message));
   page.on('console',m=>{if(m.type()==='error'||/multiple instances/.test(m.text())) report.errors.push(m.text());});
-  await page.goto(origin+'/login'); await page.locator('#email').fill(fixture.managerEmail);
+  await page.goto(origin+'/login',{waitUntil:'networkidle'}); await page.locator('#email').fill(fixture.managerEmails?.[width] ?? fixture.managerEmail);
   await page.locator('#password').fill(process.env.NOTIFICATION_RECEIPTS_QA_PASSWORD);
   await page.getByRole('button',{name:'Entrar',exact:true}).click(); await page.waitForURL('**/manager/dashboard');
   await page.goto(origin+'/notifications'); await page.waitForLoadState('networkidle');
   const announcement=page.getByRole('button',{name:'Entendi, continuar',exact:true});
   if(await announcement.isVisible()) {await announcement.click(); await announcement.waitFor({state:'detached'});}
-  if(out) await page.screenshot({path:out+`/compact-list-${width}.png`,fullPage:true});
+  if(out) await page.screenshot({path:out+`/compact-list-${width}.png`,fullPage:false});
   // Only the disposable fixture may be marked read; no swap decisions are performed.
   const seen=new Set(); let card;
   for(const number of [1,2]) {
@@ -34,9 +34,13 @@ try {
     assert.equal(await toggle.getAttribute('aria-expanded'),'false');
     const panel=item.locator('[data-notification-details]');
     assert(!(await panel.isVisible()));
+    assert.equal(await item.getByRole('button').count(),1);
+    assert.equal(await item.getByRole('link').count(),0);
+    assert(await toggle.evaluate(el=>el.getBoundingClientRect().height>=44));
     assert.equal(await toggle.getAttribute('aria-controls'),await panel.getAttribute('id'));
     await toggle.focus(); await toggle.press('Enter');
     await panel.waitFor({state:'visible'});
+    assert(await panel.getByRole('link',{name:'Abrir módulo',exact:true}).isVisible());
     assert.equal(await toggle.getAttribute('aria-expanded'),'true');
     assert.equal(await item.locator('[data-receipt-kind="historical"]').count(),1);
     assert.equal(await item.locator('[data-recorded-swap-status]').innerText(),'Aguardando gerência');
@@ -56,13 +60,18 @@ try {
     await card.locator('[data-notification-details]').waitFor({state:'hidden'});
     assert(await neighbor.locator('[data-notification-details]').isVisible());
     await card.locator('[aria-controls]').click();
+    await card.locator('[data-notification-details]').waitFor({state:'visible'});
     const read=await card.getByRole('button',{name:'Marcar como lida',exact:true}).count()
      ? card.getByRole('button',{name:'Marcar como lida',exact:true})
      : neighbor.getByRole('button',{name:'Marcar como lida',exact:true});
     if(await read.count()) {
-     const update=page.waitForResponse(r=>/\/livewire[^/]*\/update(?:\?|$)/.test(r.url())&&r.request().method()==='POST');
+     const readToggleId=await read.evaluate(el=>el.closest('[data-notification-swap]').querySelector('[aria-controls]').id);
+     const readOwner=page.locator('#'+readToggleId).locator('xpath=ancestor::article[@data-notification-swap][1]');
+     const update=page.waitForResponse(r=>/\/livewire[^/]*\/update(?:\?|$)/.test(r.url())&&r.request().method()==='POST'&&r.request().postData()?.includes('markAsRead'));
      await read.click(); const response=await update; assert.equal(response.status(),200); await response.finished();
      await read.waitFor({state:'detached'});
+     assert(await readOwner.getByRole('button',{name:'Notificação lida',exact:true}).isDisabled());
+     await page.waitForFunction(id=>document.activeElement?.id===id, readToggleId);
      assert(await card.locator('[data-notification-details]').isVisible());
      assert(await neighbor.locator('[data-notification-details]').isVisible());
     }
@@ -94,7 +103,18 @@ try {
     if(out) writeFileSync(out+'/historical-print.html',html);
     await page.locator('#receipt-print-iframe').evaluate(el=>el.remove());
     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
-    await card.getByRole('button',{name:'Recolher detalhes',exact:true}).click();
+    const collapse = card.getByRole('button',{name:'Recolher detalhes',exact:true});
+    await collapse.scrollIntoViewIfNeeded();
+    if(width<1024) {
+     const bar = page.getByRole('navigation',{name:'Navegação móvel principal'});
+     assert.equal(await bar.count(),1);
+     if(await bar.count()) {
+      const actionBox=await collapse.boundingBox(),barBox=await bar.boundingBox();
+      assert(actionBox.y+actionBox.height<=barBox.y+1);
+     }
+     assert(await card.locator('[data-notification-details]').evaluate(el=>parseFloat(getComputedStyle(el).transitionDuration)<=0.01));
+    }
+    await collapse.click();
     await card.locator('[data-notification-details]').waitFor({state:'hidden'});
     assert(await card.locator('[aria-controls]').evaluate(el=>el===document.activeElement));
     report.checks.push({width,phase:'compact-independent-toggle-read-current-history-pdf-print-keyboard-axe',passed:true});
@@ -112,7 +132,19 @@ try {
   const first=page.locator('[data-notification-swap]').first();
   await first.locator('[aria-controls]').click(); await first.locator('[data-notification-details]').waitFor({state:'visible'});
   await first.locator('[aria-controls]').click(); await first.locator('[data-notification-details]').waitFor({state:'hidden'});
-  report.checks.push({width,phase:'pagination-refresh',passed:true});
+  await page.getByRole('button',{name:'Marcar todas como lidas',exact:true}).click();
+  const allRead=page.locator('#mark-all-read'); await allRead.waitFor();
+  await allRead.getByRole('button',{name:'Cancelar',exact:true}).click(); await allRead.waitFor({state:'detached'});
+  await page.getByRole('button',{name:'Marcar todas como lidas',exact:true}).click(); await allRead.waitFor();
+  await allRead.getByRole('button',{name:'Confirmar leitura',exact:true}).click(); await allRead.waitFor({state:'detached'});
+  await page.waitForFunction(()=>document.activeElement?.id==='notifications-title');
+  assert.equal(await page.locator('.count-badge').first().innerText(),'0');
+  if(width<1024) {
+   const toast=await page.locator('.toast-region').boundingBox();
+   const bar=await page.getByRole('navigation',{name:'Navegação móvel principal',exact:true}).boundingBox();
+   assert(toast.y+toast.height<=bar.y);
+  }
+  report.checks.push({width,phase:'pagination-refresh-bulk-read-focus-toast',passed:true});
   await context.close();
  }
  assert.deepEqual(report.errors,[]);

@@ -8,9 +8,10 @@
     'tone' => 'danger',
     'busyAction' => null,
     'trapFocus' => true,
+    'returnFocus' => null,
 ])
 
-<x-action-modal :request-error-message="$requestErrorMessage" :show="$show" :id="$id" :title="$title" :close-action="$closeAction" role="alertdialog" :busy-action="$busyAction" :restore-focus="$busyAction === null" initial-focus="[data-confirm-cancel]" class="confirmation-overlay">
+<x-action-modal :request-error-message="$requestErrorMessage" :show="$show" :id="$id" :title="$title" :close-action="$closeAction" role="alertdialog" :busy-action="$busyAction" :restore-focus="$busyAction === null" :return-focus="$returnFocus" initial-focus="[data-confirm-cancel]" class="confirmation-overlay">
     <x-slot:heading>
         <div class="flex items-start gap-4">
             <span class="confirmation-icon confirmation-icon-{{ $tone }}" aria-hidden="true">

@@ -23,7 +23,7 @@
             @if ($swapId && $allowOfficialPdf)
                 <a
                     href="{{ route('swaps.receipt.pdf', $swapId) }}"
-                    class="button-secondary print:hidden ml-auto sm:ml-0 min-h-10 px-3 py-1.5 text-xs inline-flex items-center gap-1.5 text-ink hover:text-primary transition-colors"
+                    class="button-secondary print:hidden ml-auto sm:ml-0 min-h-11 w-full sm:w-auto px-3 py-2 text-sm inline-flex items-center gap-1.5 text-ink hover:text-primary transition-colors"
                     title="{{ $historical ? 'Baixar comprovante oficial atualizado em PDF' : 'Baixar comprovante oficial em PDF' }}"
                 >
                     <svg class="size-4 text-muted" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
@@ -36,7 +36,7 @@
             <button
                 type="button"
                 onclick="window.printSwapReceipt ? window.printSwapReceipt(this) : window.print()"
-                class="button-secondary print:hidden {{ ! $swapId ? 'ml-auto' : '' }} min-h-10 px-3 py-1.5 text-xs inline-flex items-center gap-1.5 text-ink hover:text-primary transition-colors"
+                class="button-secondary print:hidden {{ ! $swapId ? 'ml-auto' : '' }} min-h-11 w-full sm:w-auto px-3 py-2 text-sm inline-flex items-center gap-1.5 text-ink hover:text-primary transition-colors"
                 title="{{ $historical ? 'Imprimir apenas o registro histórico desta notificação' : 'Imprimir apenas este comprovante' }}"
             >
                 <svg class="size-4 text-muted" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">

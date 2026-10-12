@@ -4,7 +4,7 @@
 
 Sistema interno para gestão de escalas médicas, plantões, trocas e ausências em unidades de saúde. A aplicação centraliza a operação da gerência, permite que profissionais acompanhem a própria agenda e aplica as regras de compatibilidade e limite mensal em todas as decisões de troca.
 
-**Versão atual:** `1.43.0` — consulte o histórico completo em [`versoes.md`](versoes.md).
+**Versão atual:** `1.44.0` — consulte o histórico completo em [`versoes.md`](versoes.md).
 
 Desenvolvido por [KL Tecnologia](https://kltecnologia.com).
 
@@ -158,7 +158,7 @@ Crie um banco MySQL chamado `escala_facil` e ajuste o `.env`:
 APP_NAME="Escala Fácil"
 APP_URL=http://127.0.0.1:8000
 APP_TIMEZONE=America/Maceio
-APP_VERSION=1.43.0
+APP_VERSION=1.44.0
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR
 APP_FAKER_LOCALE=pt_BR
@@ -497,3 +497,5 @@ Resposta a solicitações recebidas: [fluxo e segurança](docs/incoming-swap-res
 A revisão gerencial de trocas apresenta situação atual e participantes em janelas adaptadas ao celular, com ações no rodapé. Consulte [o fluxo e a validação](docs/manager-mobile-decisions.md).
 
 A realocação assistida permite pesquisar os profissionais disponíveis pelo nome, revisar a alteração e confirmar em uma janela adaptada ao celular. Consulte [o fluxo e a validação](docs/mobile-shift-reallocation.md).
+
+A Central de Notificações mantém os cards compactos, com situação atual em destaque e ações de leitura, acesso ao módulo e comprovantes no painel de detalhes. Consulte [o comportamento e a validação](docs/mobile-notifications.md).

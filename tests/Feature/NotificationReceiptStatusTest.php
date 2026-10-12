@@ -233,6 +233,43 @@ class NotificationReceiptStatusTest extends TestCase
         }
     }
 
+    public function test_mobile_actions_are_inside_collapsed_details_and_reading_preserves_payload(): void
+    {
+        [$manager, , $substitute, $swap] = $this->pending();
+        app(AcceptShiftSwapAction::class)->execute($substitute, $swap->id);
+        $notification = $manager->notifications()->sole();
+        $payload = $notification->data;
+        $screen = Livewire::actingAs($manager)->test(NotificationsCenter::class);
+        $document = new \DOMDocument;
+        @$document->loadHTML('<?xml encoding="utf-8" ?>'.$screen->html());
+        $xpath = new \DOMXPath($document);
+        $cards = $xpath->query('//article[@data-notification-swap]');
+        $this->assertCount(1, $cards);
+        $card = $cards->item(0);
+        $this->assertSame(1, $xpath->query('.//button[not(ancestor::*[@data-notification-details])]', $card)->length);
+        $panel = $xpath->query('.//*[@data-notification-details]', $card)->item(0);
+        $this->assertTrue($panel->hasAttribute('x-cloak'));
+        $this->assertStringContainsString('Marcar como lida', $panel->textContent);
+        $this->assertStringContainsString('Abrir módulo', $panel->textContent);
+        $this->assertStringContainsString('PDF oficial atualizado', $panel->textContent);
+        $this->assertStringContainsString('Imprimir registro histórico', $panel->textContent);
+        $this->assertNull($notification->fresh()->read_at);
+        $screen->call('markAsRead', $notification->id)->assertSee('Notificação lida')->assertDispatched('notifications-updated');
+        $this->assertSame($payload, $notification->fresh()->data);
+    }
+
+    public function test_legacy_notification_without_receipt_keeps_module_and_read_controls_without_writes(): void
+    {
+        $manager = User::factory()->create(['role' => UserRole::Manager]);
+        $manager->notify(new ShiftSwapEventNotification(['title' => 'Aviso antigo', 'message' => 'Registro original sem comprovante.',
+            'target_url' => route('manager.dashboard')]));
+        $original = $manager->notifications()->sole()->getAttributes();
+        Livewire::actingAs($manager)->test(NotificationsCenter::class)->assertSee('Aviso antigo')
+            ->assertSee('Registro original sem comprovante.')->assertSee('Ver detalhes')->assertSee('Abrir módulo')
+            ->assertDontSee('Situação atual da troca:')->assertViewHas('swapStatuses', fn ($states) => $states === []);
+        $this->assertSame($original, $manager->notifications()->sole()->getAttributes());
+    }
+
     private function assertCurrentPdf(User $viewer, ShiftSwap $swap, ShiftSwapStatus $status): void
     {
         Pdf::shouldReceive('loadView')->once()->with('reports.swap-receipt', \Mockery::on(fn ($data) => $data['receipt']['shift_swap_id'] === $swap->id

@@ -308,3 +308,11 @@
 - [x] Cartão compacto, seleção/revisão/confirmar e rodapé acessível na janela compartilhada.
 - [x] Ajuste opcional à área visual do teclado, foco e proteção contra descarte acidental.
 - [x] Actions, autorização, locks, histórico e disponibilidade preservados; testes de fronteira, busca e interação.
+
+
+## 1.44.0 — Notificações no celular
+
+- [x] Cards compactos preservados, situação atual separada e ações secundárias nos detalhes.
+- [x] Controles de 44 px, legibilidade, carregamento e foco após leitura.
+- [x] PDF, impressão histórica, expansão independente, paginação e autorização preservados.
+- [x] Testes de situação atual/histórica, registros antigos, ausência de gravação no render e navegador mobile.

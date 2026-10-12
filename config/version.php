@@ -2,9 +2,18 @@
 
 return [
     // Versão do código instalado. APP_VERSION não pode sobrepor este registro.
-    'current' => '1.43.0',
+    'current' => '1.44.0',
 
     'releases' => [
+        [
+            'version' => '1.44.0',
+            'date' => '2026-10-12',
+            'title' => 'Notificações mais práticas no celular',
+            'summary' => 'As notificações ficaram mais práticas no celular, com acesso rápido aos detalhes e comprovantes.',
+            'highlights' => [
+                'As notificações ficaram mais práticas no celular, com acesso rápido aos detalhes e comprovantes.',
+            ],
+        ],
         [
             'version' => '1.43.0',
             'date' => '2026-10-12',
