@@ -248,3 +248,11 @@ A rota ativa, inclusive subrotas e blocos profissionais, recebe aria-current e d
 Os filtros do calendário ficam recolhidos inicialmente no celular, com botão rotulado, aria-expanded e indicação dos filtros ativos. No desktop permanecem visíveis. O feedback de carregamento fica oculto quando nenhuma consulta está em andamento.
 
 Tocar no corpo do cartão ou acionar Ver detalhes abre a mesma consulta autorizada; o botão fornece o equivalente por teclado. O atalho do próximo plantão move o foco até o botão do registro encontrado, inclusive quando a paginação muda.
+
+## Solicitação guiada de troca
+
+- A ação Solicitar troca abre cinco etapas na janela responsiva canônica: escolher plantão, modalidade simples/mútua, colega e contrapartida, revisão e confirmação. O plantão acionado vem selecionado na página correspondente; Voltar conserva os valores. Trocar o colega limpa a contrapartida, e trocar a modalidade elimina uma contrapartida incompatível.
+- Busca com debounce e paginação no banco restringem os colegas ao setor/categoria e à cota vigente. As listas de plantões não incluem registros com pedidos ativos como origem ou contrapartida. A seleção é revalidada no servidor.
+- A revisão identifica quem assume cada plantão, datas, término no dia seguinte, duração, setor/categoria e cotas. Conflitos reais e dobras são avisos informativos nesta solicitação, preservando as regras posteriores de aceite/aprovação; nenhuma regra de descanso nova é inferida.
+- O envio só produz feedback de sucesso e comprovante após a resposta da Action transacional. Payload alterado após revisão exige nova revisão; indisponibilidade ou cota atualizada mantêm as entradas e mostram o motivo. Locks e validação de pedido ativo impedem duplicações.
+- O foco inicial e o foco após avanço/retorno vão ao título da etapa, sem abrir o teclado automaticamente. Escape/Cancelar oferecem descarte explícito quando há alterações. Foco preso, retorno ao acionador, ações fixas, safe area e movimento reduzido reutilizam a biblioteca Mobile First.

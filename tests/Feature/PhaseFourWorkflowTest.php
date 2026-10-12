@@ -143,7 +143,7 @@ class PhaseFourWorkflowTest extends TestCase
             ->set('substituteId', (string) $substitute->id)
             ->call('reviewSwapRequest')
             ->assertSet('pendingConfirmation', 'request_swap')
-            ->assertSee('Enviar solicitação de troca?')
+            ->assertSee('Revise os detalhes')
             ->assertSee($substitute->name)
             ->call('confirmSwapRequest')
             ->assertHasNoErrors();
@@ -186,7 +186,7 @@ class PhaseFourWorkflowTest extends TestCase
 
         Livewire::actingAs($requester)
             ->test(MySchedule::class)
-            ->set('swapShiftId', $shift->id)
+            ->call('openSwap', $shift->id)
             ->set('substituteId', (string) $incompatible->id)
             ->call('requestSwap')
             ->assertHasErrors(['substitute_id']);

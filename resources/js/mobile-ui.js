@@ -2,9 +2,11 @@
 export function actionDialog(options = {}) {
     return {
         busy: false, dirty: false, discardRequested: false,
-        origin: null, initialValues: '',
+        origin: null, dialogRoot: null, initialValues: '',
         opened: false,
         init() {
+            // Alpine $el follows the event handler element; keep the dialog root stable.
+            this.dialogRoot = this.$el;
             if (options.active) {
                 this.$watch(() => options.active(), value => value ? this.begin() : this.restore());
                 if (options.active()) this.begin();
@@ -19,7 +21,7 @@ export function actionDialog(options = {}) {
             });
         },
         values() {
-            return JSON.stringify([...this.$el.querySelectorAll('input, select, textarea')]
+            return JSON.stringify([...this.dialogRoot.querySelectorAll('input, select, textarea')]
                 .filter(el => el.name !== '_token' && !el.disabled)
                 .map(el => [el.id || el.name, el.type === 'checkbox' || el.type === 'radio' ? el.checked : el.type === 'file' ? [...el.files].map(file => [file.name, file.size, file.lastModified]) : el.value]));
         },
@@ -27,7 +29,7 @@ export function actionDialog(options = {}) {
             if (options.trackChanges) this.dirty = this.values() !== this.initialValues;
         },
         focusInitial() {
-            const target = this.$el.querySelector(options.initialFocus || '[data-confirm-cancel], [x-ref="firstField"], [data-dialog-body]');
+            const target = this.dialogRoot.querySelector(options.initialFocus || '[data-confirm-cancel], [x-ref="firstField"], [data-dialog-body]');
             target?.focus({ preventScroll: true });
         },
         requestClose() {
@@ -53,7 +55,7 @@ export function actionDialog(options = {}) {
             const origin = this.origin;
             requestAnimationFrame(() => {
                 const active = document.activeElement;
-                if (active !== document.body && !this.$el.contains(active)) return;
+                if (active !== document.body && !this.dialogRoot.contains(active)) return;
                 const target = origin?.isConnected && origin !== document.body ? origin : (options.returnFocus && document.querySelector(options.returnFocus));
                 target?.focus({ preventScroll: true });
             });
@@ -159,7 +161,7 @@ export function registerMobileUi(Livewire, Alpine) {
             busy(count > 0);
         });
         onSuccess(({ onRender }) => onRender(() => requestAnimationFrame(() => {
-            const field = dialog()?.querySelector('[aria-invalid="true"]');
+            const field = dialog()?.querySelector('[aria-invalid="true"], [data-validation-error]');
             field?.scrollIntoView({ block: 'nearest' });
             field?.focus({ preventScroll: true });
         })));

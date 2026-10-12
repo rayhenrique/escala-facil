@@ -1,4 +1,4 @@
-<div class="professional-home-layout" x-data x-on:professional-form-opened.window="$nextTick(() => { const target = document.getElementById($event.detail.target); target?.focus(); target?.scrollIntoView({ block: 'start' }); })">
+<div class="professional-home-layout" x-data="{ swapOpener: '' }" x-on:professional-form-opened.window="$nextTick(() => { const target = document.getElementById($event.detail.target); target?.focus(); if ($event.detail.target !== 'swap-form-title') target?.scrollIntoView({ block: 'start' }); })">
     <div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
             <p class="eyebrow">Área profissional</p>
@@ -28,7 +28,7 @@
             <div class="mt-4 flex flex-wrap gap-2">
                 <x-action-button id="professional-next-details" wire:click="showShiftDetails({{ $nextShift->id }})" variant="secondary" target="showShiftDetails">Ver detalhes</x-action-button>
                 @if ($nextSwapReason === null)
-                    <x-action-button variant="primary" wire:click="openSwap({{ $nextShift->id }})" target="openSwap">Solicitar troca</x-action-button>
+                    <x-action-button variant="primary" wire:click="openSwap({{ $nextShift->id }})" target="openSwap" id="next-swap-open" x-on:click="swapOpener = 'next-swap-open'" x-bind:data-swap-return="swapOpener === 'next-swap-open' ? '' : null">Solicitar troca</x-action-button>
                 @endif
                 <a href="#schedule-title" class="button-secondary">Ver escala</a>
             </div>
@@ -92,38 +92,7 @@
 
     <x-professional.incoming-swaps :incoming-swaps="$incomingSwaps" :swap-limit-reached="$swapLimitReached" heading-id="incoming-desktop-title" class="hidden lg:block" />
 
-    @if ($swapShiftId)
-        <section class="panel mt-8 border-primary" aria-labelledby="swap-form-title">
-            <div class="section-heading"><div><p class="eyebrow">Solicitação de troca</p><h2 id="swap-form-title" tabindex="-1">Escolha um substituto elegível</h2></div><button type="button" wire:click="cancelAction" class="button-secondary w-full sm:w-auto">Cancelar</button></div>
-            <form method="post" wire:submit="reviewSwapRequest" class="mt-6 max-w-xl" novalidate>
-                @csrf
-                <label for="substitute" class="field-label">Profissional substituto</label>
-                <select wire:model.live="substituteId" id="substitute" class="field-input" @error('substitute_id') aria-invalid="true" aria-describedby="substitute-error" @enderror>
-                    <option value="">Selecione</option>
-                    @foreach ($this->eligibleSubstitutes as $professional)<option value="{{ $professional->id }}">{{ $professional->name }}</option>@endforeach
-                </select>
-                @error('substitute_id') <p id="substitute-error" class="field-error">{{ $message }}</p> @enderror
-
-                @if ($substituteId && $this->eligibleSubstituteShifts->isNotEmpty())
-                    <div class="mt-4">
-                        <label for="substitute-shift" class="field-label">Plantão de contrapartida <span class="font-normal text-muted">(opcional — troca de dias)</span></label>
-                        <select wire:model="substituteShiftId" id="substitute-shift" class="field-input" @error('substitute_shift_id') aria-invalid="true" aria-describedby="substitute-shift-error" @enderror>
-                            <option value="">Apenas cobertura (sem plantão de volta)</option>
-                            @foreach ($this->eligibleSubstituteShifts as $s)
-                                <option value="{{ $s->id }}">{{ $s->date->format('d/m/Y') }} · {{ $s->time_label }} ({{ $s->sector->name }})</option>
-                            @endforeach
-                        </select>
-                        <p class="mt-1 text-xs text-muted">Selecione para realizar uma troca mútua de dias com o colega.</p>
-                        @error('substitute_shift_id') <p id="substitute-shift-error" class="field-error">{{ $message }}</p> @enderror
-                    </div>
-                @endif
-
-                @error('shift_id') <p class="field-error">{{ $message }}</p> @enderror
-                @if ($this->eligibleSubstitutes->isEmpty())<p class="mt-3 text-sm text-muted">Não há profissionais elegíveis e disponíveis na sua categoria e setor.</p>@endif
-                <button type="submit" class="button-primary mt-5 inline-flex w-full sm:w-auto" @disabled($this->eligibleSubstitutes->isEmpty()) wire:loading.attr="disabled" wire:target="reviewSwapRequest">Revisar solicitação</button>
-            </form>
-        </section>
-    @endif
+    @include('livewire.professional.partials.swap-request-flow')
 
     @if ($absenceShiftId)
         <section class="panel mt-8 border-amber-300" aria-labelledby="absence-form-title">
@@ -206,7 +175,7 @@
                         <p class="mt-1 text-sm text-muted">{{ $shift->sector?->name ?? 'Setor não informado' }} · {{ $shift->category?->name ?? 'Categoria não informada' }}</p>
                         @if ($shift->date->isAfter(today()) && $shift->status === \App\Enums\ShiftStatus::Scheduled)
                             <div class="mt-5 flex flex-wrap gap-2">
-                                <button type="button" wire:click="openSwap({{ $shift->id }})" class="button-secondary" @disabled($hasActiveSwap || $swapLimitReached)>Solicitar troca</button>
+                                <button type="button" wire:click="openSwap({{ $shift->id }})" id="swap-open-{{ $shift->id }}" x-on:click="swapOpener = 'swap-open-{{ $shift->id }}'" x-bind:data-swap-return="swapOpener === 'swap-open-{{ $shift->id }}' ? '' : null" class="button-secondary" @disabled($hasActiveSwap || $swapLimitReached)>Solicitar troca</button>
                                 <button type="button" wire:click="openAbsence({{ $shift->id }})" class="table-action min-h-10">Informar ausência</button>
                             </div>
                             @if ($hasActiveSwap || $swapLimitReached)
@@ -275,10 +244,9 @@
         <x-slot:actions><x-action-button variant="secondary" wire:click="closeShiftDetails">Fechar</x-action-button></x-slot:actions>
     </x-bottom-sheet>
     <x-confirmation-modal
-        :show="$pendingConfirmation !== null"
+        :show="$pendingConfirmation !== null && $pendingConfirmation !== 'request_swap'"
         id="professional-action"
         :title="match ($pendingConfirmation) {
-            'request_swap' => 'Enviar solicitação de troca?',
             'accept_swap' => 'Aceitar cobertura deste plantão?',
             'absence' => 'Registrar ausência?',
             default => 'Confirmar ação?',
@@ -289,13 +257,7 @@
         @if ($confirmationSummary)
             <p><strong>{{ $confirmationSummary['shift'] }}</strong></p>
             <p>{{ $confirmationSummary['location'] }}</p>
-            @if ($pendingConfirmation === 'request_swap')
-                <p>Substituto: <strong>{{ $confirmationSummary['substitute'] }}</strong></p>
-                @if (! empty($confirmationSummary['counterpart']))
-                    <p class="mt-2 font-semibold text-coverage">Contrapartida: você assumirá o plantão do colega em {{ $confirmationSummary['counterpart'] }}.</p>
-                @endif
-                <p>O profissional receberá uma notificação para aceitar ou recusar a troca.</p>
-            @elseif ($pendingConfirmation === 'accept_swap')
+            @if ($pendingConfirmation === 'accept_swap')
                 <p>Solicitado por: <strong>{{ $confirmationSummary['requester'] }}</strong></p>
                 @if (! empty($confirmationSummary['counterpart']))
                     <p class="mt-2 font-semibold text-coverage">Contrapartida: você cederá seu plantão de {{ $confirmationSummary['counterpart'] }} ao solicitante.</p>
@@ -311,9 +273,7 @@
         @endif
         <x-slot:actions>
             <button type="button" wire:click="cancelConfirmation" class="button-secondary w-full sm:w-auto" data-confirm-cancel>Voltar e revisar</button>
-            @if ($pendingConfirmation === 'request_swap')
-                <button type="button" wire:click="confirmSwapRequest" wire:loading.attr="disabled" wire:target="confirmSwapRequest" class="button-primary w-full sm:w-auto">Confirmar envio</button>
-            @elseif ($pendingConfirmation === 'accept_swap')
+            @if ($pendingConfirmation === 'accept_swap')
                 <button type="button" wire:click="confirmAcceptSwap" wire:loading.attr="disabled" wire:target="confirmAcceptSwap" class="button-primary w-full sm:w-auto">Confirmar aceite</button>
             @elseif ($pendingConfirmation === 'absence')
                 <button type="button" wire:click="confirmAbsence" wire:loading.attr="disabled" wire:target="confirmAbsence" class="button-danger w-full sm:w-auto">Confirmar ausência</button>

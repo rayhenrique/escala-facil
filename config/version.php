@@ -2,9 +2,18 @@
 
 return [
     // Versão do código instalado. APP_VERSION não pode sobrepor este registro.
-    'current' => '1.39.0',
+    'current' => '1.40.0',
 
     'releases' => [
+        [
+            'version' => '1.40.0',
+            'date' => '2026-10-11',
+            'title' => 'Solicitação de troca guiada',
+            'summary' => 'Solicitar uma troca ficou mais simples: escolha o plantão, selecione o colega e confirme os detalhes.',
+            'highlights' => [
+                'Solicitar uma troca ficou mais simples: escolha o plantão, selecione o colega e confirme os detalhes.',
+            ],
+        ],
         [
             'version' => '1.39.0',
             'date' => '2026-10-11',

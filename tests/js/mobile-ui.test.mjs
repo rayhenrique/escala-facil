@@ -108,3 +108,15 @@ test('dialog returns to explicit trigger when loading disabled it before initial
  ui.$nextTick=fn=>fn();ui.init();ui.destroy();
  assert.equal(events.at(-1),'fallback-focus');
 });
+
+
+test('child button handlers retain the dialog root for focus and dirty checks', () => {
+ const {ui, field, events} = dialogHarness();
+ ui.$el = {querySelector: () => null, querySelectorAll: () => [], contains: () => false};
+ field.value = 'Edited'; ui.changed(); ui.requestClose();
+ assert(ui.discardRequested);
+ ui.keepEditing();
+ assert.equal(events.at(-1), 'field-focus');
+ assert(ui.dirty);
+ assert.equal(ui.discardRequested, false);
+});

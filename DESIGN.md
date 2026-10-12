@@ -292,3 +292,7 @@ O próximo plantão aparece antes dos filtros mensais, com início, término, du
 No celular, a grade mensal dá lugar a cartões de plantão agrupados por data de início. Semana, Mês e Lista usam botões existentes, com estado pressionado; filtros e data ficam explícitos. Hoje, próximo plantão, troca realizada e necessidade de cobertura usam badges/texto, sem depender apenas de cor. Detalhes e ações autorizadas reutilizam bottom-sheet; os horários continuam definidos por ShiftPeriod. A grade e os cartões diários do desktop permanecem preservados.
 
 O painel móvel recolhe os campos de filtro para dar espaço à agenda; o botão de filtro mantém o rótulo explícito e o desktop mantém os campos abertos.
+
+## Solicitação de troca guiada
+
+A solicitação profissional usa o bottom sheet compartilhado amplo no celular e modal centralizado no desktop. Cinco etapas curtas (Plantão, Modalidade, Colega, Revisão, Confirmar) têm progresso textual, título focável e rodapé fixo. Colegas e contrapartidas usam opções nativas com busca e paginação; os cartões da revisão mostram os dois movimentos da permuta. Cotas e alertas usam texto explícito, sem sugerir aprovação automática.

@@ -23,7 +23,10 @@ use App\Support\ShiftCoverage;
 use App\Support\ShiftSwapReceipt;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
@@ -112,7 +115,20 @@ class MySchedule extends Component
         unset($this->detailShift);
     }
 
+    #[Locked]
     public ?int $swapShiftId = null;
+
+    #[Locked]
+    public int $swapStep = 1;
+
+    #[Locked]
+    public ?string $reviewedSwap = null;
+
+    public string $chosenShiftId = '';
+
+    public string $swapMode = 'simple';
+
+    public string $professionalSearch = '';
 
     public string $substituteId = '';
 
@@ -131,7 +147,7 @@ class MySchedule extends Component
 
     public ?int $pendingAcceptSwapId = null;
 
-    /** @var array<string, string|null>|null */
+    /** @var array<string, mixed>|null */
     public ?array $confirmationSummary = null;
 
     public function mount(): void
@@ -147,97 +163,161 @@ class MySchedule extends Component
     public function updatedSubstituteId(): void
     {
         $this->substituteShiftId = '';
+        $this->resetPage('counterpartPage');
+        $this->reviewedSwap = null;
+    }
+
+    private function availableShifts(int $userId): Builder
+    {
+        return Shift::query()->with(['sector', 'category'])->where('user_id', $userId)
+            ->whereDate('date', '>', today())->where('status', ShiftStatus::Scheduled)
+            ->whereNotExists(fn ($query) => $query->selectRaw('1')->from('shift_swaps')
+                ->where(fn ($query) => $query->whereColumn('shift_id', 'shifts.id')->orWhereColumn('substitute_shift_id', 'shifts.id'))
+                ->whereIn('status', [ShiftSwapStatus::PendingProfessional->value, ShiftSwapStatus::PendingManager->value, ShiftSwapStatus::Approved->value]))
+            ->orderBy('date')->orderBy('start_time')->orderBy('id');
     }
 
     #[Computed]
-    public function eligibleSubstituteShifts(): Collection
+    public function swapShift(): ?Shift
     {
-        if (! $this->swapShiftId || ! $this->substituteId) {
-            return new Collection;
-        }
-
-        $shift = Shift::query()
-            ->where('user_id', auth()->id())
-            ->find($this->swapShiftId);
-
-        if (! $shift) {
-            return new Collection;
-        }
-
-        return Shift::query()
-            ->with(['sector', 'category'])
-            ->where('user_id', $this->substituteId)
-            ->whereDate('date', '>', today())
-            ->where('status', ShiftStatus::Scheduled)
-            ->where('sector_id', $shift->sector_id)
-            ->where('category_id', $shift->category_id)
-            ->whereDoesntHave('swaps', fn ($query) => $query->whereIn('status', [
-                ShiftSwapStatus::PendingProfessional,
-                ShiftSwapStatus::PendingManager,
-                ShiftSwapStatus::Approved,
-            ]))
-            ->orderBy('date')
-            ->orderBy('start_time')
-            ->get();
+        return $this->swapShiftId ? Shift::query()->with(['sector', 'category'])
+            ->where('user_id', auth()->id())->findOrFail($this->swapShiftId) : null;
     }
 
     #[Computed]
-    public function eligibleSubstitutes(): Collection
+    public function selectableSwapShifts(): LengthAwarePaginator
     {
-        if (! $this->swapShiftId) {
-            return new Collection;
+        return $this->availableShifts(auth()->id())->paginate(10, ['*'], 'chooseShiftPage');
+    }
+
+    #[Computed]
+    public function eligibleSubstituteShifts(): LengthAwarePaginator
+    {
+        $shift = $this->swapShift;
+
+        return $this->availableShifts((int) $this->substituteId)
+            ->where('sector_id', $shift?->sector_id)->where('category_id', $shift?->category_id)
+            ->paginate(10, ['*'], 'counterpartPage');
+    }
+
+    #[Computed]
+    public function eligibleSubstitutes(): LengthAwarePaginator
+    {
+        $shift = $this->swapShift;
+
+        return User::query()->where('role', UserRole::Professional)->where('id', '!=', auth()->id())
+            ->where('category_id', $shift?->category_id)->where('sector_id', $shift?->sector_id)
+            ->when(trim($this->professionalSearch) !== '', fn ($query) => $query->where('name', 'like', '%'.mb_substr(trim($this->professionalSearch), 0, 100).'%'))
+            ->whereRaw('(select count(*) from shift_swaps where (requester_id = users.id or substitute_id = users.id) and status = ? and created_at >= ? and created_at < ?) < ?',
+                [ShiftSwapStatus::Approved->value, now()->startOfMonth(), now()->startOfMonth()->addMonth(), User::MONTHLY_SWAP_LIMIT])
+            ->orderBy('name')->orderBy('id')->paginate(10, ['*'], 'professionalPage');
+    }
+
+    public function updatedProfessionalSearch(): void
+    {
+        $this->resetPage('professionalPage');
+    }
+
+    public function updatedSwapMode(): void
+    {
+        $this->substituteShiftId = '';
+        $this->cancelConfirmation();
+        $this->reviewedSwap = null;
+    }
+
+    public function previousSwapStep(): void
+    {
+        $this->swapStep = max(1, $this->swapStep - 1);
+        $this->cancelConfirmation();
+        $this->reviewedSwap = null;
+        $this->resetValidation();
+        $this->dispatch('swap-step-changed');
+    }
+
+    public function nextSwapStep(): void
+    {
+        abort_unless($this->swapShiftId !== null, 404);
+        $this->authorizeSwapRequest();
+        $this->resetValidation();
+        if ($this->swapStep === 1) {
+            $this->validate(['chosenShiftId' => ['required', 'integer']]);
+            $shift = $this->availableShifts(auth()->id())->find($this->chosenShiftId);
+            if (! $shift) {
+                $this->addError('shift_id', 'Este plantão não está disponível para troca. Escolha outro plantão futuro, agendado e sem pedido ativo.');
+
+                return;
+            }
+            if ($this->swapShiftId !== $shift->id) {
+                $this->substituteId = $this->substituteShiftId = '';
+            }
+            $this->swapShiftId = $shift->id;
+            unset($this->swapShift, $this->eligibleSubstitutes, $this->eligibleSubstituteShifts);
+        } elseif ($this->swapStep === 2) {
+            $this->validate(['swapMode' => ['required', 'in:simple,mutual']]);
+        } elseif ($this->swapStep === 3) {
+            $this->validate(['swapMode' => ['required', 'in:simple,mutual']]);
+            if ($this->swapMode === 'mutual' && $this->substituteShiftId === '') {
+                (new StoreShiftSwapRequest)->validatePayload($this->swapPayload(), auth()->user());
+                throw ValidationException::withMessages(['substitute_shift_id' => 'Escolha um plantão de contrapartida para a troca mútua.']);
+            }
+            if ($this->swapMode === 'simple') {
+                $this->substituteShiftId = '';
+            }
+            $this->reviewSwapRequest();
+        } elseif ($this->swapStep === 4) {
+            $this->reviewSwapRequest();
         }
+        $this->swapStep = min(5, $this->swapStep + 1);
+        $this->dispatch('swap-step-changed');
+    }
 
-        $user = auth()->user();
-        $shift = Shift::query()
-            ->where('user_id', $user->id)
-            ->find($this->swapShiftId);
-
-        if (! $shift) {
-            return new Collection;
+    private function authorizeSwapRequest(): void
+    {
+        if (auth()->user()->hasReachedSwapLimit(now()->month, now()->year)) {
+            throw ValidationException::withMessages(['shift_id' => 'Você atingiu o limite mensal de quatro trocas aprovadas.']);
         }
+        $this->authorize('create', ShiftSwap::class);
+    }
 
-        return User::query()
-            ->where('role', UserRole::Professional)
-            ->where('id', '!=', $user->id)
-            ->where('category_id', $shift->category_id)
-            ->where('sector_id', $shift->sector_id)
-            ->withCount([
-                'requestedSwaps as approved_requested_swaps_count' => fn ($query) => $query
-                    ->where('status', ShiftSwapStatus::Approved)
-                    ->whereMonth('created_at', now()->month)
-                    ->whereYear('created_at', now()->year),
-                'substituteSwaps as approved_substitute_swaps_count' => fn ($query) => $query
-                    ->where('status', ShiftSwapStatus::Approved)
-                    ->whereMonth('created_at', now()->month)
-                    ->whereYear('created_at', now()->year),
-            ])
-            ->orderBy('name')
-            ->get()
-            ->filter(fn (User $professional): bool => $professional->approved_requested_swaps_count + $professional->approved_substitute_swaps_count
-                < User::MONTHLY_SWAP_LIMIT
-            )
-            ->values();
+    private function swapPayload(): array
+    {
+        return ['shift_id' => $this->swapShiftId, 'substitute_id' => $this->substituteId,
+            'substitute_shift_id' => $this->substituteShiftId ?: null];
     }
 
     public function openSwap(int $shiftId): void
     {
         $shift = Shift::query()->where('user_id', auth()->id())->findOrFail($shiftId);
-        $this->authorize('create', ShiftSwap::class);
+        $this->authorizeSwapRequest();
 
         $this->swapShiftId = $shift->id;
+        $this->chosenShiftId = (string) $shift->id;
+        $this->swapStep = 1;
+        $this->swapMode = 'simple';
+        $this->professionalSearch = '';
+        $this->reviewedSwap = null;
+        $this->cancelConfirmation();
+        foreach (['chooseShiftPage', 'professionalPage', 'counterpartPage'] as $page) {
+            $this->resetPage($page);
+        }
+        $preceding = $this->availableShifts(auth()->id())->where(fn ($query) => $query
+            ->where('date', '<', $shift->getRawOriginal('date'))
+            ->orWhere(fn ($query) => $query->where('date', $shift->getRawOriginal('date'))->where('start_time', '<', $shift->start_time))
+            ->orWhere(fn ($query) => $query->where('date', $shift->getRawOriginal('date'))->where('start_time', $shift->start_time)->where('id', '<', $shift->id)))->count();
+        $this->setPage(intdiv($preceding, 10) + 1, 'chooseShiftPage');
         $this->substituteId = '';
         $this->substituteShiftId = '';
         $this->absenceShiftId = null;
         $this->resetValidation();
         unset($this->eligibleSubstitutes);
         unset($this->eligibleSubstituteShifts);
+        // The responsive dialog manages initial focus; the event remains available to integrations.
         $this->dispatch('professional-form-opened', target: 'swap-form-title');
     }
 
     public function requestSwap(CreateShiftSwapAction $action, ShiftSwapReceipt $receipts): void
     {
-        $this->authorize('create', ShiftSwap::class);
+        $this->authorizeSwapRequest();
         $shiftSwap = $action->execute(auth()->user(), [
             'shift_id' => $this->swapShiftId,
             'substitute_id' => $this->substituteId,
@@ -256,7 +336,7 @@ class MySchedule extends Component
 
     public function reviewSwapRequest(): void
     {
-        $this->authorize('create', ShiftSwap::class);
+        $this->authorizeSwapRequest();
         $validated = (new StoreShiftSwapRequest)->validatePayload([
             'shift_id' => $this->swapShiftId,
             'substitute_id' => $this->substituteId,
@@ -269,16 +349,53 @@ class MySchedule extends Component
             ? Shift::query()->with(['sector', 'category'])->find($validated['substitute_shift_id'])
             : null;
 
+        if ($this->swapStep < 3) {
+            $this->swapStep = 4;
+        }
+        $this->reviewedSwap = hash('sha256', json_encode($this->swapPayload()));
         $this->pendingConfirmation = 'request_swap';
         $this->confirmationSummary = $this->shiftSummary($shift) + [
             'substitute' => $substitute->name,
             'counterpart' => $counterpart ? $this->shiftSummary($counterpart)['shift'] : null,
+            'counterpart_location' => $counterpart ? $this->shiftSummary($counterpart)['location'] : null,
+            'requester' => auth()->user()->name,
+            'quota' => auth()->user()->approvedSwapCount(now()->month, now()->year).' de 4',
+            'substitute_quota' => $substitute->approvedSwapCount(now()->month, now()->year).' de 4',
+            'warnings' => $this->swapWarnings($shift, $substitute, $counterpart),
         ];
+    }
+
+    /** Informational only: acceptance and approval keep their existing validation. */
+    private function swapWarnings(Shift $shift, User $substitute, ?Shift $counterpart): array
+    {
+        $warnings = [];
+        foreach ([[$substitute, $shift], [auth()->user(), $counterpart]] as [$recipient, $candidate]) {
+            if (! $candidate) {
+                continue;
+            }
+            $pool = Shift::query()->where('user_id', $recipient->id)->where('status', ShiftStatus::Scheduled)
+                ->whereBetween('date', [$candidate->period()->start->subDay()->toDateString(), $candidate->period()->end->addDay()->endOfDay()])
+                ->whereNotIn('id', array_filter([$shift->id, $counterpart?->id]))->get();
+            foreach ($pool as $existing) {
+                if (! ShiftCoverage::findDoubleShiftIn(collect([$existing]), $recipient->id, $candidate)) {
+                    continue;
+                }
+                $kind = $candidate->period()->overlaps($existing->period()) ? 'Conflito de horários' : 'Dobra';
+                $warnings[] = $kind.': '.$recipient->name.' já tem o plantão #'.$existing->id.' em '.ShiftCoverage::doubleShiftLabel($existing).'. Revise a escolha; o aceite e a gerência revalidarão a disponibilidade.';
+            }
+        }
+
+        return $warnings;
     }
 
     public function confirmSwapRequest(CreateShiftSwapAction $action, ShiftSwapReceipt $receipts): void
     {
         abort_unless($this->pendingConfirmation === 'request_swap', 404);
+        if ($this->reviewedSwap !== hash('sha256', json_encode($this->swapPayload()))) {
+            $this->addError('shift_id', 'Os dados mudaram. Volte e revise os detalhes antes de confirmar.');
+
+            return;
+        }
         $this->requestSwap($action, $receipts);
     }
 

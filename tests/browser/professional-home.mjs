@@ -47,7 +47,7 @@ try {
    if (await request.isVisible()) {
     await request.click();
     await page.waitForFunction(() => document.activeElement?.id === 'swap-form-title');
-    await page.locator('section[aria-labelledby="swap-form-title"]').getByRole('button', {name: 'Cancelar', exact: true}).click();
+    await page.getByRole('dialog', {name: 'Solicitar troca', exact: true}).getByRole('button', {name: 'Cancelar', exact: true}).click();
     await page.locator('#swap-form-title').waitFor({state: 'detached'});
    }
    const received = page.locator('section[aria-labelledby="incoming-title"]');

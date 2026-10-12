@@ -27,10 +27,10 @@ try {
   await page.keyboard.press('Escape');await dialog.waitFor({state:'detached'});await page.waitForFunction(el=>el===document.activeElement,await open.elementHandle());
   assert(await page.evaluate(()=>document.documentElement.style.overflow!=='hidden'));
   await open.click();await field.waitFor();await field.fill('Não descartar silenciosamente');await field.press('Escape');
-  await page.getByText('Há alterações não salvas. Deseja descartá-las?',{exact:true}).waitFor({state:'visible'});
+  await dialog.getByText('Há alterações não salvas. Deseja descartá-las?',{exact:true}).waitFor({state:'visible'});
   assert(await page.getByRole('button',{name:'Continuar editando',exact:true}).evaluate(el=>el===document.activeElement));
   await page.getByRole('button',{name:'Continuar editando',exact:true}).click();assert.equal(await field.inputValue(),'Não descartar silenciosamente');
-  await page.locator('.modal-backdrop').click({position:{x:1,y:1}});
+  await dialog.locator('..').locator('.modal-backdrop').click({position:{x:1,y:1}});
   await page.getByRole('button',{name:'Descartar alterações',exact:true}).click();await dialog.waitFor({state:'detached'});
   await open.click();await field.waitFor();await field.fill('');await page.getByRole('button',{name:'Criar setor',exact:true}).click();
   await page.locator('#sector-name[aria-invalid="true"]').waitFor({state:'visible'});

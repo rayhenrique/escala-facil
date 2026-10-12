@@ -6,6 +6,12 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.40.0 — 11/10/2026
+
+### Solicitação de troca guiada
+
+- Solicitar uma troca ficou mais simples: escolha o plantão, selecione o colega e confirme os detalhes.
+
 ## 1.39.0 — 11/10/2026
 
 ### Calendário mais fácil no celular
