@@ -143,3 +143,14 @@ test('reversion shares busy protection, validation focus and cancellation return
     const cancel = h.message('cancelRevert'); h.show(false); cancel.finish();
     assert.equal(h.trigger.focused, true);
 });
+
+
+test('parallel requests keep the operational dialog busy until every response completes', () => {
+    const h = harness(); h.show(true);
+    const refresh = h.message('refreshSwapAnalysis');
+    const confirm = h.message('confirmDecision');
+    refresh.send(); confirm.send(); refresh.finish();
+    assert.equal(h.events.at(-1), true);
+    confirm.finish();
+    assert.equal(h.events.at(-1), false);
+});

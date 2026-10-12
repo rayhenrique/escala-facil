@@ -265,3 +265,12 @@ Tocar no corpo do cartão ou acionar Ver detalhes abre a mesma consulta autoriza
 - A Action compartilhada bloqueia participantes, plantões em ordem de ID e pedido, relê autorização/status e compara a revisão. Uma resposta simultânea não sobrescreve a outra. Falhas não produzem comprovantes nem eventos de sucesso.
 - Detalhes e confirmação nunca ficam ativos juntos. Cancelar retorna aos detalhes; fechar devolve foco ao acionador. Após resposta, a fila, contador e notificações se atualizam via Livewire; foco vai à lista restante ou ao título da página.
 - Falha de conexão preserva revisão e motivo, não presume sucesso e oferece Atualizar detalhes. Se o servidor já respondeu, a atualização mostra o estado atual e impede novo envio. Históricos/notificações anteriores e comprovantes mantêm seus dados.
+
+
+## Revisão gerencial de trocas no celular
+
+A análise usa a janela responsiva `action-modal`, com largura ampliada no desktop, corpo rolável e rodapé separado no celular. O cabeçalho de dados reutilizável mostra referência, situação atual, solicitante e substituto. A confirmação da aprovação destaca quem assume cada plantão, incluindo contrapartida; atribuições e cotas continuam disponíveis em uma conferência expansível. Alertas e bloqueios ficam visíveis no corpo.
+
+A rejeição exige a justificativa vigente. Escape, botão de fechar e fundo da janela pedem confirmação antes de descartar texto digitado. Voltar à análise e atualizar a revisão preservam a justificativa. A reversão apresenta situação atual e resultado esperado dos dois plantões; alterações posteriores continuam bloqueadas e encaminhadas para consulta administrativa separada. Apenas uma revisão fica aberta por vez.
+
+Foco, bloqueio de rolagem, altura da viewport, área segura e movimento reduzido pertencem à biblioteca compartilhada. Enquanto houver requisições em andamento, as ações ficam indisponíveis. Erros preservam a janela e o texto; somente a resposta bem-sucedida do servidor fecha a revisão e atualiza comprovantes e notificações. As Actions, Policies, locks e regras institucionais permanecem responsáveis por todas as decisões.

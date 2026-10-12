@@ -2,9 +2,18 @@
 
 return [
     // Versão do código instalado. APP_VERSION não pode sobrepor este registro.
-    'current' => '1.41.0',
+    'current' => '1.42.0',
 
     'releases' => [
+        [
+            'version' => '1.42.0',
+            'date' => '2026-10-11',
+            'title' => 'Revisão de trocas pelo celular',
+            'summary' => 'Gerentes agora podem analisar, aprovar e revisar trocas com mais clareza pelo celular.',
+            'highlights' => [
+                'Gerentes agora podem analisar, aprovar e revisar trocas com mais clareza pelo celular.',
+            ],
+        ],
         [
             'version' => '1.41.0',
             'date' => '2026-10-11',

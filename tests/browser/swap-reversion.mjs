@@ -17,7 +17,7 @@ try {
   const page=await context.newPage(); page.setDefaultTimeout(30000); page.setDefaultNavigationTimeout(60000);
   page.on('pageerror',e=>report.errors.push(e.message));
   page.on('console',m=>{if(m.type()==='error'||/multiple instances/.test(m.text())) report.errors.push(m.text())});
-  await page.goto(origin+'/login');
+  await page.goto(origin+'/login',{waitUntil:'networkidle'});
   await page.getByLabel('E-mail',{exact:true}).fill(fixtures.managerEmail ?? 'reversion-qa@example.test');
   await page.getByLabel('Senha',{exact:true}).fill(process.env.SWAP_REVERSION_QA_PASSWORD);
   await page.getByRole('button',{name:'Entrar',exact:true}).click(); await page.waitForURL('**/manager/dashboard');
@@ -26,7 +26,7 @@ try {
   const dialog=page.getByRole('alertdialog'); await dialog.waitFor();
   assert.match(await dialog.innerText(),/Situação atual → Situação após desfazer/);
   assert.match(await dialog.innerText(),/24h/);
-  assert.equal(await dialog.locator('dl').count(),2);
+  assert.equal(await dialog.locator('dl').count(),3);
   for(const item of await dialog.locator('dd').all()) assert.ok((await item.innerText()).trim());
   await dialog.getByRole('button',{name:'Confirmar desfazer',exact:true}).click();
   await dialog.locator('[aria-invalid="true"]').waitFor();
@@ -43,7 +43,7 @@ try {
   if(root) await page.screenshot({path:root+`/preview-${width}.png`,fullPage:true});
   // Tab focus stays in the modal; Escape and cancellation remain usable.
   for(let n=0;n<8;n++) {await page.keyboard.press('Tab'); assert(await page.evaluate(()=>!!document.activeElement?.closest('[role="alertdialog"]')));}
-  await page.keyboard.press('Escape'); await dialog.waitFor({state:'detached'});
+  await page.keyboard.press('Escape'); await dialog.getByRole('button',{name:'Descartar alterações'}).click(); await dialog.waitFor({state:'detached'});
   await page.waitForFunction(id=>document.activeElement?.getAttribute('wire:click')===`requestRevert(${id})`,fixtures.mutual.id,{timeout:15000});
   await page.locator(`button[wire\\:click="requestRevert(${fixtures.blocked.id})"]`).click(); await dialog.waitFor();
   assert.equal(await dialog.getByRole('button',{name:'Confirmar desfazer',exact:true}).count(),0);

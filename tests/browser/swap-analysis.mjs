@@ -40,12 +40,12 @@ try {
         await login(page);
         const open = page.locator('button[wire\\:click^="openSwapAnalysis"]').first();
         await open.click();
-        const dialog = page.getByRole('alertdialog');
+        const dialog = page.locator('#decide-swap');
         await dialog.waitFor();
         await audit(page);
         await page.waitForFunction(() => document.activeElement?.matches('[data-confirm-cancel]'));
         await page.keyboard.press('Shift+Tab');
-        assert.equal(await page.evaluate(() => document.activeElement?.closest('[role="alertdialog"]') !== null), true);
+        assert.equal(await page.evaluate(() => document.activeElement?.closest('#decide-swap') !== null), true);
         await page.keyboard.press('Tab');
         assert.equal(await page.evaluate(() => document.activeElement?.matches('[data-confirm-cancel]')), true);
         if (out) await page.screenshot({ path: `${out}/analysis-${width}.png` });
@@ -56,6 +56,7 @@ try {
         await dialog.locator('#rejection-reason').fill('Manter a cobertura original.');
         // Escape returns to the initiating control; no decision was made.
         await page.keyboard.press('Escape');
+        await dialog.getByRole('button', { name: 'Descartar alterações' }).click();
         await dialog.waitFor({ state: 'detached' });
         await page.waitForFunction(() => document.activeElement?.matches('button[wire\\:click^="openSwapAnalysis"]'));
         await open.click();
@@ -63,6 +64,7 @@ try {
         await dialog.getByRole('button', { name: 'Aprovar…', exact: true }).click();
         await audit(page);
         if (out) await page.screenshot({ path: `${out}/confirm-${width}.png` });
+        await dialog.getByRole('button', { name: 'Voltar à análise', exact: true }).click();
         await dialog.getByRole('button', { name: 'Fechar', exact: true }).click();
         await dialog.waitFor({ state: 'detached' });
         assert.deepEqual(errors, []);

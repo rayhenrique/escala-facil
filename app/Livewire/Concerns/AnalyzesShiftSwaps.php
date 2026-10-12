@@ -36,11 +36,22 @@ trait AnalyzesShiftSwaps
         if (method_exists($this, 'closeReallocation')) {
             $this->closeReallocation();
         }
+        if (method_exists($this, 'cancelRevert')) {
+            $this->cancelRevert();
+        }
         $this->cancelDecision();
         $this->pendingDecisionSummary = app(ShiftSwapAnalysis::class)->make($swap, auth()->user());
         $this->decisionSnapshot = $this->pendingDecisionSummary['fingerprint'];
         unset($this->pendingDecisionSummary['fingerprint']);
         $this->pendingDecisionSwapId = $id;
+    }
+
+    public function refreshSwapAnalysis(): void
+    {
+        abort_unless($this->pendingDecisionSwapId, 404);
+        $reason = $this->rejectionReason;
+        $this->openSwapAnalysis($this->pendingDecisionSwapId);
+        $this->rejectionReason = $reason;
     }
 
     public function requestDecision(int $shiftSwapId, string $decision): void

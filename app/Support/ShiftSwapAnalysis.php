@@ -46,6 +46,9 @@ class ShiftSwapAnalysis
         $userFields = ['id', 'name', 'role', 'sector_id', 'category_id', 'requires_activation'];
 
         return [
+            'status' => $swap->status->value,
+            'status_label' => $swap->status->label(),
+            'reference' => sprintf('TROCA-%06d', $swap->id),
             'shift' => $swap->shift?->period()->datedLabel() ?? 'Plantão #'.$swap->shift_id.' indisponível',
             'location' => ($swap->shift?->sector?->name ?? 'Setor indisponível').' · '.($swap->shift?->category?->name ?? 'Categoria indisponível'),
             'requester' => $swap->requester?->name ?? 'Solicitante indisponível',

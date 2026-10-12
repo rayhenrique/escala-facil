@@ -189,6 +189,39 @@ class DashboardSwapAnalysisTest extends TestCase
         $panel->set('pendingDecisionSwapId', $swap->id + 1);
     }
 
+    public function test_mobile_review_refresh_preserves_reason_and_requires_a_new_explicit_decision(): void
+    {
+        [$manager, $swap] = $this->pending(true);
+        $panel = Livewire::actingAs($manager)->test(Dashboard::class)
+            ->call('requestDecision', $swap->id, 'reject')
+            ->set('rejectionReason', 'Manter cobertura original.')
+            ->call('returnToSwapAnalysis')->call('refreshSwapAnalysis')
+            ->assertSet('rejectionReason', 'Manter cobertura original.')
+            ->assertSet('pendingDecision', null)
+            ->assertSee(sprintf('TROCA-%06d', $swap->id))
+            ->assertSee('Aguardando gerência');
+        $this->assertSame(ShiftSwapStatus::PendingManager, $swap->refresh()->status);
+        $this->assertDatabaseCount('notifications', 0);
+        $panel->call('requestDecision', $swap->id, 'reject')->call('confirmDecision')
+            ->assertHasNoErrors()->assertSet('pendingDecisionSwapId', null);
+        $this->assertSame($swap->requester_id, $swap->shift->refresh()->user_id);
+        $this->assertSame($swap->substitute_id, $swap->substituteShift->refresh()->user_id);
+    }
+
+    public function test_confirmation_presents_both_transfers_before_any_mutation(): void
+    {
+        [$manager, $swap] = $this->pending(true);
+        Livewire::actingAs($manager)->test(Dashboard::class)
+            ->call('requestDecision', $swap->id, 'approve')
+            ->assertSee('Quem assume cada plantão')
+            ->assertSee($swap->substitute->name.' assume')
+            ->assertSee($swap->requester->name.' assume')
+            ->assertSee('Conferir atribuições e limite mensal');
+        $this->assertSame($swap->requester_id, $swap->shift->refresh()->user_id);
+        $this->assertSame($swap->substitute_id, $swap->substituteShift->refresh()->user_id);
+        $this->assertDatabaseCount('notifications', 0);
+    }
+
     private function pending(bool $mutual = false): array
     {
         $manager = User::factory()->create(['role' => UserRole::Manager]);

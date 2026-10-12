@@ -300,3 +300,12 @@ A solicitação profissional usa o bottom sheet compartilhado amplo no celular e
 ## Respostas aos pedidos recebidos
 
 Cartões compactos identificam modalidade, solicitante, referência, período completo e setor/categoria. Ver detalhes abre o bottom sheet amplo compartilhado, com os dois plantões, cota e alertas. Aceitar e Recusar usam confirmações objetivas; a recusa tem motivo opcional. Bloqueios aparecem em texto danger, separados de avisos informativos. Somente uma janela fica ativa; ações fixas e foco de retorno seguem a biblioteca existente.
+
+
+## Revisão gerencial de trocas no celular
+
+A análise usa a janela responsiva `action-modal`, com largura ampliada no desktop, corpo rolável e rodapé separado no celular. O cabeçalho de dados reutilizável mostra referência, situação atual, solicitante e substituto. A confirmação da aprovação destaca quem assume cada plantão, incluindo contrapartida; atribuições e cotas continuam disponíveis em uma conferência expansível. Alertas e bloqueios ficam visíveis no corpo.
+
+A rejeição exige a justificativa vigente. Escape, botão de fechar e fundo da janela pedem confirmação antes de descartar texto digitado. Voltar à análise e atualizar a revisão preservam a justificativa. A reversão apresenta situação atual e resultado esperado dos dois plantões; alterações posteriores continuam bloqueadas e encaminhadas para consulta administrativa separada. Apenas uma revisão fica aberta por vez.
+
+Foco, bloqueio de rolagem, altura da viewport, área segura e movimento reduzido pertencem à biblioteca compartilhada. Enquanto houver requisições em andamento, as ações ficam indisponíveis. Erros preservam a janela e o texto; somente a resposta bem-sucedida do servidor fecha a revisão e atualiza comprovantes e notificações. As Actions, Policies, locks e regras institucionais permanecem responsáveis por todas as decisões.

@@ -1,15 +1,26 @@
-<x-confirmation-modal
+<x-action-modal
     :show="$pendingDecisionSwapId !== null"
     id="decide-swap"
     :title="$pendingDecision === 'approve' ? 'Aprovar e transferir plantão?' : ($pendingDecision === 'reject' ? 'Rejeitar solicitação de troca?' : 'Analisar pedido #'.$pendingDecisionSwapId)"
     :eyebrow="$pendingDecision ? 'Confirmação necessária' : 'Análise da troca'"
     close-action="cancelDecision"
-    :tone="$pendingDecision === 'reject' ? 'danger' : 'primary'"
+    :role="$pendingDecision ? 'alertdialog' : 'dialog'"
+    max-width="2xl"
+    track-changes
+    :restore-focus="false"
+    initial-focus="[data-confirm-cancel]"
     busy-action="confirmDecision"
-    trap-focus
 >
     @if ($pendingDecisionSummary)
-        <div class="space-y-3 text-left" data-swap-analysis>
+        <div class="space-y-4 text-left" data-swap-analysis>
+            <x-manager-swap-review-heading :summary="$pendingDecisionSummary" />
+            @if ($pendingDecision === 'approve')
+                <div class="rounded-lg border border-primary bg-primary-soft p-3 text-sm text-ink" data-approval-preview>
+                    <p class="font-semibold">Quem assume cada plantão</p>
+                    <p class="mt-2">{{ $pendingDecisionSummary['substitute'] }} assume {{ $pendingDecisionSummary['shift'] }} · {{ $pendingDecisionSummary['location'] }}.</p>
+                    @if ($pendingDecisionSummary['counterpart'])<p class="mt-2">{{ $pendingDecisionSummary['requester'] }} assume {{ $pendingDecisionSummary['counterpart'] }} · {{ $pendingDecisionSummary['counterpart_location'] }}.</p>@endif
+                </div>
+            @endif
             <div id="swap-approval-reasons" class="space-y-2">
                 @if ($pendingDecisionSummary['approval_blockers'])<p class="text-sm font-semibold">O que impede a aprovação</p>@endif
                 @foreach ($pendingDecisionSummary['approval_blockers'] as $blocker)
@@ -17,6 +28,7 @@
                 @endforeach
                 @if ($pendingDecisionSummary['can_approve'])<p class="text-sm text-muted">Atribuições, situações e cotas permitem a aprovação nesta análise. A confirmação será revalidada no servidor.</p>@endif
             </div>
+            @if ($pendingDecision !== 'approve')
             <div class="rounded-lg border border-line bg-canvas p-3">
                 <p class="meta-label">Plantão a ser substituído</p>
                 <p class="mt-1 font-semibold text-ink">{{ $pendingDecisionSummary['shift'] }}</p>
@@ -29,12 +41,8 @@
                     <p class="text-sm text-muted">{{ $pendingDecisionSummary['counterpart_location'] }}</p>
                 </div>
             @endif
-            <p class="text-sm">Solicitante: <strong>{{ $pendingDecisionSummary['requester'] }}</strong><br>Substituto: <strong>{{ $pendingDecisionSummary['substitute'] }}</strong></p>
-            <div class="rounded-lg border border-line p-3 text-sm">
-                <p class="font-semibold">Troca geral:</p>
-                <p>{{ $pendingDecisionSummary['substitute'] }} assume {{ $pendingDecisionSummary['shift'] }}.</p>
-                @if ($pendingDecisionSummary['counterpart'])<p>{{ $pendingDecisionSummary['requester'] }} assume {{ $pendingDecisionSummary['counterpart'] }}.</p>@endif
-            </div>
+            @endif
+            @if ($pendingDecision)<details class="rounded-lg border border-line p-3"><summary class="cursor-pointer text-sm font-semibold min-h-11">Conferir atribuições e limite mensal</summary><div class="mt-2 space-y-3">@endif
             <div class="text-sm">
                 <p class="font-semibold">Conferência das atribuições</p>
                 @foreach ($pendingDecisionSummary['assignments'] as $assignment)<p>{{ $assignment }}</p>@endforeach
@@ -44,6 +52,7 @@
                 @foreach ($pendingDecisionSummary['quotas'] as $quota)<p>{{ $quota }}</p>@endforeach
                 <p class="mt-1 text-xs text-muted">Contagem pelo mês da solicitação, conforme a regra vigente. Cada pedido aprovado conta uma vez por participante, inclusive na troca mútua. Pendentes, rejeitados e desfeitos não consomem a cota.</p>
             </div>
+            @if ($pendingDecision)</div></details>@endif
             <p class="text-sm font-semibold">Avisos de horário</p>
             @forelse ($pendingDecisionSummary['warnings'] as $warning)
                 <p class="border-l-2 border-primary pl-3 text-sm font-semibold text-ink">{{ $warning }}</p>
@@ -52,6 +61,7 @@
             @endforelse
             @if ($pendingDecisionSummary['warnings'])<p class="text-xs text-muted">Conflitos e dobras são avisos para revisão gerencial, conforme a regra vigente; não bloqueiam automaticamente a decisão.</p>@endif
             @error('decision')<p class="field-error" role="alert" tabindex="-1" data-swap-decision-error>{{ $message }}</p>@enderror
+            @if ($errors->has('decision'))<button type="button" wire:click="refreshSwapAnalysis" x-bind:disabled="busy" class="text-link min-h-11">Atualizar análise</button>@endif
             <p class="field-error" role="alert" tabindex="-1" hidden data-decision-request-error></p>
             @if ($pendingDecision === 'reject')
                 <div>
@@ -67,17 +77,16 @@
         </div>
     @endif
     <x-slot:actions>
-        <button type="button" wire:click="cancelDecision" class="button-secondary w-full sm:w-auto" data-confirm-cancel wire:loading.attr="disabled" wire:target="confirmDecision">Fechar</button>
-        @if ($errors->has('decision'))<button type="button" wire:click="openSwapAnalysis({{ $pendingDecisionSwapId }})" class="button-secondary w-full sm:w-auto" wire:loading.attr="disabled">Atualizar análise</button>@endif
+        @if (! $pendingDecision)<button type="button" @click="requestClose()" x-bind:disabled="busy" class="button-secondary w-full sm:w-auto" data-confirm-cancel wire:loading.attr="disabled" wire:target="confirmDecision">Fechar</button>@endif
         @if ($pendingDecision)
-            <button type="button" wire:click="returnToSwapAnalysis" class="button-secondary w-full sm:w-auto" wire:loading.attr="disabled" wire:target="confirmDecision">Voltar à análise</button>
-            <button type="button" wire:click="confirmDecision" wire:loading.attr="disabled" wire:target="confirmDecision" @disabled($errors->has('decision')) class="{{ $pendingDecision === 'approve' ? 'button-primary' : 'button-danger' }} w-full sm:w-auto">
+            <button type="button" wire:click="returnToSwapAnalysis" x-bind:disabled="busy" class="button-secondary w-full sm:w-auto" wire:loading.attr="disabled" wire:target="confirmDecision" data-confirm-cancel>Voltar à análise</button>
+            <button type="button" wire:click="confirmDecision" x-bind:disabled="busy || @js($errors->has('decision'))" wire:loading.attr="disabled" wire:target="confirmDecision" @disabled($errors->has('decision')) class="{{ $pendingDecision === 'approve' ? 'button-primary' : 'button-danger' }} col-span-2 w-full sm:w-auto">
                 <span wire:loading.remove wire:target="confirmDecision">{{ $pendingDecision === 'approve' ? 'Confirmar aprovação' : 'Confirmar rejeição' }}</span>
                 <span wire:loading wire:target="confirmDecision" role="status">Processando…</span>
             </button>
         @else
-            <button type="button" wire:click="requestDecision({{ $pendingDecisionSwapId }}, 'reject')" wire:loading.attr="disabled" wire:target="requestDecision" @disabled(! ($pendingDecisionSummary['can_reject'] ?? false)) class="button-secondary w-full sm:w-auto">Rejeitar…</button>
-            <button type="button" wire:click="requestDecision({{ $pendingDecisionSwapId }}, 'approve')" wire:loading.attr="disabled" wire:target="requestDecision" @disabled(! ($pendingDecisionSummary['can_approve'] ?? false) || $errors->has('decision')) aria-describedby="swap-approval-reasons" class="button-primary w-full sm:w-auto">Aprovar…</button>
+            <button type="button" x-bind:disabled="busy || @js(! ($pendingDecisionSummary['can_reject'] ?? false))" wire:click="requestDecision({{ $pendingDecisionSwapId }}, 'reject')" wire:loading.attr="disabled" wire:target="requestDecision" @disabled(! ($pendingDecisionSummary['can_reject'] ?? false)) class="button-secondary w-full sm:w-auto">Rejeitar…</button>
+            <button type="button" x-bind:disabled="busy || @js(! ($pendingDecisionSummary['can_approve'] ?? false) || $errors->has('decision'))" wire:click="requestDecision({{ $pendingDecisionSwapId }}, 'approve')" wire:loading.attr="disabled" wire:target="requestDecision" @disabled(! ($pendingDecisionSummary['can_approve'] ?? false) || $errors->has('decision')) aria-describedby="swap-approval-reasons" class="button-primary col-span-2 w-full sm:w-auto">Aprovar…</button>
         @endif
     </x-slot:actions>
-</x-confirmation-modal>
+</x-action-modal>

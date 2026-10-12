@@ -45,6 +45,7 @@
         @endunless
         <a href="{{ route('swaps.receipt.pdf', $swap->id) }}" class="button-secondary" aria-label="Comprovante do pedido #{{ $swap->id }} em PDF">Comprovante PDF</a>
         @if ($swap->status === \App\Enums\ShiftSwapStatus::PendingManager)
+            <button type="button" wire:click="openSwapAnalysis({{ $swap->id }})" wire:loading.attr="disabled" class="button-secondary" aria-label="Analisar pedido #{{ $swap->id }}">Analisar</button>
             <button type="button" wire:click="requestDecision({{ $swap->id }}, 'reject')" wire:loading.attr="disabled" class="button-secondary">Rejeitar</button>
             <button type="button" wire:click="requestDecision({{ $swap->id }}, 'approve')" wire:loading.attr="disabled" class="button-primary">Aprovar e transferir</button>
         @endif

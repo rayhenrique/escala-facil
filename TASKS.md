@@ -292,3 +292,11 @@
 - [x] v1.40.0 — Solicitação de troca guiada: cinco etapas, busca e paginação de colegas/contrapartidas, revisão dos dois movimentos e confirmação protegida; testes de regras, concorrência e interface mobile.
 
 - [x] v1.41.0 — Cards de solicitações recebidas, detalhes responsivos, aceite/recusa com confirmação, estado revalidado e eventos profissionais distintos; testes de permissões, concorrência e falha de conexão.
+
+
+## 1.42.0 — Revisão gerencial no celular
+
+- [x] Resumo com situação atual e participantes, aprovação com ambas as atribuições.
+- [x] Corpo rolável e rodapé fixo usando biblioteca UI; proteção da justificativa e revisão exclusiva.
+- [x] Reversão mantém prévia, justificativa, bloqueios e consulta administrativa separada.
+- [x] Revalidação, autorização, histórico e concorrência preservados; testes PHP/JS e navegador em 320, 390 e 1440 px.

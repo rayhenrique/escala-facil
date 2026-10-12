@@ -188,8 +188,15 @@ class SwapApprovals extends Component
         $shiftSwap = ShiftSwap::query()->findOrFail($shiftSwapId);
         $this->authorize('reviewReversion', $shiftSwap);
         $review = app(ShiftSwapReversion::class)->inspect($shiftSwap);
+        $this->cancelDecision();
         $this->pendingRevertSwapId = $shiftSwap->id;
-        $this->pendingRevertSummary = array_intersect_key($review, array_flip(['rows', 'blocks', 'warnings', 'can_revert', 'later_events']));
+        $this->pendingRevertSummary = array_intersect_key($review, array_flip(['rows', 'blocks', 'warnings', 'can_revert', 'later_events'])) + [
+            'status' => $shiftSwap->status->value,
+            'status_label' => $shiftSwap->status->label(),
+            'reference' => sprintf('TROCA-%06d', $shiftSwap->id),
+            'requester' => $shiftSwap->requester->name,
+            'substitute' => $shiftSwap->substitute->name,
+        ];
         $this->reversionSnapshot = $review['fingerprint'];
         $this->administrativeAnalysis = false;
         $this->resetValidation(['reversion', 'reversionReason', 'reversionSnapshot']);

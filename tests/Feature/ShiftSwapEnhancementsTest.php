@@ -105,7 +105,9 @@ class ShiftSwapEnhancementsTest extends TestCase
             ->assertSee($substitute->name)
             ->call('requestDecision', $swap->id, 'approve')
             ->assertSet('pendingDecision', 'approve')
-            ->assertSee('Troca geral:')
+            ->assertSee('Quem assume cada plantão')
+            ->assertSee($substitute->name.' assume')
+            ->assertSee($requester->name.' assume')
             ->call('confirmDecision')
             ->assertHasNoErrors();
 

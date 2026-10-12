@@ -68,6 +68,38 @@ class SafeSwapReversionTest extends TestCase
         return [$manager, $requester, $substitute, $shift->fresh(), $counter?->fresh(), $swap->fresh()];
     }
 
+    public function test_review_windows_are_exclusive_and_refresh_preserves_administrative_reason(): void
+    {
+        [$manager, , , , , $swap] = $this->approved();
+        $screen = Livewire::actingAs($manager)->test(SwapApprovals::class)
+            ->call('openSwapAnalysis', $swap->id)
+            ->call('requestRevert', $swap->id)
+            ->assertSet('pendingDecisionSwapId', null)
+            ->assertSet('pendingRevertSummary.status_label', 'Aprovada')
+            ->assertSee($swap->requester->name)->assertSee($swap->substitute->name)
+            ->set('reversionReason', 'Correção administrativa solicitada.')
+            ->call('refreshReversion')->assertSet('reversionReason', 'Correção administrativa solicitada.');
+        $this->assertDatabaseCount('shift_swap_reversals', 0);
+        $screen->call('openSwapAnalysis', $swap->id)->assertSet('pendingRevertSwapId', null)
+            ->assertSet('pendingDecisionSummary.status_label', 'Aprovada');
+        $this->assertSame(ShiftSwapStatus::Approved, $swap->refresh()->status);
+    }
+
+    public function test_mobile_reversion_keeps_the_review_open_when_assignment_changes_after_preview(): void
+    {
+        [$manager, $requester, , $shift, , $swap] = $this->approved();
+        $screen = Livewire::actingAs($manager)->test(SwapApprovals::class)
+            ->call('requestRevert', $swap->id)->set('reversionReason', 'Corrigir atribuições originais.');
+        $shift->update(['user_id' => $requester->id]);
+        $screen->call('confirmRevert')->assertHasErrors('reversion')
+            ->assertSet('pendingRevertSwapId', $swap->id)
+            ->assertSet('reversionReason', 'Corrigir atribuições originais.')
+            ->call('refreshReversion')->assertDontSee('Confirmar desfazer')
+            ->assertSee('Analisar correção administrativa');
+        $this->assertSame(ShiftSwapStatus::Approved, $swap->refresh()->status);
+        $this->assertDatabaseCount('shift_swap_reversals', 0);
+    }
+
     private function review(ShiftSwap $swap): array
     {
         return app(ShiftSwapReversion::class)->inspect($swap->fresh());

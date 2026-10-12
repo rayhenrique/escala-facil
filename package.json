@@ -3,6 +3,7 @@
     "private": true,
     "type": "module",
     "scripts": {
+        "test:manager-decisions:browser": "node tests/browser/manager-mobile-decisions.mjs",
         "test:incoming-response:browser": "node tests/browser/incoming-swap-response.mjs",
         "test:guided-swap:browser": "node tests/browser/guided-swap-request.mjs",
         "test:mobile-calendar:browser": "node tests/browser/mobile-calendar.mjs",

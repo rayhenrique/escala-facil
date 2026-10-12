@@ -1,6 +1,7 @@
 // Feedback only: authorization, stale snapshots and deduplication stay in the Action.
 export function registerSwapAnalysis(Livewire) {
     const origins = new WeakMap();
+    const pending = new WeakMap();
     Livewire.interceptMessage(({ message, onSend, onFinish, onFailure, onError, onSuccess }) => {
         const dialog = () => message.component.el.querySelector('[data-decision-component]');
         const hadDialog = !!dialog();
@@ -25,8 +26,11 @@ export function registerSwapAnalysis(Livewire) {
             alert.hidden = false;
             alert.focus();
         };
-        onSend(() => setBusy(true));
-        if (hadDialog && [...message.actions].some((action) => ['reviewReallocation', 'returnToReallocation', 'requestDecision', 'returnToSwapAnalysis', 'returnToShiftForm', 'openSwapAnalysis', 'confirmDecision', 'confirmRevert', 'refreshReversion', 'analyzeAdministrativeCorrection'].includes(action.name ?? action.method))) {
+        onSend(() => {
+            pending.set(message.component, (pending.get(message.component) ?? 0) + 1);
+            setBusy(true);
+        });
+        if (hadDialog && [...message.actions].some((action) => ['reviewReallocation', 'returnToReallocation', 'requestDecision', 'returnToSwapAnalysis', 'returnToShiftForm', 'openSwapAnalysis', 'refreshSwapAnalysis', 'confirmDecision', 'confirmRevert', 'refreshReversion', 'analyzeAdministrativeCorrection'].includes(action.name ?? action.method))) {
             onSuccess(({ onRender }) => onRender(() => {
                 requestAnimationFrame(() => {
                     const body = dialog()?.querySelector('.modal-body');
@@ -49,8 +53,10 @@ export function registerSwapAnalysis(Livewire) {
             }));
         }
         onFinish(() => {
-            setBusy(false);
-            if (dialog()) return;
+            const count = Math.max(0, (pending.get(message.component) ?? 1) - 1);
+            pending.set(message.component, count);
+            setBusy(count > 0);
+            if (dialog() || count > 0) return;
             const origin = origins.get(message.component);
             origins.delete(message.component);
             requestAnimationFrame(() => {
