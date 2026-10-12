@@ -131,7 +131,7 @@ try {
         await page.locator('#email').fill('fixture@example.test');
         await page.locator('#password').fill('keep-this-fixture');
         await page.locator('button[type=submit]').click();
-        await page.locator('[data-auth-request-error]').waitFor({ state: 'visible' });
+        await page.locator('[data-operational-inline] [data-operation-error]').waitFor({ state: 'visible' });
         await page.waitForFunction(() => !document.querySelector('button[type=submit]').disabled);
         assert.equal(await page.locator('#password').inputValue(), 'keep-this-fixture');
         assert.equal(await page.locator('button[type=submit]').isEnabled(), true);
@@ -139,10 +139,10 @@ try {
         await page.unroute('**/livewire-*/update');
         await page.route('**/livewire-*/update', (route) => route.fulfill({ status: 419, body: 'Test-only expired' }));
         await page.locator('button[type=submit]').click();
-        await page.locator('[data-auth-reload]').waitFor({ state: 'visible' });
-        assert.match(await page.locator('[data-auth-request-message]').innerText(), /expirou/);
+        await page.getByRole('button', { name: 'Atualizar página para entrar' }).waitFor({ state: 'visible' });
+        assert.match(await page.locator('[data-operational-inline] [data-operation-error]').innerText(), /expirou/);
         await page.unroute('**/livewire-*/update');
-        await Promise.all([page.waitForEvent('load'), page.locator('[data-auth-reload]').click()]);
+        await Promise.all([page.waitForEvent('load'), page.getByRole('button', { name: 'Atualizar página para entrar' }).click()]);
         await page.waitForLoadState('networkidle');
 
         if (email && password) {

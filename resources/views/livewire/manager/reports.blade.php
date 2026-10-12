@@ -237,7 +237,7 @@
                                 <p class="mt-1 text-sm text-muted">{{ $row['total'] }} plantão(ões) · {{ $row['uncovered'] }} descoberto(s)</p>
                             </article>
                         @empty
-                            <div class="empty-state compact-empty"><p class="font-semibold text-ink">Nenhum plantão no período.</p></div>
+                            <x-empty-state class="compact-empty" title="Nenhum plantão no período." />
                         @endforelse
                     </div>
                 </section>
@@ -269,7 +269,7 @@
                                 <p class="mt-1 text-sm text-muted">{{ $row['total'] }} plantão(ões) · {{ $row['uncovered'] }} descoberto(s)</p>
                             </article>
                         @empty
-                            <div class="empty-state compact-empty"><p class="font-semibold text-ink">Nenhum plantão no período.</p></div>
+                            <x-empty-state class="compact-empty" title="Nenhum plantão no período." />
                         @endforelse
                     </div>
                 </section>
@@ -347,7 +347,7 @@
                         <p class="mt-1 text-sm text-muted">{{ $row['shifts'] }} plantão(ões) · {{ $row['approvedSwaps'] }} de 4 trocas · {{ $row['absences'] }} ausência(s)</p>
                     </article>
                 @empty
-                    <div class="empty-state compact-empty"><p class="font-semibold text-ink">Nenhum profissional corresponde ao mês e aos filtros. Ajuste a pesquisa ou limpe os filtros.</p></div>
+                    <x-empty-state class="compact-empty" title="Nenhum profissional corresponde ao mês e aos filtros. Ajuste a pesquisa ou limpe os filtros." />
                 @endforelse
             </div>
             <div class="mt-4">{{ $this->report['byProfessional']->links() }}</div>
@@ -484,7 +484,7 @@
                         @endif
                     </article>
                 @empty
-                    <div class="empty-state compact-empty"><p class="font-semibold text-ink">Nenhuma ausência registrada no período.</p></div>
+                    <x-empty-state class="compact-empty" title="Nenhuma ausência registrada no período." />
                 @endforelse
             </div>
             <div class="mt-4">{{ $this->report['absencesList']->links() }}</div>

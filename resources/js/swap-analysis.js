@@ -1,3 +1,4 @@
+import { reportRequestFailure } from './operational-feedback.js';
 // Feedback only: authorization, stale snapshots and deduplication stay in the Action.
 export function registerSwapAnalysis(Livewire) {
     const origins = new WeakMap();
@@ -17,15 +18,7 @@ export function registerSwapAnalysis(Livewire) {
             origins.set(message.component, { element: active, action: active?.getAttribute('wire:click') });
         }
         const setBusy = (busy) => dialog()?.dispatchEvent(new CustomEvent('swap-decision-busy', { detail: busy, bubbles: true }));
-        const failure = (expired = false) => {
-            const alert = dialog()?.querySelector('[data-decision-request-error]');
-            if (!alert) return;
-            alert.textContent = expired
-                ? 'A sessão expirou. Atualize a página e confira o estado do registro antes de decidir.'
-                : 'Não foi possível confirmar a resposta. Feche e abra a análise para conferir o estado do registro antes de tentar novamente.';
-            alert.hidden = false;
-            alert.focus();
-        };
+        const failure = (expired = false) => { if (!globalThis.Alpine?.store?.('operationalFeedback')) reportRequestFailure(message.component, expired ? 419 : null, true); };
         onSend(() => {
             pending.set(message.component, (pending.get(message.component) ?? 0) + 1);
             setBusy(true);

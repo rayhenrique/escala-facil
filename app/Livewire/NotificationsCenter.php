@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\ShiftSwap;
 use App\Support\ShiftSwapReceipt;
+use App\Support\UiFeedback;
 use Illuminate\Contracts\View\View;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Collection;
@@ -40,7 +41,7 @@ class NotificationsCenter extends Component
         auth()->user()->unreadNotifications()->update(['read_at' => now()]);
         $this->showMarkAllConfirmation = false;
         $this->dispatch('notifications-updated');
-        session()->flash('status', 'Todas as notificações foram marcadas como lidas.');
+        UiFeedback::success('Todas as notificações foram marcadas como lidas.');
     }
 
     public function requestMarkAllAsRead(): void

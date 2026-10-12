@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'escala-facil-static-v1.45.0';
+const CACHE_VERSION = 'escala-facil-static-v1.46.0';
 const OFFLINE_URL = '/offline.html';
 const STATIC_FILES = [
     OFFLINE_URL,

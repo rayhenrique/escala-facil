@@ -90,7 +90,7 @@
 
                 <x-slot:actions>
                     <button type="button" @click="requestClose()" x-bind:disabled="busy" class="button-secondary w-full sm:w-auto">Cancelar</button>
-                    <button type="submit" x-bind:disabled="busy" class="button-primary w-full sm:w-auto" wire:loading.attr="disabled" wire:target="save">
+                    <button type="submit" x-bind:disabled="busy" class="button-primary w-full sm:w-auto" wire:target="save">
                         <span wire:loading.remove wire:target="save">{{ $invitationMode ? 'Enviar convite' : ($editingUserId ? 'Salvar alterações' : 'Criar usuário') }}</span>
                         <span wire:loading wire:target="save">Salvando…</span>
                     </button>
@@ -129,7 +129,7 @@
                     </div>
                 </article>
             @empty
-                <div class="empty-state compact-empty"><p class="font-semibold text-ink">Nenhum usuário encontrado.</p><p class="mt-2 text-sm">Altere os filtros ou crie um novo usuário.</p></div>
+                <x-empty-state class="compact-empty" title="Nenhum usuário encontrado." description="Altere os filtros ou crie um novo usuário." />
             @endforelse
         </div>
 

@@ -27,7 +27,7 @@
                 </div>
                 <x-slot:actions>
                     <button type="button" @click="requestClose()" class="button-secondary w-full sm:w-auto">Cancelar</button>
-                    <button type="submit" class="button-primary w-full sm:w-auto" wire:loading.attr="disabled" wire:target="save">
+                    <button type="submit" class="button-primary w-full sm:w-auto" wire:target="save">
                         <span wire:loading.remove wire:target="save">{{ $editingCategoryId ? 'Salvar alterações' : 'Criar categoria' }}</span>
                         <span wire:loading wire:target="save">Salvando…</span>
                     </button>
@@ -58,7 +58,7 @@
                     </div>
                 </article>
             @empty
-                <div class="empty-state compact-empty"><p class="font-semibold text-ink">Nenhuma categoria encontrada.</p><p class="mt-2 text-sm">Altere a busca ou crie uma nova categoria.</p></div>
+                <x-empty-state class="compact-empty" title="Nenhuma categoria encontrada." description="Altere a busca ou crie uma nova categoria." />
             @endforelse
         </div>
 

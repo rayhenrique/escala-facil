@@ -325,3 +325,11 @@
 - [x] Busca limitada no banco com select nativo de profissionais, seleção e compatibilidade preservadas.
 - [x] Formulários responsivos, foco, validação, descarte explícito, áreas seguras e ações acima do teclado.
 - [x] Testes PHP, JavaScript e navegador para toque, teclado, validação, filtros combinados e isolamento.
+
+## 1.46.0 — Feedback operacional
+
+- [x] Outlet compartilhado, toast identificado por operação confirmada e mensagens sem duplicação.
+- [x] Loading, erros seguros, vazio, conexão indisponível e sessão expirada.
+- [x] Recuperação explícita preservando entradas, sem reenvio automático de decisões.
+- [x] Bloqueio de ativação duplicada e correção da liberação dos formulários após falha.
+- [x] Testes PHP, JavaScript e navegador para latência, duplicação, validação, conexão e sessão.

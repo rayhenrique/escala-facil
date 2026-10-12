@@ -109,7 +109,7 @@
 
                 <x-slot:actions>
                     <button type="button" @click="requestClose()" x-bind:disabled="busy" class="button-secondary w-full sm:w-auto">Cancelar</button>
-                    <button type="submit" x-bind:disabled="busy" class="button-primary w-full sm:w-auto" wire:loading.attr="disabled" wire:target="save">
+                    <button type="submit" x-bind:disabled="busy" class="button-primary w-full sm:w-auto" wire:target="save">
                         <span wire:loading.remove wire:target="save">{{ $shiftPreview ? 'Confirmar com os avisos' : ($editingShiftId ? 'Salvar alterações' : 'Criar plantão') }}</span>
                         <span wire:loading wire:target="save">Salvando…</span>
                     </button>
@@ -134,7 +134,7 @@
                     </div>
                 </x-shift-card>
             @empty
-                <div class="empty-state compact-empty"><p class="font-semibold text-ink">Nenhum plantão corresponde aos filtros. Ajuste a pesquisa ou limpe os filtros.</p><p class="mt-2 text-sm">Altere o mês ou crie um novo plantão.</p></div>
+                <x-empty-state class="compact-empty" title="Nenhum plantão corresponde aos filtros. Ajuste a pesquisa ou limpe os filtros." description="Altere o mês ou crie um novo plantão." />
             @endforelse
         </div>
 
@@ -198,6 +198,7 @@
                 </header>
 
                 <div class="modal-body grid gap-5">
+                    <x-operational-state inline />
                     <div class="grid gap-5 sm:grid-cols-2">
                         <div>
                             <label for="copy-source-month" class="field-label">Mês de origem</label>
@@ -306,9 +307,9 @@
     @endif
 
     @if ($showImportModal)
-        <div class="modal-overlay" x-data x-init="$nextTick(() => $refs.importField?.focus())" @keydown.escape.window="$wire.closeImportModal()">
+        <div class="modal-overlay" x-data @keydown.escape.window="$wire.closeImportModal()">
             <button type="button" wire:click="closeImportModal" class="modal-backdrop" aria-label="Fechar importação de plantões"></button>
-            <form method="post" wire:submit="confirmImport" class="modal-dialog max-w-2xl" role="dialog" aria-modal="true" aria-labelledby="shift-import-title" novalidate enctype="multipart/form-data">
+            <form method="post" wire:submit="confirmImport" x-data="{ uploading: false }" x-init="$nextTick(() => $refs.importField?.focus())" x-on:livewire-upload-start="uploading = true" x-on:livewire-upload-finish="uploading = false" x-on:livewire-upload-error="uploading = false" x-on:livewire-upload-cancel="uploading = false" class="modal-dialog max-w-2xl" role="dialog" aria-modal="true" aria-labelledby="shift-import-title" novalidate enctype="multipart/form-data">
                 @csrf
                 <header class="modal-header">
                     <div>
@@ -321,6 +322,7 @@
                 </header>
 
                 <div class="modal-body grid gap-5">
+                    <x-operational-state inline />
                     <p class="text-sm text-muted">Use o <a href="{{ route('manager.shifts.template') }}" class="table-action">modelo padrão</a> com os setores e categorias cadastrados. Linhas duplicadas são ignoradas; qualquer erro em uma linha cancela toda a importação.</p>
                     <div>
                         <label for="import-file" class="field-label">Arquivo XLSX (máximo 5 MB)</label>
@@ -345,7 +347,7 @@
 
                 <footer class="modal-footer">
                     <button type="button" wire:click="closeImportModal" class="button-secondary w-full sm:w-auto">Cancelar</button>
-                    <button type="submit" class="button-primary w-full sm:w-auto" wire:loading.attr="disabled" wire:target="confirmImport,importFile">
+                    <button type="submit" class="button-primary w-full sm:w-auto" :disabled="uploading" wire:target="confirmImport,importFile">
                         <span wire:loading.remove wire:target="confirmImport,importFile">Revisar e importar</span>
                         <span wire:loading wire:target="confirmImport,importFile">Importando…</span>
                     </button>

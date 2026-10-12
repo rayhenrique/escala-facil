@@ -13,7 +13,7 @@
             <button type="button" wire:click="reportAgain" class="button-secondary mt-4">Enviar outro relato</button>
         </div>
     @else
-        <form wire:submit="submit" class="mt-4 space-y-5">
+        <form wire:submit="submit" x-data="{ uploading: false }" x-on:livewire-upload-start="uploading = true" x-on:livewire-upload-finish="uploading = false" x-on:livewire-upload-error="uploading = false" x-on:livewire-upload-cancel="uploading = false" class="mt-4 space-y-5">
             <div>
                 <label for="report-module" class="field-label">Módulo onde o problema ocorreu</label>
                 <select wire:model="module" id="report-module" class="field-input" @error('module') aria-invalid="true" aria-describedby="report-module-error" @enderror>
@@ -44,7 +44,7 @@
                 @error('attachment') <p id="report-attachment-error" class="field-error">{{ $message }}</p> @enderror
             </div>
 
-            <button type="submit" wire:loading.attr="disabled" class="button-primary w-full sm:w-auto">Enviar relato</button>
+            <button type="submit" :disabled="uploading" class="button-primary w-full sm:w-auto">Enviar relato</button>
         </form>
     @endif
 </div>

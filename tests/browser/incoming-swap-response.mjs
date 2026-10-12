@@ -89,7 +89,7 @@ try {
     };
     await page.route(/\/livewire[^/]*\/update(?:\?|$)/, handler);
     await confirmation.getByRole('button', {name: 'Confirmar aceite', exact: true}).click();
-    await confirmation.locator('[data-ui-request-error]').waitFor({state: 'visible'});
+    await confirmation.locator('[data-operational-inline] [data-operation-error]').waitFor({state: 'visible'});
     await page.waitForFunction(() => !document.querySelector('#professional-action [data-confirm-cancel]')?.disabled);
     await page.unroute(/\/livewire[^/]*\/update(?:\?|$)/, handler);
     await confirmation.getByRole('button', {name: 'Atualizar detalhes', exact: true}).click();

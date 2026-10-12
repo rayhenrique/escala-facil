@@ -75,7 +75,7 @@
                 <p class="mt-3 break-all font-mono text-xs text-muted">Operação {{ $event->operation_id }}</p>
             </article>
         @empty
-            <div class="empty-state"><p class="font-semibold text-ink">Nenhuma alteração corresponde aos filtros.</p><p class="mt-2 text-sm">Ajuste os filtros. Registros anteriores à instalação não recebem um histórico inventado.</p></div>
+            <x-empty-state title="Nenhuma alteração corresponde aos filtros." description="Ajuste os filtros. Registros anteriores à instalação não recebem um histórico inventado." />
         @endforelse
     </section>
     <div class="mt-5">{{ $events->links() }}</div>

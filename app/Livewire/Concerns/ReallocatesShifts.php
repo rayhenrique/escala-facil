@@ -7,6 +7,7 @@ use App\Http\Requests\ReallocateShiftRequest;
 use App\Models\Shift;
 use App\Models\User;
 use App\Support\ShiftReallocation;
+use App\Support\UiFeedback;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -105,7 +106,7 @@ trait ReallocatesShifts
         $this->closeReallocation();
         $this->dispatch('shift-reallocated', shiftId: $audit->shift_id);
         $this->dispatch('notifications-updated');
-        session()->flash('status', 'Plantão preenchido por '.$audit->after['professional'].'. Realocação registrada em '.$audit->performed_at->format('d/m/Y H:i').' por '.$audit->manager_name.'.');
+        UiFeedback::success('Plantão preenchido por '.$audit->after['professional'].'. Realocação registrada em '.$audit->performed_at->format('d/m/Y H:i').' por '.$audit->manager_name.'.');
     }
 
     public function closeReallocation(): void

@@ -332,3 +332,9 @@ Paginação, autenticação, consulta em lote e comprovantes permanecem sob os c
 Os filtros complexos de Escalas, Trocas e Relatórios usam `filter-panel`, uma variante da janela canônica `action-modal`: bottom sheet até 1023 px e painel inline no desktop. A única instância dos controles conserva IDs e rótulos; desktop mantém filtro imediato. Chips reutilizam `filter-chip`, com texto e remoção explícita. Pesquisas simples de Usuários, Setores e Categorias continuam inline, com resumo e limpeza compartilhados.
 
 Campos mobile têm 16 px, e ações têm pelo menos 44 px. Os formulários de plantão, usuário, setor e categoria reutilizam a janela responsiva, corpo rolável, rodapé separado e opção de acompanhar a área visual do teclado. Seletores curtos e datas permanecem nativos. `searchable-select` acrescenta busca no servidor antes do select nativo de profissionais, sem transformar texto em ID nem criar um listbox próprio. Paleta, tipografia e composição desktop permanecem sob os tokens existentes.
+
+## Feedback operacional — 1.46.0
+
+O outlet compartilhado reutiliza toast, loading e estados vazios. Sucesso vem de uma operação confirmada pelo servidor; uma identidade por operação impede mensagens repetidas durante atualizações. Nova operação pode repetir o mesmo texto. Erros persistem até revisão ou descarte explícito e nunca mostram respostas técnicas do servidor.
+
+Avisos ficam acima da navegação inferior, respeitando áreas seguras. Dentro de janelas e formulários de acesso, o aviso aparece no próprio painel, ao alcance do foco e da rolagem. Carregamento é anunciado sem simular sucesso. Movimento reduzido mantém o comportamento anterior. Botões de envio usam o bloqueio do formulário Livewire; botões de clique usam seu indicador de carregamento, sem sobrepor dois donos do atributo disabled.

@@ -97,3 +97,6 @@ jobs:
 
       - name: Test authentication presentation lifecycle
         run: npm run test:auth
+
+      - name: Test operational feedback lifecycle
+        run: npm run test:feedback

@@ -7,4 +7,5 @@
         <button type="button" class="mt-2 min-h-10 font-semibold underline underline-offset-4" data-auth-reload hidden>Atualizar página</button>
     </div>
     {{ $slot }}
+    <x-operational-state inline />
 </form>

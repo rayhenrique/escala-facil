@@ -97,12 +97,12 @@
     @if ($absenceShiftId)
         <section class="panel mt-8 border-amber-300" aria-labelledby="absence-form-title">
             <div class="section-heading"><div><p class="eyebrow">Ausência justificada</p><h2 id="absence-form-title" tabindex="-1">Informe o motivo da ausência</h2></div><button type="button" wire:click="cancelAction" class="button-secondary w-full sm:w-auto">Cancelar</button></div>
-            <form method="post" wire:submit="reviewAbsence" class="mt-6 max-w-2xl space-y-5" novalidate>
+            <form method="post" wire:submit="reviewAbsence" x-data="{ uploading: false }" x-on:livewire-upload-start="uploading = true" x-on:livewire-upload-finish="uploading = false" x-on:livewire-upload-error="uploading = false" x-on:livewire-upload-cancel="uploading = false" class="mt-6 max-w-2xl space-y-5" novalidate>
                 @csrf
                 <div><label for="absence-reason" class="field-label">Justificativa</label><textarea wire:model="absenceReason" id="absence-reason" rows="5" class="field-input min-h-32 resize-none" @error('reason') aria-invalid="true" aria-describedby="reason-error" @enderror></textarea>@error('reason') <p id="reason-error" class="field-error">{{ $message }}</p> @enderror</div>
                 <div><label for="attachment" class="field-label">Documento comprobatório <span class="font-normal text-muted">(opcional)</span></label><input wire:model="attachment" id="attachment" type="file" accept=".pdf,.jpg,.jpeg,.png" class="file-input" @error('attachment') aria-invalid="true" aria-describedby="attachment-error" @enderror><p class="mt-2 text-xs text-muted">PDF, JPG ou PNG de até 5 MB.</p>@error('attachment') <p id="attachment-error" class="field-error">{{ $message }}</p> @enderror</div>
                 @error('shift_id') <p class="field-error">{{ $message }}</p> @enderror
-                <button type="submit" class="button-primary inline-flex w-full sm:w-auto" wire:loading.attr="disabled" wire:target="reviewAbsence,attachment"><span wire:loading.remove wire:target="reviewAbsence">Revisar ausência</span><span wire:loading wire:target="reviewAbsence,attachment">Validando…</span></button>
+                <button type="submit" class="button-primary inline-flex w-full sm:w-auto" :disabled="uploading" wire:target="reviewAbsence,attachment"><span wire:loading.remove wire:target="reviewAbsence">Revisar ausência</span><span wire:loading wire:target="reviewAbsence,attachment">Validando…</span></button>
             </form>
         </section>
     @endif
@@ -185,7 +185,7 @@
                     </div>
                 </article>
             @empty
-                <div class="empty-state lg:col-span-2"><p class="font-semibold text-ink">Nenhum plantão correspondente aos filtros neste mês.</p><p class="mt-2 text-sm">Altere o mês, ajuste a pesquisa ou limpe os filtros.</p></div>
+                <x-empty-state class="lg:col-span-2" title="Nenhum plantão correspondente aos filtros neste mês." description="Altere o mês, ajuste a pesquisa ou limpe os filtros." />
             @endforelse
         </div>
         <div class="mt-4">{{ $shifts->links() }}</div>

@@ -5,6 +5,7 @@ namespace App\Livewire\Manager;
 use App\Http\Requests\SaveCategoryRequest;
 use App\Livewire\Concerns\HasOperationalContext;
 use App\Models\Category;
+use App\Support\UiFeedback;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
@@ -61,10 +62,10 @@ class CategoryManager extends Component
 
         if ($category) {
             $category->update(['name' => $validated['name']]);
-            session()->flash('status', 'Categoria atualizada com sucesso.');
+            UiFeedback::success('Categoria atualizada com sucesso.');
         } else {
             Category::query()->create(['name' => $validated['name']]);
-            session()->flash('status', 'Categoria criada com sucesso.');
+            UiFeedback::success('Categoria criada com sucesso.');
         }
 
         $this->resetForm();
@@ -113,14 +114,14 @@ class CategoryManager extends Component
 
         if ($category->users()->exists() || $category->shifts()->exists()) {
             $this->cancelDelete();
-            session()->flash('error', 'A categoria não pode ser excluída porque está vinculada a usuários ou plantões.');
+            UiFeedback::error('A categoria não pode ser excluída porque está vinculada a usuários ou plantões.');
 
             return;
         }
 
         $category->delete();
         $this->cancelDelete();
-        session()->flash('status', 'Categoria excluída.');
+        UiFeedback::success('Categoria excluída.');
     }
 
     public function resetForm(): void

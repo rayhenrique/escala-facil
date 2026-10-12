@@ -2,8 +2,9 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import vm from 'node:vm';
+import { reportRequestFailure } from '../../resources/js/operational-feedback.js';
 
-const source = readFileSync(new URL('../../resources/js/auth.js', import.meta.url), 'utf8').replace('export function', 'function');
+const source = readFileSync(new URL('../../resources/js/auth.js', import.meta.url), 'utf8').replace(/^import .*;\r?\n/, '').replace('export function', 'function');
 
 function boot() {
     const handlers = {};
@@ -19,7 +20,7 @@ function boot() {
         $set: (...args) => updates.push(args),
         $interceptRequest: (cb) => { cb({ onFailure: (fn) => { handlers.failure = fn; }, onError: (fn) => { handlers.error = fn; } }); return () => { handlers.requestCleaned = true; }; },
     } };
-    const context = vm.createContext({ AbortController, requestAnimationFrame: (cb) => cb(), window: { location: { reload: () => { handlers.reloaded = true; } } } });
+    const context = vm.createContext({ reportRequestFailure, AbortController, requestAnimationFrame: (cb) => cb(), window: { location: { reload: () => { handlers.reloaded = true; } } } });
     vm.runInContext(source, context);
     context.registerAuthUi({
         hook: (_, callback) => callback({ component, cleanup: (fn) => cleanups.push(fn) }),

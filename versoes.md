@@ -6,6 +6,12 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.46.0 — 12/10/2026
+
+### Operações com feedback mais claro
+
+- Agora o aplicativo mostra com mais clareza quando uma operação está sendo realizada, concluída ou precisa de atenção.
+
 ## 1.45.0 — 12/10/2026
 
 ### Formulários e filtros mais fáceis no celular

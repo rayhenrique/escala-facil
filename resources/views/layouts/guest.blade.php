@@ -45,6 +45,7 @@
                 <x-system-footer class="mt-auto w-full max-w-md" />
             </section>
         </main>
+        <x-feedback-outlet />
         @livewireScriptConfig
     </body>
 </html>

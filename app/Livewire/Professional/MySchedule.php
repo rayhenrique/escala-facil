@@ -23,6 +23,7 @@ use App\Support\OperationalFilters;
 use App\Support\ShiftSwapReceipt;
 use App\Support\ShiftSwapResponse;
 use App\Support\ShiftSwapTimingWarnings;
+use App\Support\UiFeedback;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -381,7 +382,7 @@ class MySchedule extends Component
         $this->cancelConfirmation();
         unset($this->eligibleSubstitutes);
         unset($this->eligibleSubstituteShifts);
-        session()->flash('status', 'Solicitação enviada ao profissional selecionado.');
+        UiFeedback::success('Solicitação enviada ao profissional selecionado.');
     }
 
     public function reviewSwapRequest(): void
@@ -441,7 +442,7 @@ class MySchedule extends Component
         $this->resetPage('incomingPage');
         $this->dispatch('notifications-updated');
         $this->dispatch('incoming-response-finished');
-        session()->flash('status', $message);
+        UiFeedback::success($message);
     }
 
     private function reviewIncomingDecision(int $id, string $decision): void
@@ -508,7 +509,7 @@ class MySchedule extends Component
         $this->absenceReason = '';
         $this->attachment = null;
         $this->cancelConfirmation();
-        session()->flash('status', 'Ausência registrada. O plantão agora está descoberto.');
+        UiFeedback::success('Ausência registrada. O plantão agora está descoberto.');
     }
 
     public function reviewAbsence(): void

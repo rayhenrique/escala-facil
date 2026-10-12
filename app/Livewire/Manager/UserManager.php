@@ -10,6 +10,7 @@ use App\Models\AccountInvitation;
 use App\Models\Category;
 use App\Models\Sector;
 use App\Models\User;
+use App\Support\UiFeedback;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
@@ -108,7 +109,7 @@ class UserManager extends Component
         if ($this->invitationMode) {
             app(InviteProfessionalAction::class)->create(auth()->user(), $this->payload());
             $this->resetForm();
-            session()->flash('status', 'Convite criado. O envio do link de ativação foi solicitado.');
+            UiFeedback::success('Convite criado. O envio do link de ativação foi solicitado.');
 
             return;
         }
@@ -156,10 +157,10 @@ class UserManager extends Component
 
         if ($user) {
             $user->update($data);
-            session()->flash('status', 'Usuário atualizado com sucesso.');
+            UiFeedback::success('Usuário atualizado com sucesso.');
         } else {
             User::query()->create($data);
-            session()->flash('status', 'Usuário criado com sucesso.');
+            UiFeedback::success('Usuário criado com sucesso.');
         }
 
         $this->resetForm();
@@ -182,13 +183,13 @@ class UserManager extends Component
     public function resendInvitation(int $userId): void
     {
         app(InviteProfessionalAction::class)->resend(auth()->user(), $userId);
-        session()->flash('status', 'Novo convite solicitado. O link anterior não pode mais ser usado.');
+        UiFeedback::success('Novo convite solicitado. O link anterior não pode mais ser usado.');
     }
 
     public function revokeInvitation(int $userId): void
     {
         app(InviteProfessionalAction::class)->revoke(auth()->user(), $userId);
-        session()->flash('status', 'Convite revogado. O link não pode mais ativar a conta.');
+        UiFeedback::success('Convite revogado. O link não pode mais ativar a conta.');
     }
 
     public function requestInvitationRevocation(int $userId): void
@@ -277,7 +278,7 @@ class UserManager extends Component
 
         $user->delete();
         $this->cancelDelete();
-        session()->flash('status', 'Usuário excluído.');
+        UiFeedback::success('Usuário excluído.');
     }
 
     public function resetForm(): void
@@ -337,7 +338,7 @@ class UserManager extends Component
     private function denyDeletion(string $message): void
     {
         $this->cancelDelete();
-        session()->flash('error', $message);
+        UiFeedback::error($message);
     }
 
     public function render(): View

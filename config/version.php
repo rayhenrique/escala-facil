@@ -2,9 +2,18 @@
 
 return [
     // Versão do código instalado. APP_VERSION não pode sobrepor este registro.
-    'current' => '1.45.0',
+    'current' => '1.46.0',
 
     'releases' => [
+        [
+            'version' => '1.46.0',
+            'date' => '2026-10-12',
+            'title' => 'Operações com feedback mais claro',
+            'summary' => 'Agora o aplicativo mostra com mais clareza quando uma operação está sendo realizada, concluída ou precisa de atenção.',
+            'highlights' => [
+                'Agora o aplicativo mostra com mais clareza quando uma operação está sendo realizada, concluída ou precisa de atenção.',
+            ],
+        ],
         [
             'version' => '1.45.0',
             'date' => '2026-10-12',

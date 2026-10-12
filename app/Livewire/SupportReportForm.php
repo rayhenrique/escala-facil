@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Actions\Support\SubmitIssueReportAction;
 use App\Models\IssueReport;
 use App\Support\IssueReportModules;
+use App\Support\UiFeedback;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
@@ -60,7 +61,7 @@ class SupportReportForm extends Component
         $this->reset(['module', 'description', 'expectedBehavior', 'attachment']);
         $this->protocol = $report->protocol;
 
-        session()->flash('status', 'Relato enviado. Anote o protocolo para acompanhar com a gerência.');
+        UiFeedback::success('Relato enviado. Anote o protocolo para acompanhar com a gerência.');
     }
 
     public function reportAgain(): void

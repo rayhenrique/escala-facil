@@ -19,6 +19,7 @@ use App\Support\OperationalNavigation;
 use App\Support\ShiftCoverage;
 use App\Support\ShiftSwapReceipt;
 use App\Support\ShiftSwapReversion;
+use App\Support\UiFeedback;
 use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -170,7 +171,7 @@ class SwapApprovals extends Component
         $shiftSwap = $action->approve(auth()->user(), $shiftSwapId);
         $this->swapReceipt = $receipts->make($shiftSwap, ShiftSwapEvent::Approved);
 
-        session()->flash('status', 'Troca aprovada e plantão transferido ao substituto.');
+        UiFeedback::success('Troca aprovada e plantão transferido ao substituto.');
     }
 
     public function reject(int $shiftSwapId, DecideShiftSwapAction $action, ShiftSwapReceipt $receipts, ?string $reason = null): void
@@ -180,7 +181,7 @@ class SwapApprovals extends Component
         $shiftSwap = $action->reject(auth()->user(), $shiftSwapId, $reason);
         $this->swapReceipt = $receipts->make($shiftSwap, ShiftSwapEvent::Rejected);
 
-        session()->flash('status', 'Solicitação de troca rejeitada e comprovante gerado.');
+        UiFeedback::success('Solicitação de troca rejeitada e comprovante gerado.');
     }
 
     public function requestRevert(int $shiftSwapId): void
@@ -228,7 +229,7 @@ class SwapApprovals extends Component
         $this->swapReceipt = $receipts->make($shiftSwap, ShiftSwapEvent::Reverted);
         $this->cancelRevert();
         $this->dispatch('notifications-updated');
-        session()->flash('status', 'Troca desfeita. Os profissionais voltaram aos plantões originais e receberam um novo comprovante.');
+        UiFeedback::success('Troca desfeita. Os profissionais voltaram aos plantões originais e receberam um novo comprovante.');
     }
 
     public function render(): View

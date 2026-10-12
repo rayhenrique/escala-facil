@@ -5,6 +5,7 @@ namespace App\Livewire\Manager;
 use App\Http\Requests\SaveSectorRequest;
 use App\Livewire\Concerns\HasOperationalContext;
 use App\Models\Sector;
+use App\Support\UiFeedback;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
@@ -61,10 +62,10 @@ class SectorManager extends Component
 
         if ($sector) {
             $sector->update(['name' => $validated['name']]);
-            session()->flash('status', 'Setor atualizado com sucesso.');
+            UiFeedback::success('Setor atualizado com sucesso.');
         } else {
             Sector::query()->create(['name' => $validated['name']]);
-            session()->flash('status', 'Setor criado com sucesso.');
+            UiFeedback::success('Setor criado com sucesso.');
         }
 
         $this->resetForm();
@@ -113,14 +114,14 @@ class SectorManager extends Component
 
         if ($sector->users()->exists() || $sector->shifts()->exists()) {
             $this->cancelDelete();
-            session()->flash('error', 'O setor não pode ser excluído porque está vinculado a usuários ou plantões.');
+            UiFeedback::error('O setor não pode ser excluído porque está vinculado a usuários ou plantões.');
 
             return;
         }
 
         $sector->delete();
         $this->cancelDelete();
-        session()->flash('status', 'Setor excluído.');
+        UiFeedback::success('Setor excluído.');
     }
 
     public function resetForm(): void

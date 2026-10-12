@@ -42,6 +42,8 @@
             </header>
             <div id="{{ $id }}-description" class="modal-body" tabindex="0" data-dialog-body>
                 {{ $slot }}
+                <x-loading-state x-show="busy" x-cloak class="mt-4" label="Processando solicitação…" />
+                <x-operational-state inline />
                 <p hidden tabindex="-1" role="alert" class="field-error mt-3" data-ui-request-error>{{ $requestErrorMessage }}</p>
             </div>
             <footer class="modal-footer" x-show="!discardRequested">

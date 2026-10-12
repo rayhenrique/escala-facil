@@ -1,4 +1,5 @@
 import { mobileFilterPanel } from './mobile-filters.js';
+import { registerOperationalFeedback, reportRequestFailure } from './operational-feedback.js';
 
 // Shared interaction only. Persistence and permissions remain in Livewire/Actions.
 export function actionDialog(options = {}) {
@@ -84,7 +85,7 @@ export function actionDialog(options = {}) {
     };
 }
 
-export function toastMessage({ duration = 5500 } = {}) {
+export function toastMessage({ duration = 5500, onDismiss = () => {} } = {}) {
     return {
         visible: true, timer: null, remaining: duration, started: 0,
         init() { this.resume(); },
@@ -97,9 +98,9 @@ export function toastMessage({ duration = 5500 } = {}) {
         resume() {
             if (!this.visible || !duration || this.timer || this.$el.matches(':hover') || this.$el.contains(document.activeElement)) return;
             this.started = Date.now();
-            this.timer = setTimeout(() => { this.visible = false; this.timer = null; }, this.remaining);
+            this.timer = setTimeout(() => { this.visible = false; this.timer = null; onDismiss(); }, this.remaining);
         },
-        dismiss() { this.pause(); this.visible = false; },
+        dismiss() { this.pause(); this.visible = false; onDismiss(); },
         destroy() { this.pause(); },
     };
 }
@@ -170,8 +171,9 @@ export function registerMobileUi(Livewire, Alpine) {
     Alpine.data('toastMessage', toastMessage);
     Alpine.data('mobileNavigation', mobileNavigation);
     Alpine.data('mobileFilterPanel', mobileFilterPanel);
+    registerOperationalFeedback(Livewire, Alpine);
     const pending = new WeakMap();
-    Livewire.interceptMessage(({ message, onSend, onFinish, onSuccess, onFailure }) => {
+    Livewire.interceptMessage(({ message, onSend, onFinish, onSuccess, onFailure, onError }) => {
         const dialog = () => message.component.el.querySelector('[data-ui-dialog-component]');
         if (!dialog()) return;
         const busy = value => dialog()?.dispatchEvent(new CustomEvent('ui-dialog-busy', { detail: value }));
@@ -186,9 +188,7 @@ export function registerMobileUi(Livewire, Alpine) {
             field?.scrollIntoView({ block: 'nearest' });
             field?.focus({ preventScroll: true });
         })));
-        onFailure(() => {
-            const alert = dialog()?.querySelector('[data-ui-request-error]');
-            if (alert) { alert.hidden = false; alert.focus(); }
-        });
+        onFailure(() => { if (!globalThis.Alpine?.store?.('operationalFeedback')) reportRequestFailure(message.component, null, true); });
+        onError?.(({ response, preventDefault }) => { preventDefault(); if (!globalThis.Alpine?.store?.('operationalFeedback')) reportRequestFailure(message.component, response.status, true); });
     });
 }

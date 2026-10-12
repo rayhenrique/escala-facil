@@ -22,6 +22,7 @@ use App\Support\ManagerAttention;
 use App\Support\OperationalFilters;
 use App\Support\OperationalNavigation;
 use App\Support\ShiftAssignmentAnalysis;
+use App\Support\UiFeedback;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
@@ -212,10 +213,10 @@ class ShiftManager extends Component
         if ($shift) {
             abort_unless($this->editingShiftSnapshot, 404);
             $action->execute(auth()->user(), $shift->id, $this->payload(), $this->editingShiftSnapshot, $expected);
-            session()->flash('status', 'Plantão atualizado com sucesso.');
+            UiFeedback::success('Plantão atualizado com sucesso.');
         } else {
             app(CreateShiftAction::class)->execute(auth()->user(), $this->payload(), $expected);
-            session()->flash('status', 'Plantão criado com sucesso.');
+            UiFeedback::success('Plantão criado com sucesso.');
         }
 
         $this->resetForm();
@@ -288,7 +289,7 @@ class ShiftManager extends Component
         $this->focus = null;
 
         $this->cancelDelete();
-        session()->flash('status', 'Plantão excluído.');
+        UiFeedback::success('Plantão excluído.');
     }
 
     public function openImportModal(): void
@@ -329,7 +330,7 @@ class ShiftManager extends Component
         $this->closeImportModal();
         $this->resetPage();
 
-        session()->flash('status', sprintf(
+        UiFeedback::success(sprintf(
             'Importação concluída: %d plantão(ões) criado(s)%s.',
             $result['created'],
             $result['skipped'] > 0 ? " e {$result['skipped']} duplicata(s) ignorada(s)" : '',
@@ -402,7 +403,7 @@ class ShiftManager extends Component
         $this->month = $this->normalizeMonth($targetMonth);
         $this->resetPage();
 
-        session()->flash('status', sprintf(
+        UiFeedback::success(sprintf(
             'Cópia concluída: %d plantão(ões) criado(s) e %d ignorado(s).',
             $result['created'],
             $result['ignored'],

@@ -7,6 +7,7 @@ use App\Enums\ShiftSwapEvent;
 use App\Models\ShiftSwap;
 use App\Support\ShiftSwapAnalysis;
 use App\Support\ShiftSwapReceipt;
+use App\Support\UiFeedback;
 use Illuminate\Auth\Access\AuthorizationException;
 use Livewire\Attributes\Locked;
 
@@ -97,7 +98,7 @@ trait AnalyzesShiftSwaps
         $this->swapReceipt = $receipts->make($swap, $event);
         $this->cancelDecision();
         $this->dispatch('notifications-updated');
-        session()->flash('status', $event === ShiftSwapEvent::Approved
+        UiFeedback::success($event === ShiftSwapEvent::Approved
             ? 'Troca aprovada e plantão transferido ao substituto.'
             : 'Solicitação de troca rejeitada e comprovante gerado.');
     }

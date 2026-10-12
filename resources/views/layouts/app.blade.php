@@ -167,6 +167,7 @@
         </div>
         <livewire:mobile-navigation />
         <livewire:release-announcement />
+        <x-feedback-outlet />
         @livewireScriptConfig
     </body>
 </html>

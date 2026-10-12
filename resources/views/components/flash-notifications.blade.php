@@ -3,8 +3,10 @@
     $errorMessage = session('error');
 @endphp
 @if ($successMessage || $errorMessage)
-    <div class="toast-region">
-        @if ($successMessage)<x-toast :message="$successMessage" wire:key="toast-success-{{ md5($successMessage) }}" />@endif
-        @if ($errorMessage)<x-toast :message="$errorMessage" tone="error" wire:key="toast-error-{{ md5($errorMessage) }}" />@endif
-    </div>
+    @foreach (['status' => ['success', $successMessage], 'error' => ['error', $errorMessage]] as $key => [$tone, $message])
+        @if ($message)
+            @php $identity = session('ui_feedback_'.$key.'_id') ?? 'legacy-'.$tone.'-'.md5($message); @endphp
+            <div hidden x-data x-init="$store.operationalFeedback.notify({ id: @js($identity), tone: @js($tone), message: @js($message) })" wire:key="feedback-{{ $identity }}">{{ $message }}</div>
+        @endif
+    @endforeach
 @endif

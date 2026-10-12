@@ -1,3 +1,4 @@
+import { reportRequestFailure } from './operational-feedback.js';
 // Apenas apresentação: autenticação, limites e sessão continuam no servidor.
 export function registerAuthUi(Livewire) {
     Livewire.hook('component.init', ({ component, cleanup }) => {
@@ -5,17 +6,7 @@ export function registerAuthUi(Livewire) {
         if (!form) return;
         const listeners = new AbortController();
         const currentForm = () => component.el.querySelector('[data-auth-form]');
-        const showFailure = (expired = false) => {
-            if (!component.el.isConnected) return;
-            const alert = currentForm()?.querySelector('[data-auth-request-error]');
-            if (!alert) return;
-            alert.querySelector('[data-auth-request-message]').textContent = expired
-                ? 'Esta página expirou. Atualize a página para continuar.'
-                : 'Não foi possível concluir a solicitação. Confira sua conexão e tente novamente.';
-            alert.querySelector('[data-auth-reload]').hidden = !expired;
-            alert.hidden = false;
-            alert.focus();
-        };
+        const showFailure = (expired = false) => { if (!globalThis.Alpine?.store?.('operationalFeedback')) reportRequestFailure(component, expired ? 419 : null, true); };
         form.addEventListener('submit', () => {
             form.querySelector('[data-auth-request-error]').hidden = true;
             // Alguns gerenciadores preenchem sem emitir input/change. Sincroniza
