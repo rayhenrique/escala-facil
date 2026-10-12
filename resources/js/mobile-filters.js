@@ -74,4 +74,3 @@ export function mobileFilterPanel({ fields, defaults = {}, labels = {} }) {
         destroy() { this.media?.removeEventListener('change', this.mediaChanged); },
     };
 }
-
