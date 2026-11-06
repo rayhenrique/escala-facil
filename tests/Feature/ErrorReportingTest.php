@@ -8,6 +8,7 @@ use App\Support\ErrorReporting;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
+use Sentry\Breadcrumb;
 use Sentry\Event;
 use Sentry\UserDataBag;
 use Tests\TestCase;
@@ -96,6 +97,20 @@ class ErrorReportingTest extends TestCase
         );
 
         $this->assertNotEmpty($errorId);
+    }
+
+    public function test_livewire_passwords_are_scrubbed_from_breadcrumbs_and_raw_json_requests(): void
+    {
+        $credentials = ['current_password' => 'senha-antiga', 'password' => 'senha-nova', 'password_confirmation' => 'senha-nova'];
+        $event = Event::createEvent();
+        $event->setRequest(['data' => json_encode(['components' => [['calls' => [['method' => 'changePassword', 'params' => [$credentials]]]]]])]);
+
+        $request = ErrorReporting::scrubEvent($event)->getRequest();
+        $expected = array_fill_keys(array_keys($credentials), ErrorReporting::FILTERED);
+        $this->assertSame($expected, $request['data']['components'][0]['calls'][0]['params'][0]);
+
+        $breadcrumb = new Breadcrumb(Breadcrumb::LEVEL_INFO, Breadcrumb::TYPE_DEFAULT, 'livewire', 'Component call: my-profile::changePassword', ['$credentials' => $credentials]);
+        $this->assertSame(['$credentials' => $expected], ErrorReporting::scrubBreadcrumb($breadcrumb)->getMetadata());
     }
 
     public function test_client_error_endpoint_accepts_scrubbed_payloads(): void

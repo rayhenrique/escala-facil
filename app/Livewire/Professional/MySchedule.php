@@ -259,8 +259,7 @@ class MySchedule extends Component
         return User::query()->where('role', UserRole::Professional)->where('id', '!=', auth()->id())
             ->where('category_id', $shift?->category_id)->where('sector_id', $shift?->sector_id)
             ->when(trim($this->professionalSearch) !== '', fn ($query) => $query->where('name', 'like', '%'.mb_substr(trim($this->professionalSearch), 0, 100).'%'))
-            ->whereRaw('(select count(*) from shift_swaps where (requester_id = users.id or substitute_id = users.id) and status = ? and created_at >= ? and created_at < ?) < ?',
-                [ShiftSwapStatus::Approved->value, now()->startOfMonth(), now()->startOfMonth()->addMonth(), User::MONTHLY_SWAP_LIMIT])
+            ->withAvailableSwapQuota()
             ->orderBy('name')->orderBy('id')->paginate(10, ['*'], 'professionalPage');
     }
 
@@ -324,8 +323,8 @@ class MySchedule extends Component
 
     private function authorizeSwapRequest(): void
     {
-        if (auth()->user()->hasReachedSwapLimit(now()->month, now()->year)) {
-            throw ValidationException::withMessages(['shift_id' => 'Você atingiu o limite mensal de quatro trocas aprovadas.']);
+        if (auth()->user()->hasReachedSwapLimit()) {
+            throw ValidationException::withMessages(['shift_id' => User::SWAP_LIMIT_MESSAGE]);
         }
         $this->authorize('create', ShiftSwap::class);
     }
@@ -410,8 +409,8 @@ class MySchedule extends Component
             'counterpart' => $counterpart ? $this->shiftSummary($counterpart)['shift'] : null,
             'counterpart_location' => $counterpart ? $this->shiftSummary($counterpart)['location'] : null,
             'requester' => auth()->user()->name,
-            'quota' => auth()->user()->approvedSwapCount(now()->month, now()->year).' de 4',
-            'substitute_quota' => $substitute->approvedSwapCount(now()->month, now()->year).' de 4',
+            'quota' => auth()->user()->approvedSwapCount().' de 4',
+            'substitute_quota' => $substitute->approvedSwapCount().' de 4',
             'warnings' => app(ShiftSwapTimingWarnings::class)->make($shift, $substitute, $counterpart, auth()->user()),
         ];
     }
@@ -582,7 +581,8 @@ class MySchedule extends Component
         $validFilters = $this->validListFilters();
         $validShiftStatus = $this->filter === '' || ShiftStatus::tryFrom($this->filter);
         $validSwapStatus = $this->swapStatusFilter === '' || ShiftSwapStatus::tryFrom($this->swapStatusFilter);
-        $swapLimitReached = auth()->user()->hasReachedSwapLimit(now()->month, now()->year);
+        $swapCount = auth()->user()->approvedSwapCount();
+        $swapLimitReached = $swapCount >= User::MONTHLY_SWAP_LIMIT;
 
         // Independent of history filters: bounded, current assignments only.
         $nextShift = Shift::query()->with(['sector', 'category'])
@@ -599,7 +599,7 @@ class MySchedule extends Component
         if ($nextShift) {
             $nextSwapReason = match (true) {
                 ! $nextShift->date->isAfter(today()) => 'Trocas só podem ser solicitadas para plantões após o dia de hoje.',
-                $swapLimitReached => 'A cota mensal de quatro trocas aprovadas foi atingida.',
+                $swapLimitReached => User::SWAP_LIMIT_MESSAGE,
                 ! auth()->user()->can('create', ShiftSwap::class) => 'Complete o setor e a categoria do seu cadastro com a gerência.',
                 $nextShift->sector_id !== auth()->user()->sector_id || $nextShift->category_id !== auth()->user()->category_id => 'O setor ou a categoria do plantão difere do seu cadastro. Consulte a gerência antes de solicitar troca.',
                 $nextHasActiveSwap => 'Este plantão já possui uma troca em andamento ou aprovada. Consulte suas solicitações.',
@@ -707,6 +707,7 @@ class MySchedule extends Component
             'incomingSwaps',
             'mySwaps',
             'swapLimitReached',
+            'swapCount',
             'swappedShiftsDetails',
         ));
     }

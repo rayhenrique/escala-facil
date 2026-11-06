@@ -8,6 +8,7 @@ use App\Enums\UserRole;
 use App\Models\Shift;
 use App\Models\ShiftSwap;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Validation\Validator;
 
 class StoreShiftSwapRequest extends DataFormRequest
@@ -99,11 +100,12 @@ class StoreShiftSwapRequest extends DataFormRequest
                     }
                 }
 
-                if ($requester->hasReachedSwapLimit(now()->month, now()->year)) {
-                    $validator->errors()->add('shift_id', 'Você atingiu o limite mensal de quatro trocas aprovadas.');
+                $reference = CarbonImmutable::now(config('app.timezone'));
+                if ($requester->hasReachedSwapLimit($reference->month, $reference->year)) {
+                    $validator->errors()->add('shift_id', User::SWAP_LIMIT_MESSAGE);
                 }
 
-                if ($substitute->hasReachedSwapLimit(now()->month, now()->year)) {
+                if ($substitute->hasReachedSwapLimit($reference->month, $reference->year)) {
                     $validator->errors()->add('substitute_id', 'O profissional selecionado atingiu o limite mensal de trocas.');
                 }
             },

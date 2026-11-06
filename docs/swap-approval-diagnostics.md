@@ -19,16 +19,16 @@ Foi consultado exclusivamente o arquivo SQLite local em modo somente leitura, co
 | Original não pertence mais ao solicitante | Papel/ID, profissional esperado e atribuição atual | Revisar escala; se a mudança foi intencional, rejeitar com justificativa e criar nova solicitação |
 | Contrapartida não pertence mais ao substituto | Mesmos detalhes para a contrapartida | Mesma orientação, sem ignorar a segunda atribuição |
 | Um dos plantões não está Agendado | Papel/ID e situação atual | Conferir ausência ou alteração na escala |
-| Um participante tem pelo menos quatro participações aprovadas | Nome, quantidade, limite e mês de referência | Conferir pedidos aprovados do mês de criação da solicitação |
+| Um participante tem pelo menos quatro participações aprovadas | Nome, quantidade, limite e mês de referência | Conferir aprovações do mês corrente |
 | Dados relevantes mudaram após revisão | Análise desatualizada e impedimentos atuais, se houver | Usar Atualizar análise e conferir novamente antes da confirmação |
 | Operação concorrente não concluiu após tentativas | Outra operação está alterando os registros | Atualizar análise após a conclusão da operação concorrente |
 
 `ShiftSwapApproval` fornece os impedimentos de domínio e cotas para `ShiftSwapPolicy::approve()` e `ShiftSwapAnalysis`. A Policy retorna razões específicas com `Response::deny`; o componente preserva essas razões. A revisão apresenta as duas atribuições e separa impedimentos obrigatórios de avisos de horário. Cotas da tela e elegibilidade usam o mesmo resultado, sem consultar novamente a cota para decidir o estado do botão.
 
-## Regra mensal preservada
+## Regra mensal desde a 1.47.0
 
 - Conta somente `approved`, com `requester_id = pessoa` **ou** `substitute_id = pessoa`, sem somar duas vezes o mesmo pedido.
-- Referência: `created_at` da solicitação, do primeiro dia às 00h até antes do primeiro dia do mês seguinte, no fuso configurado no aplicativo. Não é o mês do plantão nem o mês da decisão.
+- Referência: `approved_at` da decisão gerencial, do primeiro dia às 00h até antes do primeiro dia do mês seguinte, no fuso configurado no aplicativo.
 - Pedidos pendentes, rejeitados e desfeitos não consomem cota. Desfazer uma aprovação libera essa participação, conforme o fluxo existente.
 - 3/4 permite a quarta aprovação; 4/4 impede outra. `User::approvedSwapCount()` centraliza a contagem; `hasReachedSwapLimit()` mantém a comparação com quatro. Intervalos por data aproveitam os índices existentes.
 
@@ -47,7 +47,7 @@ Após instalar a correção pelo processo habitual, abra o pedido #89 em Trocas 
 Se for necessária conferência técnica antes disso, execute a consulta abaixo somente no ambiente de dados autorizado; ela não modifica registros:
 
 ```sql
-SELECT s.id, s.status, s.created_at, s.requester_id, s.substitute_id,
+SELECT s.id, s.status, s.created_at, s.approved_at, s.requester_id, s.substitute_id,
        s.shift_id, a.user_id AS original_user_id, a.status AS original_status,
        s.substitute_shift_id, b.user_id AS counterpart_user_id,
        b.status AS counterpart_status
@@ -57,14 +57,14 @@ LEFT JOIN shifts b ON b.id = s.substitute_shift_id
 WHERE s.id = 89;
 ```
 
-Para cada participante, confira as participações aprovadas com o mesmo mês de criação do pedido. Os parâmetros `:id_requester` e `:id_substitute` recebem o mesmo ID da pessoa:
+Para cada participante, confira as participações aprovadas no mês corrente. Os parâmetros `:id_requester` e `:id_substitute` recebem o mesmo ID da pessoa:
 
 ```sql
 SELECT COUNT(*) AS approved_participations
 FROM shift_swaps
 WHERE status = 'approved'
-  AND created_at >= :month_start
-  AND created_at < :next_month_start
+  AND approved_at >= :month_start
+  AND approved_at < :next_month_start
   AND (requester_id = :id_requester OR substitute_id = :id_substitute);
 ```
 

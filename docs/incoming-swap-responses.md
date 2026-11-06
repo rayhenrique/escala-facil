@@ -12,7 +12,7 @@ A migração aditiva inclui professional_response e professional_responded_at, a
 
 RespondToShiftSwapAction mantém aceite e recusa em uma transação comum: bloqueia participantes e plantões em ordem de ID, depois pedido; relê perfil, destinatário e status. O fingerprint inclui as atribuições e horários dos dois plantões, compatibilidade, cota e alertas. Revisão desatualizada pede nova consulta; disputa concorrente é tratada com até três tentativas e motivo claro. Notificações e auditoria participam da mesma transação.
 
-A cota do aceite usa o mês de criação da solicitação, não necessariamente o mês corrente. Ambos os plantões precisam conservar atribuição/status e compatibilidade para aceite. Conflitos e dobras são avisos informativos nesta etapa, sem inventar descanso mínimo ou mudar a aprovação gerencial. A recusa permanece disponível diante desses impedimentos operacionais, enquanto o pedido ainda aguarda o destinatário.
+O aceite confere as aprovações gerenciais do destinatário no mês corrente. Ambos os plantões precisam conservar atribuição/status e compatibilidade para aceite. Conflitos e dobras são avisos informativos nesta etapa, sem inventar descanso mínimo ou mudar a aprovação gerencial. A recusa permanece disponível diante desses impedimentos operacionais, enquanto o pedido ainda aguarda o destinatário.
 
 Uma interrupção de rede não confirma nem desfaz uma decisão. O formulário conserva os dados e oferece Atualizar detalhes. Se o servidor já concluiu, a consulta mostra a situação atual; uma repetição não gera nova decisão, histórico ou notificação.
 

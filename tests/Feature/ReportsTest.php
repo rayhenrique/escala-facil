@@ -84,6 +84,35 @@ class ReportsTest extends TestCase
             ->assertSee('Ana Plantonista');
     }
 
+    public function test_professional_quota_in_screen_and_pdf_uses_the_approval_month(): void
+    {
+        [$manager, $ana, $bruno, $sector, $category] = $this->team();
+        $shift = Shift::factory()->create([
+            'date' => '2026-11-12', 'user_id' => $ana->id, 'sector_id' => $sector->id, 'category_id' => $category->id,
+        ]);
+        ShiftSwap::factory()->approved()->create([
+            'shift_id' => $shift->id, 'requester_id' => $bruno->id, 'substitute_id' => $ana->id,
+            'created_at' => '2026-10-30 13:00:00', 'approved_at' => '2026-11-01 00:00:00',
+        ]);
+        $previousSectorShift = Shift::factory()->create([
+            'date' => '2026-10-31', 'user_id' => $ana->id, 'sector_id' => Sector::factory()->create()->id, 'category_id' => $category->id,
+        ]);
+        ShiftSwap::factory()->approved()->create([
+            'shift_id' => $previousSectorShift->id,
+            'requester_id' => $ana->id, 'substitute_id' => $bruno->id,
+            'created_at' => '2026-10-31 13:00:00', 'approved_at' => '2026-11-01 01:00:00',
+        ]);
+
+        $reports = app(ShiftReportService::class);
+        foreach ([$reports->forScreen('2026-11', '', '', $manager), $reports->forPeriod('2026-11', forUser: $manager)] as $report) {
+            $this->assertSame(2, $report['byProfessional']->firstWhere('name', $ana->name)['approvedSwaps']);
+            $this->assertSame(0, $report['summary']['swapsApproved']);
+        }
+        foreach ([$reports->forScreen('2026-11', '', '', $bruno), $reports->forPeriod('2026-11', forUser: $bruno)] as $report) {
+            $this->assertSame(1, $report['byProfessional']->firstWhere('name', $ana->name)['approvedSwaps']);
+        }
+    }
+
     public function test_invalid_month_is_normalized_before_queries_run(): void
     {
         $manager = User::factory()->create(['role' => UserRole::Manager]);

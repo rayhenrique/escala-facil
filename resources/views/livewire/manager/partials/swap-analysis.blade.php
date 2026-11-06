@@ -50,7 +50,7 @@
             <div class="text-sm">
                 <p class="font-semibold">Limite mensal</p>
                 @foreach ($pendingDecisionSummary['quotas'] as $quota)<p>{{ $quota }}</p>@endforeach
-                <p class="mt-1 text-xs text-muted">Contagem pelo mês da solicitação, conforme a regra vigente. Cada pedido aprovado conta uma vez por participante, inclusive na troca mútua. Pendentes, rejeitados e desfeitos não consomem a cota.</p>
+                <p class="mt-1 text-xs text-muted">A cota deste mês considera a data da aprovação gerencial. Cada pedido aprovado conta uma vez por participante, inclusive na troca mútua. Pendentes, rejeitados e desfeitos não consomem a cota.</p>
             </div>
             @if ($pendingDecision)</div></details>@endif
             <p class="text-sm font-semibold">Avisos de horário</p>

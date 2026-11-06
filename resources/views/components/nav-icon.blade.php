@@ -20,6 +20,10 @@
         @case('swap')
             <path d="M7 7h11l-3-3M18 7l-3 3M17 17H6l3 3M6 17l3-3" />
             @break
+        @case('profile')
+            <circle cx="12" cy="8" r="4" />
+            <path d="M4 21v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2" />
+            @break
         @case('users')
             <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
             <circle cx="9" cy="7" r="4" />

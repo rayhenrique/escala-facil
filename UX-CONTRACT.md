@@ -117,7 +117,7 @@ Os formulários de acesso não abrem o teclado automaticamente. E-mail usa tecla
 - Responsáveis canônicos: `ShiftSwapAnalysis`, `AnalyzesShiftSwaps`, parcial `manager/partials/swap-analysis` e `DecideShiftSwapAction`, compartilhados com Trocas.
 - Abrir a análise não modifica o pedido. Aprovar ou Rejeitar abre a etapa de confirmação com consequências explícitas. Rejeição exige justificativa de 3 a 1000 caracteres no servidor, inclusive fora do componente.
 - São exibidos data, início, término, duração, setor, categoria, participantes e contrapartida. Alertas consideram o cronograma resultante dos dois profissionais, excluindo os plantões que serão transferidos. Encostar é dobra; sobrepor é conflito. Ambos permanecem alertas gerenciais conforme a regra vigente; não foi criada proibição institucional adicional.
-- Cota: quatro participações aprovadas, pelo mês de criação da solicitação. Limite atingido impede aprovação, mas permite análise e rejeição.
+- Cota: quatro participações aprovadas, pelo mês da aprovação gerencial. Limite atingido impede aprovação, mas permite análise e rejeição.
 - A confirmação usa estado bloqueado do Livewire e uma assinatura da análise. A Action relê e bloqueia participantes, gerente, plantões em ordem estável e pedido, revalida permissão atual, atribuição da contrapartida, status e cota na transação. Mudanças desde a análise exigem fechá-la e abri-la novamente.
 - Clique repetido ou duas decisões concorrentes não criam duas decisões/comprovantes. Deadlocks recebem até três tentativas; conflito persistente retorna mensagem para consultar novamente, sem sucesso antecipado. Falhas de rede mantêm a análise e orientam conferir o estado antes de repetir.
 - Após sucesso, fila e indicadores são recalculados, filtros mantidos, comprovante exibido e contador de notificações atualizado. Notificações históricas permanecem imutáveis na mesma transação da decisão.
@@ -260,7 +260,7 @@ Tocar no corpo do cartão ou acionar Ver detalhes abre a mesma consulta autoriza
 ## Responder a solicitações recebidas
 
 - O destinatário profissional pode consultar o pedido, aceitar ou recusar enquanto ele aguarda profissional. Cards e detalhes mostram troca simples/mútua, participantes, horários, duração e ambos os movimentos quando houver contrapartida.
-- ShiftSwapResponse centraliza os impedimentos da resposta: status, atribuição/situação dos dois plantões, setor/categoria e cota do destinatário no mês de criação do pedido. Sobreposição e dobra são avisos calculados por ShiftCoverage/ShiftPeriod e não mudam os critérios de aprovação da gerência.
+- ShiftSwapResponse centraliza os impedimentos da resposta: status, atribuição/situação dos dois plantões, setor/categoria e cota do destinatário no mês corrente. Sobreposição e dobra são avisos calculados por ShiftCoverage/ShiftPeriod e não mudam os critérios de aprovação da gerência.
 - Aceitar encaminha à gerência, sem transferir plantões nem consumir cota. Recusar encerra o pedido no estado terminal Rejeitada, identificado por novo evento Recusa do profissional; o motivo é opcional. Nenhuma recusa ou motivo é fabricado para registros antigos.
 - A Action compartilhada bloqueia participantes, plantões em ordem de ID e pedido, relê autorização/status e compara a revisão. Uma resposta simultânea não sobrescreve a outra. Falhas não produzem comprovantes nem eventos de sucesso.
 - Detalhes e confirmação nunca ficam ativos juntos. Cancelar retorna aos detalhes; fechar devolve foco ao acionador. Após resposta, a fila, contador e notificações se atualizam via Livewire; foco vai à lista restante ou ao título da página.
@@ -305,3 +305,9 @@ Somente o backend confirma sucesso. Atualizar a interface, voltar à conexão ou
 Falha recuperável conserva entradas e janela. Uma resposta ausente pode corresponder a alteração recebida: orientar a conferir o registro antes de tentar novamente. Verificar conexão faz apenas uma consulta de disponibilidade; não repete ações. Atualizar consulta só está disponível para falhas de leitura. Aprovação, rejeição e reversão jamais são reenviadas automaticamente. Conflitos orientam atualizar a análise existente e revisar; validações continuam junto aos campos. Sessão expirada solicita atualização deliberada após copiar os dados necessários; não renova autenticação nem envia formulários automaticamente.
 
 Avisos globais cedem lugar ao painel ativo, evitando mensagens fora do focus trap. Sem conexão é um aviso imediato; voltar online não confirma a operação. Paginação, PWA, autenticação e registros históricos mantêm os contratos anteriores.
+
+## Meu Perfil e montagem mensal — 1.47.0
+
+- Meu Perfil fica na sidebar e na gaveta móvel. Atualizar o nome reflete na navegação. A seção Segurança reutiliza o campo de senha e limpa os campos após a confirmação. Profissionais acessam Minha escala pelo atalho para a agenda mensal vigente.
+- A montagem mensal reutiliza a busca nativa de profissionais e a revisão do formulário de Gestão de escalas. A grade começa na segunda-feira. No celular, os dias são apresentados em lista, com ações de criação e edição acessíveis. Cada plantão aparece no dia de início.
+- Cadastrar e editar reaproveitam os avisos de sobreposição, dobra e cobertura, com confirmação explícita e revalidação. A cota de trocas usa o mês de aprovação gerencial e é recalculada em cada operação.

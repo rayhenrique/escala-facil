@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
-use App\Enums\ShiftSwapStatus;
 use App\Enums\UserRole;
 use App\Models\Concerns\HasOperationalAudit;
 use Carbon\CarbonImmutable;
 use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -22,6 +22,8 @@ class User extends Authenticatable
     use HasOperationalAudit;
 
     public const MONTHLY_SWAP_LIMIT = 4;
+
+    public const SWAP_LIMIT_MESSAGE = 'Você atingiu o limite de quatro trocas aprovadas neste mês. Novas solicitações e aceites serão liberados no próximo mês.';
 
     protected $fillable = [
         'name',
@@ -98,27 +100,36 @@ class User extends Authenticatable
         return $this->hasMany(Absence::class);
     }
 
-    public function hasReachedSwapLimit(int $month, int $year, bool $lockForUpdate = false): bool
+    public function hasReachedSwapLimit(?int $month = null, ?int $year = null, bool $lockForUpdate = false): bool
     {
         return $this->approvedSwapCount($month, $year, $lockForUpdate) >= self::MONTHLY_SWAP_LIMIT;
     }
 
-    public function approvedSwapCount(int $month, int $year, bool $lockForUpdate = false): int
+    public function approvedSwapCount(?int $month = null, ?int $year = null, bool $lockForUpdate = false): int
     {
-        $start = CarbonImmutable::create($year, $month, 1, 0, 0, 0);
-        $query = ShiftSwap::query()
-            ->where('status', ShiftSwapStatus::Approved)
-            ->where(function ($query) {
-                $query->where('requester_id', $this->getKey())
-                    ->orWhere('substitute_id', $this->getKey());
-            })
-            ->where('created_at', '>=', $start)
-            ->where('created_at', '<', $start->addMonth());
+        $now = CarbonImmutable::now(config('app.timezone'));
 
-        $participations = $lockForUpdate
-            ? $query->lockForUpdate()->pluck('id')->count()
-            : $query->count();
+        return $this->swapCountForMonth($now->startOfMonth()->setDate($year ?? $now->year, $month ?? $now->month, 1), $lockForUpdate);
+    }
 
-        return $participations;
+    public function swapCountForMonth(CarbonImmutable $reference, bool $lockForUpdate = false): int
+    {
+        $query = ShiftSwap::query()->approvedInMonth($reference)
+            ->where(fn (Builder $query) => $query->where('requester_id', $this->getKey())->orWhere('substitute_id', $this->getKey()));
+
+        return $lockForUpdate ? $query->lockForUpdate()->pluck('id')->count() : $query->count();
+    }
+
+    public function scopeWithAvailableSwapQuota(Builder $query): Builder
+    {
+        return $query->where(self::approvedSwapCountForUsers(CarbonImmutable::now(config('app.timezone'))), '<', self::MONTHLY_SWAP_LIMIT);
+    }
+
+    /** Count participations for the users selected by the outer query. */
+    public static function approvedSwapCountForUsers(CarbonImmutable $reference): Builder
+    {
+        return ShiftSwap::query()->approvedInMonth($reference)
+            ->selectRaw('COUNT(*)')
+            ->where(fn (Builder $query) => $query->whereColumn('requester_id', 'users.id')->orWhereColumn('substitute_id', 'users.id'));
     }
 }

@@ -63,6 +63,8 @@ class PhaseEightCalendarTest extends TestCase
 
     public function test_calendar_moves_between_months_and_rejects_invalid_or_outside_dates(): void
     {
+        $this->travelTo(now()->setDate(2026, 10, 31)->startOfDay());
+
         $manager = User::factory()->create(['role' => UserRole::Manager]);
 
         Livewire::actingAs($manager)

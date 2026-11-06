@@ -4,6 +4,7 @@ namespace App\Support;
 
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Sentry\Breadcrumb;
 use Sentry\Event;
 use Sentry\EventHint;
 use Sentry\SentrySdk;
@@ -141,6 +142,9 @@ class ErrorReporting
 
             if (isset($request['data']) && is_array($request['data'])) {
                 $request['data'] = self::scrub($request['data']);
+            } elseif (isset($request['data']) && is_string($request['data'])) {
+                $decoded = json_decode($request['data'], true);
+                $request['data'] = is_array($decoded) ? self::scrub($decoded) : self::FILTERED;
             }
 
             if (isset($request['url']) && is_string($request['url'])) {
@@ -159,6 +163,22 @@ class ErrorReporting
         }
 
         return $event;
+    }
+
+    public static function scrubBreadcrumb(Breadcrumb $breadcrumb): Breadcrumb
+    {
+        if ($breadcrumb->getCategory() !== 'livewire') {
+            return $breadcrumb;
+        }
+
+        return new Breadcrumb(
+            $breadcrumb->getLevel(),
+            $breadcrumb->getType(),
+            $breadcrumb->getCategory(),
+            $breadcrumb->getMessage(),
+            self::scrub($breadcrumb->getMetadata()),
+            $breadcrumb->getTimestamp(),
+        );
     }
 
     /** @return array<string, mixed> */

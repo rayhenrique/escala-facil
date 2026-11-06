@@ -284,7 +284,7 @@
                 <div>
                     <p class="eyebrow">Desempenho</p>
                     <h2 id="report-professionals-title" class="text-xl font-bold">Plantões por profissional</h2>
-                    <p class="mt-1 text-sm text-muted">Acompanhamento de alocação de plantões, cota mensal de trocas (máx. 4) e ausências.</p>
+                    <p class="mt-1 text-sm text-muted">{{ $isProfessional ? 'Acompanhe plantões, ausências e aprovações de troca no seu setor.' : 'Acompanhe plantões, ausências e a cota de quatro trocas pela data da aprovação gerencial.' }}</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
                     <span class="text-sm font-semibold text-muted">{{ $this->report['byProfessional']->total() }} profissional(is)</span>
@@ -305,17 +305,21 @@
                                 <td>{{ $row['team'] }}</td>
                                 <td class="text-right font-semibold">{{ $row['shifts'] }}</td>
                                 <td class="text-right">
-                                    <span @class([
-                                        'inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold',
-                                        'bg-emerald-50 text-emerald-700' => $row['approvedSwaps'] < 3,
-                                        'bg-amber-100 text-amber-800' => $row['approvedSwaps'] === 3,
-                                        'bg-red-100 text-danger font-bold' => $row['approvedSwaps'] >= 4,
-                                    ])>
-                                        {{ $row['approvedSwaps'] }} de 4
-                                        @if ($row['approvedSwaps'] >= 4)
-                                            <span class="ml-1 text-[0.625rem] uppercase tracking-wider">(Limite)</span>
-                                        @endif
-                                    </span>
+                                    @if ($isProfessional)
+                                        {{ $row['approvedSwaps'] }}
+                                    @else
+                                        <span @class([
+                                            'inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold',
+                                            'bg-emerald-50 text-emerald-700' => $row['approvedSwaps'] < 3,
+                                            'bg-amber-100 text-amber-800' => $row['approvedSwaps'] === 3,
+                                            'bg-red-100 text-danger font-bold' => $row['approvedSwaps'] >= 4,
+                                        ])>
+                                            {{ $row['approvedSwaps'] }} de 4
+                                            @if ($row['approvedSwaps'] >= 4)
+                                                <span class="ml-1 text-[0.625rem] uppercase tracking-wider">(Limite)</span>
+                                            @endif
+                                        </span>
+                                    @endif
                                 </td>
                                 <td class="text-right">
                                     @if ($row['absences'] > 0)
@@ -336,15 +340,17 @@
                     <article class="record-card">
                         <div class="flex items-center justify-between gap-2">
                             <h3 class="font-semibold">{{ $row['name'] }}</h3>
-                            <span @class([
-                                'px-2 py-0.5 rounded text-xs font-semibold',
-                                'bg-emerald-50 text-emerald-700' => $row['approvedSwaps'] < 3,
-                                'bg-amber-100 text-amber-800' => $row['approvedSwaps'] === 3,
-                                'bg-red-100 text-danger' => $row['approvedSwaps'] >= 4,
-                            ])>{{ $row['approvedSwaps'] }}/4 trocas</span>
+                            @unless ($isProfessional)
+                                <span @class([
+                                    'px-2 py-0.5 rounded text-xs font-semibold',
+                                    'bg-emerald-50 text-emerald-700' => $row['approvedSwaps'] < 3,
+                                    'bg-amber-100 text-amber-800' => $row['approvedSwaps'] === 3,
+                                    'bg-red-100 text-danger' => $row['approvedSwaps'] >= 4,
+                                ])>{{ $row['approvedSwaps'] }}/4 trocas</span>
+                            @endunless
                         </div>
                         <p class="mt-1 text-sm text-muted">{{ $row['team'] }}</p>
-                        <p class="mt-1 text-sm text-muted">{{ $row['shifts'] }} plantão(ões) · {{ $row['approvedSwaps'] }} de 4 trocas · {{ $row['absences'] }} ausência(s)</p>
+                        <p class="mt-1 text-sm text-muted">{{ $row['shifts'] }} plantão(ões) · {{ $row['approvedSwaps'] }} {{ $isProfessional ? 'troca(s) aprovada(s)' : 'de 4 trocas' }} · {{ $row['absences'] }} ausência(s)</p>
                     </article>
                 @empty
                     <x-empty-state class="compact-empty" title="Nenhum profissional corresponde ao mês e aos filtros. Ajuste a pesquisa ou limpe os filtros." />

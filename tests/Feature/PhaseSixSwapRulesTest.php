@@ -46,7 +46,7 @@ class PhaseSixSwapRulesTest extends TestCase
         } catch (ValidationException $exception) {
             $this->assertArrayHasKey('shift_id', $exception->errors());
             $this->assertSame(
-                'Você atingiu o limite mensal de quatro trocas aprovadas.',
+                User::SWAP_LIMIT_MESSAGE,
                 $exception->errors()['shift_id'][0],
             );
         }
@@ -66,7 +66,7 @@ class PhaseSixSwapRulesTest extends TestCase
 
         Livewire::actingAs($professional)
             ->test(MySchedule::class)
-            ->assertSee('Você atingiu a cota de quatro trocas aprovadas neste mês.')
+            ->assertSee(User::SWAP_LIMIT_MESSAGE)
             ->assertSeeHtml('disabled');
     }
 
@@ -245,6 +245,7 @@ class PhaseSixSwapRulesTest extends TestCase
             'requester_id' => $requester->id,
             'substitute_id' => $substitute->id,
             'status' => $status,
+            'approved_at' => $status === ShiftSwapStatus::Approved ? now() : null,
         ]);
     }
 }

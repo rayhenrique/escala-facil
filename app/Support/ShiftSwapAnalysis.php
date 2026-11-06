@@ -7,16 +7,17 @@ use App\Enums\ShiftSwapStatus;
 use App\Models\Shift;
 use App\Models\ShiftSwap;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Gate;
 
 class ShiftSwapAnalysis
 {
     /** The same snapshot is used for review and again inside the decision transaction. */
-    public function make(ShiftSwap $swap, User $manager): array
+    public function make(ShiftSwap $swap, User $manager, ?CarbonImmutable $reference = null): array
     {
         Gate::forUser($manager)->authorize('viewAny', ShiftSwap::class);
         $swap->loadMissing(['shift.sector', 'shift.category', 'substituteShift.sector', 'substituteShift.category', 'requester', 'substitute']);
-        $eligibility = app(ShiftSwapApproval::class)->inspect($swap);
+        $eligibility = app(ShiftSwapApproval::class)->inspect($swap, $reference);
         $targets = collect([[$swap->substitute, $swap->shift], [$swap->requester, $swap->substituteShift]])
             ->filter(fn ($pair) => $pair[0] !== null && $pair[1] !== null);
         $dates = $targets->map(fn ($pair) => $pair[1]->period()->start)->sort();

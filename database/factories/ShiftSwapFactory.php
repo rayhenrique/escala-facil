@@ -34,6 +34,15 @@ class ShiftSwapFactory extends Factory
         ];
     }
 
+    public function configure(): static
+    {
+        return $this->afterMaking(function (ShiftSwap $swap): void {
+            if ($swap->status === ShiftSwapStatus::Approved && $swap->approved_at === null) {
+                $swap->approved_at = $swap->updated_at ?? $swap->created_at ?? now();
+            }
+        });
+    }
+
     public function pendingManager(): static
     {
         return $this->state(fn (array $attributes): array => [

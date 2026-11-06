@@ -166,7 +166,7 @@ class GuidedSwapRequestTest extends TestCase
         $flow->call('confirmSwapRequest')->assertHasErrors(['shift_id'])->assertSee('atribuído a você');
         $shift->update(['user_id' => $user->id]);
         ShiftSwap::factory()->count(4)->create(['requester_id' => $user->id, 'status' => ShiftSwapStatus::Approved, 'created_at' => now()]);
-        $flow->call('confirmSwapRequest')->assertHasErrors(['shift_id'])->assertSee('limite mensal de quatro');
+        $flow->call('confirmSwapRequest')->assertHasErrors(['shift_id'])->assertSee(User::SWAP_LIMIT_MESSAGE);
         $this->assertDatabaseCount('shift_swaps', 4);
     }
 

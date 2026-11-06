@@ -10,7 +10,8 @@
                 <label for="month" class="field-label">Mês exibido</label>
                 <input wire:model.live="month" id="month" type="month" class="field-input" @disabled($filter === 'uncovered' || $focus !== null || $dateFrom !== '' || $dateTo !== '')>
             </div>
-            <div class="flex flex-col gap-2 sm:flex-row">
+            <div class="flex flex-col flex-wrap gap-2 sm:flex-row sm:justify-end">
+                <a href="{{ route('manager.shifts.builder', ['month' => $month]) }}" wire:navigate class="button-primary w-full text-center sm:w-auto">Montar escala mensal</a>
                 <a href="{{ route('manager.shifts.template') }}" class="button-secondary w-full text-center sm:w-auto">Modelo XLSX</a>
                 <a href="{{ route('manager.shifts.export', ['month' => $month]) }}" class="button-secondary w-full text-center sm:w-auto">Exportar</a>
                 <button type="button" wire:click="openImportModal" class="button-secondary w-full sm:w-auto">Importar</button>
@@ -46,35 +47,9 @@
                     @error('shift')<p class="field-error col-span-full" role="alert">{{ $message }}</p>@enderror
                     <p hidden data-decision-request-error tabindex="-1" role="alert" class="field-error col-span-full"></p>
                     @if ($shiftPreview)
-                        <div class="col-span-full space-y-4" tabindex="-1" x-ref="alerts">
-                            <h3 class="text-lg font-semibold">Revise antes de confirmar</h3>
-                            <p class="text-sm">{{ $shiftPreview['period'] }} · {{ $shiftPreview['professional'] }}</p>
-                            <x-shift-assignment-alerts :blocks="$shiftPreview['blocks']" :warnings="$shiftPreview['warnings']" />
-                            <p class="text-sm text-muted">Os avisos não criam novos limites institucionais. A disponibilidade será conferida novamente ao confirmar.</p>
-                            <button type="button" wire:click="returnToShiftForm" :disabled="busy" class="button-secondary">Revisar dados</button>
-                        </div>
+                        @include('livewire.manager.partials.shift-preview')
                     @else
-                    <div>
-                        <label for="date" class="field-label">Data</label>
-                        <input x-ref="firstField" wire:model="date" id="date" type="date" class="field-input" @error('date') aria-invalid="true" aria-describedby="date-error" @enderror>
-                        @error('date') <p id="date-error" class="field-error">{{ $message }}</p> @enderror
-                    </div>
-                    <div>
-                        <label for="start-time" class="field-label">Início</label>
-                        <input wire:model="startTime" id="start-time" type="time" class="field-input" @error('start_time') aria-invalid="true" aria-describedby="start-time-error" @enderror>
-                        @error('start_time') <p id="start-time-error" class="field-error">{{ $message }}</p> @enderror
-                    </div>
-                    <div>
-                        <label for="end-time" class="field-label">Horário de término</label>
-                        <input wire:model="endTime" id="end-time" type="time" class="field-input" @error('end_time') aria-invalid="true" aria-describedby="end-time-error" @enderror>
-                        @error('end_time') <p id="end-time-error" class="field-error">{{ $message }}</p> @enderror
-                    </div>
-                    <div>
-                        <label for="end-date" class="field-label">Data de término (opcional)</label>
-                        <input wire:model="endDate" id="end-date" type="date" class="field-input" aria-describedby="end-date-help{{ $errors->has('end_date') ? ' end-date-error' : '' }}" @error('end_date') aria-invalid="true" @enderror>
-                        <p id="end-date-help" class="mt-2 text-xs leading-5 text-muted">Para 24h, use o mesmo horário e a data do dia seguinte. Sem data, um horário final menor termina no dia seguinte; um horário maior termina no mesmo dia.</p>
-                        @error('end_date') <p id="end-date-error" class="field-error">{{ $message }}</p> @enderror
-                    </div>
+                        @include('livewire.manager.partials.shift-timing-fields')
                     <div>
                         <label for="sector" class="field-label">Setor</label>
                         <select wire:model.live="sectorId" id="sector" class="field-input" @error('sector_id') aria-invalid="true" aria-describedby="sector-error" @enderror>

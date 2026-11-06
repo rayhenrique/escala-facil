@@ -161,6 +161,7 @@ class DemoDataService
                     'requester_id' => $requester->id,
                     'substitute_id' => $substitute->id,
                     'status' => $status,
+                    'approved_at' => $status === ShiftSwapStatus::Approved ? now() : null,
                     'manager_id' => in_array($status, [ShiftSwapStatus::Approved, ShiftSwapStatus::Rejected], true)
                         ? $manager->id
                         : null,

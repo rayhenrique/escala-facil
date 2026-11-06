@@ -18,7 +18,7 @@ Plantões iniciados, passados, concluídos, alterados, dependentes de outras ope
 
 O registro de reversão guarda autor, data/hora, justificativa, referência da aprovação original, operação e retratos anterior/posterior. É append-only no modelo e no banco (SQLite/MySQL), sem exclusão em cascata. A justificativa aparece no histórico operacional, nos novos comprovantes e notificações. Os comprovantes originais permanecem intactos; PDFs da reversão mostram o retorno correto de cada profissional.
 
-O pedido passa de Aprovado para Desfeito. A regra vigente conta somente trocas aprovadas no mês da solicitação, por participante; a reversão libera essa cota para ambos. Escala, calendário e relatórios consultam as atribuições e situações atuais, sem caches intermediários de cobertura. As notificações em banco são criadas na transação e ficam visíveis após o commit.
+O pedido passa de Aprovado para Desfeito. A regra vigente conta somente trocas pela data da aprovação gerencial, por participante; a reversão libera essa cota para ambos. Escala, calendário e relatórios consultam as atribuições e situações atuais, sem caches intermediários de cobertura. As notificações em banco são criadas na transação e ficam visíveis após o commit.
 
 Nenhum dado de produção é alterado por esta implementação. Instalação futura precisa aplicar a migration de registros de reversão; não executar rollback destrutivo quando houver registros. Retenção e acesso seguem o histórico operacional: gerência autorizada, mínimo de dados, sem senhas, tokens ou anexos; justificativas devem evitar informações médicas ou pessoais desnecessárias. Expurgo exige procedimento institucional e técnico auditável, não exclusão pela interface.
 

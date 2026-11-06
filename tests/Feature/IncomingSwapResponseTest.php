@@ -97,7 +97,7 @@ class IncomingSwapResponseTest extends TestCase
         [$requester, $sub, $swap] = $this->team();
         ShiftSwap::factory()->count(4)->create(['substitute_id' => $sub->id, 'status' => ShiftSwapStatus::Approved, 'created_at' => now()]);
         $sub->update(['sector_id' => Sector::factory()->create()->id]);
-        Livewire::actingAs($sub)->test(MySchedule::class)->call('openIncomingDetails', $swap->id)->assertSee('incompatível')->assertSee('cota de 4 de 4')
+        Livewire::actingAs($sub)->test(MySchedule::class)->call('openIncomingDetails', $swap->id)->assertSee('incompatível')->assertSee(User::SWAP_LIMIT_MESSAGE)
             ->call('requestDeclineSwap', $swap->id)->call('confirmDeclineSwap')->assertHasNoErrors();
         $this->assertSame(4, $sub->approvedSwapCount(now()->month, now()->year));
     }
@@ -148,12 +148,12 @@ class IncomingSwapResponseTest extends TestCase
         $this->assertSame(1, OperationalAuditEvent::where('entity_type', 'swap')->where('entity_id', $swap->id)->whereIn('action', ['accepted', 'declined'])->count());
     }
 
-    public function test_quota_uses_request_month_and_reason_validation_preserves_inputs(): void
+    public function test_quota_uses_current_month_and_reason_validation_preserves_inputs(): void
     {
         [$requester, $sub, $swap] = $this->team();
         ShiftSwap::factory()->count(4)->create(['substitute_id' => $sub->id, 'status' => ShiftSwapStatus::Approved, 'created_at' => now()]);
         $swap->forceFill(['created_at' => now()->subMonth()])->save();
-        $this->assertTrue($sub->can('accept', $swap->fresh()));
+        $this->assertFalse($sub->can('accept', $swap->fresh()));
         $flow = Livewire::actingAs($sub)->test(MySchedule::class)->call('requestDeclineSwap', $swap->id)
             ->set('declineReason', str_repeat('a', 1001))->call('confirmDeclineSwap')->assertHasErrors(['declineReason'])->assertSet('pendingConfirmation', 'decline_swap');
         $this->assertSame(ShiftSwapStatus::PendingProfessional, $swap->fresh()->status);

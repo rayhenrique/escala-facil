@@ -6,6 +6,7 @@ use App\Enums\ShiftStatus;
 use App\Enums\ShiftSwapStatus;
 use App\Models\ShiftSwap;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 
 /** Approval preconditions shared by the Policy, review and locked decision. */
 class ShiftSwapApproval
@@ -16,7 +17,7 @@ class ShiftSwapApproval
             : 'Pedido #'.$swap->id.': situação incompatível ('.$swap->status->label().'). Apenas pedidos aguardando a gerência podem ser decididos. Atualize a fila e confira a decisão registrada.';
     }
 
-    public function inspect(ShiftSwap $swap): array
+    public function inspect(ShiftSwap $swap, ?CarbonImmutable $reference = null, bool $lockForUpdate = false): array
     {
         $swap->loadMissing(['requester', 'substitute', 'shift', 'substituteShift']);
         $blockers = [];
@@ -24,7 +25,7 @@ class ShiftSwapApproval
         if ($statusReason !== null) {
             $blockers[] = ['code' => 'request_status', 'message' => $statusReason];
         }
-        $reference = $swap->created_at ?? now();
+        $reference ??= CarbonImmutable::now(config('app.timezone'));
         $quotas = [];
         foreach (['requester' => 'Solicitante', 'substitute' => 'Substituto'] as $relation => $label) {
             $participant = $swap->{$relation};
@@ -33,10 +34,10 @@ class ShiftSwapApproval
 
                 continue;
             }
-            $count = $participant->approvedSwapCount($reference->month, $reference->year);
+            $count = $participant->swapCountForMonth($reference, $lockForUpdate);
             $quotas[] = ['id' => $participant->id, 'name' => $participant->name, 'count' => $count, 'limit' => User::MONTHLY_SWAP_LIMIT, 'month' => $reference->format('m/Y')];
             if ($count >= User::MONTHLY_SWAP_LIMIT) {
-                $blockers[] = ['code' => $relation.'_quota', 'message' => 'Limite mensal atingido por '.$participant->name.': '.$count.' de '.User::MONTHLY_SWAP_LIMIT.' trocas aprovadas em '.$reference->format('m/Y').'. Confira as participações aprovadas no mês de criação deste pedido.'];
+                $blockers[] = ['code' => $relation.'_quota', 'message' => 'Limite mensal atingido por '.$participant->name.': '.$count.' de '.User::MONTHLY_SWAP_LIMIT.' trocas aprovadas em '.$reference->format('m/Y').'. Confira as participações aprovadas no mês corrente.'];
             }
         }
         $assignments = [];

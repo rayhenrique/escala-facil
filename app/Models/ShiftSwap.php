@@ -4,7 +4,9 @@ namespace App\Models;
 
 use App\Enums\ShiftSwapStatus;
 use App\Models\Concerns\HasOperationalAudit;
+use Carbon\CarbonImmutable;
 use Database\Factories\ShiftSwapFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -24,6 +26,7 @@ class ShiftSwap extends Model
         'substitute_id',
         'status',
         'manager_id',
+        'approved_at',
         'rejection_reason',
         'professional_response',
         'professional_responded_at',
@@ -39,8 +42,18 @@ class ShiftSwap extends Model
             'substitute_id' => 'integer',
             'manager_id' => 'integer',
             'status' => ShiftSwapStatus::class,
+            'approved_at' => 'immutable_datetime',
             'professional_responded_at' => 'immutable_datetime',
         ];
+    }
+
+    public function scopeApprovedInMonth(Builder $query, CarbonImmutable $reference): Builder
+    {
+        $start = $reference->setTimezone(config('app.timezone'))->startOfMonth();
+
+        return $query->where('status', ShiftSwapStatus::Approved)
+            ->where('approved_at', '>=', $start)
+            ->where('approved_at', '<', $start->addMonth());
     }
 
     public function shift(): BelongsTo

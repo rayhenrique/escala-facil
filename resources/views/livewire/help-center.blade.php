@@ -212,7 +212,7 @@
                         <li>Abra <strong>Relatórios</strong> e selecione o mês, o setor e a categoria. Todos os números da tela passam a refletir os filtros; use <strong>Limpar filtros</strong> para voltar à visão completa.</li>
                         <li>Leia o quadro de resumo: <strong>Cobertura</strong> mostra o percentual de plantões com profissional; <strong>Descobertos</strong> conta os sem profissional; <strong>Trocas aprovadas</strong> soma as criadas no mês; <strong>Ausências</strong> soma as justificativas de plantões do mês.</li>
                         <li>Confira <strong>Plantões por setor</strong> e <strong>por categoria</strong> para localizar onde faltou cobertura.</li>
-                        <li>Em <strong>Plantões por profissional</strong>, cada linha mostra plantões, trocas aprovadas no formato <strong>X de 4</strong> (a cota mensal) e ausências. Use essa tabela para conversas de alinhamento e para antecipar estouro de cota.</li>
+                        <li>Em <strong>Plantões por profissional</strong>, a gerência vê plantões, ausências e a cota no formato <strong>X de 4</strong>, conforme o mês da aprovação gerencial. Use essa tabela para conversas de alinhamento e para antecipar estouro de cota.</li>
                         <li>Em <strong>Trocas criadas no mês</strong>, acompanhe solicitante, substituto e situação de cada pedido.</li>
                         <li>Use <strong>Exportar PDF</strong> para guardar ou compartilhar o fechamento com os mesmos filtros da tela.</li>
                         <li>Use <strong>PDF para afixar</strong> para imprimir a escala do mês com legenda, trocas destacadas (● Troca) e linhas de assinatura da gerência e do responsável.</li>
@@ -379,7 +379,7 @@
                     <p>Para manter a escala equilibrada e juridicamente segura, o sistema impõe quatro regras inegociáveis:</p>
                     <ol>
                         <li><strong>Compatibilidade estrita de setor e categoria:</strong> solicitante e substituto devem pertencer à mesma categoria profissional (ex.: Médico Clínico, Enfermeiro) e estar vinculados ao mesmo setor de atuação (ex.: UTI, Pronto Atendimento). O sistema impede a escolha de profissionais incompatíveis.</li>
-                        <li><strong>Limite mensal de quatro trocas aprovadas:</strong> cada profissional pode participar de até <strong>quatro trocas aprovadas por mês</strong>, somando tanto as solicitações criadas quanto as substituições assumidas. A 5ª participação é bloqueada no envio, no aceite e na aprovação.</li>
+                        <li><strong>Limite mensal de quatro trocas aprovadas:</strong> cada profissional pode participar de até <strong>quatro trocas aprovadas por mês</strong>, somando tanto as solicitações criadas quanto as substituições assumidas. A data da aprovação gerencial define o mês da cota. A 5ª participação é bloqueada no envio, no aceite e na aprovação.</li>
                         <li><strong>Plantão elegível e futuro:</strong> a troca só pode ser iniciada sobre plantões futuros atribuídos ao profissional, com status <em>Agendado</em>, sem registro de ausência e sem outro pedido de troca pendente.</li>
                         <li><strong>Revalidação automática:</strong> as regras de compatibilidade e o saldo da cota mensal são rechecados pelo sistema em tempo real no momento do aceite do substituto e na decisão do gerente.</li>
                     </ol>

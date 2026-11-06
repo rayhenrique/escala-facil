@@ -6,6 +6,7 @@ use App\Enums\ShiftStatus;
 use App\Enums\ShiftSwapStatus;
 use App\Models\ShiftSwap;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 
 /** Response eligibility shared by Policy, preview and the locked backend operation. */
 class ShiftSwapResponse
@@ -39,10 +40,10 @@ class ShiftSwapResponse
         if (! $swap->requester || $recipient->sector_id !== $swap->requester->sector_id || $recipient->category_id !== $swap->requester->category_id) {
             $blocks[] = 'O cadastro do solicitante é incompatível com seu setor ou categoria. Consulte a gerência.';
         }
-        $reference = $swap->created_at ?? now();
-        $count = $recipient->approvedSwapCount($reference->month, $reference->year);
+        $reference = CarbonImmutable::now(config('app.timezone'));
+        $count = $recipient->swapCountForMonth($reference);
         if ($count >= User::MONTHLY_SWAP_LIMIT) {
-            $blocks[] = 'Você atingiu a cota de '.$count.' de '.User::MONTHLY_SWAP_LIMIT.' trocas aprovadas em '.$reference->format('m/Y').', mês da solicitação. Ainda é possível recusar este pedido.';
+            $blocks[] = User::SWAP_LIMIT_MESSAGE.' Ainda é possível recusar este pedido.';
         }
         $warnings = $swap->shift && $swap->requester && $swap->substitute
             ? app(ShiftSwapTimingWarnings::class)->make($swap->shift, $swap->substitute, $swap->substituteShift, $swap->requester) : [];

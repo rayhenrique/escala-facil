@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Support\ShiftSwapApproval;
 use App\Support\ShiftSwapResponse;
 use App\Support\ShiftSwapReversion;
+use Carbon\CarbonImmutable;
 use Illuminate\Auth\Access\Response;
 
 class ShiftSwapPolicy
@@ -30,7 +31,7 @@ class ShiftSwapPolicy
         return $user->role === UserRole::Professional
             && $user->category_id !== null
             && $user->sector_id !== null
-            && ! $user->hasReachedSwapLimit(now()->month, now()->year);
+            && ! $user->hasReachedSwapLimit();
     }
 
     public function viewResponse(User $user, ShiftSwap $shiftSwap): bool
@@ -53,12 +54,12 @@ class ShiftSwapPolicy
         return $blocks === [] ? Response::allow() : Response::deny(implode(' ', $blocks));
     }
 
-    public function approve(User $user, ShiftSwap $shiftSwap): Response
+    public function approve(User $user, ShiftSwap $shiftSwap, ?CarbonImmutable $reference = null, bool $lockForUpdate = false): Response
     {
         if ($user->role !== UserRole::Manager) {
             return Response::deny('Somente gerentes podem aprovar pedidos de troca.');
         }
-        $blockers = app(ShiftSwapApproval::class)->inspect($shiftSwap)['blockers'];
+        $blockers = app(ShiftSwapApproval::class)->inspect($shiftSwap, $reference, $lockForUpdate)['blockers'];
 
         return $blockers === [] ? Response::allow() : Response::deny(implode(' ', array_column($blockers, 'message')));
     }

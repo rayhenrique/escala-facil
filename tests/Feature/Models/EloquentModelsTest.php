@@ -167,6 +167,7 @@ class EloquentModelsTest extends TestCase
         ]);
         $swap->created_at = CarbonImmutable::parse($createdAt);
         $swap->updated_at = CarbonImmutable::parse($createdAt);
+        $swap->approved_at = $status === ShiftSwapStatus::Approved ? $swap->updated_at : null;
         $swap->save();
 
         return $swap;

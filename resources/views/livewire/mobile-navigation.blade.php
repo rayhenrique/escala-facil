@@ -33,6 +33,7 @@
                 <a data-mobile-menu-link href="{{ route('professional.calendar') }}" wire:navigate @click="menuOpen = false" @if (str_starts_with($routeName, 'professional.calendar')) aria-current="page" @endif><x-nav-icon name="calendar" />Calendário</a>
                 <a data-mobile-menu-link href="{{ route('professional.reports') }}" wire:navigate @click="menuOpen = false" @if (str_starts_with($routeName, 'professional.reports')) aria-current="page" @endif><x-nav-icon name="report" />Relatórios</a>
             @endif
+            <a data-mobile-menu-link href="{{ route('profile') }}" wire:navigate @click="menuOpen = false" @if ($routeName === 'profile') aria-current="page" @endif><x-nav-icon name="profile" />Meu Perfil</a>
             <a data-mobile-menu-link href="{{ route('notifications') }}" wire:navigate @click="menuOpen = false" @if ($routeName === 'notifications') aria-current="page" @endif><x-nav-icon name="bell" />Notificações @if ($unreadCount)<span class="notification-count ml-auto">{{ $unreadCount }}</span>@endif</a>
             <a data-mobile-menu-link href="{{ route('help') }}" wire:navigate @click="menuOpen = false" @if ($routeName === 'help') aria-current="page" @endif><x-nav-icon name="help" />Ajuda e versões</a>
             <button type="button" data-pwa-install hidden><x-nav-icon name="install" />Instalar aplicativo</button>

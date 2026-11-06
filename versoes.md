@@ -6,6 +6,12 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.47.0 — 06/11/2026
+
+- Meu Perfil reúne dados da conta, alteração de nome e senha e atalho para a escala do profissional.
+- A gerência pode criar e editar plantões por profissional em um calendário mensal, com agenda e formulário adaptados ao celular.
+- A cota de quatro trocas é calculada no mês da aprovação gerencial, com liberação quando a troca é desfeita.
+
 ## 1.46.0 — 12/10/2026
 
 ### Operações com feedback mais claro

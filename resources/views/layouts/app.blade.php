@@ -71,7 +71,7 @@
                             <a href="{{ route('manager.calendar') }}" wire:navigate title="Calendário" class="sidebar-nav-link {{ request()->routeIs('manager.calendar') ? 'sidebar-nav-link-active' : '' }}" @if(request()->routeIs('manager.calendar')) aria-current="page" @endif>
                                 <x-nav-icon name="calendar" class="sidebar-nav-icon" /><span class="sidebar-label">Calendário</span>
                             </a>
-                            <a href="{{ route('manager.shifts') }}" wire:navigate title="Escalas" class="sidebar-nav-link {{ request()->routeIs('manager.shifts') ? 'sidebar-nav-link-active' : '' }}" @if(request()->routeIs('manager.shifts')) aria-current="page" @endif>
+                            <a href="{{ route('manager.shifts') }}" wire:navigate title="Escalas" class="sidebar-nav-link {{ request()->routeIs('manager.shifts', 'manager.shifts.builder') ? 'sidebar-nav-link-active' : '' }}" @if(request()->routeIs('manager.shifts', 'manager.shifts.builder')) aria-current="page" @endif>
                                 <x-nav-icon name="schedule" class="sidebar-nav-icon" /><span class="sidebar-label">Escalas</span>
                             </a>
                             <a href="{{ route('manager.swaps') }}" wire:navigate title="Trocas" class="sidebar-nav-link {{ request()->routeIs('manager.swaps') ? 'sidebar-nav-link-active' : '' }}" @if(request()->routeIs('manager.swaps')) aria-current="page" @endif>
@@ -127,6 +127,10 @@
                             @endif
                         @endif
                     </div>
+
+                    <a href="{{ route('profile') }}" wire:navigate title="Meu Perfil" class="sidebar-nav-link mt-3 {{ request()->routeIs('profile') ? 'sidebar-nav-link-active' : '' }}" @if(request()->routeIs('profile')) aria-current="page" @endif>
+                        <x-nav-icon name="profile" class="sidebar-nav-icon" /><span class="sidebar-label">Meu Perfil</span>
+                    </a>
 
                     <div class="mt-6 border-t border-white/10 pt-5">
                         <p class="sidebar-label px-3 font-mono text-[0.6875rem] font-medium uppercase tracking-[0.16em] text-white/65">Suporte</p>

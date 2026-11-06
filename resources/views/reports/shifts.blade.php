@@ -86,7 +86,7 @@
         <thead><tr><th>Profissional</th><th>Setor / categoria</th><th class="num">Plantões</th><th class="num">Trocas aprovadas</th><th class="num">Ausências</th></tr></thead>
         <tbody>
             @forelse ($report['byProfessional'] as $row)
-                <tr><td>{{ $row['name'] }}</td><td>{{ $row['team'] }}</td><td class="num">{{ $row['shifts'] }}</td><td class="num">{{ $row['approvedSwaps'] }} de 4</td><td class="num">{{ $row['absences'] }}</td></tr>
+                <tr><td>{{ $row['name'] }}</td><td>{{ $row['team'] }}</td><td class="num">{{ $row['shifts'] }}</td><td class="num">{{ $row['approvedSwaps'] }}@if ($report['isManager']) de 4 @endif</td><td class="num">{{ $row['absences'] }}</td></tr>
             @empty
                 <tr><td colspan="5">Nenhum profissional alocado no período.</td></tr>
             @endforelse

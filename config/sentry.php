@@ -25,6 +25,7 @@ return [
     // Scrubs passwords, tokens, clinical data and unnecessary PII before
     // any event leaves the application. See App\Support\ErrorReporting.
     'before_send' => [ErrorReporting::class, 'scrubEvent'],
+    'before_breadcrumb' => [ErrorReporting::class, 'scrubBreadcrumb'],
 
     // When left empty or `null` the Laravel environment will be used (usually discovered from `APP_ENV` in your `.env`)
     'environment' => env('SENTRY_ENVIRONMENT'),

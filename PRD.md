@@ -23,10 +23,17 @@ Sistema interno para gerenciamento de escalas médicas e trocas de plantões em 
 
 ## 4. Regras de Negócio Críticas
 * **Match de Perfil:** Uma troca só pode ser solicitada/aceita por profissionais que possuam a exata mesma `categoria` e atuem no mesmo `setor`.
-* **Limite de Cota:** Um profissional só pode realizar **4 trocas por mês** (somando as vezes em que pediu para sair e as vezes em que aceitou cobrir). Apenas trocas com status `approved` contabilizam nesta cota mensal.
-* **Bloqueio de Cota:** Se o profissional atingir o limite de 4 trocas no mês corrente, o sistema deve desabilitar o botão de solicitar troca e ocultar seu nome da lista de substitutos elegíveis daquele mês.
+* **Limite de Cota:** Um profissional só pode realizar **4 trocas por mês** (somando as vezes em que pediu para sair e as vezes em que aceitou cobrir). Conta o mês da aprovação gerencial (`approved_at`) no fuso da aplicação. Somente o status `approved` consome cota.
+* **Bloqueio de Cota:** Se o profissional atingir o limite de 4 trocas no mês corrente, o sistema deve desabilitar o botão de solicitar troca e ocultar seu nome da lista de substitutos elegíveis. O aceite revalida a cota do substituto e a aprovação revalida a dos dois participantes.
 
 ## 5. Requisitos Não-Funcionais
 * **Stack:** Laravel 11+, Livewire 3, Tailwind CSS, Alpine.js, MySQL 8.0.
 * **Interface:** Design responsivo, otimizado para uso em desktops (gerência) e mobile (plantonistas).
 * **Auditoria:** O status das solicitações de troca deve armazenar carimbos de data/hora para cada mudança de fase (criado, aceito, aprovado).
+
+
+### Meu Perfil e montagem mensal
+
+Cada usuário autenticado pode atualizar o próprio nome e senha em **Meu Perfil**. E-mail, perfil de acesso, setor, categoria e situação da conta são exibidos para consulta. O profissional acessa sua escala mensal pelo atalho para **Minha escala**.
+
+Em **Montar escala mensal**, a gerência seleciona um profissional e consulta seus plantões por mês. O calendário abre o cadastro e a edição de plantões com os mesmos controles de compatibilidade, duração, cobertura, alertas e auditoria de **Gestão de escalas**.

@@ -11,6 +11,7 @@ use App\Models\ShiftSwap;
 use App\Models\User;
 use App\Support\OperationalFilters;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -104,14 +105,13 @@ class ShiftReportService
                 ->orWhereHas('category', fn ($name) => OperationalFilters::name($name, $search))))
             ->addSelect([
                 'shift_count' => (clone $shifts)->selectRaw('COUNT(*)')->whereColumn('shifts.user_id', 'users.id'),
-                'requested_count' => (clone $swaps)->selectRaw('COUNT(*)')->where('status', ShiftSwapStatus::Approved)->whereColumn('requester_id', 'users.id'),
-                'substituted_count' => (clone $swaps)->selectRaw('COUNT(*)')->where('status', ShiftSwapStatus::Approved)->whereColumn('substitute_id', 'users.id'),
+                'approved_swap_count' => $this->reportApprovalCount($start, $isManager, $sectorId, $categoryId),
                 'absence_count' => (clone $absences)->selectRaw('COUNT(*)')->whereColumn('user_id', 'users.id'),
             ])->orderBy('name')->orderBy('id')->paginate(10, ['*'], 'professionalsPage')
             ->through(fn (User $user) => [
                 'name' => $user->name, 'team' => ($user->sector?->name ?? 'Sem setor').' · '.($user->category?->name ?? 'Sem categoria'),
                 'shifts' => (int) $user->shift_count,
-                'approvedSwaps' => (int) $user->requested_count + (int) $user->substituted_count,
+                'approvedSwaps' => (int) $user->approved_swap_count,
                 'absences' => (int) $user->absence_count,
             ]);
 
@@ -237,7 +237,7 @@ class ShiftReportService
             ],
             'bySector' => $this->groupByRelation($shifts, 'sector'),
             'byCategory' => $this->groupByRelation($shifts, 'category'),
-            'byProfessional' => $this->professionalRows($shifts, $allSwaps, $absences, $search),
+            'byProfessional' => $this->professionalRows($shifts, $this->reportApprovalCount($monthStart, $isManager, $sectorId, $categoryId), $absences, $search),
             'swaps' => $swapStatus !== '' ? $visibleSwaps->where('status', ShiftSwapStatus::from($swapStatus))->values() : $visibleSwaps,
             'sectorIndicators' => $isManager && $forUser
                 ? $this->sectorIndicators($month, $sectorId, $categoryId, $forUser, $swapStatus)->get()->map($this->indicatorRow(...)) : collect(),
@@ -267,21 +267,21 @@ class ShiftReportService
             ->values();
     }
 
+    private function reportApprovalCount(CarbonImmutable $month, bool $isManager, string $sectorId, string $categoryId): EloquentBuilder
+    {
+        return User::approvedSwapCountForUsers($month)
+            ->when(! $isManager, fn ($query) => $query->whereHas('shift', fn ($shift) => $shift
+                ->where('sector_id', $sectorId)
+                ->when($categoryId !== '', fn ($shift) => $shift->where('category_id', $categoryId))));
+    }
+
     /**
      * @param  Collection<int, Shift>  $shifts
-     * @param  Collection<int, ShiftSwap>  $swaps
      * @param  Collection<int, Absence>  $absences
      * @return Collection<int, array{name: string, team: string, shifts: int, approvedSwaps: int, absences: int}>
      */
-    private function professionalRows(Collection $shifts, Collection $swaps, Collection $absences, string $search = ''): Collection
+    private function professionalRows(Collection $shifts, EloquentBuilder $approvals, Collection $absences, string $search = ''): Collection
     {
-        $approvedByUser = [];
-
-        foreach ($swaps->where('status', ShiftSwapStatus::Approved) as $swap) {
-            $approvedByUser[$swap->requester_id] = ($approvedByUser[$swap->requester_id] ?? 0) + 1;
-            $approvedByUser[$swap->substitute_id] = ($approvedByUser[$swap->substitute_id] ?? 0) + 1;
-        }
-
         $absencesByUser = $absences->groupBy(fn (Absence $absence): int => $absence->user_id);
 
         return User::query()
@@ -291,13 +291,14 @@ class ShiftReportService
                 ->where(fn ($name) => OperationalFilters::name($name, $search))
                 ->orWhereHas('sector', fn ($name) => OperationalFilters::name($name, $search))
                 ->orWhereHas('category', fn ($name) => OperationalFilters::name($name, $search))))
+            ->addSelect(['approved_swap_count' => $approvals])
             ->orderBy('name')
             ->get()
             ->map(fn (User $user): array => [
                 'name' => $user->name,
                 'team' => $user->sector->name.' · '.$user->category->name,
                 'shifts' => $shifts->where('user_id', $user->id)->count(),
-                'approvedSwaps' => $approvedByUser[$user->id] ?? 0,
+                'approvedSwaps' => (int) $user->approved_swap_count,
                 'absences' => $absencesByUser->get($user->id, collect())->count(),
             ]);
     }

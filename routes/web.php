@@ -14,12 +14,14 @@ use App\Livewire\Manager\AuditHistory;
 use App\Livewire\Manager\CategoryManager;
 use App\Livewire\Manager\Dashboard;
 use App\Livewire\Manager\IssueReports;
+use App\Livewire\Manager\MonthlyShiftBuilder;
 use App\Livewire\Manager\Reports;
 use App\Livewire\Manager\SectorManager;
 use App\Livewire\Manager\ShiftManager;
 use App\Livewire\Manager\SwapApprovals;
 use App\Livewire\Manager\UserManager;
 use App\Livewire\MonthlyCalendar;
+use App\Livewire\MyProfile;
 use App\Livewire\NotificationsCenter;
 use App\Livewire\Professional\MySchedule;
 use Illuminate\Support\Facades\Route;
@@ -33,6 +35,8 @@ Route::view('/landing', 'landing')->name('landing');
 Route::get('dashboard', DashboardRedirectController::class)
     ->middleware('auth')
     ->name('dashboard');
+
+Route::get('profile', MyProfile::class)->middleware('auth')->name('profile');
 
 Route::get('help', HelpCenter::class)
     ->middleware('auth')
@@ -68,6 +72,7 @@ Route::middleware(['auth', 'manager', ValidateOperationalQuery::class])
         Route::get('dashboard', Dashboard::class)->name('dashboard');
         Route::get('calendar', MonthlyCalendar::class)->name('calendar');
         Route::get('shifts', ShiftManager::class)->name('shifts');
+        Route::get('shifts/monthly', MonthlyShiftBuilder::class)->name('shifts.builder');
         Route::get('shifts/template', [ShiftSpreadsheetController::class, 'template'])->name('shifts.template');
         Route::get('shifts/export', [ShiftSpreadsheetController::class, 'export'])->name('shifts.export');
         Route::get('reports', Reports::class)->name('reports');

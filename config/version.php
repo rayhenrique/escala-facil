@@ -2,9 +2,20 @@
 
 return [
     // Versão do código instalado. APP_VERSION não pode sobrepor este registro.
-    'current' => '1.46.0',
+    'current' => '1.47.0',
 
     'releases' => [
+        [
+            'version' => '1.47.0',
+            'date' => '2026-11-06',
+            'title' => 'Meu Perfil e montagem da escala mensal',
+            'summary' => 'Atualize seus dados, organize plantões no calendário e acompanhe a cota de trocas do mês.',
+            'highlights' => [
+                'Meu Perfil permite editar o nome e a senha e oferece acesso à Minha escala para profissionais.',
+                'A gerência pode montar a escala mensal por profissional, com calendário no computador e agenda no celular.',
+                'A cota de quatro trocas passa a considerar o mês em que a gerência aprova cada pedido.',
+            ],
+        ],
         [
             'version' => '1.46.0',
             'date' => '2026-10-12',

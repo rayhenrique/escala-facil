@@ -26,6 +26,8 @@ class ShiftSwapApprovalReasonsTest extends TestCase
 
     private function mutual(): array
     {
+        $this->travelTo(now()->setDate(2026, 10, 10)->setTime(12, 0));
+
         $sector = Sector::factory()->create();
         $category = Category::factory()->create();
         $manager = User::factory()->create(['role' => UserRole::Manager]);
@@ -46,7 +48,7 @@ class ShiftSwapApprovalReasonsTest extends TestCase
         $shift = Shift::factory()->create(['date' => '2026-10-01', 'user_id' => $participant->id]);
 
         return ShiftSwap::factory()->create(['shift_id' => $shift->id, 'requester_id' => $asSubstitute ? $other->id : $participant->id,
-            'substitute_id' => $asSubstitute ? $participant->id : $other->id, 'status' => $status, 'created_at' => $created]);
+            'substitute_id' => $asSubstitute ? $participant->id : $other->id, 'status' => $status, 'created_at' => '2026-09-01', 'approved_at' => $status === ShiftSwapStatus::Approved ? $created : null]);
     }
 
     public function test_synthetic_request_89_with_one_and_three_participations_is_approved(): void
@@ -95,7 +97,7 @@ class ShiftSwapApprovalReasonsTest extends TestCase
         $this->assertDatabaseCount('notifications', 0);
     }
 
-    public function test_monthly_count_uses_request_creation_and_excludes_other_states_and_months(): void
+    public function test_monthly_count_uses_approval_and_excludes_other_states_and_months(): void
     {
         [$manager, $swap] = $this->mutual();
         foreach (['2026-10-01 00:00:00', '2026-10-31 23:59:59'] as $date) {

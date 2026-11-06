@@ -12,24 +12,25 @@ try {
   const context=await browser.newContext({viewport:{width,height:900},reducedMotion:'reduce',serviceWorkers:'allow'});
   const page=await context.newPage();page.setDefaultTimeout(30000);
   page.on('pageerror',e=>report.errors.push(e.message));page.on('console',m=>{if(m.type()==='error'||/multiple instances/.test(m.text()))report.errors.push(m.text());});
-  await page.goto(origin+'/login');await page.locator('#email').fill(role==='manager'?process.env.MOBILE_NAV_MANAGER:process.env.MOBILE_NAV_PROFESSIONAL);
+  await page.goto(origin+'/login');await page.waitForFunction(()=>!!window.Livewire);await page.locator('#email').fill(role==='manager'?process.env.MOBILE_NAV_MANAGER:process.env.MOBILE_NAV_PROFESSIONAL);
   await page.locator('#password').fill(process.env.MOBILE_NAV_PASSWORD);await page.getByRole('button',{name:'Entrar',exact:true}).click();await page.waitForURL('**/'+role+'/dashboard');
   const announcement=page.getByRole('button',{name:'Entendi, continuar',exact:true});if(await announcement.isVisible()){await announcement.click();await announcement.waitFor({state:'detached'});}
   const bar=page.getByRole('navigation',{name:'Navegação móvel principal',exact:true});
-  if(width>=1024){assert(!(await bar.isVisible()));assert(await page.locator('#primary-sidebar').isVisible());assert.equal(await page.locator('.mobile-navigation-space').evaluate(el=>getComputedStyle(el).paddingBottom),'0px');report.checks.push({role,width,phase:'desktop-preserved',passed:true});await context.close();continue;}
+  if(width>=1024){assert(!(await bar.isVisible()));assert(await page.locator('#primary-sidebar').isVisible());assert(await page.locator('#primary-sidebar').getByRole('link',{name:'Meu Perfil',exact:true}).isVisible());assert.equal(await page.locator('.mobile-navigation-space').evaluate(el=>getComputedStyle(el).paddingBottom),'0px');report.checks.push({role,width,phase:'desktop-preserved',passed:true});await context.close();continue;}
   assert(await bar.isVisible());assert(!(await page.locator('#primary-sidebar').isVisible()));
   assert.equal(await bar.locator(':scope > a, :scope > button').count(),4);
   for(const item of await bar.locator(':scope > a, :scope > button').all()){const box=await item.boundingBox();assert(box.height>=44&&box.width>=44);}
   assert.equal(await bar.locator('[aria-current="page"]').count(),1);
+  const displayedMonth = role === 'professional' && (await page.locator('#month').inputValue() === '2026-11' ? '2026-12' : '2026-11');
   if(role==='professional') {
-   await page.locator('#month').fill('2026-11');
-   await page.waitForURL(url=>url.searchParams.get('month')==='2026-11');
+   await page.locator('#month').fill(displayedMonth);
+   await page.waitForURL(url=>url.searchParams.get('month')===displayedMonth);
   }
   const secondary=role==='manager'?'Calendário':'Escala';
   await bar.getByRole('link',{name:secondary,exact:true}).click();
   if(role==='manager')await page.waitForURL('**/manager/calendar');else {await page.waitForURL('**#schedule-title');await page.waitForFunction(()=>document.activeElement?.id==='schedule-title');}
   await page.waitForLoadState('networkidle');assert.equal(await bar.getByRole('link',{name:secondary,exact:true}).getAttribute('aria-current'),'page');
-  if(role==='professional') assert.equal(new URL(page.url()).searchParams.get('month'),'2026-11');
+  if(role==='professional') assert.equal(new URL(page.url()).searchParams.get('month'),displayedMonth);
   await bar.getByRole('link',{name:/^Trocas/}).click();if(role==='manager')await page.waitForURL('**/manager/swaps');else {await page.waitForURL('**#my-swaps-title');await page.waitForFunction(()=>document.activeElement?.id==='my-swaps-title');}
   await page.waitForLoadState('networkidle');assert.equal(await bar.getByRole('link',{name:/^Trocas/}).getAttribute('aria-current'),'page');
   await page.reload();await page.waitForLoadState('networkidle');assert.equal(await bar.getByRole('link',{name:/^Trocas/}).getAttribute('aria-current'),'page');
@@ -37,18 +38,28 @@ try {
   const footer=await page.locator('.system-footer').boundingBox();const barBox=await bar.boundingBox();assert(footer.y+footer.height<=barBox.y+1);
   const menu=bar.getByRole('button',{name:'Abrir menu principal',exact:true});await menu.focus();await page.keyboard.press('Enter');
   const dialog=page.getByRole('dialog',{name:'Menu',exact:true});await dialog.waitFor({state:'visible'});
-  assert(await dialog.evaluate(el=>el.contains(document.activeElement)));
+  await page.waitForFunction(()=>document.querySelector('#mobile-menu')?.contains(document.activeElement));
   assert(await page.evaluate(()=>document.documentElement.style.overflow==='hidden'));
   for(let i=0;i<12;i++){await page.keyboard.press('Tab');assert(await dialog.evaluate(el=>el.contains(document.activeElement)));}
   assert.equal(await dialog.getByRole('link',{name:'Início',exact:true}).count(),0);assert.equal(await dialog.getByRole('link',{name:'Trocas',exact:true}).count(),0);
   if(role==='professional')for(const link of await dialog.getByRole('link').all())assert(!((await link.getAttribute('href'))??'').includes('/manager/'));
   if(process.env.AXE_MODULE){await page.addScriptTag({path:process.env.AXE_MODULE});const violations=await page.evaluate(async()=>(await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa','best-practice']}})).violations);assert.deepEqual(violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)})),[]);}
+  const profileLink = dialog.getByRole('link',{name:'Meu Perfil',exact:true});
+  await profileLink.focus();
   await dialog.evaluate(async el=>{let root=el;while(root&&!root.hasAttribute('wire:id'))root=root.parentElement;await window.Livewire.find(root.getAttribute('wire:id')).$refresh();});
-  assert(await dialog.isVisible());assert(await dialog.evaluate(el=>el.contains(document.activeElement)));
+  assert(await dialog.isVisible());await page.waitForFunction(el=>el===document.activeElement,await profileLink.elementHandle());
   if(out)await page.screenshot({path:out+`/menu-${role}-${width}.png`});
   await page.keyboard.press('Escape');await dialog.waitFor({state:'hidden'});await page.waitForFunction(el=>el===document.activeElement,await menu.elementHandle());
   await menu.click();await dialog.getByRole('link',{name:'Relatórios',exact:true}).click();await page.waitForURL('**/'+role+'/reports');await page.waitForLoadState('networkidle');
   assert(!(await dialog.isVisible()));assert.equal(await menu.getAttribute('aria-current'),'page');
+  await menu.click();await dialog.getByRole('link',{name:'Meu Perfil',exact:true}).click();
+  await page.waitForURL('**/profile');await dialog.waitFor({state:'hidden'});
+  assert(await page.getByRole('heading',{name:'Meu Perfil',exact:true}).isVisible());
+  await menu.click();
+  assert.equal(await dialog.getByRole('link',{name:'Meu Perfil',exact:true}).getAttribute('aria-current'),'page');
+  await page.waitForFunction(()=>!!document.querySelector('main')?.closest('[aria-hidden="true"]'));
+  await page.keyboard.press('Escape');await dialog.waitFor({state:'hidden'});
+  await page.getByRole('button',{name:'Salvar nome',exact:true}).waitFor();
   // A profile's reports subview remains under Menu after a Livewire update.
   await page.goto(origin+'/'+role+'/reports?tab=swaps');await page.waitForLoadState('networkidle');assert.equal(await menu.getAttribute('aria-current'),'page');
   if(role==='manager') {
@@ -61,7 +72,7 @@ try {
   if(out)await page.screenshot({path:out+`/bar-${role}-${width}.png`});
   await menu.click();await dialog.waitFor({state:'visible'});await page.setViewportSize({width:1440,height:900});await dialog.waitFor({state:'hidden'});assert(await page.evaluate(()=>document.documentElement.style.overflow!=='hidden'));
   await page.setViewportSize({width,height:900});await menu.click();await dialog.getByRole('button',{name:'Sair',exact:true}).click();await page.waitForURL('**/login');assert.equal(await bar.count(),0);
-  await page.locator('#email').fill(role==='manager'?process.env.MOBILE_NAV_MANAGER:process.env.MOBILE_NAV_PROFESSIONAL);await page.locator('#password').fill(process.env.MOBILE_NAV_PASSWORD);await page.getByRole('button',{name:'Entrar',exact:true}).click();await page.waitForURL('**/'+role+'/dashboard');
+  await page.waitForFunction(()=>!!window.Livewire);await page.locator('#email').fill(role==='manager'?process.env.MOBILE_NAV_MANAGER:process.env.MOBILE_NAV_PROFESSIONAL);await page.locator('#password').fill(process.env.MOBILE_NAV_PASSWORD);await page.getByRole('button',{name:'Entrar',exact:true}).click();await page.waitForURL('**/'+role+'/dashboard');
   await context.clearCookies();await page.getByRole('navigation',{name:'Navegação móvel principal'}).getByRole('link',{name:role==='manager'?'Calendário':'Escala',exact:true}).click();
   // Same-page hash links do not consult the session; a protected module must.
   if(role==='professional')await page.goto(origin+'/professional/calendar');

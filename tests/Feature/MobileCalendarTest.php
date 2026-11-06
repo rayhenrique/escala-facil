@@ -119,6 +119,8 @@ class MobileCalendarTest extends TestCase
 
     public function test_approved_mutual_swaps_and_uncovered_shifts_are_identified_without_changing_assignments(): void
     {
+        $this->travelTo(now()->setDate(2026, 10, 31)->startOfDay());
+
         $manager = User::factory()->create(['role' => UserRole::Manager]);
         $user = $this->professional();
         $first = $this->shift($user, ['date' => '2026-11-01']);

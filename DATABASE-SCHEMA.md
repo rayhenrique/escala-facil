@@ -43,6 +43,8 @@
 * `substitute_id` (foreignId -> users.id, constrained) - Quem vai assumir
 * `status` (enum: 'pending_professional', 'pending_manager', 'approved', 'rejected', 'reverted')
 * `manager_id` (foreignId -> users.id, nullable, constrained) - Quem aprovou/rejeitou
+* `approved_at` (datetime, nullable) — instante da aprovação gerencial no fuso da aplicação. A migração preenche trocas históricas em estado `approved` com `updated_at` ou, na ausência dele, `created_at`. O campo permanece registrado ao desfazer uma aprovação.
+* Índices de cota: `(requester_id, status, approved_at)` e `(substitute_id, status, approved_at)`. A cota usa `status = approved` e o intervalo do início do mês até antes do início do mês seguinte.
 * `timestamps`
 
 ### `absences` (Justificativas de Falta)

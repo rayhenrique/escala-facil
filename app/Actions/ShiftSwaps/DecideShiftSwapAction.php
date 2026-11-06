@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Services\ShiftSwapNotificationService;
 use App\Support\OperationalAuditContext;
 use App\Support\ShiftSwapAnalysis;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\DetectsConcurrencyErrors;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Gate;
@@ -57,16 +58,22 @@ class DecideShiftSwapAction
                 $swap->setRelation('substituteShift', $shifts->get($swap->substitute_shift_id));
                 $swap->setRelation('requester', $users->get($swap->requester_id));
                 $swap->setRelation('substitute', $users->get($swap->substitute_id));
+                $approvedAt = $decision === 'approve' ? CarbonImmutable::now(config('app.timezone')) : null;
                 if ($expected !== null) {
-                    $current = app(ShiftSwapAnalysis::class)->make($swap, $manager);
+                    $current = app(ShiftSwapAnalysis::class)->make($swap, $manager, $approvedAt);
                     if (! hash_equals($expected, $current['fingerprint'])) {
                         $details = implode(' ', array_column($current['approval_blockers'], 'message'));
                         throw ValidationException::withMessages(['decision' => 'Análise desatualizada. '.($details ?: 'Os horários, participantes, cotas ou alertas relevantes mudaram.').' Atualize a análise e confira os dados antes de decidir.']);
                     }
                 }
-                Gate::forUser($manager)->authorize($decision, $swap);
+                if ($approvedAt) {
+                    Gate::forUser($manager)->authorize('approve', [$swap, $approvedAt, true]);
+                } else {
+                    Gate::forUser($manager)->authorize('reject', $swap);
+                }
                 $swap->update([
                     'status' => $decision === 'approve' ? ShiftSwapStatus::Approved : ShiftSwapStatus::Rejected,
+                    'approved_at' => $approvedAt,
                     'manager_id' => $manager->id,
                     'rejection_reason' => $reason,
                 ]);

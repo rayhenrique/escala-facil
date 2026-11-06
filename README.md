@@ -4,7 +4,7 @@
 
 Sistema interno para gestão de escalas médicas, plantões, trocas e ausências em unidades de saúde. A aplicação centraliza a operação da gerência, permite que profissionais acompanhem a própria agenda e aplica as regras de compatibilidade e limite mensal em todas as decisões de troca.
 
-**Versão atual:** `1.46.0` — consulte o histórico completo em [`versoes.md`](versoes.md).
+**Versão atual:** `1.47.0` — consulte o histórico completo em [`versoes.md`](versoes.md).
 
 Desenvolvido por [KL Tecnologia](https://kltecnologia.com).
 
@@ -74,6 +74,9 @@ O cadastro público permanece desativado. Novas contas são criadas pela gerênc
 - O fluxo segue `Aguardando profissional` → `Aguardando gerência` → `Aprovada`, `Rejeitada` ou `Desfeita`.
 - Cada profissional pode participar de no máximo **quatro trocas aprovadas por mês**, somando solicitações e substituições.
 - A aprovação gerencial transfere o plantão ao substituto; o aceite que emenda turnos exibe alerta de dobra para decisão consciente.
+- Em **Meu Perfil**, usuários autenticados podem atualizar o próprio nome e senha. Profissionais têm um atalho para **Minha escala**.
+- Em **Gestão de escalas → Montar escala mensal**, gerentes selecionam um profissional para criar e editar seus plantões em uma grade no desktop ou em uma agenda no celular.
+- A cota de quatro trocas por participante é calculada pelo mês da aprovação gerencial no fuso America/Maceio.
 - A gerência pode desfazer trocas aprovadas futuras, devolvendo o plantão ao solicitante e liberando a cota mensal.
 - Uma solicitação avisa o substituto; o aceite avisa o solicitante, o substituto e todos os gerentes; a decisão avisa os dois profissionais.
 - Cada etapa armazena um comprovante com referência, data, horário, setor, categoria e participantes conforme estavam no momento da movimentação.
@@ -158,7 +161,7 @@ Crie um banco MySQL chamado `escala_facil` e ajuste o `.env`:
 APP_NAME="Escala Fácil"
 APP_URL=http://127.0.0.1:8000
 APP_TIMEZONE=America/Maceio
-APP_VERSION=1.46.0
+APP_VERSION=1.47.0
 APP_LOCALE=pt_BR
 APP_FALLBACK_LOCALE=pt_BR
 APP_FAKER_LOCALE=pt_BR

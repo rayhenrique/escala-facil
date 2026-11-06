@@ -59,6 +59,7 @@ class ShiftSwapPolicyTest extends TestCase
                 'requester_id' => $requester->id,
                 'substitute_id' => $substitute->id,
                 'status' => ShiftSwapStatus::Approved,
+                'approved_at' => now(),
             ]);
         }
 

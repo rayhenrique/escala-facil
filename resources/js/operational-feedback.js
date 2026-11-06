@@ -1,6 +1,6 @@
 // Presentation only. No request is replayed and no success is inferred here.
 const registered = new WeakSet();
-const mutationNames = new Set(['save', 'delete', 'approve', 'reject', 'confirmDecision', 'confirmRevert', 'confirmReallocation', 'confirmSwapRequest', 'confirmAcceptSwap', 'confirmDeclineSwap', 'confirmAbsence', 'reportAbsence', 'requestSwap', 'acceptSwap', 'revokeInvitation', 'import', 'importShifts', 'confirmImport', 'confirmCopy', 'resendInvitation', 'confirmInvitationRevocation', 'markAsRead', 'markAllAsRead', 'submit', 'login', 'sendResetLink', 'resetPassword', 'activate']);
+const mutationNames = new Set(['save', 'delete', 'approve', 'reject', 'confirmDecision', 'confirmRevert', 'confirmReallocation', 'confirmSwapRequest', 'confirmAcceptSwap', 'confirmDeclineSwap', 'confirmAbsence', 'reportAbsence', 'requestSwap', 'acceptSwap', 'revokeInvitation', 'import', 'importShifts', 'confirmImport', 'confirmCopy', 'resendInvitation', 'confirmInvitationRevocation', 'markAsRead', 'markAllAsRead', 'submit', 'login', 'sendResetLink', 'resetPassword', 'saveName', 'changePassword', 'activate']);
 export const isMutation = name => mutationNames.has(name);
 
 export function failureDescription(status, mutable = false) {

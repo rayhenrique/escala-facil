@@ -80,15 +80,14 @@
         <x-swap-receipt :receipt="$swapReceipt" class="mt-6" />
     @endif
 
-    @if ($swapLimitReached)
-        <div class="mt-6 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900" role="status">
-            @if ($month === now()->format('Y-m'))
-                Você atingiu a cota de quatro trocas aprovadas neste mês. Novas solicitações e aceites serão liberados no próximo mês.
-            @else
-                Você atingiu a cota de quatro trocas aprovadas no mês corrente ({{ now()->format('m/Y') }}). Novas solicitações e aceites serão liberados no próximo mês.
-            @endif
-        </div>
-    @endif
+    <p class="mt-4 text-sm text-muted" role="status">
+        @if ($swapLimitReached)
+            {{ \App\Models\User::SWAP_LIMIT_MESSAGE }}
+        @else
+            Você ainda possui {{ \App\Models\User::MONTHLY_SWAP_LIMIT - $swapCount }} de 4 trocas disponíveis neste mês.
+        @endif
+        {{ $swapCount }} de 4 trocas utilizadas.
+    </p>
 
     <x-professional.incoming-swaps :incoming-swaps="$incomingSwaps" :swap-limit-reached="$swapLimitReached" heading-id="incoming-desktop-title" class="hidden lg:block" />
 

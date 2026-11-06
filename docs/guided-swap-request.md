@@ -2,7 +2,7 @@
 
 A versão 1.40.0 mantém StoreShiftSwapRequest, CreateShiftSwapAction, Policies e limites existentes. O profissional escolhe plantão, modalidade, colega e contrapartida, revisa os movimentos e confirma. Voltar preserva entradas; alterar colega limpa uma contrapartida anterior.
 
-Listas paginam dez resultados no banco. Busca por nome tem debounce de 300 ms; setor/categoria e cota são aplicados antes da paginação. Cotas contam participações aprovadas no mês da solicitação conforme regra vigente. Pedidos ativos são verificados em ambas as atribuições.
+Listas paginam dez resultados no banco. Busca por nome tem debounce de 300 ms; setor/categoria e cota são aplicados antes da paginação. Cotas contam participações aprovadas pela data da aprovação gerencial no mês corrente. Pedidos ativos são verificados em ambas as atribuições.
 
 ShiftCoverage e ShiftPeriod sustentam os avisos de conflito/dobra, incluindo meia-noite e duração de 24h. Esses avisos não criam bloqueios institucionais na solicitação: aceite e aprovação continuam com suas validações. Não se presume intervalo mínimo de descanso.
 

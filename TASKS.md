@@ -1,5 +1,11 @@
 # TASKS - Plano de Execução Sequencial
 
+- [x] **Meu Perfil, montagem mensal e cota de trocas (1.47.0)**
+  - [x] Autorizar edição do próprio nome e senha e integrar o atalho para Minha escala.
+  - [x] Montar escala por profissional com calendário, agenda móvel, validação, prévia e auditoria.
+  - [x] Migrar o histórico aprovado e usar o mês de aprovação na solicitação, no aceite e na decisão gerencial.
+  - [x] Cobrir permissões, plantões de 24h, virada do mês e reversão com regressões automatizadas.
+
 - [x] **Ativação segura por convite (1.31.0)**
   - [x] Integrar conta pendente, token com hash, expiração, uso único, reenvio e revogação.
   - [x] Proteger autorização, recuperação, sessão, concorrência e dados do convite.
@@ -81,7 +87,7 @@
 
 - [x] **Fase 2: Eloquent, Models e Casts**
   - [x] Configurar `$fillable`, `$casts` e relacionamentos (hasMany, belongsTo) em todos os Models.
-  - [x] No model `User`, criar método `hasReachedSwapLimit($month, $year)` que conta ocorrências na tabela `shift_swaps` como requester ou substitute com status 'approved'.
+  - [x] No model `User`, criar método `hasReachedSwapLimit($month, $year)` que conta ocorrências na tabela `shift_swaps` como requester ou substitute com status 'approved' pela data de aprovação.
 
 - [x] **Fase 3: Autenticação e Autorização**
   - [x] Configurar autenticação base (Laravel Breeze ou custom auth).

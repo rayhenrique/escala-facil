@@ -2,17 +2,15 @@
 
 namespace App\Livewire\Manager;
 
-use App\Actions\Shifts\CreateShiftAction;
 use App\Actions\Shifts\DuplicateMonthAction;
 use App\Actions\Shifts\ImportShiftsAction;
-use App\Actions\Shifts\UpdateShiftAction;
 use App\Enums\ShiftStatus;
 use App\Enums\UserRole;
 use App\Http\Requests\ImportShiftsRequest;
-use App\Http\Requests\SaveShiftRequest;
 use App\Livewire\Concerns\FiltersOperationalLists;
 use App\Livewire\Concerns\HasOperationalContext;
 use App\Livewire\Concerns\ReallocatesShifts;
+use App\Livewire\Concerns\SavesShiftForm;
 use App\Models\Category;
 use App\Models\Sector;
 use App\Models\Shift;
@@ -21,7 +19,6 @@ use App\Models\User;
 use App\Support\ManagerAttention;
 use App\Support\OperationalFilters;
 use App\Support\OperationalNavigation;
-use App\Support\ShiftAssignmentAnalysis;
 use App\Support\UiFeedback;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
@@ -31,7 +28,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\WithFileUploads;
@@ -43,6 +39,7 @@ class ShiftManager extends Component
     use FiltersOperationalLists;
     use HasOperationalContext;
     use ReallocatesShifts;
+    use SavesShiftForm;
     use WithFileUploads;
     use WithPagination;
 
@@ -55,28 +52,9 @@ class ShiftManager extends Component
     #[Url]
     public $focus = null;
 
-    #[Locked]
-    public ?int $editingShiftId = null;
-
-    #[Locked]
-    public ?string $editingShiftSnapshot = null;
-
     public ?int $pendingDeleteId = null;
 
     public string $pendingDeleteLabel = '';
-
-    public bool $showFormModal = false;
-
-    #[Locked]
-    public ?array $shiftPreview = null;
-
-    public string $date = '';
-
-    public string $startTime = '07:00';
-
-    public string $endTime = '19:00';
-
-    public string $endDate = '';
 
     public string $sectorId = '';
 
@@ -186,40 +164,9 @@ class ShiftManager extends Component
         unset($this->professionals);
     }
 
-    public function save(UpdateShiftAction $action): void
+    protected function shiftBeingEdited(int $shiftId): Shift
     {
-        $shift = $this->editingShiftId ? Shift::query()->findOrFail($this->editingShiftId) : null;
-        $this->authorize($shift ? 'update' : 'create', $shift ?? Shift::class);
-
-        if ($shift && (! $this->editingShiftSnapshot || ! hash_equals($this->editingShiftSnapshot, app(\App\Support\ShiftReallocation::class)->shiftSignature($shift)))) {
-            throw ValidationException::withMessages(['shift' => 'Este plantão foi alterado por outra operação. Feche o formulário e abra o registro novamente antes de salvar.']);
-        }
-
-        $validated = (new SaveShiftRequest)->validatePayload($this->payload(), auth()->user());
-        $candidate = new Shift($validated);
-        if ($shift) {
-            $candidate->id = $shift->id;
-        }
-        $analysis = app(ShiftAssignmentAnalysis::class)->preview($candidate);
-        $expected = $this->shiftPreview['fingerprint'] ?? null;
-        if (($analysis['warnings'] !== [] && $expected === null) || ($expected !== null && ! hash_equals($expected, $analysis['fingerprint']))) {
-            $this->shiftPreview = $analysis;
-            $this->resetValidation();
-            $this->dispatch('shift-alerts-ready');
-
-            return;
-        }
-
-        if ($shift) {
-            abort_unless($this->editingShiftSnapshot, 404);
-            $action->execute(auth()->user(), $shift->id, $this->payload(), $this->editingShiftSnapshot, $expected);
-            UiFeedback::success('Plantão atualizado com sucesso.');
-        } else {
-            app(CreateShiftAction::class)->execute(auth()->user(), $this->payload(), $expected);
-            UiFeedback::success('Plantão criado com sucesso.');
-        }
-
-        $this->resetForm();
+        return Shift::query()->findOrFail($shiftId);
     }
 
     public function openCreateModal(): void
@@ -228,32 +175,18 @@ class ShiftManager extends Component
         $this->showFormModal = true;
     }
 
-    public function returnToShiftForm(): void
-    {
-        $this->shiftPreview = null;
-        $this->resetValidation();
-    }
-
     public function edit(int $shiftId): void
     {
         $shift = Shift::query()->findOrFail($shiftId);
         $this->authorize('update', $shift);
 
-        $this->editingShiftId = $shift->id;
-        $this->editingShiftSnapshot = app(\App\Support\ShiftReallocation::class)->shiftSignature($shift);
+        $this->fillShiftForm($shift);
         $this->pendingDeleteId = null;
-        $this->date = $shift->date->format('Y-m-d');
-        $this->startTime = substr((string) $shift->start_time, 0, 5);
-        $this->endTime = substr((string) $shift->end_time, 0, 5);
-        $this->endDate = $shift->period()->end->format('Y-m-d');
         $this->sectorId = (string) $shift->sector_id;
         $this->categoryId = (string) $shift->category_id;
         $this->userId = $shift->user_id ? (string) $shift->user_id : '';
         $this->professionalSearch = '';
         $this->status = $shift->status->value;
-        $this->showFormModal = true;
-        $this->shiftPreview = null;
-        $this->resetValidation();
     }
 
     public function closeFormModal(): void
@@ -423,7 +356,7 @@ class ShiftManager extends Component
     }
 
     /** @return array<string, mixed> */
-    private function payload(): array
+    protected function payload(?Shift $shift): array
     {
         return [
             'date' => $this->date,
