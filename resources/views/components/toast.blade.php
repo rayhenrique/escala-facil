@@ -1,6 +1,9 @@
 @props(['message', 'tone' => 'success', 'clientMessage' => null, 'clientTone' => null, 'clientId' => null])
-@php $isError = $tone === 'error'; @endphp
-<div x-data="toastMessage({ duration: {{ $clientTone ? $clientTone." === 'error' ? 0 : 5500" : ($isError ? 0 : 5500) }}{{ $clientId ? ', onDismiss: () => $store.operationalFeedback.dismiss('.$clientId.')' : '' }} })" x-show="visible" x-transition.opacity.duration.150ms
+@php
+    $isError = $tone === 'error';
+    $duration = $clientTone ? $clientTone." === 'error' ? 0 : 5500" : ($isError ? 0 : 5500);
+@endphp
+<div x-data="toastMessage({ duration: {{ $duration }}{{ $clientId ? ', onDismiss: () => $store.operationalFeedback.dismiss('.$clientId.')' : '' }} })" x-show="visible" x-transition.opacity.duration.150ms
     @mouseenter="pause()" @mouseleave="resume()" @focusin="pause()" @focusout="$nextTick(() => resume())"
     {{ $attributes->class(['toast-message', $clientTone ? '' : ($isError ? 'toast-error' : 'toast-success')]) }} role="{{ $isError ? 'alert' : 'status' }}" @if ($clientTone) :class="{{ $clientTone }} === 'error' ? 'toast-error' : 'toast-success'" :role="{{ $clientTone }} === 'error' ? 'alert' : 'status'" @endif>
     <span class="toast-icon" aria-hidden="true">

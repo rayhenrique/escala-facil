@@ -6,6 +6,12 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.47.1 — 06/11/2026
+
+### Correção na compilação das notificações
+
+- As notificações de sucesso e erro voltam a compilar corretamente no Blade.
+
 ## 1.47.0 — 06/11/2026
 
 - Meu Perfil reúne dados da conta, alteração de nome e senha e atalho para a escala do profissional.

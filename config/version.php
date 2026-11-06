@@ -2,9 +2,18 @@
 
 return [
     // Versão do código instalado. APP_VERSION não pode sobrepor este registro.
-    'current' => '1.47.0',
+    'current' => '1.47.1',
 
     'releases' => [
+        [
+            'version' => '1.47.1',
+            'date' => '2026-11-06',
+            'title' => 'Correção na compilação das notificações',
+            'summary' => 'Corrige a compilação do componente de feedback operacional.',
+            'highlights' => [
+                'As notificações de sucesso e erro voltam a compilar corretamente no Blade.',
+            ],
+        ],
         [
             'version' => '1.47.0',
             'date' => '2026-11-06',
