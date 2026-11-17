@@ -85,4 +85,9 @@ class ShiftSwap extends Model
     {
         return $this->hasOne(ShiftSwapReversal::class);
     }
+
+    public function rectification(): HasOne
+    {
+        return $this->hasOne(ShiftSwapRectification::class);
+    }
 }

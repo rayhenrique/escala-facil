@@ -144,7 +144,7 @@ class DashboardSwapAnalysisTest extends TestCase
     {
         [$manager, $swap] = $this->pending(true);
         DB::listen(function ($query): void {
-            if (str_contains($query->sql, 'insert into "notifications"')) {
+            if (str_contains($query->sql, 'insert into '.DB::getQueryGrammar()->wrapTable('notifications'))) {
                 throw new \RuntimeException('Simulated notification storage failure');
             }
         });

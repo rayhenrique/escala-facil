@@ -219,7 +219,7 @@
                         </div>
                         <p class="mt-1 text-sm text-muted">Atualizado em {{ $swap->updated_at->format('d/m/Y H:i') }}</p>
                     </div>
-                    <x-status-badge :status="$swap->status" />
+                    <x-swap-status :swap="$swap" />
                 </div>
             @empty
                 <p class="py-4 text-sm text-muted">Nenhuma solicitação corresponde aos filtros. Ajuste a pesquisa ou limpe os filtros.</p>

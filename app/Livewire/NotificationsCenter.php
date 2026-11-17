@@ -93,6 +93,7 @@ class NotificationsCenter extends Component
         $swaps = ShiftSwap::query()
             ->select(['id', 'status', 'requester_id', 'substitute_id', 'manager_id', 'rejection_reason'])
             ->with('manager:id,name')
+            ->with('rectification')
             ->whereKey($swapIds)
             ->get()
             ->keyBy('id');
@@ -112,6 +113,7 @@ class NotificationsCenter extends Component
                 'status_label' => $swap->status->label(),
                 'manager' => $swap->manager?->name,
                 'rejection_reason' => $swap->rejection_reason,
+                'administratively_rectified' => $swap->rectification !== null,
             ];
         }
 

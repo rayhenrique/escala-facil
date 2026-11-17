@@ -399,7 +399,7 @@
                                     <div class="font-medium text-ink">{{ $swap->requester->name }} → {{ $swap->substitute->name }}</div>
                                     <small class="text-xs text-muted">{{ $swap->substitute_shift_id ? '⇄ Troca mútua' : '→ Cedência simples' }}</small>
                                 </td>
-                                <td><x-status-badge :status="$swap->status" /></td>
+                                <td><x-swap-status :swap="$swap" /></td>
                                 <td class="text-right">
                                     <a href="{{ route('swaps.receipt.pdf', $swap->id) }}" class="table-action text-xs" title="Baixar comprovante oficial em PDF">
                                         Salvar PDF
@@ -418,7 +418,7 @@
                     <article class="record-card">
                         <div class="flex flex-wrap items-center justify-between gap-2">
                             <h3 class="font-semibold">{{ $swap->shift->date->format('d/m/Y') }}</h3>
-                            <x-status-badge :status="$swap->status" />
+                            <x-swap-status :swap="$swap" />
                         </div>
                         <p class="mt-1 text-sm text-muted">{{ $swap->requester->name }} → {{ $swap->substitute->name }} · {{ $swap->shift->sector->name }}</p>
                         @if (! $isProfessional)<a href="{{ \App\Support\OperationalNavigation::url('swaps', ['request' => $swap->id], 'reports', $this->navigationContext()) }}" wire:navigate class="text-link inline-flex min-h-10 items-center">Abrir pedido #{{ $swap->id }}</a>@endif

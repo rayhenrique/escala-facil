@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdministrativeSwapReceiptPdfController;
 use App\Http\Controllers\ClientErrorController;
 use App\Http\Controllers\DashboardRedirectController;
 use App\Http\Controllers\Manager\IssueAttachmentController;
@@ -49,6 +50,9 @@ Route::get('notifications', NotificationsCenter::class)
 Route::get('swaps/{swap}/receipt/pdf', SwapReceiptPdfController::class)
     ->middleware('auth')
     ->name('swaps.receipt.pdf');
+
+Route::get('swaps/{swap}/rectification/receipt/pdf', AdministrativeSwapReceiptPdfController::class)
+    ->middleware('auth')->name('swaps.rectification.receipt.pdf');
 
 Route::post('support/client-error', ClientErrorController::class)
     ->middleware(['auth', 'throttle:10,1'])

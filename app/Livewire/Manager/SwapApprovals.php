@@ -3,6 +3,7 @@
 namespace App\Livewire\Manager;
 
 use App\Actions\ShiftSwaps\DecideShiftSwapAction;
+use App\Actions\ShiftSwaps\RectifyShiftSwapAction;
 use App\Actions\ShiftSwaps\RevertShiftSwapAction;
 use App\Enums\ShiftSwapEvent;
 use App\Enums\ShiftSwapStatus;
@@ -14,6 +15,7 @@ use App\Models\Category;
 use App\Models\Sector;
 use App\Models\Shift;
 use App\Models\ShiftSwap;
+use App\Support\AdministrativeSwapCorrection;
 use App\Support\OperationalFilters;
 use App\Support\OperationalNavigation;
 use App\Support\ShiftCoverage;
@@ -72,6 +74,17 @@ class SwapApprovals extends Component
 
     #[Locked]
     public bool $administrativeAnalysis = false;
+
+    #[Locked]
+    public ?string $administrativeSnapshot = null;
+
+    public string $administrativeKind = 'rectification';
+
+    public string $administrativeReason = '';
+
+    public string $administrativeEvidence = '';
+
+    public bool $administrativeConfirmed = false;
 
     #[Computed]
     public function sectors()
@@ -188,6 +201,11 @@ class SwapApprovals extends Component
     {
         $shiftSwap = ShiftSwap::query()->findOrFail($shiftSwapId);
         $this->authorize('reviewReversion', $shiftSwap);
+        if ($this->pendingRevertSwapId !== $shiftSwap->id) {
+            $this->reset(['administrativeKind', 'administrativeReason', 'administrativeEvidence']);
+        }
+        $this->administrativeConfirmed = false;
+        $this->administrativeSnapshot = null;
         $review = app(ShiftSwapReversion::class)->inspect($shiftSwap);
         $this->cancelDecision();
         $this->pendingRevertSwapId = $shiftSwap->id;
@@ -197,6 +215,7 @@ class SwapApprovals extends Component
             'reference' => sprintf('TROCA-%06d', $shiftSwap->id),
             'requester' => $shiftSwap->requester->name,
             'substitute' => $shiftSwap->substitute->name,
+            'administrative_record' => $shiftSwap->rectification?->receipt,
         ];
         $this->reversionSnapshot = $review['fingerprint'];
         $this->administrativeAnalysis = false;
@@ -206,7 +225,12 @@ class SwapApprovals extends Component
     public function analyzeAdministrativeCorrection(): void
     {
         abort_unless($this->pendingRevertSwapId, 404);
-        $this->authorize('reviewReversion', ShiftSwap::query()->findOrFail($this->pendingRevertSwapId));
+        $swap = ShiftSwap::query()->findOrFail($this->pendingRevertSwapId);
+        $this->authorize('reviewReversion', $swap);
+        $review = app(AdministrativeSwapCorrection::class)->review($swap);
+        $this->administrativeSnapshot = $review['fingerprint'];
+        $this->administrativeConfirmed = false;
+        $this->pendingRevertSummary['administrative_can_register'] = $review['can_register'];
         $this->administrativeAnalysis = true;
     }
 
@@ -218,8 +242,8 @@ class SwapApprovals extends Component
 
     public function cancelRevert(): void
     {
-        $this->reset(['pendingRevertSwapId', 'pendingRevertSummary', 'reversionSnapshot', 'reversionReason', 'administrativeAnalysis']);
-        $this->resetValidation(['reversion', 'reversionReason', 'reversionSnapshot']);
+        $this->reset(['pendingRevertSwapId', 'pendingRevertSummary', 'reversionSnapshot', 'reversionReason', 'administrativeAnalysis', 'administrativeSnapshot', 'administrativeKind', 'administrativeReason', 'administrativeEvidence', 'administrativeConfirmed']);
+        $this->resetValidation();
     }
 
     public function confirmRevert(RevertShiftSwapAction $action, ShiftSwapReceipt $receipts): void
@@ -230,6 +254,20 @@ class SwapApprovals extends Component
         $this->cancelRevert();
         $this->dispatch('notifications-updated');
         UiFeedback::success('Troca desfeita. Os profissionais voltaram aos plantões originais e receberam um novo comprovante.');
+    }
+
+    public function confirmAdministrativeCorrection(RectifyShiftSwapAction $action): void
+    {
+        abort_unless($this->pendingRevertSwapId && $this->administrativeAnalysis, 404);
+        $record = $action->execute(auth()->user(), $this->pendingRevertSwapId, [
+            'administrativeKind' => $this->administrativeKind, 'administrativeReason' => $this->administrativeReason,
+            'administrativeEvidence' => $this->administrativeEvidence, 'administrativeConfirmed' => $this->administrativeConfirmed,
+            'administrativeSnapshot' => $this->administrativeSnapshot,
+        ]);
+        $this->swapReceipt = $record->receipt;
+        $this->cancelRevert();
+        $this->dispatch('notifications-updated');
+        UiFeedback::success('Retificação administrativa registrada. Aprovação, plantões e cotas foram preservados.');
     }
 
     public function render(): View
@@ -246,6 +284,7 @@ class SwapApprovals extends Component
                 'requester',
                 'substitute',
                 'manager',
+                'rectification',
                 'shift.user',
                 'substituteShift.user',
                 'shift' => fn ($query) => $query->withExists([

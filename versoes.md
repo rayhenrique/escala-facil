@@ -6,6 +6,17 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.48.0 — 16/11/2026
+
+### Retificação administrativa de trocas
+
+- Registros administrativos têm justificativa, evidências, comprovante e identificação própria no histórico.
+- O desfazimento operacional continua disponível para plantões futuros elegíveis.
+
+Manutenção técnica: registro administrativo imutável e exclusivo da gerência, com justificativa, confirmação explícita, evidências congeladas, auditoria e notificações atômicas sob transação e locks. A migration é aditiva; aprovação, atribuições, timestamps e cotas anteriores permanecem preservados. Snapshots parciais de aprovação passam a gerar bloqueio explicado em vez de exceção. Modal compacto com rolagem e botões acessíveis no mobile. Consulte [o procedimento administrativo](docs/administrative-swap-corrections.md).
+
+Validação local: SQLite com 493 testes aprovados (3.927 assertions); MySQL 8.4.7 com 492 aprovados (3.925 assertions) e 1 skip preexistente de plano específico de SQLite. Corrigidos os cinco bloqueios anteriores na instrumentação dos testes, sem alterar regras do domínio. Build, 53 testes JavaScript, Pint e validação mobile/desktop com Playwright aprovados. Nenhum dado de produção foi consultado ou alterado.
+
 ## 1.47.4 — 16/11/2026
 
 ### Diagnóstico de reversões de trocas

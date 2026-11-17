@@ -1,5 +1,7 @@
 # Diagnóstico de bloqueios de reversão
 
+> Atualização 1.48.0: o erro de snapshot parcial documentado abaixo foi tratado com validação estrutural e bloqueio explicado, sem liberar reversão sem evidência. O teste de caracterização foi convertido em regressão desse comportamento. Há agora um [procedimento administrativo separado](administrative-swap-corrections.md), sem restauração de plantões ou ajuste automático de cota. A análise abaixo preserva o diagnóstico feito sobre a 1.47.3; a causa real do pedido #190 não foi comprovada.
+
 ## Escopo e limite da conclusão
 
 Análise da `main` no commit `d76944f` (versão 1.47.3). Não houve acesso a produção, deploy, correção de dados ou execução de reversão em banco real. Não foi fornecido um extrato dos registros reais do pedido #190 e dos plantões #1675/#1468; sua causa específica permanece **não comprovada**.

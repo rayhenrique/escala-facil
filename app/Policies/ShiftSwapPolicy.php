@@ -84,6 +84,16 @@ class ShiftSwapPolicy
             ? Response::allow() : Response::deny('Somente trocas aprovadas podem ser revisadas para desfazimento.');
     }
 
+    public function administrativelyRectify(User $user, ShiftSwap $shiftSwap): Response
+    {
+        if ($user->role !== UserRole::Manager) {
+            return Response::deny('Somente gerentes podem registrar retificações administrativas.');
+        }
+
+        return $shiftSwap->status === ShiftSwapStatus::Approved && ! $shiftSwap->rectification()->exists()
+            ? Response::allow() : Response::deny('O pedido deve estar aprovado e sem registro administrativo anterior.');
+    }
+
     public function revert(User $user, ShiftSwap $shiftSwap): Response
     {
         $permission = $this->reviewReversion($user, $shiftSwap);

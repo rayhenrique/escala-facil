@@ -208,6 +208,12 @@ Transições de cor duram até 160ms e comunicam resposta. Carregamentos mantêm
 
 A voz é direta e respeitosa. Estados dizem o que ocorreu e o próximo passo. Datas e horários futuros seguem `pt-BR`. Gráficos futuros precisam de legenda textual e alternativa tabular.
 
+### Revisão e retificação administrativa de trocas — 1.48.0
+
+O fluxo reutiliza `action-modal`, controles nativos, `status-badge` e o feedback operacional. A variante `swap-reversion-dialog` reduz o cabeçalho a 1rem/1,125rem, com espaçamento `px-4 py-3`, corpo rolável e ações empilhadas com altura mínima de 44px no celular. `fitViewport` mantém o teclado sob o contrato existente de `visualViewport`; a rolagem pertence a `.modal-body`, não ao documento de fundo. Não há nova paleta, tipografia ou proprietário de foco.
+
+`swap-status` preserva o badge operacional e acrescenta `Retificada administrativamente` com `primary-soft`, `primary-strong` e borda `primary`, todos canônicos em `resources/css/app.css`. `Desfeita` continua usando o estilo operacional existente. O comprovante administrativo é um documento separado, sem setas de restauração ou alegação de transferência de plantões.
+
 ## Do's and Don'ts
 
 - **Do:** usar as faixas de escala para reforçar estado ou sequência.

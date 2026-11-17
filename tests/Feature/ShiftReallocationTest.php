@@ -302,7 +302,8 @@ class ShiftReallocationTest extends TestCase
 
     private function approve(User $manager, Shift $shift, User $professional): Audit
     {
-        $snapshot = app(ShiftReallocation::class)->preview($shift, $professional)['fingerprint'];
+        // Match the UI's database read, including MySQL's persisted time representation.
+        $snapshot = app(ShiftReallocation::class)->preview($shift->fresh(), $professional)['fingerprint'];
 
         return app(ReallocateShiftAction::class)->execute($manager, $shift->id, $professional->id, $snapshot);
     }

@@ -287,8 +287,8 @@ class AccountInvitationsTest extends TestCase
         $this->actingAs($manager)->get(route('manager.users'))->assertOk()->assertSee('Convite: Pendente');
         $queries = collect(DB::getQueryLog())->pluck('query');
         DB::disableQueryLog();
-        $this->assertLessThanOrEqual(4, $queries->filter(fn ($query) => str_contains($query, 'from "users"'))->count());
-        $this->assertSame(1, $queries->filter(fn ($query) => str_contains($query, 'from "account_invitations"'))->count());
+        $this->assertLessThanOrEqual(4, $queries->filter(fn ($query) => str_contains($query, 'from '.DB::getQueryGrammar()->wrapTable('users')))->count());
+        $this->assertSame(1, $queries->filter(fn ($query) => str_contains($query, 'from '.DB::getQueryGrammar()->wrapTable('account_invitations')))->count());
     }
 
     public function test_disabled_queue_is_refused_and_migration_cannot_release_pending_accounts(): void

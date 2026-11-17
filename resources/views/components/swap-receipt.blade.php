@@ -1,5 +1,9 @@
 @props(['receipt', 'historical' => false, 'allowOfficialPdf' => true])
 
+@if (($receipt['event'] ?? null) === 'administratively_rectified')
+    <x-administrative-swap-receipt :receipt="$receipt" {{ $attributes }} />
+@else
+
 @php
     $receipt = \App\Support\ShiftSwapReceipt::withTimeLabels($receipt);
     $recordedAt = \Carbon\CarbonImmutable::parse($receipt['recorded_at']);
@@ -154,6 +158,7 @@
         </div>
     @endif
 </article>
+@endif
 
 @once
 <script>

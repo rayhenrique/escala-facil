@@ -19,7 +19,7 @@ class SwapReceiptPdfController extends Controller
 
         $receipt = $receipts->current($swap);
 
-        return Pdf::loadView('reports.swap-receipt', [
+        return Pdf::loadView(($receipt['event'] ?? null) === 'administratively_rectified' ? 'reports.administrative-swap-receipt' : 'reports.swap-receipt', [
             'receipt' => $receipt,
             'generatedAt' => now()->format('d/m/Y H:i'),
         ])->setPaper('a4', 'portrait')->download("comprovante-{$receipt['reference']}.pdf");

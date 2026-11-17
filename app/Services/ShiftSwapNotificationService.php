@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\ShiftSwapEvent;
 use App\Enums\UserRole;
 use App\Models\ShiftSwap;
+use App\Models\ShiftSwapRectification;
 use App\Models\User;
 use App\Notifications\ShiftSwapEventNotification;
 use App\Support\ShiftSwapReceipt;
@@ -123,6 +124,16 @@ class ShiftSwapNotificationService
                 route('notifications', [], false),
             )),
         );
+    }
+
+    public function administrativelyRectified(ShiftSwap $swap, ShiftSwapRectification $record): void
+    {
+        $swap->loadMissing(['requester', 'substitute']);
+        Notification::send(collect([$swap->requester, $swap->substitute])->filter()->unique('id'), new ShiftSwapEventNotification($this->payloadFromReceipt(
+            $record->receipt, 'Retificada administrativamente',
+            'A gerência registrou uma '.$record->receipt['kind_label'].'. Nenhum plantão foi restaurado e nenhuma cota foi ajustada. Consulte o registro administrativo.',
+            route('notifications', [], false),
+        )));
     }
 
     /** @return array<string, mixed> */

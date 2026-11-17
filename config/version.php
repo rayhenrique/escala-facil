@@ -2,9 +2,19 @@
 
 return [
     // Versão do código instalado. APP_VERSION não pode sobrepor este registro.
-    'current' => '1.47.4',
+    'current' => '1.48.0',
 
     'releases' => [
+        [
+            'version' => '1.48.0',
+            'date' => '2026-11-16',
+            'title' => 'Retificação administrativa de trocas',
+            'summary' => 'Registre revisões administrativas com evidências, sem restaurar plantões passados ou alterar a cota automaticamente.',
+            'highlights' => [
+                'Registros administrativos têm justificativa, evidências, comprovante e identificação própria no histórico.',
+                'O desfazimento operacional continua disponível para plantões futuros elegíveis.',
+            ],
+        ],
         [
             'version' => '1.47.4',
             'date' => '2026-11-16',

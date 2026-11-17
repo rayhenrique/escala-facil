@@ -52,6 +52,9 @@ class ShiftSwapReversion
         foreach ($events as $event) {
             foreach (self::BINDINGS as $field) {
                 if (isset($event->changes[$field])) {
+                    if (! is_array($event->changes[$field]) || ! array_key_exists('after', $event->changes[$field])) {
+                        return null;
+                    }
                     $bindings[$field] = $event->changes[$field]['after'];
                 }
             }
@@ -69,6 +72,9 @@ class ShiftSwapReversion
             $snapshot = ['end_date' => null];
             foreach ($events as $event) {
                 foreach ($event->changes as $field => $change) {
+                    if (! is_array($change) || ! array_key_exists('after', $change)) {
+                        return null;
+                    }
                     $snapshot[$field] = $change['after'];
                 }
             }
@@ -113,7 +119,7 @@ class ShiftSwapReversion
             ->where('action', 'approved')->orderBy('id')->get();
         $approval = $approvals->count() === 1 ? $approvals->first() : null;
         $state = $approval ? ($approval->changes['approval_state']['after'] ?? $this->legacyState($swap, $approval)) : null;
-        if (! $state || ! $this->bindingsMatch($state['bindings'] ?? null, $swap)) {
+        if (! $this->validState($state, $swap)) {
             $blocks[] = 'Não há evidência completa e confiável da aprovação original ou os vínculos foram alterados. Compare os comprovantes na análise administrativa; nenhuma atribuição será restaurada automaticamente.';
             $state = null;
         }
@@ -177,7 +183,10 @@ class ShiftSwapReversion
                 }
                 $warnings = [...$warnings, ...$analysis['warnings']];
             }
-            $rows[] = ['id' => $shift->id, 'period' => $shift->period()->datedLabel(), 'location' => $shift->sector->name.' · '.$shift->category->name,
+            if (! $shift->sector || ! $shift->category) {
+                $blocks[] = 'O setor ou a categoria do plantão #'.$shift->id.' não está disponível para conferência.';
+            }
+            $rows[] = ['id' => $shift->id, 'period' => $shift->period()->datedLabel(), 'location' => ($shift->sector?->name ?? 'Setor indisponível').' · '.($shift->category?->name ?? 'Categoria indisponível'),
                 'current' => $shift->user?->name ?? 'Sem profissional alocado', 'current_status' => $shift->status->label(),
                 'after' => $original?->name ?? 'Cadastro indisponível', 'after_id' => $original?->id, 'state' => $current];
         }
@@ -198,5 +207,34 @@ class ShiftSwapReversion
                 $approval?->id, $state, $later->pluck('id')->all(), $pending->pluck('id')->all(), $absenceIds,
                 $swap->requester?->only(['id', 'name', 'role', 'sector_id', 'category_id', 'requires_activation']),
                 $swap->substitute?->only(['id', 'name', 'role', 'sector_id', 'category_id', 'requires_activation']), $schedules], JSON_THROW_ON_ERROR))];
+    }
+
+    private function validState(mixed $state, ShiftSwap $swap): bool
+    {
+        if (! is_array($state) || ! $this->bindingsMatch($state['bindings'] ?? null, $swap)) {
+            return false;
+        }
+        foreach (['before', 'after'] as $point) {
+            foreach (array_filter([$swap->shift_id, $swap->substitute_shift_id]) as $id) {
+                $snapshot = $state[$point][$id] ?? null;
+                if (! is_array($snapshot)) {
+                    return false;
+                }
+                foreach (['date', 'start_time', 'end_time', 'end_date', 'sector_id', 'category_id', 'user_id', 'status'] as $field) {
+                    if (! array_key_exists($field, $snapshot)) {
+                        return false;
+                    }
+                    if (in_array($field, ['sector_id', 'category_id', 'user_id'], true)) {
+                        if ($snapshot[$field] !== null && ! is_int($snapshot[$field])) {
+                            return false;
+                        }
+                    } elseif (! is_string($snapshot[$field]) && ! ($field === 'end_date' && $snapshot[$field] === null)) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
     }
 }

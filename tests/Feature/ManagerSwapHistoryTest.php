@@ -168,10 +168,10 @@ class ManagerSwapHistoryTest extends TestCase
             Livewire::withQueryParams(['listView' => 'history'])->test(SwapApprovals::class)
                 ->assertViewHas('swaps', fn ($rows) => $rows->total() === 15 && $rows->count() === 10);
             $queries = collect(DB::getQueryLog())->pluck('query');
-            $this->assertTrue($queries->contains(fn ($sql) => str_contains($sql, 'from "shift_swaps"') && str_contains($sql, 'limit 10')));
+            $this->assertTrue($queries->contains(fn ($sql) => str_contains($sql, 'from '.DB::getQueryGrammar()->wrapTable('shift_swaps')) && str_contains($sql, 'limit 10')));
             $exists = $queries->filter(fn ($sql) => str_contains($sql, 'pending_swaps_exists'));
             $this->assertCount(1, $exists);
-            $this->assertSame(0, $queries->filter(fn ($sql) => str_starts_with($sql, 'select exists') && (str_contains($sql, '"absences"') || str_contains($sql, '"shift_swaps"')))->count());
+            $this->assertSame(0, $queries->filter(fn ($sql) => str_starts_with($sql, 'select exists') && (str_contains($sql, DB::getQueryGrammar()->wrapTable('absences')) || str_contains($sql, DB::getQueryGrammar()->wrapTable('shift_swaps'))))->count());
         } finally {
             DB::disableQueryLog();
             Model::preventLazyLoading(false);

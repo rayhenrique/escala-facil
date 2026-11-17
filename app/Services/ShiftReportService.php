@@ -130,6 +130,7 @@ class ShiftReportService
             'bySector' => $groups('sectors', 'sector_id'), 'byCategory' => $groups('categories', 'category_id'),
             'byProfessional' => $professionals,
             'swaps' => $visibleSwaps->when($status !== '', fn ($q) => $q->where('status', $status))
+                ->withExists('rectification')
                 ->with(['shift.sector', 'shift.category', 'requester', 'substitute'])->oldest()->orderBy('id')->paginate(10, ['*'], 'swapsPage'),
             'absencesList' => (clone $absences)->when(! $isManager, fn ($q) => $q->where('user_id', $forUser->id))
                 ->with(['user', 'shift.sector', 'shift.category'])->oldest()->orderBy('id')->paginate(10, ['*'], 'absencesPage'),

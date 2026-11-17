@@ -118,12 +118,12 @@ class NotificationReceiptStatusTest extends TestCase
                 ->assertViewHas('notifications', fn ($rows) => $rows->count() === 10 && $rows->total() === 12)
                 ->assertViewHas('swapStatuses', fn ($states) => count($states) === 10);
             $queries = collect(DB::getQueryLog())->pluck('query');
-            $this->assertSame(1, $queries->filter(fn ($sql) => str_contains($sql, 'from "shift_swaps"'))->count());
-            $this->assertSame(1, $queries->filter(fn ($sql) => str_contains($sql, 'from "users"') && str_contains($sql, '"users"."id" in'))->count());
+            $this->assertSame(1, $queries->filter(fn ($sql) => str_contains($sql, 'from '.DB::getQueryGrammar()->wrapTable('shift_swaps')))->count());
+            $this->assertSame(1, $queries->filter(fn ($sql) => str_contains($sql, 'from '.DB::getQueryGrammar()->wrapTable('users')) && str_contains($sql, DB::getQueryGrammar()->wrap('users.id').' in'))->count());
             DB::flushQueryLog();
             $screen->call('gotoPage', 2)->assertViewHas('notifications', fn ($rows) => $rows->count() === 2)
                 ->assertViewHas('swapStatuses', fn ($states) => count($states) === 2);
-            $this->assertSame(1, collect(DB::getQueryLog())->pluck('query')->filter(fn ($sql) => str_contains($sql, 'from "shift_swaps"'))->count());
+            $this->assertSame(1, collect(DB::getQueryLog())->pluck('query')->filter(fn ($sql) => str_contains($sql, 'from '.DB::getQueryGrammar()->wrapTable('shift_swaps')))->count());
         } finally {
             DB::disableQueryLog();
         }

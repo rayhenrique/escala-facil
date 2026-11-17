@@ -3,6 +3,7 @@
     <div class="flex flex-wrap items-center gap-3">
         <x-status-badge :status="$swap->status" :label="$swap->status === \App\Enums\ShiftSwapStatus::PendingManager ? 'Aguardando decisão' : $swap->status->label()" />
         @if ($doubleShift)<x-status-badge status="double_shift" label="Dobra" />@endif
+        @if ($swap->rectification)<x-status-badge status="rectified" label="Retificada administrativamente" />@endif
         <span class="font-mono text-xs text-muted">Pedido #{{ $swap->id }}</span>
         <span class="text-sm font-semibold">{{ $swap->substituteShift ? 'Troca mútua' : 'Cobertura de plantão' }}</span>
         <x-operational-audit-link entity="swap" :record="$swap->id" from="swaps" :context="$context" />
@@ -44,6 +45,7 @@
             <a href="{{ \App\Support\OperationalNavigation::url('swaps', ['request' => $swap->id], 'swaps', $context) }}" wire:navigate class="button-secondary" aria-label="Detalhes do pedido #{{ $swap->id }}">Detalhes</a>
         @endunless
         <a href="{{ route('swaps.receipt.pdf', $swap->id) }}" class="button-secondary" aria-label="Comprovante do pedido #{{ $swap->id }} em PDF">Comprovante PDF</a>
+        @if ($swap->rectification)<a href="{{ route('swaps.rectification.receipt.pdf', $swap->id) }}" class="button-secondary">PDF administrativo</a>@endif
         @if ($swap->status === \App\Enums\ShiftSwapStatus::PendingManager)
             <button type="button" wire:click="openSwapAnalysis({{ $swap->id }})" wire:loading.attr="disabled" class="button-secondary" aria-label="Analisar pedido #{{ $swap->id }}">Analisar</button>
             <button type="button" wire:click="requestDecision({{ $swap->id }}, 'reject')" wire:loading.attr="disabled" class="button-secondary">Rejeitar</button>

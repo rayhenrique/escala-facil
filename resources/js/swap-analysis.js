@@ -23,7 +23,7 @@ export function registerSwapAnalysis(Livewire) {
             pending.set(message.component, (pending.get(message.component) ?? 0) + 1);
             setBusy(true);
         });
-        if (hadDialog && [...message.actions].some((action) => ['reviewReallocation', 'returnToReallocation', 'requestDecision', 'returnToSwapAnalysis', 'returnToShiftForm', 'openSwapAnalysis', 'refreshSwapAnalysis', 'confirmDecision', 'confirmRevert', 'refreshReversion', 'analyzeAdministrativeCorrection'].includes(action.name ?? action.method))) {
+        if (hadDialog && [...message.actions].some((action) => ['reviewReallocation', 'returnToReallocation', 'requestDecision', 'returnToSwapAnalysis', 'returnToShiftForm', 'openSwapAnalysis', 'refreshSwapAnalysis', 'confirmDecision', 'confirmRevert', 'confirmAdministrativeCorrection', 'refreshReversion', 'analyzeAdministrativeCorrection'].includes(action.name ?? action.method))) {
             onSuccess(({ onRender }) => onRender(() => {
                 requestAnimationFrame(() => {
                     const body = dialog()?.querySelector('.modal-body');

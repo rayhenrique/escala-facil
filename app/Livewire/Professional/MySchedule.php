@@ -686,6 +686,7 @@ class MySchedule extends Component
         $pendingResponses = ShiftSwap::query()->where('substitute_id', auth()->id())->where('status', ShiftSwapStatus::PendingProfessional)->count();
 
         $mySwaps = ShiftSwap::query()
+            ->withExists('rectification')
             ->with(['shift.sector', 'shift.category', 'substituteShift.sector', 'substituteShift.category', 'substitute', 'requester'])
             ->where(function ($query) {
                 $query->where('requester_id', auth()->id())

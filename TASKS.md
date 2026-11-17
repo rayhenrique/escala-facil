@@ -1,5 +1,15 @@
 # TASKS - Plano de Execução Sequencial
 
+- [x] **Retificação administrativa segura — 1.48.0**
+  - [x] Preservar reversão operacional e tratar snapshots parciais com bloqueio explicado.
+  - [x] Criar registro imutável, migration aditiva, Action transacional, locks e Policy gerencial.
+  - [x] Exigir justificativa, evidências, confirmação explícita e revisão atual; preservar pedido, plantões, aprovações e cotas.
+  - [x] Emitir comprovante/PDF e novas notificações; distinguir retificação do estado operacional original.
+  - [x] Validar modal em 320/390/1440 px com Playwright e banco descartável; build, JS e Pint aprovados.
+  - [x] Concluir suítes completas SQLite/MySQL e preparar commit isolado após validação.
+    - SQLite: 493 aprovados (3.927 assertions). MySQL 8.4.7: 492 aprovados (3.925 assertions), com 1 skip preexistente de plano de consulta exclusivo de SQLite.
+    - Os cinco bloqueios anteriores do MySQL foram corrigidos na instrumentação dos testes; nenhum cenário foi removido. Build, 53 testes JavaScript, Pint, lint do DESIGN.md e QA de navegador passaram.
+
 - [x] **Diagnóstico de bloqueios de reversão — base 1.47.3**
   - [x] Revisar snapshots, fallback legado, vínculos, alterações posteriores, Policies e confirmação sob locks.
   - [x] Criar diagnóstico CLI por ID somente leitura, restrito a cópia local/testing, sem executar reversão.
@@ -19,11 +29,12 @@
     - Falhas restantes em testes não alterados: aspas SQL específicas de SQLite em AccountInvitationsTest, DashboardSwapAnalysisTest, ManagerSwapHistoryTest e NotificationReceiptStatusTest; fingerprint de realocação divergente em ShiftReallocationTest. Detalhes em docs/monthly-swap-quota-diagnosis.md.
   - [x] Preparar versão 1.47.3 e registrar autorização do usuário para commit separado e push com as cinco falhas MySQL conhecidas; a recuperação completa do CI permanece pendente.
 
-- [ ] **Correções de segurança e recuperação do CI**
+- [x] **Correções de segurança e recuperação do CI**
   - [x] Auditar e atualizar dependências vulneráveis sem trocar os majors de Laravel, Livewire e Symfony.
   - [x] Atualizar os lockfiles e gerar os assets Vite antes das suítes PHP no CI.
   - [x] Validar os audits Composer/npm, requisitos PHP, build, 53 testes JavaScript e Pint.
-  - [ ] Resolver as falhas da suíte MySQL para concluir a recuperação do CI.
+  - [x] Resolver as falhas da suíte MySQL para concluir a recuperação do CI.
+    - Conclusão local na 1.48.0: suítes completas SQLite/MySQL aprovadas; resultados acima. O resultado remoto do GitHub Actions depende da execução após o push.
     - SQLite: 463 testes aprovados (3.669 assertions).
     - Validação anterior (1.47.2), MySQL 8.4.7: 407 aprovados, 55 falhas e 1 skip existente (3.363 assertions). Commit e push daquela versão autorizados pelo usuário após ciência destes resultados; a recuperação completa do CI permanece pendente.
     - Causas reproduzidas: asserts/listeners SQL dependentes das aspas do SQLite; ordem das chaves JSON no MySQL; rollback de `approved_at` tenta remover índice necessário a uma foreign key (erro 1553), com risco de contaminar os testes seguintes por DDL e commit implícito.

@@ -161,14 +161,14 @@ class SwapReversionDiagnosisTest extends TestCase
     public function test_partial_embedded_state_reproduces_existing_review_error_and_diagnostic_reports_it(): void
     {
         [$swap] = $this->fixture('partial_state');
-        // Characterizes an unfixed robustness defect; does not assert that the
-        // current review handles malformed historical data safely.
-        $this->assertThrows(fn () => app(ShiftSwapReversion::class)->inspect($swap), \ErrorException::class);
-        $report = $this->diagnosis(exitCode: 3);
+        $review = app(ShiftSwapReversion::class)->inspect($swap);
+        $this->assertFalse($review['can_revert']);
+        $this->assertStringContainsString('evidência completa', implode(' ', $review['blocks']));
+        $report = $this->diagnosis(exitCode: 1);
         $this->assertSame('embedded', $report['approval']['source']);
-        $this->assertSame(\ErrorException::class, $report['review']['error']['class']);
+        $this->assertNull($report['review']['error']);
         $this->assertSame(['user_id'], $report['approval']['embedded_shape']['before'][1675]['missing_fields']);
-        $this->assertNull($report['review']['can_revert']);
+        $this->assertFalse($report['review']['can_revert']);
         $this->assertDatabaseCount('shift_swap_reversals', 0);
     }
 

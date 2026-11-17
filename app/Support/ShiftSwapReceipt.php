@@ -35,6 +35,10 @@ class ShiftSwapReceipt
     /** Consulta da situação atual; não substitui comprovantes de eventos anteriores. */
     public function current(ShiftSwap $swap): array
     {
+        if ($swap->status === ShiftSwapStatus::Approved && $swap->rectification) {
+            return $swap->rectification->receipt;
+        }
+
         return $this->make($swap, match ($swap->status) {
             ShiftSwapStatus::PendingProfessional => ShiftSwapEvent::Requested,
             ShiftSwapStatus::PendingManager => ShiftSwapEvent::Accepted,
@@ -71,6 +75,9 @@ class ShiftSwapReceipt
     {
         $receipt = self::withTimeLabels($receipt);
         $lines = [('Solicitante: '.($receipt['requester'] ?? 'Não informado')).' · Substituto: '.($receipt['substitute'] ?? 'Não informado')];
+        if (($receipt['event'] ?? null) === 'administratively_rectified') {
+            return [...$lines, $receipt['kind_label'], 'Plantões referenciados: #'.$receipt['shift_id'].(! empty($receipt['substitute_shift_id']) ? ' / #'.$receipt['substitute_shift_id'] : ''), $receipt['effect']];
+        }
         foreach (['' => 'Plantão', 'counterpart_' => 'Contrapartida'] as $prefix => $label) {
             if (empty($receipt[$prefix.'shift_date']) || ($prefix && empty($receipt['has_counterpart']))) {
                 continue;

@@ -74,6 +74,7 @@
                             <span class="text-xs text-muted">Situação atual</span>
                             @if ($currentSwap)
                                 <x-status-badge :status="$currentSwap['status']" :label="$currentSwap['status_label']" />
+                                @if ($currentSwap['administratively_rectified'] ?? false)<x-status-badge status="rectified" label="Retificada administrativamente" />@endif
                             @else
                                 <span class="text-sm font-semibold">Indisponível para consulta</span>
                             @endif

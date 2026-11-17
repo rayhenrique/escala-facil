@@ -18,6 +18,7 @@ class OperationalAuditPresentation
             'shift_id' => 'Plantão (ID)', 'substitute_shift_id' => 'Contrapartida (ID)', 'requester_id' => 'Solicitante (ID)',
             'substitute_id' => 'Substituto (ID)', 'manager_id' => 'Gerente (ID)', 'professional_response' => 'Resposta do profissional', 'professional_responded_at' => 'Data da resposta',
             'approval_state' => 'Atribuições e horários da aprovação original',
+            'approved_at' => 'Data da aprovação', 'administrative_record_id' => 'Registro administrativo (ID)', 'administrative_kind' => 'Tipo de registro administrativo',
             'requires_activation' => 'Ativação pendente', 'invited_by' => 'Gerente do convite (ID)', 'generation' => 'Emissão do convite',
             'expires_at' => 'Expiração', 'last_sent_at' => 'Envio solicitado', 'accepted_at' => 'Aceite', 'revoked_at' => 'Revogação',
         ][$field] ?? $field;
@@ -44,6 +45,9 @@ class OperationalAuditPresentation
         }
         if ($field === 'role') {
             return UserRole::tryFrom($value)?->label() ?? $value;
+        }
+        if ($field === 'administrative_kind') {
+            return $value === 'annulment' ? 'Anulação administrativa' : 'Retificação administrativa';
         }
         if (in_array($field, ['date', 'end_date'], true)) {
             return CarbonImmutable::parse($value)->format('d/m/Y');

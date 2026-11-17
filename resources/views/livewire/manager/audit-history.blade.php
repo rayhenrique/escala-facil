@@ -73,6 +73,9 @@
                     <p class="mt-2 text-sm text-muted">Reversão #{{ $event->reversal->id }} · Aprovação original #{{ $event->reversal->approval_event_id }}</p>
                 @endif
                 <p class="mt-3 break-all font-mono text-xs text-muted">Operação {{ $event->operation_id }}</p>
+                @if ($event->entity_type === 'swap' && $event->action === 'administratively_rectified')
+                    <a class="text-link mt-3 inline-flex min-h-11 items-center" href="{{ route('swaps.rectification.receipt.pdf', $event->entity_id) }}">Consultar PDF do registro administrativo</a>
+                @endif
             </article>
         @empty
             <x-empty-state title="Nenhuma alteração corresponde aos filtros." description="Ajuste os filtros. Registros anteriores à instalação não recebem um histórico inventado." />
