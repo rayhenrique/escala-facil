@@ -64,6 +64,12 @@ jobs:
       - name: Audit locked dependencies
         run: composer audit --locked
 
+      - name: Install JS dependencies
+        run: npm ci
+
+      - name: Build assets
+        run: npm run build
+
       - name: Run test suite (sqlite)
         if: matrix.database == 'sqlite'
         run: php artisan test
@@ -82,12 +88,6 @@ jobs:
 
       - name: Check code style
         run: vendor/bin/pint --test
-
-      - name: Install JS dependencies
-        run: npm ci
-
-      - name: Build assets
-        run: npm run build
 
       - name: Test landing animation lifecycle
         run: npm run test:landing

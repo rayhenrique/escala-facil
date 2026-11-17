@@ -1,5 +1,15 @@
 # TASKS - Plano de Execução Sequencial
 
+- [ ] **Correções de segurança e recuperação do CI**
+  - [x] Auditar e atualizar dependências vulneráveis sem trocar os majors de Laravel, Livewire e Symfony.
+  - [x] Atualizar os lockfiles e gerar os assets Vite antes das suítes PHP no CI.
+  - [x] Validar os audits Composer/npm, requisitos PHP, build, 53 testes JavaScript e Pint.
+  - [ ] Resolver as falhas da suíte MySQL para concluir a recuperação do CI.
+    - SQLite: 463 testes aprovados (3.669 assertions).
+    - MySQL 8.4.7: 407 aprovados, 55 falhas e 1 skip existente (3.363 assertions). Commit e push autorizados pelo usuário após ciência destes resultados; a recuperação completa do CI permanece pendente.
+    - Causas reproduzidas: asserts/listeners SQL dependentes das aspas do SQLite; ordem das chaves JSON no MySQL; rollback de `approved_at` tenta remover índice necessário a uma foreign key (erro 1553), com risco de contaminar os testes seguintes por DDL e commit implícito.
+    - A reversão compara `bindings` JSON com `!==` em `app/Support/ShiftSwapReversion.php`; a ordem das chaves também afeta essa verificação. Requer correção e validação separadas antes de considerar o CI recuperado.
+
 - [x] **Meu Perfil, montagem mensal e cota de trocas (1.47.0)**
   - [x] Autorizar edição do próprio nome e senha e integrar o atalho para Minha escala.
   - [x] Montar escala por profissional com calendário, agenda móvel, validação, prévia e auditoria.

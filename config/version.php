@@ -2,9 +2,18 @@
 
 return [
     // Versão do código instalado. APP_VERSION não pode sobrepor este registro.
-    'current' => '1.47.1',
+    'current' => '1.47.2',
 
     'releases' => [
+        [
+            'version' => '1.47.2',
+            'date' => '2026-11-16',
+            'title' => 'Atualização de segurança',
+            'summary' => 'Atualizações de segurança nos componentes do aplicativo.',
+            'highlights' => [
+                'Atualizações de segurança nos componentes do aplicativo.',
+            ],
+        ],
         [
             'version' => '1.47.1',
             'date' => '2026-11-06',

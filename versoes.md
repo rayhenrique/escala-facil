@@ -6,6 +6,16 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.47.2 — 16/11/2026
+
+### Atualização de segurança
+
+- Atualizações de segurança nos componentes do aplicativo.
+
+Manutenção técnica: Laravel 13.40.0, Livewire 4.4.8, patches do Symfony 8.1, Vite 7.3.8 e follow-redirects 1.16.3. O CI gera os assets Vite antes dos testes PHP. Nenhum alerta de segurança foi suprimido.
+
+Validação: audits Composer/npm, build, Pint, 53 testes JavaScript e 463 testes SQLite aprovados. A suíte MySQL 8.4.7 teve 407 testes aprovados, 55 falhas e 1 skip existente. As causas reproduzidas e a recuperação pendente do CI estão registradas em `TASKS.md`. Publicação autorizada pelo usuário com essas falhas conhecidas.
+
 ## 1.47.1 — 06/11/2026
 
 ### Correção na compilação das notificações
