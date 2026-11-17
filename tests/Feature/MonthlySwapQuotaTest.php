@@ -9,6 +9,7 @@ use App\Actions\ShiftSwaps\RevertShiftSwapAction;
 use App\Enums\ShiftSwapStatus;
 use App\Livewire\Professional\MySchedule;
 use App\Models\Category;
+use App\Models\OperationalAuditEvent;
 use App\Models\Sector;
 use App\Models\Shift;
 use App\Models\ShiftSwap;
@@ -16,6 +17,7 @@ use App\Models\User;
 use App\Support\ShiftSwapReversion;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -130,20 +132,82 @@ class MonthlySwapQuotaTest extends TestCase
         $this->assertSame(ShiftSwapStatus::Approved, $decision->approve($manager, $fifth->id)->status);
     }
 
+    public function test_all_quota_queries_use_the_same_local_month_for_a_utc_reference(): void
+    {
+        [, $requester, $substitute] = $this->team();
+        $this->travelTo(CarbonImmutable::parse('2026-10-31T23:00:00-03:00'));
+        $this->approvedFixtures($requester, $substitute, 2);
+        $this->travelTo(CarbonImmutable::parse('2026-11-01T00:00:00-03:00'));
+        $this->approvedFixtures($requester, $substitute, 1);
+        $reference = CarbonImmutable::parse('2026-11-01T02:59:59Z');
+        foreach ([$requester, $substitute] as $professional) {
+            $this->assertSame(1, $professional->approvedSwapCount());
+            $this->assertSame(2, $professional->approvedSwapCount(10, 2026));
+            $this->assertSame(2, $professional->swapCountForMonth($reference));
+            $row = User::query()->whereKey($professional->id)
+                ->select('users.id')->selectSub(User::approvedSwapCountForUsers($reference), 'quota')->firstOrFail();
+            $this->assertSame(2, (int) $row->quota);
+        }
+        $this->assertSame(2, ShiftSwap::query()->approvedInMonth($reference)->count());
+    }
+
     public function test_migration_backfills_legacy_approved_rows_using_update_then_creation_time(): void
     {
-        $updated = ShiftSwap::factory()->approved()->create();
-        $created = ShiftSwap::factory()->approved()->create();
-        $pending = ShiftSwap::factory()->pendingManager()->create();
-        $migration = require database_path('migrations/2026_11_06_000000_add_approved_at_to_shift_swaps_table.php');
-        $migration->down();
-        DB::table('shift_swaps')->where('id', $updated->id)->update(['updated_at' => '2026-11-04 10:00:00']);
-        DB::table('shift_swaps')->where('id', $created->id)->update(['created_at' => '2026-10-28 07:00:00', 'updated_at' => null]);
+        // Reproduce the pre-migration schema in an isolated fixture. Never run
+        // down() over the active schema: MySQL DDL commits the test transaction.
+        $default = DB::getDefaultConnection();
+        config(['database.connections.quota_legacy_fixture' => ['driver' => 'sqlite', 'database' => ':memory:', 'prefix' => '']]);
+        try {
+            DB::setDefaultConnection('quota_legacy_fixture');
+            $connection = DB::connection();
+            $connection->getSchemaBuilder()->create('shift_swaps', function (Blueprint $table): void {
+                $table->id();
+                $table->unsignedBigInteger('requester_id');
+                $table->unsignedBigInteger('substitute_id');
+                $table->string('status');
+                $table->timestamps();
+            });
+            $connection->table('shift_swaps')->insert([
+                ['id' => 1, 'requester_id' => 1, 'substitute_id' => 2, 'status' => 'approved', 'created_at' => '2026-10-28 07:00:00', 'updated_at' => '2026-11-04 10:00:00'],
+                ['id' => 2, 'requester_id' => 1, 'substitute_id' => 2, 'status' => 'approved', 'created_at' => '2026-10-28 07:00:00', 'updated_at' => null],
+                ['id' => 3, 'requester_id' => 1, 'substitute_id' => 2, 'status' => 'pending_manager', 'created_at' => '2026-10-28 07:00:00', 'updated_at' => null],
+                ['id' => 4, 'requester_id' => 1, 'substitute_id' => 2, 'status' => 'reverted', 'created_at' => '2026-10-28 07:00:00', 'updated_at' => '2026-11-04 10:00:00'],
+            ]);
+            $before = $connection->table('shift_swaps')->orderBy('id')->get(['id', 'status', 'created_at', 'updated_at'])->toJson();
+            (require database_path('migrations/2026_11_06_000000_add_approved_at_to_shift_swaps_table.php'))->up();
+            $this->assertSame('2026-11-04 10:00:00', $connection->table('shift_swaps')->where('id', 1)->value('approved_at'));
+            $this->assertSame('2026-10-28 07:00:00', $connection->table('shift_swaps')->where('id', 2)->value('approved_at'));
+            $this->assertNull($connection->table('shift_swaps')->where('id', 3)->value('approved_at'));
+            $this->assertNull($connection->table('shift_swaps')->where('id', 4)->value('approved_at'));
+            $this->assertSame($before, $connection->table('shift_swaps')->orderBy('id')->get(['id', 'status', 'created_at', 'updated_at'])->toJson());
+        } finally {
+            DB::setDefaultConnection($default);
+            DB::purge('quota_legacy_fixture');
+        }
+    }
 
-        $migration->up();
+    public function test_old_approvals_keep_their_month_and_audit_after_later_edits_and_reversion(): void
+    {
+        [$manager, $requester, $substitute] = $this->team();
+        $this->travelTo(CarbonImmutable::parse('2026-10-31 23:59:59', 'America/Maceio'));
+        $pending = $this->pending($requester, $substitute);
+        app(RespondToShiftSwapAction::class)->execute($substitute, $pending->id, 'accept');
+        $approved = app(DecideShiftSwapAction::class)->approve($manager, $pending->id);
+        $approval = OperationalAuditEvent::where('entity_type', 'swap')->where('entity_id', $approved->id)->where('action', 'approved')->sole();
+        $this->assertSame('2026-10-31T23:59:59-03:00', $approval->changes['approved_at']['after']);
+        $original = $approval->getRawOriginal();
 
-        $this->assertSame('2026-11-04 10:00:00', $updated->fresh()->approved_at->toDateTimeString());
-        $this->assertSame('2026-10-28 07:00:00', $created->fresh()->approved_at->toDateTimeString());
-        $this->assertNull($pending->fresh()->approved_at);
+        $this->travelTo(CarbonImmutable::parse('2026-11-02 10:00:00', 'America/Maceio'));
+        $approved->update(['rejection_reason' => 'Metadado administrativo posterior.']);
+        $this->assertSame(1, $requester->approvedSwapCount(10, 2026));
+        $this->assertSame(1, $substitute->approvedSwapCount(10, 2026));
+        $this->assertSame(0, $requester->approvedSwapCount());
+        $this->assertSame('2026-10-31 23:59:59', $approved->fresh()->approved_at->toDateTimeString());
+        $review = app(ShiftSwapReversion::class)->inspect($approved->fresh());
+        $reverted = app(RevertShiftSwapAction::class)->execute($manager, $approved->id, 'Ajuste administrativo.', $review['fingerprint']);
+        $this->assertSame(0, $requester->approvedSwapCount(10, 2026));
+        $this->assertSame(0, $substitute->approvedSwapCount(10, 2026));
+        $this->assertSame('2026-10-31 23:59:59', $reverted->approved_at->toDateTimeString());
+        $this->assertSame($original, $approval->fresh()->getRawOriginal());
     }
 }

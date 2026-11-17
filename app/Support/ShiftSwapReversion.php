@@ -56,7 +56,7 @@ class ShiftSwapReversion
                 }
             }
         }
-        if ($bindings !== $swap->only(self::BINDINGS)) {
+        if (! $this->bindingsMatch($bindings, $swap)) {
             return null;
         }
         $before = [];
@@ -83,6 +83,19 @@ class ShiftSwapReversion
         return $this->state($swap, $before);
     }
 
+    /** JSON object key order is not stable across database engines. Keep strict value types. */
+    private function bindingsMatch(mixed $bindings, ShiftSwap $swap): bool
+    {
+        if (! is_array($bindings)) {
+            return false;
+        }
+        $expected = $swap->only(self::BINDINGS);
+        ksort($bindings);
+        ksort($expected);
+
+        return $bindings === $expected;
+    }
+
     public function inspect(ShiftSwap $swap, ?Collection $lockedSchedule = null): array
     {
         $swap->loadMissing(['shift.sector', 'shift.category', 'shift.user', 'substituteShift.sector', 'substituteShift.category', 'substituteShift.user', 'requester', 'substitute']);
@@ -100,7 +113,7 @@ class ShiftSwapReversion
             ->where('action', 'approved')->orderBy('id')->get();
         $approval = $approvals->count() === 1 ? $approvals->first() : null;
         $state = $approval ? ($approval->changes['approval_state']['after'] ?? $this->legacyState($swap, $approval)) : null;
-        if (! $state || ($state['bindings'] ?? null) !== $swap->only(self::BINDINGS)) {
+        if (! $state || ! $this->bindingsMatch($state['bindings'] ?? null, $swap)) {
             $blocks[] = 'Não há evidência completa e confiável da aprovação original ou os vínculos foram alterados. Compare os comprovantes na análise administrativa; nenhuma atribuição será restaurada automaticamente.';
             $state = null;
         }

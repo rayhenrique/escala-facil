@@ -22,6 +22,7 @@ use App\Support\ShiftReallocation;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
@@ -33,6 +34,12 @@ use Tests\TestCase;
 class OperationalAuditTest extends TestCase
 {
     use RefreshDatabase;
+
+    private function assertAuditChanges(array $expected, array $actual): void
+    {
+        // MySQL normalizes JSON object key order; types and values must still match exactly.
+        $this->assertSame(Arr::sortRecursive($expected), Arr::sortRecursive($actual));
+    }
 
     private function team(): array
     {
@@ -63,7 +70,7 @@ class OperationalAuditTest extends TestCase
         $shift->updateQuietly(['end_time' => '06:00']);
         $updated = $events()->last();
         $this->assertSame('updated', $updated->action);
-        $this->assertSame(['end_time' => ['before' => '07:00', 'after' => '06:00']], $updated->changes);
+        $this->assertAuditChanges(['end_time' => ['before' => '07:00', 'after' => '06:00']], $updated->changes);
         $shift->save();
         $this->assertCount(2, $events());
         $id = $shift->id;
@@ -82,7 +89,7 @@ class OperationalAuditTest extends TestCase
         $shift->update(['start_time' => '08:00']);
         $stale->update(['end_time' => '20:00']);
         $event = Event::where('entity_type', 'shift')->latest('id')->first();
-        $this->assertSame(['end_time' => ['before' => '19:00', 'after' => '20:00']], $event->changes);
+        $this->assertAuditChanges(['end_time' => ['before' => '19:00', 'after' => '20:00']], $event->changes);
         $stale->update(['start_time' => '09:00']);
         $event = Event::where('entity_type', 'shift')->latest('id')->first();
         $this->assertSame('08:00', $event->changes['start_time']['before']);
@@ -134,7 +141,7 @@ class OperationalAuditTest extends TestCase
         $ana->update(['name' => 'Ana Revisada', 'email' => 'private-address@example.test']);
         $event = Event::latest('id')->first();
         $this->assertSame($manager->id, $event->author_id);
-        $this->assertSame(['name', 'email_changed'], array_keys($event->changes));
+        $this->assertEqualsCanonicalizing(['name', 'email_changed'], array_keys($event->changes));
         $ana->save();
         $this->assertSame($before + 1, Event::count());
         $json = Event::all()->toJson();
@@ -203,7 +210,7 @@ class OperationalAuditTest extends TestCase
         $preview = app(ShiftReallocation::class)->preview($shift->fresh(), $ana->fresh());
         app(ReallocateShiftAction::class)->execute($manager, $shift->id, $ana->id, $preview['fingerprint']);
         $event = Event::where('entity_type', 'shift')->where('entity_id', $shift->id)->where('action', 'reallocated')->sole();
-        $this->assertSame(['user_id', 'status'], array_keys($event->changes));
+        $this->assertEqualsCanonicalizing(['user_id', 'status'], array_keys($event->changes));
         $this->assertSame($manager->id, $event->author_id);
         $this->assertDatabaseCount('shift_reallocations', 1);
         $this->assertDatabaseCount('notifications', 0);
@@ -281,7 +288,7 @@ class OperationalAuditTest extends TestCase
         $ana->update(['role' => UserRole::Manager]);
         foreach ([['sector', $sector, 'name', 'Emergência', 'Emergência revisada'], ['category', $category, 'name', 'Medicina', 'Medicina revisada'], ['user', $ana, 'role', 'professional', 'manager']] as [$type, $model, $field, $before, $after]) {
             $event = Event::where('entity_type', $type)->where('entity_id', $model->id)->where('action', 'updated')->sole();
-            $this->assertSame([$field => ['before' => $before, 'after' => $after]], $event->changes);
+            $this->assertAuditChanges([$field => ['before' => $before, 'after' => $after]], $event->changes);
             $this->assertSame($manager->id, $event->author_id);
         }
         $url = OperationalNavigation::url('audit', ['entity' => 'user', 'record' => $ana->id], 'users', ['search' => 'Ana', 'roleFilter' => 'manager', 'page' => 2]);

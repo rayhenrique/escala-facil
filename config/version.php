@@ -2,9 +2,18 @@
 
 return [
     // Versão do código instalado. APP_VERSION não pode sobrepor este registro.
-    'current' => '1.47.2',
+    'current' => '1.47.3',
 
     'releases' => [
+        [
+            'version' => '1.47.3',
+            'date' => '2026-11-16',
+            'title' => 'Conferência do histórico da cota mensal',
+            'summary' => 'Melhorias na conferência do histórico da cota mensal de trocas.',
+            'highlights' => [
+                'Melhorias na conferência do histórico da cota mensal de trocas.',
+            ],
+        ],
         [
             'version' => '1.47.2',
             'date' => '2026-11-16',

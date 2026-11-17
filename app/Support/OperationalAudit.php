@@ -18,7 +18,7 @@ class OperationalAudit
 {
     private const FIELDS = [
         Shift::class => ['date', 'start_time', 'end_time', 'end_date', 'sector_id', 'category_id', 'user_id', 'status'],
-        ShiftSwap::class => ['shift_id', 'substitute_shift_id', 'requester_id', 'substitute_id', 'status', 'manager_id', 'professional_response', 'professional_responded_at'],
+        ShiftSwap::class => ['shift_id', 'substitute_shift_id', 'requester_id', 'substitute_id', 'status', 'manager_id', 'approved_at', 'professional_response', 'professional_responded_at'],
         User::class => ['name', 'role', 'sector_id', 'category_id', 'requires_activation'],
         AccountInvitation::class => ['user_id', 'invited_by', 'generation', 'expires_at', 'last_sent_at', 'accepted_at', 'revoked_at'],
         Sector::class => ['name'], Category::class => ['name'],
@@ -31,7 +31,7 @@ class OperationalAudit
             $value = $model->getAttribute($field);
             $result[$field] = match (true) {
                 $value instanceof BackedEnum => $value->value,
-                $value instanceof DateTimeInterface => $value->format($model instanceof AccountInvitation || $field === 'professional_responded_at' ? 'c' : 'Y-m-d'),
+                $value instanceof DateTimeInterface => $value->format($model instanceof AccountInvitation || in_array($field, ['professional_responded_at', 'approved_at'], true) ? 'c' : 'Y-m-d'),
                 in_array($field, ['start_time', 'end_time'], true) => substr((string) $value, 0, 5),
                 default => $value,
             };

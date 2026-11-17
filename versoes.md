@@ -6,6 +6,16 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.47.3 — 16/11/2026
+
+### Conferência do histórico da cota mensal
+
+- Melhorias na conferência do histórico da cota mensal de trocas.
+
+Manutenção técnica: comando `app:diagnose-monthly-swap-quota` somente leitura, com comparação de evidências históricas e saída JSON Lines. Novos eventos de auditoria preservam o instante completo de `approved_at`. Reversões mantêm a comparação estrita dos vínculos sem depender da ordem das chaves JSON. A regra de quatro participações por mês da aprovação em America/Maceio permanece vigente; históricos e migrações executadas não são reescritos. Consulte [o guia de diagnóstico](docs/monthly-swap-quota-diagnosis.md).
+
+Validação local: 475 testes SQLite e 53 testes JavaScript aprovados, build e Pint aprovados. No MySQL 8.4.7, 469 testes passaram, 5 falharam e houve 1 skip existente. Os bloqueios estão documentados no guia. Commit separado e push autorizados pelo usuário após ciência dessas falhas; a recuperação completa do CI permanece pendente.
+
 ## 1.47.2 — 16/11/2026
 
 ### Atualização de segurança

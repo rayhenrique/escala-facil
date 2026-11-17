@@ -1,14 +1,25 @@
 # TASKS - Plano de Execução Sequencial
 
+- [x] **Consistência histórica da cota mensal**
+  - [x] Revisar contagem por mês da aprovação em America/Maceio, backfill legado e auditoria.
+  - [x] Criar diagnóstico somente leitura com datas divergentes/incertas e saída JSON Lines.
+  - [x] Registrar approved_at completo em eventos futuros sem alterar históricos ou migrações existentes.
+  - [x] Preservar tipos/valores dos vínculos na reversão independentemente da ordem JSON.
+  - [x] Validar virada de mês, aprovações antigas, concorrência, reversões e imutabilidade.
+    - SQLite completo: 475 aprovados (3.742 assertions). Build, 53 testes JavaScript e Pint aprovados.
+    - MySQL 8.4.7 completo: 469 aprovados, 5 falhas e 1 skip existente (3.726 assertions). Os cenários de cota, diagnóstico, auditoria operacional e reversão passaram.
+    - Falhas restantes em testes não alterados: aspas SQL específicas de SQLite em AccountInvitationsTest, DashboardSwapAnalysisTest, ManagerSwapHistoryTest e NotificationReceiptStatusTest; fingerprint de realocação divergente em ShiftReallocationTest. Detalhes em docs/monthly-swap-quota-diagnosis.md.
+  - [x] Preparar versão 1.47.3 e registrar autorização do usuário para commit separado e push com as cinco falhas MySQL conhecidas; a recuperação completa do CI permanece pendente.
+
 - [ ] **Correções de segurança e recuperação do CI**
   - [x] Auditar e atualizar dependências vulneráveis sem trocar os majors de Laravel, Livewire e Symfony.
   - [x] Atualizar os lockfiles e gerar os assets Vite antes das suítes PHP no CI.
   - [x] Validar os audits Composer/npm, requisitos PHP, build, 53 testes JavaScript e Pint.
   - [ ] Resolver as falhas da suíte MySQL para concluir a recuperação do CI.
     - SQLite: 463 testes aprovados (3.669 assertions).
-    - MySQL 8.4.7: 407 aprovados, 55 falhas e 1 skip existente (3.363 assertions). Commit e push autorizados pelo usuário após ciência destes resultados; a recuperação completa do CI permanece pendente.
+    - Validação anterior (1.47.2), MySQL 8.4.7: 407 aprovados, 55 falhas e 1 skip existente (3.363 assertions). Commit e push daquela versão autorizados pelo usuário após ciência destes resultados; a recuperação completa do CI permanece pendente.
     - Causas reproduzidas: asserts/listeners SQL dependentes das aspas do SQLite; ordem das chaves JSON no MySQL; rollback de `approved_at` tenta remover índice necessário a uma foreign key (erro 1553), com risco de contaminar os testes seguintes por DDL e commit implícito.
-    - A reversão compara `bindings` JSON com `!==` em `app/Support/ShiftSwapReversion.php`; a ordem das chaves também afeta essa verificação. Requer correção e validação separadas antes de considerar o CI recuperado.
+    - Diagnóstico anterior (1.47.2): a reversão comparava `bindings` JSON com `!==`, incluindo a ordem das chaves. A manutenção 1.47.3 passou a ordenar as chaves, mantendo tipos e valores estritos, e validou as reversões; os demais bloqueios do CI permanecem documentados acima.
 
 - [x] **Meu Perfil, montagem mensal e cota de trocas (1.47.0)**
   - [x] Autorizar edição do próprio nome e senha e integrar o atalho para Minha escala.
