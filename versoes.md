@@ -6,6 +6,16 @@ Este arquivo registra todas as versões funcionais da aplicação. O projeto usa
 - **MENOR:** funcionalidade nova compatível com a versão anterior;
 - **CORREÇÃO:** ajuste compatível, sem nova funcionalidade.
 
+## 1.47.4 — 16/11/2026
+
+### Diagnóstico de reversões de trocas
+
+- Ferramentas de apoio à conferência do histórico de reversões.
+
+Manutenção técnica: comando `app:diagnose-swap-reversion` somente leitura por ID, restrito a cópia local/testing, com evidências de aprovação, trilhas legadas, vínculos, diferenças de plantões, Policies e comparação de fingerprint. Os testes reproduzem um erro com snapshot parcial; o defeito do domínio não foi corrigido. A causa do pedido real #190 permanece não comprovada e produção não foi acessada. Consulte [o relatório de diagnóstico](docs/swap-reversion-diagnosis.md).
+
+Testes focados do diagnóstico e reversões passaram em SQLite e MySQL, além de Policies, concorrência e Pint. O CI geral permanece com bloqueios conhecidos, documentados nas manutenções anteriores. Publicação do diagnóstico autorizada pelo usuário após ciência dessas limitações.
+
 ## 1.47.3 — 16/11/2026
 
 ### Conferência do histórico da cota mensal

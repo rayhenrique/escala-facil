@@ -1,5 +1,13 @@
 # TASKS - Plano de Execução Sequencial
 
+- [x] **Diagnóstico de bloqueios de reversão — base 1.47.3**
+  - [x] Revisar snapshots, fallback legado, vínculos, alterações posteriores, Policies e confirmação sob locks.
+  - [x] Criar diagnóstico CLI por ID somente leitura, restrito a cópia local/testing, sem executar reversão.
+  - [x] Testar IDs sintéticos #190/#1675/#1468 e reproduzir erro de snapshot parcial sem modificar o domínio.
+  - [x] Documentar causas comprovadas, hipóteses, riscos e recomendações em docs/swap-reversion-diagnosis.md.
+  - [x] Preparar a versão 1.47.4 com commit e push autorizados pelo usuário após ciência das limitações.
+  - A causa do pedido real #190 permanece não comprovada: nenhum dado de produção foi consultado. A correção do domínio permanece fora desta etapa; o defeito de snapshot parcial e os bloqueios gerais do CI continuam documentados.
+
 - [x] **Consistência histórica da cota mensal**
   - [x] Revisar contagem por mês da aprovação em America/Maceio, backfill legado e auditoria.
   - [x] Criar diagnóstico somente leitura com datas divergentes/incertas e saída JSON Lines.

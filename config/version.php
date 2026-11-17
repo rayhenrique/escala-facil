@@ -2,9 +2,18 @@
 
 return [
     // Versão do código instalado. APP_VERSION não pode sobrepor este registro.
-    'current' => '1.47.3',
+    'current' => '1.47.4',
 
     'releases' => [
+        [
+            'version' => '1.47.4',
+            'date' => '2026-11-16',
+            'title' => 'Diagnóstico de reversões de trocas',
+            'summary' => 'Ferramentas de apoio à conferência do histórico de reversões.',
+            'highlights' => [
+                'Ferramentas de apoio à conferência do histórico de reversões.',
+            ],
+        ],
         [
             'version' => '1.47.3',
             'date' => '2026-11-16',
